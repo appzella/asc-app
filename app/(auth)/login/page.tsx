@@ -80,16 +80,6 @@ export default function LoginPage() {
               {isLoading ? 'Wird angemeldet...' : 'Anmelden'}
             </Button>
           </form>
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-sm text-gray-600 text-center">
-              Demo-Accounts:
-            </p>
-            <div className="mt-2 text-xs text-gray-500 space-y-1">
-              <p>Admin: admin@asc.ch / admin123</p>
-              <p>Leader: leader@asc.ch / leader123</p>
-              <p>Member: member@asc.ch / member123</p>
-            </div>
-          </div>
         </CardContent>
       </Card>
     </div>
