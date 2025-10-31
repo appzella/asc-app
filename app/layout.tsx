@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 
@@ -8,12 +8,15 @@ export const metadata: Metadata = {
   title: 'ASC Skitouren App',
   description: 'Tourenverwaltung für den Alpinen Skiclub St. Gallen',
   manifest: '/manifest.json',
-  themeColor: '#0ea5e9',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
     title: 'ASC App',
   },
+}
+
+export const viewport: Viewport = {
+  themeColor: '#0ea5e9',
 }
 
 export default function RootLayout({

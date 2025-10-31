@@ -61,8 +61,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ tourId, userId }) => {
   }
 
   return (
-    <div className="flex flex-col h-96">
-      <div className="flex-1 overflow-y-auto space-y-4 mb-4 p-2">
+    <div className="flex flex-col h-96 sm:h-96 max-h-[60vh] sm:max-h-none">
+      <div className="flex-1 overflow-y-auto space-y-4 mb-4 p-2 overscroll-contain">
         {messages.length === 0 ? (
           <p className="text-center text-gray-500 text-sm">Noch keine Nachrichten</p>
         ) : (
@@ -72,7 +72,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ tourId, userId }) => {
               className={`flex ${message.userId === userId ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                className={`max-w-[75%] sm:max-w-xs lg:max-w-md px-4 py-2 rounded-lg break-words ${
                   message.userId === userId
                     ? 'bg-primary-600 text-white'
                     : 'bg-gray-200 text-gray-900'
@@ -98,14 +98,15 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ tourId, userId }) => {
         <div ref={messagesEndRef} />
       </div>
 
-      <form onSubmit={handleSend} className="flex gap-2 items-end">
+      <form onSubmit={handleSend} className="flex gap-2 items-end touch-manipulation" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
         <Input
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Nachricht schreiben..."
           className="flex-1"
+          autoComplete="off"
         />
-        <Button type="submit" disabled={!newMessage.trim()}>
+        <Button type="submit" disabled={!newMessage.trim()} className="touch-target">
           Senden
         </Button>
       </form>
