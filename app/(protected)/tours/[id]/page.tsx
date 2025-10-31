@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { authService } from '@/lib/auth'
-import { dataStore } from '@/lib/data/mockData'
+import { dataRepository } from '@/lib/data'
 import { User, Tour } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -20,26 +20,42 @@ export default function TourDetailPage() {
 
   const [user, setUser] = useState<User | null>(null)
   const [tour, setTour] = useState<Tour | null>(null)
+  const [participants, setParticipants] = useState<User[]>([])
   const [isRegistered, setIsRegistered] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [showRejectModal, setShowRejectModal] = useState(false)
   const [rejectionComment, setRejectionComment] = useState('')
 
   useEffect(() => {
-    const currentUser = authService.getCurrentUser()
-    setUser(currentUser)
+    const loadTour = async () => {
+      const currentUser = authService.getCurrentUser()
+      setUser(currentUser)
 
-    if (currentUser) {
-      const tourData = dataStore.getTourById(tourId)
-      if (!tourData) {
-        router.push('/tours')
-        return
+      if (currentUser) {
+        try {
+          const tourData = await dataRepository.getTourById(tourId)
+          if (!tourData) {
+            router.push('/tours')
+            return
+          }
+          setTour(tourData)
+          setIsRegistered(tourData.participants.includes(currentUser.id))
+
+          // Load participant details
+          const participantUsers = await Promise.all(
+            tourData.participants.map((id) => dataRepository.getUserById(id))
+          )
+          setParticipants(participantUsers.filter((u): u is User => u !== null))
+        } catch (error) {
+          console.error('Error loading tour:', error)
+          router.push('/tours')
+        }
       }
-      setTour(tourData)
-      setIsRegistered(tourData.participants.includes(currentUser.id))
+
+      setIsLoading(false)
     }
 
-    setIsLoading(false)
+    loadTour()
 
     const unsubscribe = authService.subscribe((updatedUser) => {
       setUser(updatedUser)
@@ -50,35 +66,61 @@ export default function TourDetailPage() {
     }
   }, [tourId, router])
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (!user || !tour) return
 
-    const success = dataStore.registerForTour(tourId, user.id)
-    if (success) {
-      const updatedTour = dataStore.getTourById(tourId)
-      setTour(updatedTour || null)
-      setIsRegistered(true)
+    try {
+      const success = await dataRepository.registerForTour(tourId, user.id)
+      if (success) {
+        const updatedTour = await dataRepository.getTourById(tourId)
+        if (updatedTour) {
+          setTour(updatedTour)
+          setIsRegistered(true)
+          // Reload participants
+          const participantUsers = await Promise.all(
+            updatedTour.participants.map((id) => dataRepository.getUserById(id))
+          )
+          setParticipants(participantUsers.filter((u): u is User => u !== null))
+        }
+      }
+    } catch (error) {
+      console.error('Error registering for tour:', error)
     }
   }
 
-  const handleUnregister = () => {
+  const handleUnregister = async () => {
     if (!user || !tour) return
 
-    const success = dataStore.unregisterFromTour(tourId, user.id)
-    if (success) {
-      const updatedTour = dataStore.getTourById(tourId)
-      setTour(updatedTour || null)
-      setIsRegistered(false)
+    try {
+      const success = await dataRepository.unregisterFromTour(tourId, user.id)
+      if (success) {
+        const updatedTour = await dataRepository.getTourById(tourId)
+        if (updatedTour) {
+          setTour(updatedTour)
+          setIsRegistered(false)
+          // Reload participants
+          const participantUsers = await Promise.all(
+            updatedTour.participants.map((id) => dataRepository.getUserById(id))
+          )
+          setParticipants(participantUsers.filter((u): u is User => u !== null))
+        }
+      }
+    } catch (error) {
+      console.error('Error unregistering from tour:', error)
     }
   }
 
-  const handleApprove = () => {
+  const handleApprove = async () => {
     if (!user || !tour) return
 
-    const updatedTour = dataStore.approveTour(tourId)
-    if (updatedTour) {
-      setTour(updatedTour)
-      router.refresh()
+    try {
+      const updatedTour = await dataRepository.approveTour(tourId)
+      if (updatedTour) {
+        setTour(updatedTour)
+        router.refresh()
+      }
+    } catch (error) {
+      console.error('Error approving tour:', error)
     }
   }
 
@@ -87,15 +129,19 @@ export default function TourDetailPage() {
     setShowRejectModal(true)
   }
 
-  const handleConfirmReject = () => {
+  const handleConfirmReject = async () => {
     if (!user || !tour) return
 
-    const updatedTour = dataStore.rejectTour(tourId, rejectionComment.trim() || undefined)
-    if (updatedTour) {
-      setTour(updatedTour)
-      setShowRejectModal(false)
-      setRejectionComment('')
-      router.refresh()
+    try {
+      const updatedTour = await dataRepository.rejectTour(tourId, rejectionComment.trim() || undefined)
+      if (updatedTour) {
+        setTour(updatedTour)
+        setShowRejectModal(false)
+        setRejectionComment('')
+        router.refresh()
+      }
+    } catch (error) {
+      console.error('Error rejecting tour:', error)
     }
   }
 
@@ -295,21 +341,18 @@ export default function TourDetailPage() {
           )}
 
           {/* Teilnehmerliste */}
-          {tour.participants.length > 0 && (
+          {participants.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Teilnehmer ({tour.participants.length})</CardTitle>
+                <CardTitle>Teilnehmer ({participants.length})</CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
-                  {tour.participants.map((participantId) => {
-                    const participant = dataStore.getUserById(participantId)
-                    return (
-                      <li key={participantId} className="text-sm text-gray-700">
-                        {participant?.name || 'Unbekannt'}
-                      </li>
-                    )
-                  })}
+                  {participants.map((participant) => (
+                    <li key={participant.id} className="text-sm text-gray-700">
+                      {participant.name}
+                    </li>
+                  ))}
                 </ul>
               </CardContent>
             </Card>

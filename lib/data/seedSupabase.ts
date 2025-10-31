@@ -115,9 +115,96 @@ export async function seedSupabaseData() {
     }
 
     console.log('✅ Tour settings seeded successfully!')
+
+    // Seed Demo Tours (if leader users exist)
+    await seedDemoTours(adminClient)
   } catch (error) {
     console.error('Error during seed:', error)
     throw error
+  }
+}
+
+/**
+ * Erstellt Demo-Touren für Testzwecke
+ * Benötigt existierende Leader-User in public.users
+ */
+async function seedDemoTours(adminClient: ReturnType<typeof getSupabaseAdmin>) {
+  try {
+    // Prüfe, ob bereits Touren existieren
+    const { data: existingTours } = await adminClient
+      .from('tours')
+      .select('id')
+      .limit(1)
+
+    if (existingTours && existingTours.length > 0) {
+      console.log('Tours already exist, skipping tour seed.')
+      return
+    }
+
+    // Suche nach Leader-Usern
+    const { data: leaders } = await adminClient
+      .from('users')
+      .select('id, email')
+      .eq('role', 'leader')
+      .limit(2)
+
+    if (!leaders || leaders.length === 0) {
+      console.log('⚠️ No leader users found. Skipping tour seed.')
+      console.log('💡 Create a leader user via Supabase Auth first, then run seed again.')
+      return
+    }
+
+    const leader1Id = leaders[0].id
+    const leader2Id = leaders.length > 1 ? leaders[1].id : leaders[0].id
+
+    // Erstelle Demo-Touren
+    const demoTours = [
+      {
+        title: 'Skitour auf den Säntis',
+        description: 'Schöne Skitour auf den Säntis mit herrlicher Aussicht. Perfekt für den Chat-Test!',
+        date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 Tage in der Zukunft
+        difficulty: 'ZS',
+        tour_type: 'Skitour',
+        tour_length: 'Eintagestour',
+        elevation: 1800,
+        duration: 6,
+        leader_id: leader1Id,
+        max_participants: 8,
+        status: 'approved', // Direkt freigegeben für schnellen Test
+        created_by: leader1Id,
+      },
+      {
+        title: 'Wanderung Toggenburg',
+        description: 'Gemütliche Wanderung durch das Toggenburg. Ideal zum Testen des Chats!',
+        date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(), // 14 Tage in der Zukunft
+        difficulty: 'T2',
+        tour_type: 'Wanderung',
+        tour_length: 'Eintagestour',
+        elevation: 500,
+        duration: 4,
+        leader_id: leader2Id,
+        max_participants: 12,
+        status: 'approved', // Direkt freigegeben für schnellen Test
+        created_by: leader2Id,
+      },
+    ]
+
+    const { error: tourError } = await adminClient
+      .from('tours')
+      .insert(demoTours)
+
+    if (tourError) {
+      console.error('Error seeding tours:', tourError)
+      // Nicht werfen, da Settings bereits erfolgreich waren
+      console.log('⚠️ Tour seeding failed, but settings were seeded successfully.')
+      return
+    }
+
+    console.log('✅ Demo tours seeded successfully!')
+    console.log('💡 You can now test the chat by opening one of these tours.')
+  } catch (error) {
+    console.error('Error seeding demo tours:', error)
+    // Nicht werfen, da Settings bereits erfolgreich waren
   }
 }
 

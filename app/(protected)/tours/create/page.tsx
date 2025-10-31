@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { authService } from '@/lib/auth'
-import { dataStore } from '@/lib/data/mockData'
+import { dataRepository } from '@/lib/data'
 import { User, TourType, TourLength, Difficulty } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -17,7 +17,7 @@ import Link from 'next/link'
 export default function CreateTourPage() {
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
-  const [settings, setSettings] = useState(dataStore.getSettings())
+  const [settings, setSettings] = useState({ tourTypes: [], tourLengths: [], difficulties: [] })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -34,13 +34,21 @@ export default function CreateTourPage() {
   })
 
   useEffect(() => {
-    const currentUser = authService.getCurrentUser()
-    setUser(currentUser)
-    setSettings(dataStore.getSettings())
-
-    if (currentUser && !canCreateTour(currentUser.role)) {
-      router.push('/tours')
+    const loadData = async () => {
+      const currentUser = authService.getCurrentUser()
+      setUser(currentUser)
+      
+      if (currentUser) {
+        const tourSettings = await dataRepository.getSettings()
+        setSettings(tourSettings)
+        
+        if (!canCreateTour(currentUser.role)) {
+          router.push('/tours')
+        }
+      }
     }
+
+    loadData()
 
     const unsubscribe = authService.subscribe((updatedUser) => {
       setUser(updatedUser)
@@ -79,7 +87,7 @@ export default function CreateTourPage() {
     setIsLoading(true)
 
     try {
-      const tour = dataStore.createTour({
+      const tour = await dataRepository.createTour({
         title: formData.title,
         description: formData.description,
         date: new Date(formData.date),
@@ -95,6 +103,7 @@ export default function CreateTourPage() {
 
       router.push(`/tours/${tour.id}`)
     } catch (err) {
+      console.error('Error creating tour:', err)
       setError('Fehler beim Erstellen der Tour')
     } finally {
       setIsLoading(false)
