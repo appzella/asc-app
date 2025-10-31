@@ -47,10 +47,63 @@ class SupabaseAuthService {
 
     try {
       const user = await dataRepository.getUserById(userId)
-      this.currentUser = user
-      this.notifyListeners(user)
+      
+      if (user) {
+        this.currentUser = user
+        this.notifyListeners(user)
+      } else {
+        // Fallback: Create user profile from auth user if it doesn't exist
+        await this.createUserProfileFromAuth(userId)
+      }
     } catch (error) {
       console.error('Error loading user profile:', error)
+      this.currentUser = null
+      this.notifyListeners(null)
+    }
+  }
+
+  private async createUserProfileFromAuth(userId: string): Promise<void> {
+    if (!isSupabaseConfigured || !supabase) return
+
+    try {
+      // Get auth user details
+      const { data: { user: authUser } } = await supabase.auth.getUser(userId)
+      if (!authUser) return
+
+      // Create user profile in public.users using direct Supabase call
+      // because we need to set the id explicitly
+      const { data, error } = await supabase
+        .from('users')
+        .insert({
+          id: authUser.id,
+          email: authUser.email || '',
+          name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User',
+          role: authUser.user_metadata?.role || 'member',
+          registered: true,
+        })
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Error creating user profile:', error)
+        // If user already exists (e.g., from trigger), just load it
+        const existingUser = await dataRepository.getUserById(userId)
+        if (existingUser) {
+          this.currentUser = existingUser
+          this.notifyListeners(existingUser)
+        }
+        return
+      }
+
+      if (data) {
+        const newUser = await dataRepository.getUserById(userId)
+        if (newUser) {
+          this.currentUser = newUser
+          this.notifyListeners(newUser)
+        }
+      }
+    } catch (error) {
+      console.error('Error creating user profile from auth:', error)
       this.currentUser = null
       this.notifyListeners(null)
     }
@@ -73,7 +126,18 @@ class SupabaseAuthService {
       }
 
       if (data.user) {
+        // Wait a bit for session to be fully established
+        await new Promise((resolve) => setTimeout(resolve, 100))
+        
+        // Try to load user profile
         await this.loadUserProfile(data.user.id)
+        
+        // If still no user, wait a bit more and retry
+        if (!this.currentUser) {
+          await new Promise((resolve) => setTimeout(resolve, 200))
+          await this.loadUserProfile(data.user.id)
+        }
+        
         return this.currentUser
       }
 

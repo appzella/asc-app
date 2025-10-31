@@ -28,6 +28,7 @@ export default function LoginPage() {
         setError('Ungültige E-Mail oder Passwort')
       }
     } catch (err) {
+      console.error('Login error:', err)
       setError('Ein Fehler ist aufgetreten')
     } finally {
       setIsLoading(false)

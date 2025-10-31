@@ -25,7 +25,15 @@ export class SupabaseDataRepository implements IDataRepository {
       .eq('id', id)
       .single()
 
-    if (error || !data) return null
+    if (error) {
+      // Only log if it's not a "not found" error
+      if (error.code !== 'PGRST116') {
+        console.error('Error getting user by ID:', error)
+      }
+      return null
+    }
+    
+    if (!data) return null
     return this.mapDbUserToUser(data)
   }
 
