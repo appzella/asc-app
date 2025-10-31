@@ -1,11 +1,14 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { authService } from '@/lib/auth'
 import { User } from '@/lib/types'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
+import { MobileTabBar } from '@/components/navigation/MobileTabBar'
+import { Drawer } from '@/components/navigation/Drawer'
+import { MenuButton } from '@/components/navigation/MenuButton'
 
 export default function ProtectedLayout({
   children,
@@ -16,6 +19,7 @@ export default function ProtectedLayout({
   const pathname = usePathname()
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   useEffect(() => {
     const currentUser = authService.getCurrentUser()
@@ -43,6 +47,29 @@ export default function ProtectedLayout({
     authService.logout()
     router.push('/login')
   }
+
+  const closeDrawer = useCallback(() => setIsDrawerOpen(false), [])
+
+  const drawerItems = useMemo(() => {
+    if (!user) return []
+    const items = [
+      { href: '/dashboard', label: 'Dashboard' },
+      { href: '/tours', label: 'Touren' },
+      { href: '/help', label: 'Hilfe' },
+    ]
+    if (user.role === 'admin' || user.role === 'leader') {
+      items.push({ href: '/tours/create', label: 'Tour erstellen' })
+    }
+    if (user.role === 'admin') {
+      items.push(
+        { href: '/users', label: 'Benutzer' },
+        { href: '/invitations', label: 'Einladungen' },
+        { href: '/settings', label: 'Einstellungen' }
+      )
+    }
+    items.push({ href: '/profile', label: 'Profil' })
+    return items
+  }, [user])
 
   if (isLoading) {
     return (
@@ -79,7 +106,8 @@ export default function ProtectedLayout({
       <nav className="glass sticky top-0 z-50 border-b border-gray-200/50 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20">
-            <div className="flex items-center">
+            <div className="flex items-center gap-2">
+              <MenuButton open={isDrawerOpen} onToggle={() => setIsDrawerOpen((v) => !v)} />
               <div className="flex-shrink-0 flex items-center">
                 <span className="text-2xl font-bold gradient-text tracking-tight">ASC</span>
               </div>
@@ -126,9 +154,39 @@ export default function ProtectedLayout({
           </div>
         </div>
       </nav>
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-24 sm:pb-12" style={{ paddingBottom: 'clamp(5rem, 4rem + env(safe-area-inset-bottom, 0px), 6rem)' }}>
         {children}
       </main>
+      {/* Mobile Drawer */}
+      <Drawer open={isDrawerOpen} onClose={closeDrawer} title="Navigation">
+        <ul className="space-y-1" id="mobile-drawer">
+          {drawerItems.map((item) => (
+            <li key={item.href}>
+              <Link
+                href={item.href}
+                onClick={closeDrawer}
+                className={`flex items-center justify-between px-3 py-3 rounded-lg text-base font-medium touch-manipulation ${
+                  pathname === item.href || (item.href === '/tours' && pathname?.startsWith('/tours/'))
+                    ? 'bg-primary-50 text-primary-700'
+                    : 'text-gray-700 hover:bg-gray-50 active:bg-gray-100'
+                }`}
+              >
+                <span>{item.label}</span>
+                {pathname === item.href || (item.href === '/tours' && pathname?.startsWith('/tours/')) ? (
+                  <span className="w-2 h-2 rounded-full bg-primary-500" />
+                ) : null}
+              </Link>
+            </li>
+          ))}
+        </ul>
+        <div className="pt-3 mt-3 border-t border-gray-100">
+          <Button variant="outline" className="w-full touch-manipulation" onClick={() => { closeDrawer(); handleLogout() }}>
+            Abmelden
+          </Button>
+        </div>
+      </Drawer>
+      {/* Mobile Tab Bar */}
+      <MobileTabBar />
     </div>
   )
 }

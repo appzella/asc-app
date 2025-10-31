@@ -54,8 +54,8 @@ export const TourCard: React.FC<TourCardProps> = ({ tour }) => {
   }
 
   return (
-    <Link href={`/tours/${tour.id}`}>
-      <Card className="hover:shadow-modern-xl cursor-pointer h-full group animate-slide-up">
+    <Link href={`/tours/${tour.id}`} className="touch-manipulation">
+      <Card className="hover:shadow-modern-xl active:shadow-modern-lg cursor-pointer h-full group animate-slide-up transition-shadow">
         <CardContent className="p-6">
           <div className="flex justify-between items-start mb-2">
             <h3 className="text-xl font-semibold text-gray-900">{tour.title}</h3>
