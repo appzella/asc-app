@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { authService } from '@/lib/auth'
-import { dataStore } from '@/lib/data/mockData'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -21,7 +20,7 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      const user = authService.login(email, password)
+      const user = await authService.login(email, password)
       if (user) {
         router.push('/dashboard')
         router.refresh()

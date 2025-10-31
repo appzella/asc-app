@@ -1,42 +1,52 @@
 import { User } from './types'
-import { dataStore } from './data/mockData'
+import { isSupabaseConfigured } from './supabase/client'
+import { supabaseAuthService } from './auth/supabaseAuth'
+import { mockAuthService } from './auth/mockAuth'
 
 export interface AuthState {
   user: User | null
   isLoading: boolean
 }
 
+/**
+ * Unified Auth Service
+ * Wählt automatisch zwischen Supabase Auth und Mock Auth
+ */
 class AuthService {
-  private listeners: Set<(user: User | null) => void> = new Set()
+  private get authImpl() {
+    return isSupabaseConfigured ? supabaseAuthService : mockAuthService
+  }
 
-  login(email: string, password: string): User | null {
-    const user = dataStore.login(email, password)
-    this.notifyListeners(user)
-    return user
+  async login(email: string, password: string): Promise<User | null> {
+    return this.authImpl.login(email, password)
   }
 
   logout(): void {
-    dataStore.logout()
-    this.notifyListeners(null)
+    this.authImpl.logout()
   }
 
   getCurrentUser(): User | null {
-    return dataStore.getCurrentUser()
+    return this.authImpl.getCurrentUser()
+  }
+
+  async getCurrentUserAsync(): Promise<User | null> {
+    return this.authImpl.getCurrentUserAsync()
   }
 
   isAuthenticated(): boolean {
-    return this.getCurrentUser() !== null
+    return this.authImpl.isAuthenticated()
   }
 
   subscribe(listener: (user: User | null) => void): () => void {
-    this.listeners.add(listener)
-    return () => {
-      this.listeners.delete(listener)
-    }
+    return this.authImpl.subscribe(listener)
   }
 
-  private notifyListeners(user: User | null): void {
-    this.listeners.forEach((listener) => listener(user))
+  async register(email: string, password: string, name: string, token?: string): Promise<User | null> {
+    return this.authImpl.register(email, password, name, token)
+  }
+
+  async resetPassword(email: string): Promise<boolean> {
+    return this.authImpl.resetPassword(email)
   }
 }
 

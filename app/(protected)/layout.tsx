@@ -24,14 +24,18 @@ export default function ProtectedLayout({
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   useEffect(() => {
-    const currentUser = authService.getCurrentUser()
-    setUser(currentUser)
-    setIsLoading(false)
+    const initializeAuth = async () => {
+      const currentUser = await authService.getCurrentUserAsync()
+      setUser(currentUser)
+      setIsLoading(false)
 
-    if (!currentUser) {
-      router.push('/login')
-      return
+      if (!currentUser) {
+        router.push('/login')
+        return
+      }
     }
+
+    initializeAuth()
 
     const unsubscribe = authService.subscribe((updatedUser) => {
       setUser(updatedUser)
@@ -45,8 +49,8 @@ export default function ProtectedLayout({
     }
   }, [router])
 
-  const handleLogout = () => {
-    authService.logout()
+  const handleLogout = async () => {
+    await authService.logout()
     router.push('/login')
   }
 

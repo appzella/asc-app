@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
-import { dataStore } from '@/lib/data/mockData'
+import { dataRepository } from '@/lib/data'
 import { authService } from '@/lib/auth'
 
 export default function RegisterPage() {
@@ -21,12 +21,19 @@ export default function RegisterPage() {
   const [invitation, setInvitation] = useState<any>(null)
 
   useEffect(() => {
-    const inv = dataStore.getInvitationByToken(token)
-    if (!inv) {
-      setError('Ungültiger oder bereits verwendeter Einladungslink')
-    } else {
-      setInvitation(inv)
+    const loadInvitation = async () => {
+      try {
+        const inv = await dataRepository.getInvitationByToken(token)
+        if (!inv) {
+          setError('Ungültiger oder bereits verwendeter Einladungslink')
+        } else {
+          setInvitation(inv)
+        }
+      } catch (err) {
+        setError('Fehler beim Laden der Einladung')
+      }
     }
+    loadInvitation()
   }, [token])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -46,9 +53,8 @@ export default function RegisterPage() {
     setIsLoading(true)
 
     try {
-      const user = dataStore.useInvitation(token, name, password)
+      const user = await authService.register(invitation.email, password, name, token)
       if (user) {
-        authService.login(invitation.email, password)
         router.push('/dashboard')
         router.refresh()
       } else {

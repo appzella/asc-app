@@ -14,6 +14,8 @@
 1. Öffne die SQL Editor in deinem Supabase Dashboard
 2. Kopiere den Inhalt von `supabase/schema.sql`
 3. Führe das SQL-Script aus
+4. **Wichtig:** Kopiere auch den Inhalt von `supabase/auth-trigger.sql` und führe ihn aus
+   - Dieser Trigger erstellt automatisch einen User-Eintrag in `public.users`, wenn ein Auth-User erstellt wird
 
 ## 3. Environment Variables
 
@@ -37,10 +39,27 @@ Das Schema enthält bereits RLS Policies für:
 - ✅ Invitations: Nur Admins können verwalten
 - ✅ Tour Settings: Alle können lesen, nur Admins können ändern
 
-## 5. Nächste Schritte
+## 5. Auth Setup
+
+Die App verwendet Supabase Auth für die Authentifizierung. Der Auth Service (`lib/auth.ts`) wählt automatisch zwischen Supabase Auth und Mock Auth basierend auf den Environment Variables.
+
+### Funktionsweise:
+
+1. **Login**: Benutzer melden sich mit E-Mail und Passwort an
+2. **Auth Trigger**: Wenn ein neuer Auth-User erstellt wird, erstellt der Trigger automatisch einen Eintrag in `public.users`
+3. **User Profile**: Die App lädt das User-Profile aus `public.users` nach erfolgreicher Authentifizierung
+4. **Session Management**: Supabase Auth verwaltet Sessions automatisch (refresh, expiry, etc.)
+
+### Migration von Mock zu Supabase:
+
+Wenn `NEXT_PUBLIC_SUPABASE_URL` gesetzt ist, verwendet die App automatisch Supabase Auth. Ansonsten fällt sie auf Mock Auth zurück (für Entwicklung ohne Supabase).
+
+## 6. Nächste Schritte
 
 Nach dem Schema-Setup:
-1. Repository-Abstraktionsschicht erstellen
-2. Migration von mockData.ts zu Supabase Client
-3. Supabase Auth implementieren
+1. ✅ Repository-Abstraktionsschicht erstellt
+2. ✅ Migration von mockData.ts zu Supabase Client
+3. ✅ Supabase Auth implementiert
+4. ⏭️ Supabase Realtime für Chat-Updates implementieren
+5. ⏭️ Web Push API Setup und Notification-Events implementieren
 
