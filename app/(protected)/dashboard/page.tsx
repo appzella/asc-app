@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { authService } from '@/lib/auth'
-import { dataStore } from '@/lib/data/mockData'
+import { dataRepository } from '@/lib/data'
 import { User, Tour } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import Link from 'next/link'
@@ -19,31 +19,37 @@ export default function DashboardPage() {
     setUser(currentUser)
 
     if (currentUser) {
-      const allTours = dataStore.getTours()
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
-      
-      // Zukünftige Touren
-      const futureTours = allTours.filter((t) => {
-        const tourDate = new Date(t.date)
-        tourDate.setHours(0, 0, 0, 0)
-        return tourDate >= today && t.status === 'approved'
-      })
-      setTours(futureTours)
-      
-      // Vergangene Touren (Archiv)
-      const pastTours = allTours.filter((t) => {
-        const tourDate = new Date(t.date)
-        tourDate.setHours(0, 0, 0, 0)
-        return tourDate < today
-      })
-      setArchivedTours(pastTours)
-      
-      if (currentUser.role === 'admin') {
-        setPendingTours(dataStore.getPendingTours())
-      } else if (currentUser.role === 'leader') {
-        setPendingTours(allTours.filter((t) => t.leaderId === currentUser.id && t.status === 'pending'))
+      const loadTours = async () => {
+        const allTours = await dataRepository.getTours()
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        
+        // Zukünftige Touren
+        const futureTours = allTours.filter((t) => {
+          const tourDate = new Date(t.date)
+          tourDate.setHours(0, 0, 0, 0)
+          return tourDate >= today && t.status === 'approved'
+        })
+        setTours(futureTours)
+        
+        // Vergangene Touren (Archiv)
+        const pastTours = allTours.filter((t) => {
+          const tourDate = new Date(t.date)
+          tourDate.setHours(0, 0, 0, 0)
+          return tourDate < today
+        })
+        setArchivedTours(pastTours)
+        
+        if (currentUser.role === 'admin') {
+          const pending = await dataRepository.getPendingTours()
+          setPendingTours(pending)
+        } else if (currentUser.role === 'leader') {
+          const pending = allTours.filter((t) => t.leaderId === currentUser.id && t.status === 'pending')
+          setPendingTours(pending)
+        }
       }
+      
+      loadTours()
     }
 
     const unsubscribe = authService.subscribe((updatedUser) => {

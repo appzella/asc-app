@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { authService } from '@/lib/auth'
-import { dataStore } from '@/lib/data/mockData'
-import { User, Tour, TourType, TourLength, Difficulty } from '@/lib/types'
+import { dataRepository } from '@/lib/data'
+import { User, Tour, TourType, TourLength, Difficulty, TourSettings } from '@/lib/types'
 import { TourCard } from '@/components/tours/TourCard'
 import { Select } from '@/components/ui/Select'
 import { Input } from '@/components/ui/Input'
@@ -16,7 +16,7 @@ export default function ToursPage() {
   const [user, setUser] = useState<User | null>(null)
   const [tours, setTours] = useState<Tour[]>([])
   const [filteredTours, setFilteredTours] = useState<Tour[]>([])
-  const [settings, setSettings] = useState(dataStore.getSettings())
+  const [settings, setSettings] = useState<TourSettings | null>(null)
   
   // Filter state
   const [statusFilter, setStatusFilter] = useState<string>('')
@@ -31,30 +31,36 @@ export default function ToursPage() {
     setUser(currentUser)
 
     if (currentUser) {
-      setSettings(dataStore.getSettings())
-      let allTours = dataStore.getTours()
-      
-      // URL-Parameter prüfen
-      const statusParam = searchParams.get('status')
-      const myParam = searchParams.get('my')
-      
-      if (statusParam === 'pending' && currentUser.role === 'admin') {
-        allTours = dataStore.getPendingTours()
-        setStatusFilter('pending')
-      } else if (statusParam === 'pending' && currentUser.role === 'leader') {
-        allTours = allTours.filter((t) => t.leaderId === currentUser.id && t.status === 'pending')
-        setStatusFilter('pending')
-      } else if (currentUser.role !== 'admin') {
-        // Mitglieder sehen nur freigegebene Touren
-        allTours = allTours.filter((t) => t.status === 'approved')
-      }
+      const loadData = async () => {
+        const tourSettings = await dataRepository.getSettings()
+        setSettings(tourSettings)
+        
+        let allTours = await dataRepository.getTours()
+        
+        // URL-Parameter prüfen
+        const statusParam = searchParams.get('status')
+        const myParam = searchParams.get('my')
+        
+        if (statusParam === 'pending' && currentUser.role === 'admin') {
+          allTours = await dataRepository.getPendingTours()
+          setStatusFilter('pending')
+        } else if (statusParam === 'pending' && currentUser.role === 'leader') {
+          allTours = allTours.filter((t) => t.leaderId === currentUser.id && t.status === 'pending')
+          setStatusFilter('pending')
+        } else if (currentUser.role !== 'admin') {
+          // Mitglieder sehen nur freigegebene Touren
+          allTours = allTours.filter((t) => t.status === 'approved')
+        }
 
-      if (myParam === 'true') {
-        setShowMyTours(true)
-      }
+        if (myParam === 'true') {
+          setShowMyTours(true)
+        }
 
-      setTours(allTours)
-      setFilteredTours(allTours)
+        setTours(allTours)
+        setFilteredTours(allTours)
+      }
+      
+      loadData()
     }
 
     const unsubscribe = authService.subscribe((updatedUser) => {
@@ -135,6 +141,10 @@ export default function ToursPage() {
   }
 
   if (!user) {
+    return <div>Lädt...</div>
+  }
+
+  if (!settings) {
     return <div>Lädt...</div>
   }
 
