@@ -6,6 +6,7 @@ import { ChatMessage } from '@/lib/types'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { supabase, isSupabaseConfigured } from '@/lib/supabase/client'
+import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 
 interface ChatWindowProps {
   tourId: string
@@ -61,7 +62,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ tourId, userId }) => {
           table: 'chat_messages',
           filter: `tour_id=eq.${tourId}`,
         },
-        async (payload) => {
+        async (payload: RealtimePostgresChangesPayload<any>) => {
           // Reload messages when changes occur
           try {
             const tourMessages = await dataRepository.getMessagesByTourId(tourId)
