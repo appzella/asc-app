@@ -19,22 +19,33 @@ export class SupabaseDataRepository implements IDataRepository {
   }
 
   async getUserById(id: string): Promise<User | null> {
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', id)
-      .single()
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', id)
+        .single()
 
-    if (error) {
-      // Only log if it's not a "not found" error
-      if (error.code !== 'PGRST116') {
-        console.error('Error getting user by ID:', error)
+      if (error) {
+        // Only log unexpected errors (not "not found")
+        if (error.code !== 'PGRST116') {
+          console.error('Error getting user by ID:', error)
+        }
+        return null
       }
+    
+      if (!data) return null
+    
+      try {
+        return this.mapDbUserToUser(data)
+      } catch (error) {
+        console.error('Error mapping user data:', error)
+        return null
+      }
+    } catch (error) {
+      console.error('Unexpected error in getUserById:', error)
       return null
     }
-    
-    if (!data) return null
-    return this.mapDbUserToUser(data)
   }
 
   async getUserByEmail(email: string): Promise<User | null> {
@@ -548,21 +559,31 @@ export class SupabaseDataRepository implements IDataRepository {
 
   // Helper methods for mapping database rows to TypeScript types
   private mapDbUserToUser(row: any): User {
-    return {
-      id: row.id,
-      email: row.email,
-      name: row.name,
-      role: row.role,
-      createdAt: new Date(row.created_at),
-      invitedBy: row.invited_by || undefined,
-      registrationToken: row.registration_token || undefined,
-      registered: row.registered,
-      profilePhoto: row.profile_photo || undefined,
-      phone: row.phone || undefined,
-      mobile: row.mobile || undefined,
-      street: row.street || undefined,
-      zip: row.zip || undefined,
-      city: row.city || undefined,
+    try {
+      // Validate required fields (allow empty strings for name)
+      if (!row.id || !row.email || !row.role) {
+        throw new Error('Missing required user fields')
+      }
+
+      return {
+        id: row.id,
+        email: row.email,
+        name: row.name || '', // Allow empty string, use fallback
+        role: row.role,
+        createdAt: row.created_at ? new Date(row.created_at) : new Date(),
+        invitedBy: row.invited_by || undefined,
+        registrationToken: row.registration_token || undefined,
+        registered: row.registered ?? true,
+        profilePhoto: row.profile_photo || undefined,
+        phone: row.phone || undefined,
+        mobile: row.mobile || undefined,
+        street: row.street || undefined,
+        zip: row.zip || undefined,
+        city: row.city || undefined,
+      }
+    } catch (error) {
+      console.error('Error in mapDbUserToUser:', error)
+      throw error
     }
   }
 

@@ -11,17 +11,18 @@ import type { AuthChangeEvent, Session } from '@supabase/supabase-js'
 class SupabaseAuthService {
   private listeners: Set<(user: User | null) => void> = new Set()
   private currentUser: User | null = null
+  private isLoadingProfile: boolean = false
 
   constructor() {
     // Listen to auth state changes
     if (isSupabaseConfigured && supabase) {
       supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
-        if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user?.id) {
-          await this.loadUserProfile(session.user.id)
-        } else if (event === 'SIGNED_OUT') {
+        if (event === 'SIGNED_OUT') {
           this.currentUser = null
           this.notifyListeners(null)
         }
+        // Don't load profile here during login - let login() handle it
+        // This prevents race conditions
       })
 
       // Load initial session
@@ -42,8 +43,19 @@ class SupabaseAuthService {
     }
   }
 
-  private async loadUserProfile(userId: string) {
-    if (!isSupabaseConfigured) return
+  private async loadUserProfile(userId: string): Promise<User | null> {
+    if (!isSupabaseConfigured) return null
+
+    // Prevent concurrent loads
+    if (this.isLoadingProfile) {
+      // Wait a bit and retry
+      await new Promise((resolve) => setTimeout(resolve, 100))
+      if (this.currentUser?.id === userId) {
+        return this.currentUser
+      }
+    }
+
+    this.isLoadingProfile = true
 
     try {
       const user = await dataRepository.getUserById(userId)
@@ -51,14 +63,17 @@ class SupabaseAuthService {
       if (user) {
         this.currentUser = user
         this.notifyListeners(user)
+        return user
       } else {
         // Fallback: Create user profile from auth user if it doesn't exist
         await this.createUserProfileFromAuth(userId)
+        return this.currentUser
       }
     } catch (error) {
       console.error('Error loading user profile:', error)
-      this.currentUser = null
-      this.notifyListeners(null)
+      return null
+    } finally {
+      this.isLoadingProfile = false
     }
   }
 
@@ -66,9 +81,20 @@ class SupabaseAuthService {
     if (!isSupabaseConfigured || !supabase) return
 
     try {
-      // Get auth user details
-      const { data: { user: authUser } } = await supabase.auth.getUser(userId)
-      if (!authUser) return
+      // Get auth user details from session instead of getUser(userId)
+      // getUser(userId) requires admin rights or the user to be themselves
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.user || session.user.id !== userId) {
+        // If we don't have a session or wrong user, try to load existing user
+        const existingUser = await dataRepository.getUserById(userId)
+        if (existingUser) {
+          this.currentUser = existingUser
+          this.notifyListeners(existingUser)
+        }
+        return
+      }
+
+      const authUser = session.user
 
       // Create user profile in public.users using direct Supabase call
       // because we need to set the id explicitly
@@ -85,7 +111,6 @@ class SupabaseAuthService {
         .single()
 
       if (error) {
-        console.error('Error creating user profile:', error)
         // If user already exists (e.g., from trigger), just load it
         const existingUser = await dataRepository.getUserById(userId)
         if (existingUser) {
@@ -104,8 +129,12 @@ class SupabaseAuthService {
       }
     } catch (error) {
       console.error('Error creating user profile from auth:', error)
-      this.currentUser = null
-      this.notifyListeners(null)
+      // Don't set currentUser to null, try to load existing user instead
+      const existingUser = await dataRepository.getUserById(userId)
+      if (existingUser) {
+        this.currentUser = existingUser
+        this.notifyListeners(existingUser)
+      }
     }
   }
 
@@ -115,33 +144,23 @@ class SupabaseAuthService {
     }
 
     try {
+      // Sign in with password
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
-      if (error) {
-        console.error('Login error:', error)
+      if (error || !data.user) {
         return null
       }
 
-      if (data.user) {
-        // Wait a bit for session to be fully established
-        await new Promise((resolve) => setTimeout(resolve, 100))
-        
-        // Try to load user profile
-        await this.loadUserProfile(data.user.id)
-        
-        // If still no user, wait a bit more and retry
-        if (!this.currentUser) {
-          await new Promise((resolve) => setTimeout(resolve, 200))
-          await this.loadUserProfile(data.user.id)
-        }
-        
-        return this.currentUser
-      }
+      // Load user profile directly after successful login
+      // Give Supabase a moment to establish the session
+      await new Promise((resolve) => setTimeout(resolve, 100))
+      
+      const user = await this.loadUserProfile(data.user.id)
 
-      return null
+      return user
     } catch (error) {
       console.error('Login error:', error)
       return null
