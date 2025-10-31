@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Textarea } from '@/components/ui/Textarea'
+import Image from 'next/image'
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null)
@@ -168,9 +169,12 @@ export default function ProfilePage() {
           <CardContent className="space-y-4">
             <div className="flex flex-col items-center">
               {user.profilePhoto ? (
-                <img
+                <Image
                   src={user.profilePhoto}
                   alt={user.name}
+                  width={128}
+                  height={128}
+                  unoptimized
                   className="w-32 h-32 rounded-full object-cover border-4 border-gray-200 shadow-modern mb-4"
                 />
               ) : (

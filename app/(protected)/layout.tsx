@@ -10,6 +10,7 @@ import { MobileTabBar } from '@/components/navigation/MobileTabBar'
 import { Drawer } from '@/components/navigation/Drawer'
 import { MenuButton } from '@/components/navigation/MenuButton'
 import { ChevronRight, ChevronDown } from 'lucide-react'
+import Image from 'next/image'
 
 export default function ProtectedLayout({
   children,
@@ -240,9 +241,12 @@ export default function ProtectedLayout({
             <div className="flex items-center space-x-3">
               <Link href="/profile" className="hidden sm:flex items-center space-x-3 px-4 py-2 rounded-lg bg-gray-50/50 hover:bg-gray-100/50 transition-colors">
                 {user.profilePhoto ? (
-                  <img 
+                  <Image 
                     src={user.profilePhoto} 
                     alt={user.name}
+                    width={32}
+                    height={32}
+                    unoptimized
                     className="w-8 h-8 rounded-full object-cover border-2 border-gray-200"
                   />
                 ) : (

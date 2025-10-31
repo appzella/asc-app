@@ -144,8 +144,8 @@ export default function HelpPage() {
               Sie können das Tourenarchiv auf verschiedene Weise erreichen:
             </p>
             <ul className="list-disc list-inside space-y-2 text-gray-600 ml-4">
-              <li>Über den <strong>"Archiv"</strong>-Button auf der Touren-Übersichtsseite</li>
-              <li>Über die <strong>"Tourenarchiv"</strong>-Card im Dashboard</li>
+              <li>Über den <strong>&quot;Archiv&quot;</strong>-Button auf der Touren-Übersichtsseite</li>
+              <li>Über die <strong>&quot;Tourenarchiv&quot;</strong>-Card im Dashboard</li>
               <li>Direkt über die URL <code className="bg-gray-100 px-1 rounded">/tours/archive</code></li>
             </ul>
           </div>
@@ -159,7 +159,7 @@ export default function HelpPage() {
               <li>Suche nach Titel, Beschreibung oder Tourenleiter</li>
               <li>Filter nach Tourenart, Tourlänge und Schwierigkeit</li>
               <li>Filter nach Status (für Admins)</li>
-              <li>Option "Nur meine Touren" um nur Ihre vergangenen Touren zu sehen</li>
+              <li>Option &quot;Nur meine Touren&quot; um nur Ihre vergangenen Touren zu sehen</li>
             </ul>
           </div>
 
@@ -193,7 +193,7 @@ export default function HelpPage() {
             <h3 className="font-semibold text-gray-900 mb-2">Dashboard-Integration</h3>
             <p className="text-gray-600 mb-3">
               Im Dashboard sehen Sie eine Card mit der Anzahl der vergangenen Touren im Archiv.
-              Klicken Sie auf <strong>"Archiv öffnen"</strong>, um direkt zum Archiv zu gelangen.
+              Klicken Sie auf <strong>&quot;Archiv öffnen&quot;</strong>, um direkt zum Archiv zu gelangen.
             </p>
           </div>
         </CardContent>
@@ -213,7 +213,7 @@ export default function HelpPage() {
             <div>
               <h3 className="font-semibold text-gray-900 mb-2">Schritt 1: Neue Tour erstellen</h3>
               <p className="text-gray-600 mb-3">
-                Klicken Sie auf <strong>"Tour erstellen"</strong> in der Navigation oder auf den Button
+                Klicken Sie auf <strong>&quot;Tour erstellen&quot;</strong> in der Navigation oder auf den Button
                 in der Touren-Übersicht.
               </p>
             </div>
@@ -237,8 +237,8 @@ export default function HelpPage() {
             <div>
               <h3 className="font-semibold text-gray-900 mb-2">Schritt 3: Tour speichern</h3>
               <p className="text-gray-600 mb-3">
-                Nach dem Klicken auf <strong>"Tour erstellen"</strong> wird die Tour mit dem Status
-                <strong>"Ausstehend"</strong> gespeichert. Ein Admin muss die Tour freigeben, bevor
+                Nach dem Klicken auf <strong>&quot;Tour erstellen&quot;</strong> wird die Tour mit dem Status
+                <strong>&quot;Ausstehend&quot;</strong> gespeichert. Ein Admin muss die Tour freigeben, bevor
                 sich Mitglieder anmelden können.
               </p>
             </div>
@@ -247,12 +247,12 @@ export default function HelpPage() {
               <h3 className="font-semibold text-gray-900 mb-2">Tour bearbeiten</h3>
               <p className="text-gray-600 mb-3">
                 Sie können Ihre Touren jederzeit bearbeiten, indem Sie auf der Tour-Detailseite auf
-                <strong>"Tour bearbeiten"</strong> klicken. Wichtige Hinweise:
+                <strong>&quot;Tour bearbeiten&quot;</strong> klicken. Wichtige Hinweise:
               </p>
               <ul className="list-disc list-inside space-y-2 text-gray-600 ml-4">
                 <li>Für noch nicht freigegebene Touren werden Änderungen sofort übernommen</li>
                 <li>Für bereits freigegebene Touren müssen Änderungen vom Admin genehmigt werden</li>
-                <li>Ausstehende Änderungen werden als "pendingChanges" gespeichert</li>
+                <li>Ausstehende Änderungen werden als &quot;pendingChanges&quot; gespeichert</li>
                 <li>Der Admin sieht alle ausstehenden Änderungen bei der Freigabe</li>
               </ul>
             </div>
@@ -274,10 +274,10 @@ export default function HelpPage() {
                   Als Admin haben Sie die Verantwortung, neue Touren zu überprüfen und freizugeben:
                 </p>
                 <ul className="list-disc list-inside space-y-2 text-gray-600 ml-4">
-                  <li>In der Tour-Detailseite sehen Sie eine Box <strong>"Freigabe erforderlich"</strong></li>
+                  <li>In der Tour-Detailseite sehen Sie eine Box <strong>&quot;Freigabe erforderlich&quot;</strong></li>
                   <li>Überprüfen Sie alle Tour-Details sorgfältig</li>
-                  <li>Klicken Sie auf <strong>"Tour freigeben"</strong>, um die Tour für Anmeldungen freizugeben</li>
-                  <li>Oder klicken Sie auf <strong>"Ablehnen"</strong>, um die Tour abzulehnen</li>
+                  <li>Klicken Sie auf <strong>&quot;Tour freigeben&quot;</strong>, um die Tour für Anmeldungen freizugeben</li>
+                  <li>Oder klicken Sie auf <strong>&quot;Ablehnen&quot;</strong>, um die Tour abzulehnen</li>
                   <li>Bei Ablehnung können Sie einen Kommentar hinzufügen, der dem Tourenleiter den Grund erklärt</li>
                 </ul>
               </div>
@@ -298,7 +298,7 @@ export default function HelpPage() {
               <div>
                 <h3 className="font-semibold text-gray-900 mb-2">Benutzerverwaltung</h3>
                 <p className="text-gray-600 mb-3">
-                  Im Bereich <strong>"Benutzer"</strong> können Sie:
+                  Im Bereich <strong>&quot;Benutzer&quot;</strong> können Sie:
                 </p>
                 <ul className="list-disc list-inside space-y-2 text-gray-600 ml-4">
                   <li>Alle Clubmitglieder einsehen</li>
@@ -311,7 +311,7 @@ export default function HelpPage() {
               <div>
                 <h3 className="font-semibold text-gray-900 mb-2">Einladungen</h3>
                 <p className="text-gray-600 mb-3">
-                  Im Bereich <strong>"Einladungen"</strong> können Sie:
+                  Im Bereich <strong>&quot;Einladungen&quot;</strong> können Sie:
                 </p>
                 <ul className="list-disc list-inside space-y-2 text-gray-600 ml-4">
                   <li>Neue Einladungen für Clubmitglieder erstellen</li>
@@ -331,7 +331,7 @@ export default function HelpPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-gray-600">
-                Im Bereich <strong>"Einstellungen"</strong> können Sie die grundlegenden Konfigurationen
+                Im Bereich <strong>&quot;Einstellungen&quot;</strong> können Sie die grundlegenden Konfigurationen
                 der App verwalten:
               </p>
 
@@ -341,8 +341,8 @@ export default function HelpPage() {
                   Fügen Sie neue Tourentypen hinzu oder entfernen Sie bestehende:
                 </p>
                 <ul className="list-disc list-inside space-y-2 text-gray-600 ml-4">
-                  <li>Geben Sie den Namen des neuen Tourentyps ein (z.B. "Klettern", "Hochtour")</li>
-                  <li>Klicken Sie auf <strong>"Hinzufügen"</strong></li>
+                  <li>Geben Sie den Namen des neuen Tourentyps ein (z.B. &quot;Klettern&quot;, &quot;Hochtour&quot;)</li>
+                  <li>Klicken Sie auf <strong>&quot;Hinzufügen&quot;</strong></li>
                   <li>Die Reihenfolge kann per Drag & Drop geändert werden</li>
                   <li>Sie können Tourentypen entfernen, die nicht mehr verwendet werden</li>
                 </ul>
@@ -354,7 +354,7 @@ export default function HelpPage() {
                   Verwalten Sie die verfügbaren Tourlängen:
                 </p>
                 <ul className="list-disc list-inside space-y-2 text-gray-600 ml-4">
-                  <li>Fügen Sie neue Tourlängen hinzu (z.B. "Halbtagestour", "Wochentour")</li>
+                  <li>Fügen Sie neue Tourlängen hinzu (z.B. &quot;Halbtagestour&quot;, &quot;Wochentour&quot;)</li>
                   <li>Entfernen Sie nicht mehr benötigte Tourlängen</li>
                   <li>Ändern Sie die Reihenfolge per Drag & Drop</li>
                 </ul>
@@ -367,7 +367,7 @@ export default function HelpPage() {
                 </p>
                 <ul className="list-disc list-inside space-y-2 text-gray-600 ml-4">
                   <li>Wählen Sie zuerst einen Tourentyp aus dem Dropdown</li>
-                  <li>Fügen Sie Schwierigkeitsgrade hinzu (z.B. für Skitouren: "L", "WS", "ZS", "S", etc.)</li>
+                  <li>Fügen Sie Schwierigkeitsgrade hinzu (z.B. für Skitouren: &quot;L&quot;, &quot;WS&quot;, &quot;ZS&quot;, &quot;S&quot;, etc.)</li>
                   <li>Die Reihenfolge bestimmt die Anzeigereihenfolge bei der Tour-Erstellung</li>
                   <li>Sie können die Reihenfolge per Drag & Drop ändern</li>
                   <li>Entfernen Sie nicht mehr benötigte Schwierigkeitsgrade</li>
@@ -400,8 +400,8 @@ export default function HelpPage() {
             <ol className="list-decimal list-inside space-y-2 text-gray-600 ml-4">
               <li>Öffnen Sie die Tour-Detailseite der gewünschten Tour</li>
               <li>Überprüfen Sie alle Details (Datum, Schwierigkeit, Teilnehmerzahl)</li>
-              <li>Klicken Sie auf den Button <strong>"Anmelden"</strong> in der Seitenleiste</li>
-              <li>Sie sehen nun den Status "Sie sind angemeldet"</li>
+              <li>Klicken Sie auf den Button <strong>&quot;Anmelden&quot;</strong> in der Seitenleiste</li>
+              <li>Sie sehen nun den Status &quot;Sie sind angemeldet&quot;</li>
               <li>Die Teilnehmerzahl wird aktualisiert</li>
             </ol>
             <p className="text-gray-600 mt-3">
@@ -417,7 +417,7 @@ export default function HelpPage() {
             </p>
             <ol className="list-decimal list-inside space-y-2 text-gray-600 ml-4">
               <li>Öffnen Sie die Tour-Detailseite</li>
-              <li>Klicken Sie auf den Button <strong>"Abmelden"</strong></li>
+              <li>Klicken Sie auf den Button <strong>&quot;Abmelden&quot;</strong></li>
               <li>Sie werden aus der Teilnehmerliste entfernt</li>
             </ol>
           </div>
@@ -451,7 +451,7 @@ export default function HelpPage() {
             <h3 className="font-semibold text-gray-900 mb-2">Nachrichten senden</h3>
             <ul className="list-disc list-inside space-y-2 text-gray-600 ml-4">
               <li>Geben Sie Ihre Nachricht in das Eingabefeld ein</li>
-              <li>Klicken Sie auf <strong>"Senden"</strong> oder drücken Sie Enter</li>
+              <li>Klicken Sie auf <strong>&quot;Senden&quot;</strong> oder drücken Sie Enter</li>
               <li>Ihre Nachricht wird sofort für alle sichtbar</li>
               <li>Jede Nachricht zeigt den Namen des Absenders und die Uhrzeit</li>
             </ul>
@@ -494,7 +494,7 @@ export default function HelpPage() {
             <h3 className="font-semibold text-gray-900 mb-2">Profilfoto</h3>
             <ul className="list-disc list-inside space-y-2 text-gray-600 ml-4">
               <li>Laden Sie ein Profilfoto hoch (max. 5MB, JPG, PNG oder GIF)</li>
-              <li>Klicken Sie auf <strong>"Hochladen"</strong> oder <strong>"Ändern"</strong></li>
+              <li>Klicken Sie auf <strong>&quot;Hochladen&quot;</strong> oder <strong>&quot;Ändern&quot;</strong></li>
               <li>Wählen Sie ein Bild von Ihrem Gerät aus</li>
               <li>Das Bild wird sofort als Profilfoto verwendet</li>
               <li>Sie können das Profilfoto jederzeit entfernen</li>
@@ -513,7 +513,7 @@ export default function HelpPage() {
               <li><strong>Adresse:</strong> Strasse, PLZ und Ort</li>
             </ul>
             <p className="text-gray-600 mt-3">
-              Klicken Sie auf <strong>"Änderungen speichern"</strong>, um Ihre Daten zu aktualisieren.
+              Klicken Sie auf <strong>&quot;Änderungen speichern&quot;</strong>, um Ihre Daten zu aktualisieren.
             </p>
           </div>
         </CardContent>
