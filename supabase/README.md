@@ -54,12 +54,32 @@ Die App verwendet Supabase Auth für die Authentifizierung. Der Auth Service (`l
 
 Wenn `NEXT_PUBLIC_SUPABASE_URL` gesetzt ist, verwendet die App automatisch Supabase Auth. Ansonsten fällt sie auf Mock Auth zurück (für Entwicklung ohne Supabase).
 
-## 6. Nächste Schritte
+## 6. Realtime Setup
+
+Für Echtzeit-Chat-Updates muss Realtime für die `chat_messages` Tabelle aktiviert sein:
+
+1. Öffne den **SQL Editor** in deinem Supabase Dashboard
+2. Kopiere den Inhalt von `supabase/realtime-setup.sql` und führe ihn aus
+3. Das Script erstellt die `supabase_realtime` Publikation (falls nicht vorhanden) und fügt `chat_messages` hinzu
+4. Am Ende zeigt das Script eine Bestätigung, ob Realtime aktiviert ist
+
+**Überprüfung:** 
+- Das Script zeigt am Ende selbst eine Bestätigung
+- Alternativ kannst du im SQL Editor prüfen:
+  ```sql
+  SELECT tablename FROM pg_publication_tables 
+  WHERE pubname = 'supabase_realtime' 
+  AND tablename = 'chat_messages';
+  ```
+  Wenn eine Zeile zurückkommt, ist Realtime aktiviert.
+
+## 7. Nächste Schritte
 
 Nach dem Schema-Setup:
 1. ✅ Repository-Abstraktionsschicht erstellt
 2. ✅ Migration von mockData.ts zu Supabase Client
 3. ✅ Supabase Auth implementiert
-4. ⏭️ Supabase Realtime für Chat-Updates implementieren
+4. ✅ Supabase Realtime für Chat-Updates implementiert
 5. ⏭️ Web Push API Setup und Notification-Events implementieren
+6. ⏭️ E-Mail-Service für Einladungslinks einrichten
 
