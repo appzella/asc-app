@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card, CardContent, CardHeader } from '@/components/ui/Card'
-import { dataStore } from '@/lib/data/mockData'
+import { authService } from '@/lib/auth'
 
 export default function ForgotPasswordPage() {
   const router = useRouter()
@@ -20,17 +20,18 @@ export default function ForgotPasswordPage() {
     setIsLoading(true)
 
     try {
-      const user = dataStore.getUserByEmail(email)
-      if (!user || !user.registered) {
+      // Use Supabase Auth resetPassword function
+      // This will send a password reset email if the user exists
+      const result = await authService.resetPassword(email)
+      
+      if (result) {
+        // Success - email sent (or at least no error occurred)
+        setSuccess(true)
+      } else {
         setError('Kein Konto mit dieser E-Mail-Adresse gefunden')
-        setIsLoading(false)
-        return
       }
-
-      // In einer echten App würde hier ein Reset-Token generiert und per E-Mail gesendet werden
-      // Für diese Demo-App zeigen wir einfach eine Erfolgsmeldung
-      setSuccess(true)
     } catch (err) {
+      console.error('Password reset error:', err)
       setError('Ein Fehler ist aufgetreten')
     } finally {
       setIsLoading(false)
