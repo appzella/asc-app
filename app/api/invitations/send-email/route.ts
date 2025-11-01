@@ -47,11 +47,29 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Get app URL from environment or use default
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 
-                   process.env.NEXT_PUBLIC_VERCEL_URL ? 
-                     `https://${process.env.NEXT_PUBLIC_VERCEL_URL}` : 
-                     'http://localhost:3000'
+    // Get app URL from environment
+    // Priority: NEXT_PUBLIC_APP_URL > VERCEL_URL (production) > default
+    let appUrl = process.env.NEXT_PUBLIC_APP_URL
+    
+    if (!appUrl) {
+      // Check if we're on Vercel production
+      const vercelUrl = process.env.VERCEL_URL
+      if (vercelUrl && process.env.VERCEL_ENV === 'production') {
+        // Production: use custom domain or vercel.app
+        appUrl = `https://${vercelUrl.includes('asc-app') ? vercelUrl : 'asc-app.vercel.app'}`
+      } else if (vercelUrl && process.env.VERCEL_ENV !== 'production') {
+        // Preview/Development: use vercel URL (but prefer NEXT_PUBLIC_APP_URL if set)
+        appUrl = `https://${vercelUrl}`
+      } else {
+        // Local development
+        appUrl = 'http://localhost:3000'
+      }
+    }
+    
+    // Fallback: Always use production URL if not explicitly set
+    if (!appUrl || appUrl.includes('localhost')) {
+      appUrl = 'https://asc-app.vercel.app'
+    }
 
     // Call Supabase Edge Function
     const { data, error } = await admin.functions.invoke('send-invitation-email', {
