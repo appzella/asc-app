@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { authService } from '@/lib/auth'
 import { dataRepository } from '@/lib/data'
 import { User } from '@/lib/types'
@@ -12,6 +13,7 @@ import { ImageCropper } from '@/components/ui/ImageCropper'
 import Image from 'next/image'
 
 export default function ProfilePage() {
+  const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
@@ -297,6 +299,11 @@ export default function ProfilePage() {
     }
   }
 
+  const handleLogout = async () => {
+    await authService.logout()
+    router.push('/login')
+  }
+
   if (!user) {
     return <div>Lädt...</div>
   }
@@ -551,6 +558,19 @@ export default function ProfilePage() {
                   </div>
                 </form>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Abmelden */}
+          <Card className="mt-8">
+            <CardContent className="pt-6">
+              <Button
+                variant="danger"
+                onClick={handleLogout}
+                className="w-full"
+              >
+                Abmelden
+              </Button>
             </CardContent>
           </Card>
         </div>

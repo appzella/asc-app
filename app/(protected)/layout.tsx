@@ -376,11 +376,6 @@ export default function ProtectedLayout({
             )
           })}
         </ul>
-        <div className="pt-3 mt-3 border-t border-gray-100">
-          <Button variant="outline" className="w-full touch-manipulation" onClick={() => { closeDrawer(); handleLogout() }}>
-            Abmelden
-          </Button>
-        </div>
       </Drawer>
       {/* Mobile Tab Bar */}
       <MobileTabBar />
