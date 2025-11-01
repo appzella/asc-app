@@ -7,7 +7,7 @@ import { User, Tour } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
-import { HelpCircle, ChevronRight, ListChecks, Calendar, Archive, BookOpen } from 'lucide-react'
+import { ChevronRight, ListChecks, Calendar, Archive, BookOpen } from 'lucide-react'
 
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null)
@@ -229,15 +229,9 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent className="flex flex-col flex-1">
             <Link href="/help" className="sm:hidden touch-manipulation block flex-1">
-              <div className="flex-1 flex items-center justify-center mb-4">
-                <HelpCircle className="w-12 h-12 text-primary-600" strokeWidth={1.5} />
-              </div>
               <p className="text-sm text-gray-600 text-center">Benötigen Sie Hilfe bei der Nutzung der App?</p>
             </Link>
             <div className="sm:block hidden">
-              <div className="flex-1 flex items-center justify-center mb-4">
-                <HelpCircle className="w-12 h-12 text-primary-600" strokeWidth={1.5} />
-              </div>
               <p className="text-sm text-gray-600 text-center">Benötigen Sie Hilfe bei der Nutzung der App?</p>
             </div>
             <div className="mt-auto pt-4">
