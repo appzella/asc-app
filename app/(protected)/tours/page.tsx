@@ -10,6 +10,7 @@ import { TourCard } from '@/components/tours/TourCard'
 import { Select } from '@/components/ui/Select'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
+import { Archive, Filter } from 'lucide-react'
 
 export default function ToursPage() {
   const searchParams = useSearchParams()
@@ -25,6 +26,7 @@ export default function ToursPage() {
   const [difficultyFilter, setDifficultyFilter] = useState<string>('')
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [showMyTours, setShowMyTours] = useState<boolean>(false)
+  const [showFilters, setShowFilters] = useState<boolean>(false)
 
   useEffect(() => {
     const currentUser = authService.getCurrentUser()
@@ -172,8 +174,9 @@ export default function ToursPage() {
         <div className="flex items-center gap-4">
           <h1 className="text-3xl font-bold text-gray-900">Touren</h1>
           <Link href="/tours/archive">
-            <Button variant="outline" size="sm">
-              Archiv
+            <Button variant="outline" size="sm" className="flex items-center gap-2">
+              <Archive className="w-4 h-4" strokeWidth={1.8} />
+              <span className="hidden sm:inline">Archiv</span>
             </Button>
           </Link>
         </div>
@@ -185,102 +188,225 @@ export default function ToursPage() {
       </div>
 
       {/* Filter */}
-      <div className="glass p-6 rounded-xl shadow-modern space-y-4 border border-gray-100/50">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          <Input
-            placeholder="Suche..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          
-          {user.role === 'admin' && (
-            <Select
-              label="Status"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              options={[
-                { value: '', label: 'Alle' },
-                { value: 'published', label: 'Veröffentlicht' },
-                { value: 'draft', label: 'Entwurf' },
-                { value: 'cancelled', label: 'Abgesagt' },
-                { value: 'submitted', label: 'Zur Veröffentlichung eingereicht' },
-              ]}
+      <div className="glass p-3 md:p-6 rounded-xl shadow-modern border border-gray-100/50">
+        {/* Mobile: Kompakte Suchzeile mit Filter-Toggle */}
+        <div className="md:hidden space-y-3">
+          <div className="flex gap-2">
+            <Input
+              placeholder="Suche..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="flex-1"
             />
+            <div className="flex flex-col">
+              <div className="h-5 mb-1"></div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex-shrink-0 flex items-center justify-center px-3 h-[3rem]"
+                aria-label={showFilters ? 'Filter schließen' : 'Filter anzeigen'}
+              >
+                <Filter className="w-4 h-4" strokeWidth={1.8} />
+              </Button>
+            </div>
+          </div>
+          
+          {/* Ausklappbare Filter auf Mobile */}
+          {showFilters && (
+            <div className="space-y-3 pt-2 border-t border-gray-200">
+              <div className="space-y-3">
+                {user.role === 'admin' && (
+                  <Select
+                    label="Status"
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    options={[
+                      { value: '', label: 'Alle' },
+                      { value: 'published', label: 'Veröffentlicht' },
+                      { value: 'draft', label: 'Entwurf' },
+                      { value: 'cancelled', label: 'Abgesagt' },
+                      { value: 'submitted', label: 'Zur Veröffentlichung eingereicht' },
+                    ]}
+                  />
+                )}
+
+                <Select
+                  label="Tourenart"
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value)}
+                  options={[
+                    { value: '', label: 'Alle' },
+                    ...settings.tourTypes.map((type) => ({
+                      value: type,
+                      label: type,
+                    })),
+                  ]}
+                />
+
+                <Select
+                  label="Tourlänge"
+                  value={lengthFilter}
+                  onChange={(e) => setLengthFilter(e.target.value)}
+                  options={[
+                    { value: '', label: 'Alle' },
+                    ...settings.tourLengths.map((length) => ({
+                      value: length,
+                      label: length,
+                    })),
+                  ]}
+                />
+
+                <Select
+                  label="Schwierigkeit"
+                  value={difficultyFilter}
+                  onChange={(e) => setDifficultyFilter(e.target.value)}
+                  options={[
+                    { value: '', label: 'Alle' },
+                    // T-Skala (Wanderungen)
+                    { value: 'T1', label: 'T1 - Wandern' },
+                    { value: 'T2', label: 'T2 - Bergwandern' },
+                    { value: 'T3', label: 'T3 - Anspruchsvolles Bergwandern' },
+                    { value: 'T4', label: 'T4 - Alpinwandern' },
+                    { value: 'T5', label: 'T5 - Anspruchsvolles Alpinwandern' },
+                    { value: 'T6', label: 'T6 - Schwieriges Alpinwandern' },
+                    // SAC-Skala (Skitouren)
+                    { value: 'L', label: 'L - Leicht' },
+                    { value: 'WS', label: 'WS - Wenig schwierig' },
+                    { value: 'ZS', label: 'ZS - Ziemlich schwierig' },
+                    { value: 'S', label: 'S - Schwierig' },
+                    { value: 'SS', label: 'SS - Sehr schwierig' },
+                    { value: 'AS', label: 'AS - Äußerst schwierig' },
+                    { value: 'EX', label: 'EX - Extrem schwierig' },
+                    // Bike-Skala
+                    { value: 'B1', label: 'B1 - Leicht' },
+                    { value: 'B2', label: 'B2 - Mittel' },
+                    { value: 'B3', label: 'B3 - Schwer' },
+                    { value: 'B4', label: 'B4 - Sehr schwierig' },
+                    { value: 'B5', label: 'B5 - Extrem' },
+                  ]}
+                />
+              </div>
+
+              <div className="flex flex-col gap-2 pt-2 border-t border-gray-200">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={showMyTours}
+                    onChange={(e) => setShowMyTours(e.target.checked)}
+                    className="mr-2"
+                  />
+                  <span className="text-sm text-gray-700">Nur meine Touren</span>
+                </label>
+                
+                {(statusFilter || typeFilter || lengthFilter || difficultyFilter || searchQuery || showMyTours) && (
+                  <Button variant="outline" size="sm" onClick={clearFilters} className="w-full">
+                    Filter zurücksetzen
+                  </Button>
+                )}
+              </div>
+            </div>
           )}
-
-          <Select
-            label="Tourenart"
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-            options={[
-              { value: '', label: 'Alle' },
-              ...settings.tourTypes.map((type) => ({
-                value: type,
-                label: type,
-              })),
-            ]}
-          />
-
-          <Select
-            label="Tourlänge"
-            value={lengthFilter}
-            onChange={(e) => setLengthFilter(e.target.value)}
-            options={[
-              { value: '', label: 'Alle' },
-              ...settings.tourLengths.map((length) => ({
-                value: length,
-                label: length,
-              })),
-            ]}
-          />
-
-          <Select
-            label="Schwierigkeit"
-            value={difficultyFilter}
-            onChange={(e) => setDifficultyFilter(e.target.value)}
-            options={[
-              { value: '', label: 'Alle' },
-              // T-Skala (Wanderungen)
-              { value: 'T1', label: 'T1 - Wandern' },
-              { value: 'T2', label: 'T2 - Bergwandern' },
-              { value: 'T3', label: 'T3 - Anspruchsvolles Bergwandern' },
-              { value: 'T4', label: 'T4 - Alpinwandern' },
-              { value: 'T5', label: 'T5 - Anspruchsvolles Alpinwandern' },
-              { value: 'T6', label: 'T6 - Schwieriges Alpinwandern' },
-              // SAC-Skala (Skitouren)
-              { value: 'L', label: 'L - Leicht' },
-              { value: 'WS', label: 'WS - Wenig schwierig' },
-              { value: 'ZS', label: 'ZS - Ziemlich schwierig' },
-              { value: 'S', label: 'S - Schwierig' },
-              { value: 'SS', label: 'SS - Sehr schwierig' },
-              { value: 'AS', label: 'AS - Äußerst schwierig' },
-              { value: 'EX', label: 'EX - Extrem schwierig' },
-              // Bike-Skala
-              { value: 'B1', label: 'B1 - Leicht' },
-              { value: 'B2', label: 'B2 - Mittel' },
-              { value: 'B3', label: 'B3 - Schwer' },
-              { value: 'B4', label: 'B4 - Sehr schwierig' },
-              { value: 'B5', label: 'B5 - Extrem' },
-            ]}
-          />
         </div>
 
-        <div className="flex items-center gap-4">
-          <label className="flex items-center">
-            <input
-              type="checkbox"
-              checked={showMyTours}
-              onChange={(e) => setShowMyTours(e.target.checked)}
-              className="mr-2"
+        {/* Desktop: Normale Ansicht */}
+        <div className="hidden md:block space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <Input
+              placeholder="Suche..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <span className="text-sm text-gray-700">Nur meine Touren</span>
-          </label>
-          
-          {(statusFilter || typeFilter || lengthFilter || difficultyFilter || searchQuery || showMyTours) && (
-            <Button variant="outline" size="sm" onClick={clearFilters}>
-              Filter zurücksetzen
-            </Button>
-          )}
+            
+            {user.role === 'admin' && (
+              <Select
+                label="Status"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                options={[
+                  { value: '', label: 'Alle' },
+                  { value: 'published', label: 'Veröffentlicht' },
+                  { value: 'draft', label: 'Entwurf' },
+                  { value: 'cancelled', label: 'Abgesagt' },
+                  { value: 'submitted', label: 'Zur Veröffentlichung eingereicht' },
+                ]}
+              />
+            )}
+
+            <Select
+              label="Tourenart"
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+              options={[
+                { value: '', label: 'Alle' },
+                ...settings.tourTypes.map((type) => ({
+                  value: type,
+                  label: type,
+                })),
+              ]}
+            />
+
+            <Select
+              label="Tourlänge"
+              value={lengthFilter}
+              onChange={(e) => setLengthFilter(e.target.value)}
+              options={[
+                { value: '', label: 'Alle' },
+                ...settings.tourLengths.map((length) => ({
+                  value: length,
+                  label: length,
+                })),
+              ]}
+            />
+
+            <Select
+              label="Schwierigkeit"
+              value={difficultyFilter}
+              onChange={(e) => setDifficultyFilter(e.target.value)}
+              options={[
+                { value: '', label: 'Alle' },
+                // T-Skala (Wanderungen)
+                { value: 'T1', label: 'T1 - Wandern' },
+                { value: 'T2', label: 'T2 - Bergwandern' },
+                { value: 'T3', label: 'T3 - Anspruchsvolles Bergwandern' },
+                { value: 'T4', label: 'T4 - Alpinwandern' },
+                { value: 'T5', label: 'T5 - Anspruchsvolles Alpinwandern' },
+                { value: 'T6', label: 'T6 - Schwieriges Alpinwandern' },
+                // SAC-Skala (Skitouren)
+                { value: 'L', label: 'L - Leicht' },
+                { value: 'WS', label: 'WS - Wenig schwierig' },
+                { value: 'ZS', label: 'ZS - Ziemlich schwierig' },
+                { value: 'S', label: 'S - Schwierig' },
+                { value: 'SS', label: 'SS - Sehr schwierig' },
+                { value: 'AS', label: 'AS - Äußerst schwierig' },
+                { value: 'EX', label: 'EX - Extrem schwierig' },
+                // Bike-Skala
+                { value: 'B1', label: 'B1 - Leicht' },
+                { value: 'B2', label: 'B2 - Mittel' },
+                { value: 'B3', label: 'B3 - Schwer' },
+                { value: 'B4', label: 'B4 - Sehr schwierig' },
+                { value: 'B5', label: 'B5 - Extrem' },
+              ]}
+            />
+          </div>
+
+          <div className="flex items-center gap-4">
+            <label className="flex items-center">
+              <input
+                type="checkbox"
+                checked={showMyTours}
+                onChange={(e) => setShowMyTours(e.target.checked)}
+                className="mr-2"
+              />
+              <span className="text-sm text-gray-700">Nur meine Touren</span>
+            </label>
+            
+            {(statusFilter || typeFilter || lengthFilter || difficultyFilter || searchQuery || showMyTours) && (
+              <Button variant="outline" size="sm" onClick={clearFilters}>
+                Filter zurücksetzen
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
