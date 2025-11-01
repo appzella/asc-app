@@ -25,8 +25,8 @@ export const Select: React.FC<SelectProps> = ({
       )}
       <div className="relative">
         <select
-          className={`w-full px-4 py-3 pr-10 border rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all duration-200 shadow-sm hover:shadow-md appearance-none ${
-            error ? 'border-red-500 bg-red-50' : 'border-gray-200 hover:border-gray-300'
+          className={`w-full px-4 py-2.5 pr-10 border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 shadow-sm min-h-[44px] appearance-none ${
+            error ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-gray-400'
           } ${className}`}
           style={{
             WebkitAppearance: 'none',

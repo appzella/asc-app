@@ -36,12 +36,12 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-white px-4 py-12">
       <Card className="w-full max-w-md animate-scale-in">
         <CardHeader>
-          <div className="text-center mb-6">
-            <h1 className="text-3xl font-bold gradient-text mb-2">ASC Skitouren App</h1>
-            <p className="text-gray-600">Anmelden</p>
+          <div className="text-center">
+            <h1 className="text-2xl font-bold gradient-text mb-2">ASC Skitouren App</h1>
+            <p className="text-gray-600 text-sm">Anmelden</p>
           </div>
         </CardHeader>
         <CardContent>
@@ -72,11 +72,11 @@ export default function LoginPage() {
               </div>
             </div>
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
                 {error}
               </div>
             )}
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full mt-6" disabled={isLoading}>
               {isLoading ? 'Wird angemeldet...' : 'Anmelden'}
             </Button>
           </form>

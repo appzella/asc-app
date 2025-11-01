@@ -69,24 +69,24 @@ export default function RegisterPage() {
 
   if (!invitation && !error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">Lädt...</div>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center text-gray-600">Lädt...</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-white px-4 py-12">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl text-center">Registrierung</CardTitle>
-          <p className="text-center text-gray-600 mt-2">
+          <p className="text-center text-gray-600 mt-2 text-sm">
             Erstellen Sie Ihr Konto für {invitation?.email}
           </p>
         </CardHeader>
         <CardContent>
           {error && !invitation ? (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
               {error}
             </div>
           ) : (
@@ -116,11 +116,11 @@ export default function RegisterPage() {
                 minLength={6}
               />
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
                   {error}
                 </div>
               )}
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button type="submit" className="w-full mt-6" disabled={isLoading}>
                 {isLoading ? 'Wird registriert...' : 'Registrieren'}
               </Button>
             </form>

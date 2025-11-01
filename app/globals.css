@@ -7,7 +7,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-gradient-to-br from-gray-50 via-white to-gray-50 text-gray-900 antialiased;
+    @apply bg-white text-gray-900 antialiased;
     font-feature-settings: 'rlig' 1, 'calt' 1;
   }
 }
@@ -18,11 +18,11 @@
   }
   
   .glass {
-    @apply bg-white/80 backdrop-blur-xl border border-white/20;
+    @apply bg-white/90 backdrop-blur-sm border border-gray-200/50;
   }
   
   .glass-dark {
-    @apply bg-gray-900/80 backdrop-blur-xl border border-white/10;
+    @apply bg-gray-900/90 backdrop-blur-sm border border-white/20;
   }
   
   .gradient-primary {
@@ -36,15 +36,15 @@
   }
   
   .shadow-modern {
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
   }
   
   .shadow-modern-lg {
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.06), 0 2px 4px -2px rgb(0 0 0 / 0.05);
   }
   
   .shadow-modern-xl {
-    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
   }
   
   /* Safe Area Support für iOS */
@@ -82,8 +82,10 @@
     @apply bg-white;
     @apply border-2;
     @apply border-gray-300;
-    @apply rounded;
-    accent-color: #2563eb;
+    @apply rounded-md;
+    accent-color: #0284c7;
+    min-width: 20px;
+    min-height: 20px;
   }
   
   input[type="checkbox"]:checked {

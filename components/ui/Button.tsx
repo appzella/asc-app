@@ -14,19 +14,19 @@ export const Button: React.FC<ButtonProps> = ({
   children,
   ...props
 }) => {
-  const baseClasses = 'font-semibold rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]'
+  const baseClasses = 'flex items-center justify-center font-medium rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.01] active:scale-[0.99] touch-target'
   
   const variantClasses = {
-    primary: 'gradient-primary text-white hover:shadow-lg hover:shadow-primary-500/30 focus:ring-primary-500 border-2 border-transparent hover:brightness-110 transition-all box-border',
-    secondary: 'bg-gray-900 text-white hover:bg-gray-800 focus:ring-gray-500 border-2 border-transparent shadow-modern box-border',
-    danger: 'bg-red-600 text-white hover:bg-red-700 hover:shadow-lg hover:shadow-red-500/25 focus:ring-red-500 border-2 border-transparent box-border',
-    outline: 'border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 focus:ring-gray-500 bg-white/50 backdrop-blur-sm shadow-sm box-border',
+    primary: 'gradient-primary text-white hover:shadow-modern-lg focus:ring-primary-500 border-2 border-transparent',
+    secondary: 'bg-gray-700 text-white hover:bg-gray-600 focus:ring-gray-500 border-2 border-transparent shadow-modern',
+    danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 border-2 border-transparent shadow-modern',
+    outline: 'border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 focus:ring-gray-500 bg-white shadow-sm',
   }
   
   const sizeClasses = {
-    sm: 'px-4 py-2 text-sm',
-    md: 'px-6 py-3 text-base',
-    lg: 'px-8 py-4 text-lg',
+    sm: 'px-4 py-2 text-sm min-h-[36px]',
+    md: 'px-5 py-2.5 text-base min-h-[44px]',
+    lg: 'px-6 py-3 text-lg min-h-[52px]',
   }
 
   return (

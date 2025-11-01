@@ -10,6 +10,7 @@ import { TourCard } from '@/components/tours/TourCard'
 import { Select } from '@/components/ui/Select'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
+import { Card, CardContent } from '@/components/ui/Card'
 import { Archive, Filter } from 'lucide-react'
 
 export default function ToursPage() {
@@ -169,26 +170,26 @@ export default function ToursPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-4">
           <h1 className="text-3xl font-bold text-gray-900">Touren</h1>
           <Link href="/tours/archive">
             <Button variant="outline" size="sm" className="flex items-center gap-2">
-              <Archive className="w-4 h-4" strokeWidth={1.8} />
+              <Archive className="w-4 h-4" strokeWidth={2} />
               <span className="hidden sm:inline">Archiv</span>
             </Button>
           </Link>
         </div>
         {(user.role === 'admin' || user.role === 'leader') && (
           <Link href="/tours/create">
-            <Button>Neue Tour erstellen</Button>
+            <Button size="sm">Neue Tour erstellen</Button>
           </Link>
         )}
       </div>
 
       {/* Filter */}
-      <div className="glass p-3 md:p-6 rounded-xl shadow-modern border border-gray-100/50">
+      <div className="glass p-4 md:p-6 rounded-lg border border-gray-200">
         {/* Mobile: Kompakte Suchzeile mit Filter-Toggle */}
         <div className="md:hidden space-y-3">
           <div className="flex gap-2">
@@ -418,11 +419,14 @@ export default function ToursPage() {
 
       {/* Tour Liste */}
       {filteredTours.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-lg shadow-sm">
-          <p className="text-gray-500">Keine Touren gefunden.</p>
-        </div>
+        <Card>
+          <CardContent className="text-center py-12">
+            <p className="text-gray-600 text-base">Keine Touren gefunden.</p>
+            <p className="text-gray-500 text-sm mt-2">Versuchen Sie es mit anderen Filtern.</p>
+          </CardContent>
+        </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredTours.map((tour) => (
             <TourCard key={tour.id} tour={tour} tourTypeIcons={settings?.tourTypeIcons} userRole={user?.role} />
           ))}

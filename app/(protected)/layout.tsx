@@ -150,8 +150,8 @@ export default function ProtectedLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex flex-col">
-      <nav className="glass sticky top-0 z-50 border-b border-gray-200/50 backdrop-blur-xl flex-shrink-0">
+    <div className="min-h-screen bg-white flex flex-col">
+      <nav className="glass sticky top-0 z-50 border-b border-gray-200 flex-shrink-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20">
             <div className="flex items-center gap-2">
@@ -169,9 +169,9 @@ export default function ProtectedLayout({
                       <div key={itemKey} className="relative desktop-nav-dropdown">
                         <button
                           onClick={() => toggleDesktopExpanded(itemKey)}
-                          className={`inline-flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                          className={`inline-flex items-center gap-1 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
                             item.children?.some(c => pathname === c.href || (c.href === '/tours' && pathname?.startsWith('/tours/')) || (c.href === '/users' && pathname?.startsWith('/users/')) || (c.href === '/invitations' && pathname?.startsWith('/invitations/')))
-                              ? 'bg-primary-50 text-primary-700 shadow-sm'
+                              ? 'bg-primary-50 text-primary-600'
                               : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                           }`}
                         >
@@ -182,7 +182,7 @@ export default function ProtectedLayout({
                           />
                         </button>
                         {isExpanded && (
-                          <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                          <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50">
                             {item.children?.map((child) => {
                               const isActive = pathname === child.href || (child.href === '/tours' && pathname?.startsWith('/tours/')) || (child.href === '/users' && pathname?.startsWith('/users/')) || (child.href === '/invitations' && pathname?.startsWith('/invitations/'))
                               return (
@@ -190,9 +190,9 @@ export default function ProtectedLayout({
                                   key={child.href}
                                   href={child.href}
                                   onClick={() => setDesktopExpandedItems(new Set())}
-                                  className={`block px-4 py-2 text-sm transition-colors ${
+                                  className={`block px-3 py-2 text-sm transition-colors ${
                                     isActive
-                                      ? 'bg-primary-50 text-primary-700'
+                                      ? 'bg-primary-50 text-primary-600'
                                       : 'text-gray-700 hover:bg-gray-50'
                                   }`}
                                 >
@@ -214,9 +214,9 @@ export default function ProtectedLayout({
                     <Link
                       key={itemKey}
                       href={item.href}
-                      className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      className={`inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
                         isActive
-                          ? 'bg-primary-50 text-primary-700 shadow-sm'
+                          ? 'bg-primary-50 text-primary-600'
                           : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                       }`}
                     >
@@ -231,10 +231,10 @@ export default function ProtectedLayout({
               {user.role === 'admin' && (
                 <Link
                   href="/settings"
-                  className={`sm:hidden flex items-center justify-center w-10 h-10 rounded-lg transition-colors touch-manipulation ${
+                  className={`sm:hidden flex items-center justify-center w-10 h-10 rounded-md transition-colors touch-target ${
                     pathname === '/settings' || pathname?.startsWith('/settings/')
                       ? 'bg-primary-50'
-                      : 'bg-gray-50/50 hover:bg-gray-100/50'
+                      : 'bg-gray-50 hover:bg-gray-100'
                   }`}
                   aria-label="Einstellungen"
                 >
@@ -244,11 +244,11 @@ export default function ProtectedLayout({
                         ? 'text-primary-600'
                         : 'text-gray-700'
                     }`} 
-                    strokeWidth={1.8} 
+                    strokeWidth={2} 
                   />
                 </Link>
               )}
-              <Link href="/profile" className="hidden sm:flex items-center space-x-3 px-4 py-2 rounded-lg bg-gray-50/50 hover:bg-gray-100/50 transition-colors">
+                <Link href="/profile" className="hidden sm:flex items-center space-x-2 px-3 py-2 rounded-md bg-gray-50 hover:bg-gray-100 transition-colors">
                 {user.profilePhoto ? (
                   <Image 
                     src={user.profilePhoto} 
@@ -256,17 +256,17 @@ export default function ProtectedLayout({
                     width={32}
                     height={32}
                     unoptimized
-                    className="w-8 h-8 rounded-full object-cover border-2 border-gray-200"
+                    className="w-8 h-8 rounded-full object-cover border border-gray-300"
                   />
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center border-2 border-gray-200">
+                  <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center border border-gray-300">
                     <span className="text-xs font-semibold text-primary-600">
                       {user.name.charAt(0).toUpperCase()}
                     </span>
                   </div>
                 )}
                 <span className="text-sm font-medium text-gray-900">{user.name}</span>
-                <span className="text-xs font-semibold text-primary-600 bg-primary-100 px-2.5 py-1 rounded-lg">
+                <span className="text-xs font-medium text-primary-600 bg-primary-50 px-2 py-0.5 rounded-md border border-primary-200">
                   {getRoleLabel(user.role)}
                 </span>
               </Link>

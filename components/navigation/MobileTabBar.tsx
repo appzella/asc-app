@@ -40,7 +40,7 @@ export function MobileTabBar() {
       aria-label="Mobile Tab Bar"
     >
       <div className="w-full">
-        <div className="glass rounded-t-xl border-t border-gray-200/70 shadow-modern backdrop-blur-xl bg-white/70">
+        <div className="glass rounded-t-lg border-t border-gray-200 shadow-sm">
           <ul className="grid grid-cols-3">
             {tabs.map((tab) => {
               const active = isActive(tab.href)
@@ -49,16 +49,16 @@ export function MobileTabBar() {
                 <li key={tab.href}>
                   <Link
                     href={tab.href}
-                    className={`flex flex-col items-center justify-center py-4 gap-1 outline-none transition-colors touch-manipulation ${
-                      active ? 'text-primary-700' : 'text-gray-600 active:text-gray-900'
+                    className={`flex flex-col items-center justify-center py-3 gap-1 outline-none transition-colors touch-manipulation min-h-[60px] ${
+                      active ? 'text-primary-600' : 'text-gray-600 active:text-gray-900'
                     }`}
                     aria-current={active ? 'page' : undefined}
                   >
                     <IconComponent
-                      className={`w-6 h-6 ${active ? 'stroke-primary-600' : 'stroke-gray-500'}`}
-                      strokeWidth={1.8}
+                      className={`w-5 h-5 ${active ? 'stroke-primary-600' : 'stroke-gray-500'}`}
+                      strokeWidth={2}
                     />
-                    <span className={`text-[11px] font-medium ${active ? 'text-primary-700' : 'text-gray-600'}`}>
+                    <span className={`text-xs font-medium ${active ? 'text-primary-600' : 'text-gray-600'}`}>
                       {tab.label}
                     </span>
                   </Link>

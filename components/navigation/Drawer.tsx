@@ -40,30 +40,30 @@ export function Drawer({ open, onClose, title, children }: DrawerProps) {
     >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
+        className="absolute inset-0 bg-black/30 backdrop-blur-[2px] transition-opacity"
         onClick={onClose}
         aria-hidden="true"
       />
 
       {/* Panel */}
       <div
-        className="absolute inset-y-0 left-0 w-80 max-w-[85vw] bg-white shadow-2xl border-r border-gray-200 transform transition-transform duration-300 ease-out"
+        className="absolute inset-y-0 left-0 w-80 max-w-[85vw] bg-white shadow-lg border-r border-gray-200 transform transition-transform duration-200 ease-out"
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       >
-        <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+        <div className="p-4 border-b border-gray-200 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-xl font-bold gradient-text tracking-tight">ASC</span>
-            {title && <span className="text-sm text-gray-500">{title}</span>}
+            {title && <span className="text-sm text-gray-600">{title}</span>}
           </div>
           <button
-            className="p-2 rounded-lg hover:bg-gray-100 active:bg-gray-200 touch-manipulation"
+            className="p-2 rounded-md hover:bg-gray-100 active:bg-gray-200 touch-target transition-colors"
             onClick={onClose}
             aria-label="Menü schließen"
           >
-            <X className="w-6 h-6 stroke-gray-700" strokeWidth={1.8} />
+            <X className="w-5 h-5 stroke-gray-700" strokeWidth={2} />
           </button>
         </div>
-        <div className="p-2 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 80px - env(safe-area-inset-bottom, 0px))' }}>
+        <div className="p-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 80px - env(safe-area-inset-bottom, 0px))' }}>
           {children}
         </div>
       </div>
