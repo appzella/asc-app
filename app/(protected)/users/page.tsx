@@ -132,7 +132,6 @@ export default function UsersPage() {
                           { value: 'admin', label: 'Admin' },
                         ]}
                         className="w-40 text-sm"
-                        size="sm"
                       />
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
