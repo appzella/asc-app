@@ -314,7 +314,25 @@ export default function TourDetailPage() {
               {tour.leader && (
                 <div className="pt-4 border-t">
                   <span className="text-sm font-medium text-gray-700">Tourenleiter:</span>
-                  <p className="text-gray-900">{tour.leader.name}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    {tour.leader.profilePhoto ? (
+                      <Image
+                        src={tour.leader.profilePhoto}
+                        alt={tour.leader.name}
+                        width={20}
+                        height={20}
+                        unoptimized
+                        className="w-5 h-5 rounded-full object-cover border border-gray-200 flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="w-5 h-5 rounded-full bg-primary-100 flex items-center justify-center border border-gray-200 flex-shrink-0">
+                        <span className="text-[10px] font-semibold text-primary-600">
+                          {tour.leader.name.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                    )}
+                    <p className="text-gray-900">{tour.leader.name}</p>
+                  </div>
                 </div>
               )}
             </CardContent>
