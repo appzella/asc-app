@@ -107,7 +107,10 @@ export default function DashboardPage() {
         <Card className="flex flex-col hover:shadow-modern-lg transition-all h-full group">
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
-              <span>Meine Touren</span>
+              <div className="flex items-center gap-2">
+                <ListChecks className="w-5 h-5 text-primary-600" strokeWidth={2} />
+                <span>Meine Touren</span>
+              </div>
               <Link href="/tours?my=true" className="sm:hidden touch-manipulation">
                 <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-primary-600 transition-colors" strokeWidth={1.8} />
               </Link>
@@ -125,7 +128,6 @@ export default function DashboardPage() {
             <div className="mt-auto pt-4">
               <Link href="/tours?my=true" className="hidden sm:block">
                 <Button variant="outline" size="sm" className="w-full shadow-sm">
-                  <ListChecks className="w-4 h-4 mr-2" strokeWidth={2} />
                   Meine Touren öffnen
                 </Button>
               </Link>
@@ -136,7 +138,10 @@ export default function DashboardPage() {
         <Card className="flex flex-col hover:shadow-modern-lg transition-all h-full group">
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
-              <span>Verfügbare Touren</span>
+              <div className="flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-primary-600" strokeWidth={2} />
+                <span>Verfügbare Touren</span>
+              </div>
               <Link href="/tours" className="sm:hidden touch-manipulation">
                 <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-primary-600 transition-colors" strokeWidth={1.8} />
               </Link>
@@ -154,7 +159,6 @@ export default function DashboardPage() {
             <div className="mt-auto pt-4">
               <Link href="/tours" className="hidden sm:block">
                 <Button variant="outline" size="sm" className="w-full shadow-sm">
-                  <Calendar className="w-4 h-4 mr-2" strokeWidth={2} />
                   Alle Touren durchsuchen
                 </Button>
               </Link>
@@ -165,7 +169,10 @@ export default function DashboardPage() {
         <Card className="flex flex-col hover:shadow-modern-lg transition-all h-full group">
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
-              <span>Tourenarchiv</span>
+              <div className="flex items-center gap-2">
+                <Archive className="w-5 h-5 text-primary-600" strokeWidth={2} />
+                <span>Tourenarchiv</span>
+              </div>
               <Link href="/tours/archive" className="sm:hidden touch-manipulation">
                 <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-primary-600 transition-colors" strokeWidth={1.8} />
               </Link>
@@ -183,7 +190,6 @@ export default function DashboardPage() {
             <div className="mt-auto pt-4">
               <Link href="/tours/archive" className="hidden sm:block">
                 <Button variant="outline" size="sm" className="w-full shadow-sm">
-                  <Archive className="w-4 h-4 mr-2" strokeWidth={2} />
                   Archiv öffnen
                 </Button>
               </Link>
@@ -212,7 +218,10 @@ export default function DashboardPage() {
         <Card className="flex flex-col hover:shadow-modern-lg transition-all h-full group">
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
-              <span>Hilfe</span>
+              <div className="flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-primary-600" strokeWidth={2} />
+                <span>Hilfe</span>
+              </div>
               <Link href="/help" className="sm:hidden touch-manipulation">
                 <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-primary-600 transition-colors" strokeWidth={1.8} />
               </Link>
@@ -234,7 +243,6 @@ export default function DashboardPage() {
             <div className="mt-auto pt-4">
               <Link href="/help" className="hidden sm:block">
                 <Button variant="outline" size="sm" className="w-full shadow-sm">
-                  <BookOpen className="w-4 h-4 mr-2" strokeWidth={2} />
                   Hilfe öffnen
                 </Button>
               </Link>
