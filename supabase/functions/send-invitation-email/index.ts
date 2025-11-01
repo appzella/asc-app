@@ -46,7 +46,7 @@ serve(async (req) => {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
       </head>
       <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+        <div style="background: linear-gradient(90deg, #0284c7 0%, #0ea5e9 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
           <h1 style="color: white; margin: 0; font-size: 28px;">ASC Skiclub</h1>
         </div>
         <div style="background: white; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
@@ -65,14 +65,14 @@ serve(async (req) => {
           
           <div style="text-align: center; margin: 30px 0;">
             <a href="${registrationLink}" 
-               style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">
+               style="display: inline-block; background: linear-gradient(90deg, #0284c7 0%, #0ea5e9 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">
               Jetzt registrieren
             </a>
           </div>
           
           <p style="font-size: 14px; color: #6b7280; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
             Falls der Button nicht funktioniert, kopieren Sie diesen Link in Ihren Browser:<br>
-            <a href="${registrationLink}" style="color: #667eea; word-break: break-all;">${registrationLink}</a>
+            <a href="${registrationLink}" style="color: #0284c7; word-break: break-all;">${registrationLink}</a>
           </p>
           
           <p style="font-size: 12px; color: #9ca3af; margin-top: 20px;">
