@@ -345,6 +345,28 @@ class SupabaseAuthService {
       return false
     }
   }
+
+  async changePassword(newPassword: string): Promise<boolean> {
+    if (!isSupabaseConfigured || !supabase) {
+      throw new Error('Supabase not configured')
+    }
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      })
+
+      if (error) {
+        console.error('Password change error:', error)
+        return false
+      }
+
+      return true
+    } catch (error) {
+      console.error('Password change error:', error)
+      return false
+    }
+  }
 }
 
 export const supabaseAuthService = new SupabaseAuthService()

@@ -30,6 +30,15 @@ export default function ProfilePage() {
     city: '',
   })
 
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  })
+  const [showPasswordChange, setShowPasswordChange] = useState(false)
+  const [passwordError, setPasswordError] = useState('')
+  const [passwordSuccess, setPasswordSuccess] = useState('')
+
   useEffect(() => {
     const currentUser = authService.getCurrentUser()
     setUser(currentUser)
@@ -239,6 +248,55 @@ export default function ProfilePage() {
     }
   }
 
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setPasswordError('')
+    setPasswordSuccess('')
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setPasswordError('Die neuen Passwörter stimmen nicht überein')
+      return
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      setPasswordError('Das neue Passwort muss mindestens 6 Zeichen lang sein')
+      return
+    }
+
+    setIsLoading(true)
+
+    try {
+      // Verify current password by trying to login
+      const testLogin = await authService.login(user!.email, passwordData.currentPassword)
+      if (!testLogin) {
+        setPasswordError('Das aktuelle Passwort ist falsch')
+        setIsLoading(false)
+        return
+      }
+
+      // Change password
+      const success = await authService.changePassword(passwordData.newPassword)
+
+      if (success) {
+        setPasswordSuccess('Passwort erfolgreich geändert!')
+        setPasswordData({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: '',
+        })
+        setShowPasswordChange(false)
+        setTimeout(() => setPasswordSuccess(''), 3000)
+      } else {
+        setPasswordError('Fehler beim Ändern des Passworts')
+      }
+    } catch (err) {
+      console.error('Password change error:', err)
+      setPasswordError('Ein Fehler ist aufgetreten')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   if (!user) {
     return <div>Lädt...</div>
   }
@@ -405,6 +463,94 @@ export default function ProfilePage() {
                   </Button>
                 </div>
               </form>
+            </CardContent>
+          </Card>
+
+          {/* Passwort ändern */}
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle>Passwort ändern</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {!showPasswordChange ? (
+                <Button
+                  variant="outline"
+                  onClick={() => setShowPasswordChange(true)}
+                  disabled={isLoading}
+                >
+                  Passwort ändern
+                </Button>
+              ) : (
+                <form onSubmit={handlePasswordChange} className="space-y-4">
+                  <Input
+                    label="Aktuelles Passwort"
+                    type="password"
+                    value={passwordData.currentPassword}
+                    onChange={(e) =>
+                      setPasswordData({ ...passwordData, currentPassword: e.target.value })
+                    }
+                    required
+                    placeholder="Ihr aktuelles Passwort"
+                  />
+                  <Input
+                    label="Neues Passwort"
+                    type="password"
+                    value={passwordData.newPassword}
+                    onChange={(e) =>
+                      setPasswordData({ ...passwordData, newPassword: e.target.value })
+                    }
+                    required
+                    placeholder="Mindestens 6 Zeichen"
+                    minLength={6}
+                  />
+                  <Input
+                    label="Neues Passwort bestätigen"
+                    type="password"
+                    value={passwordData.confirmPassword}
+                    onChange={(e) =>
+                      setPasswordData({ ...passwordData, confirmPassword: e.target.value })
+                    }
+                    required
+                    placeholder="Passwort wiederholen"
+                    minLength={6}
+                  />
+
+                  {passwordError && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                      {passwordError}
+                    </div>
+                  )}
+
+                  {passwordSuccess && (
+                    <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+                      {passwordSuccess}
+                    </div>
+                  )}
+
+                  <div className="flex gap-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setShowPasswordChange(false)
+                        setPasswordData({
+                          currentPassword: '',
+                          newPassword: '',
+                          confirmPassword: '',
+                        })
+                        setPasswordError('')
+                        setPasswordSuccess('')
+                      }}
+                      disabled={isLoading}
+                    >
+                      Abbrechen
+                    </Button>
+                    <Button type="submit" variant="primary" disabled={isLoading}>
+                      {isLoading ? 'Wird gespeichert...' : 'Passwort ändern'}
+                    </Button>
+                  </div>
+                </form>
+              )}
             </CardContent>
           </Card>
         </div>

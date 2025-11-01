@@ -54,6 +54,11 @@ class MockAuthService {
     // Mock implementation - always returns true
     return true
   }
+
+  async changePassword(newPassword: string): Promise<boolean> {
+    // Mock implementation - always returns true
+    return true
+  }
 }
 
 export const mockAuthService = new MockAuthService()

@@ -48,6 +48,10 @@ class AuthService {
   async resetPassword(email: string): Promise<boolean> {
     return this.authImpl.resetPassword(email)
   }
+
+  async changePassword(newPassword: string): Promise<boolean> {
+    return this.authImpl.changePassword(newPassword)
+  }
 }
 
 export const authService = new AuthService()
