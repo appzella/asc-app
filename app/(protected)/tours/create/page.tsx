@@ -94,7 +94,7 @@ export default function CreateTourPage() {
       !formData.elevation ||
       !formData.duration ||
       !formData.maxParticipants ||
-      !formData.leaderId
+      (user.role === 'admin' && !formData.leaderId)
     ) {
       setError('Bitte füllen Sie alle Felder aus')
       return
@@ -103,6 +103,9 @@ export default function CreateTourPage() {
     setIsLoading(true)
 
     try {
+      // For leaders, always use their own ID as leaderId
+      const finalLeaderId = user.role === 'admin' ? formData.leaderId : user.id
+      
       const tour = await dataRepository.createTour({
         title: formData.title,
         description: formData.description,
@@ -113,7 +116,7 @@ export default function CreateTourPage() {
         elevation: parseInt(formData.elevation),
         duration: parseInt(formData.duration),
         maxParticipants: parseInt(formData.maxParticipants),
-        leaderId: formData.leaderId,
+        leaderId: finalLeaderId,
         createdBy: user.id,
       })
 

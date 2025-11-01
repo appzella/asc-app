@@ -306,7 +306,7 @@ export default function TourDetailPage() {
               <CardTitle>Chat</CardTitle>
             </CardHeader>
             <CardContent>
-              <ChatWindow tourId={tourId} userId={user.id} leaderId={tour.leaderId} />
+              <ChatWindow tourId={tourId} userId={user.id} />
             </CardContent>
           </Card>
         </div>
@@ -330,7 +330,7 @@ export default function TourDetailPage() {
             </Card>
           )}
 
-          {/* Admin Actions */}
+          {/* Admin Actions - Tour zur Veröffentlichung eingereicht */}
           {canPublish && tour.status === 'draft' && tour.submittedForPublishing && (
             <Card className="border-yellow-200 bg-yellow-50">
               <CardHeader>
@@ -342,6 +342,20 @@ export default function TourDetailPage() {
                 </Button>
                 <Button variant="outline" onClick={handleUnpublish} className="w-full">
                   Auf Entwurf zurücksetzen
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Admin Actions - Tour im Entwurf (nicht eingereicht) */}
+          {canPublish && tour.status === 'draft' && !tour.submittedForPublishing && (
+            <Card className="border-gray-200 bg-gray-50">
+              <CardHeader>
+                <CardTitle className="text-gray-800">Admin-Aktionen</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Button variant="primary" onClick={handleApprove} className="w-full">
+                  Tour veröffentlichen
                 </Button>
               </CardContent>
             </Card>

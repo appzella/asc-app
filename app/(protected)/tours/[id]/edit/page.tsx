@@ -113,7 +113,7 @@ export default function EditTourPage() {
       !formData.elevation ||
       !formData.duration ||
       !formData.maxParticipants ||
-      !formData.leaderId
+      (user.role === 'admin' && !formData.leaderId)
     ) {
       setError('Bitte füllen Sie alle Felder aus')
       return
@@ -122,6 +122,9 @@ export default function EditTourPage() {
     setIsLoading(true)
 
     try {
+      // For leaders, always use their own ID as leaderId (cannot be changed)
+      const finalLeaderId = user.role === 'admin' ? formData.leaderId : user.id
+      
       const updates = {
         title: formData.title,
         description: formData.description,
@@ -132,7 +135,7 @@ export default function EditTourPage() {
         elevation: parseInt(formData.elevation),
         duration: parseInt(formData.duration),
         maxParticipants: parseInt(formData.maxParticipants),
-        leaderId: formData.leaderId,
+        leaderId: finalLeaderId,
       }
 
       // Wenn Tour bereits approved ist, werden Änderungen als pendingChanges gespeichert
