@@ -9,7 +9,7 @@ import { canManageUsers } from '@/lib/roles'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 import { SettingsIcon } from '@/components/ui/SettingsIcon'
-import { Users, Mail } from 'lucide-react'
+import { Users, Mail, ChevronRight } from 'lucide-react'
 
 export default function SettingsPage() {
   const router = useRouter()
@@ -94,7 +94,7 @@ export default function SettingsPage() {
             <Link key={category.href} href={category.href} className="touch-manipulation">
               <Card className="hover:shadow-modern-lg active:shadow-modern transition-all cursor-pointer h-full group">
                 <CardContent className="p-4">
-                  <div className="flex items-start gap-4">
+                  <div className="flex items-center gap-4">
                     <div className="flex-shrink-0">
                       {isCustomIcon && IconComponent ? (
                         <IconComponent className="w-10 h-10 stroke-gray-600 group-hover:stroke-primary-600 transition-colors" strokeWidth={1.8} />
@@ -102,18 +102,16 @@ export default function SettingsPage() {
                         <SettingsIcon type={category.iconType as 'tour-types' | 'tour-lengths' | 'difficulties'} className="w-10 h-10 group-hover:stroke-primary-600 transition-colors" />
                       )}
                     </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-primary-600 transition-colors">
-                      {category.title}
-                    </h3>
-                    <p className="text-gray-600 text-sm mb-3 line-clamp-2">{category.description}</p>
-                    <Button variant="outline" size="sm" className="w-full">
-                      Verwalten →
-                    </Button>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-primary-600 transition-colors">
+                        {category.title}
+                      </h3>
+                      <p className="text-gray-600 text-sm line-clamp-2">{category.description}</p>
+                    </div>
+                    <ChevronRight className="w-7 h-7 text-gray-400 group-hover:text-primary-600 transition-colors flex-shrink-0" strokeWidth={1.8} />
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
           </Link>
         )
         })}

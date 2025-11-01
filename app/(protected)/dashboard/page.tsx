@@ -7,7 +7,7 @@ import { User, Tour } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
-import { HelpCircle } from 'lucide-react'
+import { HelpCircle, ChevronRight } from 'lucide-react'
 
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null)
@@ -104,50 +104,50 @@ export default function DashboardPage() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="flex flex-col">
-          <CardHeader>
-            <CardTitle>Meine Touren</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col flex-1">
-            <div className="text-3xl font-bold text-primary-600">{myTours.length}</div>
-            <p className="text-sm text-gray-600 mt-2">Angemeldete oder geleitete Touren</p>
-            <Link href="/tours?my=true" className="mt-auto pt-4">
-              <Button variant="outline" size="sm" className="w-full">
-                Anzeigen
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
+        <Link href="/tours?my=true" className="touch-manipulation">
+          <Card className="flex flex-col hover:shadow-modern-lg transition-all h-full group">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                Meine Touren
+                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-primary-600 transition-colors" strokeWidth={1.8} />
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col flex-1">
+              <div className="text-3xl font-bold text-primary-600">{myTours.length}</div>
+              <p className="text-sm text-gray-600 mt-2">Angemeldete oder geleitete Touren</p>
+            </CardContent>
+          </Card>
+        </Link>
 
-        <Card className="flex flex-col">
-          <CardHeader>
-            <CardTitle>Verfügbare Touren</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col flex-1">
-            <div className="text-3xl font-bold text-primary-600">{tours.length}</div>
-            <p className="text-sm text-gray-600 mt-2">Freigegebene Touren</p>
-            <Link href="/tours" className="mt-auto pt-4">
-              <Button variant="outline" size="sm" className="w-full">
-                Anzeigen
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
+        <Link href="/tours" className="touch-manipulation">
+          <Card className="flex flex-col hover:shadow-modern-lg transition-all h-full group">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                Verfügbare Touren
+                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-primary-600 transition-colors" strokeWidth={1.8} />
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col flex-1">
+              <div className="text-3xl font-bold text-primary-600">{tours.length}</div>
+              <p className="text-sm text-gray-600 mt-2">Freigegebene Touren</p>
+            </CardContent>
+          </Card>
+        </Link>
 
-        <Card className="flex flex-col">
-          <CardHeader>
-            <CardTitle>Tourenarchiv</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col flex-1">
-            <div className="text-3xl font-bold text-primary-600">{archivedTours.length}</div>
-            <p className="text-sm text-gray-600 mt-2">Vergangene Touren</p>
-            <Link href="/tours/archive" className="mt-auto pt-4">
-              <Button variant="outline" size="sm" className="w-full">
-                Archiv öffnen
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
+        <Link href="/tours/archive" className="touch-manipulation">
+          <Card className="flex flex-col hover:shadow-modern-lg transition-all h-full group">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                Tourenarchiv
+                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-primary-600 transition-colors" strokeWidth={1.8} />
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col flex-1">
+              <div className="text-3xl font-bold text-primary-600">{archivedTours.length}</div>
+              <p className="text-sm text-gray-600 mt-2">Vergangene Touren</p>
+            </CardContent>
+          </Card>
+        </Link>
 
         {(user.role === 'admin' || user.role === 'leader') && (
           <Card className="flex flex-col">
@@ -167,22 +167,22 @@ export default function DashboardPage() {
           </Card>
         )}
 
-        <Card className="flex flex-col">
-          <CardHeader>
-            <CardTitle>Hilfe</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col flex-1">
-            <div className="flex-1 flex items-center justify-center mb-4">
-              <HelpCircle className="w-12 h-12 text-primary-600" strokeWidth={1.5} />
-            </div>
-            <p className="text-sm text-gray-600 text-center mb-4">Benötigen Sie Hilfe bei der Nutzung der App?</p>
-            <Link href="/help" className="mt-auto">
-              <Button variant="outline" size="sm" className="w-full">
-                Hilfe-Seite öffnen
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
+        <Link href="/help" className="touch-manipulation">
+          <Card className="flex flex-col hover:shadow-modern-lg transition-all h-full group">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                Hilfe
+                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-primary-600 transition-colors" strokeWidth={1.8} />
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col flex-1">
+              <div className="flex-1 flex items-center justify-center mb-4">
+                <HelpCircle className="w-12 h-12 text-primary-600" strokeWidth={1.5} />
+              </div>
+              <p className="text-sm text-gray-600 text-center">Benötigen Sie Hilfe bei der Nutzung der App?</p>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
     </div>
   )

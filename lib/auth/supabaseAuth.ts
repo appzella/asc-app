@@ -46,12 +46,22 @@ class SupabaseAuthService {
 
     this.initializationPromise = (async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession()
+        const { data: { session }, error } = await supabase.auth.getSession()
+        if (error) {
+          // Don't log 400 errors for invalid sessions - this is expected when user is logged out
+          if (error.status !== 400 && error.message !== 'Invalid Refresh Token') {
+            console.error('Error initializing session:', error)
+          }
+          return
+        }
         if (session?.user) {
           await this.loadUserProfile(session.user.id)
         }
-      } catch (error) {
-        console.error('Error initializing session:', error)
+      } catch (error: any) {
+        // Don't log expected errors (invalid tokens, etc.)
+        if (error?.status !== 400 && error?.message?.includes('Invalid') === false) {
+          console.error('Error initializing session:', error)
+        }
       } finally {
         this.isInitializing = false
       }
@@ -167,7 +177,16 @@ class SupabaseAuthService {
         password,
       })
 
-      if (error || !data.user) {
+      if (error) {
+        // Don't log 400 errors for invalid credentials - these are expected
+        // Only log unexpected errors
+        if (error.status !== 400) {
+          console.error('Login error:', error)
+        }
+        return null
+      }
+
+      if (!data.user) {
         return null
       }
 
@@ -176,8 +195,11 @@ class SupabaseAuthService {
       const user = await this.loadUserProfile(data.user.id)
 
       return user
-    } catch (error) {
-      console.error('Login error:', error)
+    } catch (error: any) {
+      // Don't log expected errors (400 Bad Request for invalid credentials)
+      if (error?.status !== 400 && error?.response?.status !== 400) {
+        console.error('Login error:', error)
+      }
       return null
     }
   }
@@ -216,13 +238,23 @@ class SupabaseAuthService {
 
     try {
       // Try to get session and load profile if we don't have a user yet
-      const { data: { session } } = await supabase.auth.getSession()
+      const { data: { session }, error } = await supabase.auth.getSession()
+      if (error) {
+        // Don't log expected errors (invalid tokens, etc.)
+        if (error.status !== 400 && error.message !== 'Invalid Refresh Token') {
+          console.error('Error getting current user:', error)
+        }
+        return null
+      }
       if (session?.user) {
         await this.loadUserProfile(session.user.id)
         return this.currentUser
       }
-    } catch (error) {
-      console.error('Error getting current user:', error)
+    } catch (error: any) {
+      // Don't log expected errors
+      if (error?.status !== 400 && error?.message?.includes('Invalid') === false) {
+        console.error('Error getting current user:', error)
+      }
     }
 
     return null

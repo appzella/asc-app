@@ -7,7 +7,7 @@ import { User } from '@/lib/types'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 import { MobileTabBar } from '@/components/navigation/MobileTabBar'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Settings } from 'lucide-react'
 import Image from 'next/image'
 import { UserRole } from '@/lib/types'
 
@@ -227,6 +227,27 @@ export default function ProtectedLayout({
               </div>
             </div>
             <div className="flex items-center space-x-3">
+              {/* Settings Icon für Mobile (nur Admin) */}
+              {user.role === 'admin' && (
+                <Link
+                  href="/settings"
+                  className={`sm:hidden flex items-center justify-center w-10 h-10 rounded-lg transition-colors touch-manipulation ${
+                    pathname === '/settings' || pathname?.startsWith('/settings/')
+                      ? 'bg-primary-50'
+                      : 'bg-gray-50/50 hover:bg-gray-100/50'
+                  }`}
+                  aria-label="Einstellungen"
+                >
+                  <Settings 
+                    className={`w-5 h-5 ${
+                      pathname === '/settings' || pathname?.startsWith('/settings/')
+                        ? 'text-primary-600'
+                        : 'text-gray-700'
+                    }`} 
+                    strokeWidth={1.8} 
+                  />
+                </Link>
+              )}
               <Link href="/profile" className="hidden sm:flex items-center space-x-3 px-4 py-2 rounded-lg bg-gray-50/50 hover:bg-gray-100/50 transition-colors">
                 {user.profilePhoto ? (
                   <Image 

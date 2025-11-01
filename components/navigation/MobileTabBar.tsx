@@ -3,8 +3,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, List, User, Settings } from 'lucide-react'
-import { authService } from '@/lib/auth'
+import { Home, List, User } from 'lucide-react'
 
 interface TabItem {
   href: string
@@ -14,34 +13,16 @@ interface TabItem {
 
 export function MobileTabBar() {
   const pathname = usePathname()
-  const [user, setUser] = React.useState<any>(null)
-
-  React.useEffect(() => {
-    const currentUser = authService.getCurrentUser()
-    setUser(currentUser)
-
-    const unsubscribe = authService.subscribe((updatedUser) => {
-      setUser(updatedUser)
-    })
-
-    return () => {
-      unsubscribe()
-    }
-  }, [])
 
   const tabs: TabItem[] = [
     { href: '/dashboard', label: 'Dashboard', icon: Home },
     { href: '/tours', label: 'Touren', icon: List },
     { href: '/profile', label: 'Profil', icon: User },
-    ...(user?.role === 'admin' ? [{ href: '/settings', label: 'Einstellungen', icon: Settings }] : []),
   ]
 
   const isActive = (href: string) => {
     if (href === '/tours') {
       return pathname === '/tours' || pathname?.startsWith('/tours/')
-    }
-    if (href === '/settings') {
-      return pathname === '/settings' || pathname?.startsWith('/settings/')
     }
     return pathname === href
   }
@@ -58,9 +39,9 @@ export function MobileTabBar() {
       }}
       aria-label="Mobile Tab Bar"
     >
-      <div className="mx-auto max-w-7xl px-4">
+      <div className="w-full">
         <div className="glass rounded-t-xl border-t border-gray-200/70 shadow-modern backdrop-blur-xl bg-white/70">
-          <ul className={`grid ${tabs.length === 4 ? 'grid-cols-4' : 'grid-cols-3'}`}>
+          <ul className="grid grid-cols-3">
             {tabs.map((tab) => {
               const active = isActive(tab.href)
               const IconComponent = tab.icon
@@ -68,7 +49,7 @@ export function MobileTabBar() {
                 <li key={tab.href}>
                   <Link
                     href={tab.href}
-                    className={`flex flex-col items-center justify-center py-2.5 gap-1 outline-none transition-colors touch-manipulation ${
+                    className={`flex flex-col items-center justify-center py-4 gap-1 outline-none transition-colors touch-manipulation ${
                       active ? 'text-primary-700' : 'text-gray-600 active:text-gray-900'
                     }`}
                     aria-current={active ? 'page' : undefined}
