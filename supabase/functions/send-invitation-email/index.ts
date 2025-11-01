@@ -108,9 +108,15 @@ Alpine Skiclub St. Gallen
 Diese E-Mail wurde automatisch generiert. Bitte antworten Sie nicht auf diese E-Mail.
     `.trim()
 
+    // Determine sender email based on domain verification status
+    // For testing: Use Resend's default domain (onboarding@resend.dev)
+    // For production: Use your verified domain (noreply@asc-skiclub.ch)
+    const senderEmail = Deno.env.get('RESEND_FROM_EMAIL') || 'onboarding@resend.dev'
+    const senderName = Deno.env.get('RESEND_FROM_NAME') || 'ASC Skiclub'
+    
     // Send email via Resend
     const { data, error } = await resend.emails.send({
-      from: 'ASC Skiclub <noreply@asc-skiclub.ch>', // TODO: Update with your verified domain
+      from: `${senderName} <${senderEmail}>`,
       to: email,
       subject: 'Einladung zum ASC Skitouren App',
       html: emailHtml,
