@@ -214,11 +214,21 @@ export default function TourDetailPage() {
   }
 
   if (isLoading) {
-    return <div>Lädt...</div>
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-gray-600">Lädt...</div>
+      </div>
+    )
   }
 
   if (!tour || !user) {
-    return <div>Tour nicht gefunden</div>
+    return (
+      <Card>
+        <CardContent className="text-center py-12">
+          <p className="text-gray-600 text-base">Tour nicht gefunden</p>
+        </CardContent>
+      </Card>
+    )
   }
 
   const formatDate = (date: Date) => {
@@ -246,42 +256,43 @@ export default function TourDetailPage() {
   const canRegister = tour.status === 'published' && !isRegistered && !isFull && !isLeader && !isArchived
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-start">
-        <div>
-          <div className="flex items-center gap-3 mb-4">
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex-1">
+          <div className="flex items-center gap-3 mb-3">
             <Link 
               href="/tours" 
-              className="hidden sm:inline-block text-primary-600 hover:text-primary-700 text-sm mb-2"
+              className="hidden sm:inline-flex items-center gap-1 text-primary-600 hover:text-primary-700 text-sm transition-colors"
             >
-              ← Zurück zur Übersicht
+              <ChevronLeft className="w-4 h-4" strokeWidth={2} />
+              Zurück zur Übersicht
             </Link>
             <Link 
               href="/tours"
-              className="sm:hidden flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200 touch-manipulation bg-primary-100 hover:bg-primary-200 transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 shadow-sm"
+              className="sm:hidden flex items-center justify-center w-10 h-10 rounded-md transition-colors touch-target bg-gray-50 hover:bg-gray-100"
               aria-label="Zurück zur Übersicht"
             >
-              <ChevronLeft className="w-5 h-5 text-primary-700" strokeWidth={1.8} />
+              <ChevronLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
             </Link>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {(() => {
               const IconComponent = getTourIcon(tour.tourType, settings?.tourTypeIcons)
               const iconColor = getTourIconColor(tour.tourType)
-              return <IconComponent className={`w-8 h-8 ${iconColor} flex-shrink-0`} strokeWidth={2} />
+              return <IconComponent className={`w-6 h-6 ${iconColor} flex-shrink-0`} strokeWidth={2} />
             })()}
-            <h1 className="text-3xl font-bold text-gray-900">{tour.title}</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{tour.title}</h1>
           </div>
         </div>
         {canEdit && (
           <Link href={`/tours/${tourId}/edit`}>
-            <Button variant="outline">Tour bearbeiten</Button>
+            <Button variant="outline" size="sm">Tour bearbeiten</Button>
           </Link>
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2 space-y-4">
           {/* Tour Details */}
           <Card>
             <CardHeader>
@@ -289,67 +300,67 @@ export default function TourDetailPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h3 className="font-semibold text-gray-700 mb-2">Beschreibung</h3>
-                <p className="text-gray-600 whitespace-pre-wrap">{tour.description}</p>
+                <h3 className="font-semibold text-gray-900 mb-2 text-sm">Beschreibung</h3>
+                <p className="text-gray-600 whitespace-pre-wrap text-sm leading-relaxed">{tour.description}</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200">
                 <div>
-                  <span className="text-sm font-medium text-gray-700">Datum:</span>
-                  <p className="text-gray-900">{formatDate(tour.date)}</p>
+                  <span className="text-xs font-medium text-gray-600 block mb-1">Datum:</span>
+                  <p className="text-gray-900 text-sm">{formatDate(tour.date)}</p>
                 </div>
                 <div>
-                  <span className="text-sm font-medium text-gray-700">Dauer:</span>
-                  <p className="text-gray-900">{tour.duration} Stunden</p>
+                  <span className="text-xs font-medium text-gray-600 block mb-1">Dauer:</span>
+                  <p className="text-gray-900 text-sm">{tour.duration} Stunden</p>
                 </div>
                 <div>
-                  <span className="text-sm font-medium text-gray-700">Höhenmeter:</span>
-                  <p className="text-gray-900">{tour.elevation} m</p>
+                  <span className="text-xs font-medium text-gray-600 block mb-1">Höhenmeter:</span>
+                  <p className="text-gray-900 text-sm">{tour.elevation} m</p>
                 </div>
                 <div>
-                  <span className="text-sm font-medium text-gray-700">Teilnehmer:</span>
-                  <p className="text-gray-900">
+                  <span className="text-xs font-medium text-gray-600 block mb-1">Teilnehmer:</span>
+                  <p className="text-gray-900 text-sm">
                     {tour.participants.length} / {tour.maxParticipants}
                   </p>
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2 pt-4 border-t">
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+              <div className="flex flex-wrap gap-2 pt-4 border-t border-gray-200">
+                <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
                   {tour.tourType}
                 </span>
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
                   {tour.tourLength}
                 </span>
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
                   {formatDifficulty(tour.difficulty, tour.tourType)}
                 </span>
                 {tour.status === 'draft' && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                  <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
                     Entwurf
                   </span>
                 )}
                 {tour.status === 'published' && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                  <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
                     Veröffentlicht
                   </span>
                 )}
                 {tour.status === 'draft' && tour.submittedForPublishing && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                  <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-yellow-50 text-yellow-700 border border-yellow-200">
                     Zur Veröffentlichung eingereicht
                   </span>
                 )}
                 {tour.status === 'cancelled' && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                  <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-red-50 text-red-700 border border-red-200">
                     Abgesagt
                   </span>
                 )}
               </div>
 
               {tour.leader && (
-                <div className="pt-4 border-t">
-                  <span className="text-sm font-medium text-gray-700">Tourenleiter:</span>
-                  <div className="flex items-center gap-2 mt-1">
+                <div className="pt-4 border-t border-gray-200">
+                  <span className="text-xs font-medium text-gray-600 block mb-2">Tourenleiter:</span>
+                  <div className="flex items-center gap-2">
                     {tour.leader.profilePhoto ? (
                       <Image
                         src={tour.leader.profilePhoto}
@@ -357,16 +368,16 @@ export default function TourDetailPage() {
                         width={32}
                         height={32}
                         unoptimized
-                        className="w-8 h-8 rounded-full object-cover border-2 border-gray-200 flex-shrink-0"
+                        className="w-8 h-8 rounded-full object-cover border border-gray-300 flex-shrink-0"
                       />
                     ) : (
-                      <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center border-2 border-gray-200 flex-shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center border border-gray-300 flex-shrink-0">
                         <span className="text-xs font-semibold text-primary-600">
                           {tour.leader.name.charAt(0).toUpperCase()}
                         </span>
                       </div>
                     )}
-                    <p className="text-gray-900">{tour.leader.name}</p>
+                    <p className="text-gray-900 text-sm font-medium">{tour.leader.name}</p>
                   </div>
                 </div>
               )}
@@ -387,18 +398,18 @@ export default function TourDetailPage() {
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Leader Actions */}
           {canSubmit && tour.status === 'draft' && !tour.submittedForPublishing && (
-            <Card className="border-blue-200 bg-blue-50">
+            <Card className="border-blue-300 bg-blue-50/50">
               <CardHeader>
-                <CardTitle className="text-blue-800">Tour einreichen</CardTitle>
+                <CardTitle className="text-blue-800 text-base">Tour einreichen</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-primary-600 opacity-90 mb-4">
+                <p className="text-xs text-gray-600 mb-4">
                   Reichen Sie diese Tour zur Veröffentlichung ein. Ein Admin wird sie prüfen und veröffentlichen.
                 </p>
-                <Button variant="primary" onClick={handleSubmitForPublishing} className="w-full">
+                <Button variant="primary" onClick={handleSubmitForPublishing} className="w-full" size="sm">
                   Zur Veröffentlichung einreichen
                 </Button>
               </CardContent>
@@ -407,16 +418,16 @@ export default function TourDetailPage() {
 
           {/* Admin Actions - Tour zur Veröffentlichung eingereicht */}
           {canPublish && tour.status === 'draft' && tour.submittedForPublishing && (
-            <Card className="border-yellow-200 bg-yellow-50">
+            <Card className="border-yellow-300 bg-yellow-50/50">
               <CardHeader>
-                <CardTitle className="text-yellow-800">Veröffentlichung</CardTitle>
+                <CardTitle className="text-yellow-800 text-base">Veröffentlichung</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Button variant="primary" onClick={handleApprove} className="w-full" disabled={isArchived}>
+                <Button variant="primary" onClick={handleApprove} className="w-full" size="sm" disabled={isArchived}>
                   Tour veröffentlichen
                 </Button>
                 {!isArchived && (
-                  <Button variant="outline" onClick={handleUnpublish} className="w-full">
+                  <Button variant="outline" onClick={handleUnpublish} className="w-full" size="sm">
                     Auf Entwurf zurücksetzen
                   </Button>
                 )}
@@ -426,16 +437,16 @@ export default function TourDetailPage() {
 
           {/* Admin Actions - Tour im Entwurf (nicht eingereicht) */}
           {canPublish && tour.status === 'draft' && !tour.submittedForPublishing && (
-            <Card className="border-gray-200 bg-gray-50">
+            <Card className="border-gray-300 bg-gray-50/50">
               <CardHeader>
-                <CardTitle className="text-gray-800">Admin-Aktionen</CardTitle>
+                <CardTitle className="text-gray-800 text-base">Admin-Aktionen</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Button variant="primary" onClick={handleApprove} className="w-full" disabled={isArchived}>
+                <Button variant="primary" onClick={handleApprove} className="w-full" size="sm" disabled={isArchived}>
                   Tour veröffentlichen
                 </Button>
                 {isArchived && (
-                  <p className="text-sm text-gray-600 mt-2">
+                  <p className="text-xs text-gray-600 mt-2">
                     Archivierte Touren können nicht mehr veröffentlicht werden.
                   </p>
                 )}
@@ -444,22 +455,22 @@ export default function TourDetailPage() {
           )}
 
           {canPublish && tour.status === 'published' && (
-            <Card className="border-green-200 bg-green-50">
+            <Card className="border-gray-300 bg-gray-50/50">
               <CardHeader>
-                <CardTitle className="text-green-800">Verwaltung</CardTitle>
+                <CardTitle className="text-gray-800 text-base">Verwaltung</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 {!isArchived && (
                   <>
-                    <Button variant="outline" onClick={handleCancel} className="w-full">
+                    <Button variant="outline" onClick={handleCancel} className="w-full" size="sm">
                       Tour absagen
                     </Button>
-                    <Button variant="outline" onClick={handleUnpublish} className="w-full">
+                    <Button variant="outline" onClick={handleUnpublish} className="w-full" size="sm">
                       Auf Entwurf setzen
                     </Button>
                   </>
                 )}
-                <Button variant="danger" onClick={handleDelete} className="w-full">
+                <Button variant="danger" onClick={handleDelete} className="w-full" size="sm">
                   Tour löschen
                 </Button>
               </CardContent>
@@ -467,22 +478,22 @@ export default function TourDetailPage() {
           )}
 
           {canPublish && tour.status === 'cancelled' && (
-            <Card className="border-red-200 bg-red-50">
+            <Card className="border-red-300 bg-red-50/50">
               <CardHeader>
-                <CardTitle className="text-red-800">Verwaltung</CardTitle>
+                <CardTitle className="text-red-800 text-base">Verwaltung</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 {!isArchived && (
                   <>
-                    <Button variant="primary" onClick={handleApprove} className="w-full">
+                    <Button variant="primary" onClick={handleApprove} className="w-full" size="sm">
                       Tour wieder aktivieren
                     </Button>
-                    <Button variant="outline" onClick={handleUnpublish} className="w-full">
+                    <Button variant="outline" onClick={handleUnpublish} className="w-full" size="sm">
                       Auf Entwurf setzen
                     </Button>
                   </>
                 )}
-                <Button variant="danger" onClick={handleDelete} className="w-full">
+                <Button variant="danger" onClick={handleDelete} className="w-full" size="sm">
                   Tour löschen
                 </Button>
               </CardContent>
@@ -497,7 +508,7 @@ export default function TourDetailPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <p className="text-sm text-gray-600 mb-2">
+                  <p className="text-xs text-gray-600 mb-2">
                     {tour.participants.length} von {tour.maxParticipants} Plätzen belegt
                   </p>
                   <div className="w-full bg-gray-200 rounded-full h-2">
@@ -512,17 +523,17 @@ export default function TourDetailPage() {
 
                 {isRegistered ? (
                   <div className="space-y-2">
-                    <p className="text-sm text-green-600 font-medium">Sie sind angemeldet</p>
-                    <Button variant="danger" onClick={handleUnregister} className="w-full">
+                    <p className="text-xs text-green-600 font-medium">Sie sind angemeldet</p>
+                    <Button variant="danger" onClick={handleUnregister} className="w-full" size="sm">
                       Abmelden
                     </Button>
                   </div>
                 ) : (
                   <div className="space-y-2">
                     {isFull ? (
-                      <p className="text-sm text-red-600 font-medium">Tour ist ausgebucht</p>
+                      <p className="text-xs text-red-600 font-medium">Tour ist ausgebucht</p>
                     ) : !canRegister ? (
-                      <p className="text-sm text-gray-600 font-medium">
+                      <p className="text-xs text-gray-600 font-medium">
                         {isLeader 
                           ? 'Sie sind der Tourenleiter' 
                           : isArchived 
@@ -534,6 +545,7 @@ export default function TourDetailPage() {
                         variant="primary"
                         onClick={handleRegister}
                         className="w-full"
+                        size="sm"
                       >
                         Anmelden
                       </Button>
@@ -551,9 +563,9 @@ export default function TourDetailPage() {
                 <CardTitle>Teilnehmer ({participants.length})</CardTitle>
               </CardHeader>
               <CardContent>
-                <ul className="space-y-2">
+                <ul className="space-y-3">
                   {participants.map((participant) => (
-                    <li key={participant.id} className="flex items-center gap-3 text-sm text-gray-700">
+                    <li key={participant.id} className="flex items-center gap-3">
                       {participant.profilePhoto ? (
                         <Image
                           src={participant.profilePhoto}
@@ -561,16 +573,16 @@ export default function TourDetailPage() {
                           width={32}
                           height={32}
                           unoptimized
-                          className="w-8 h-8 rounded-full object-cover border-2 border-gray-200 flex-shrink-0"
+                          className="w-8 h-8 rounded-full object-cover border border-gray-300 flex-shrink-0"
                         />
                       ) : (
-                        <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center border-2 border-gray-200 flex-shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center border border-gray-300 flex-shrink-0">
                           <span className="text-xs font-semibold text-primary-600">
                             {participant.name.charAt(0).toUpperCase()}
                           </span>
                         </div>
                       )}
-                      <span className="font-medium">{participant.name}</span>
+                      <span className="text-sm font-medium text-gray-900">{participant.name}</span>
                     </li>
                   ))}
                 </ul>
@@ -582,7 +594,7 @@ export default function TourDetailPage() {
 
       {/* Reject Modal */}
       {showRejectModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-[2px] flex items-center justify-center z-50 p-4">
           <Card className="max-w-md w-full">
             <CardHeader>
               <CardTitle>Tour ablehnen</CardTitle>
@@ -603,6 +615,7 @@ export default function TourDetailPage() {
                   variant="danger"
                   onClick={handleConfirmReject}
                   className="flex-1"
+                  size="sm"
                 >
                   Ablehnen
                 </Button>
@@ -613,6 +626,7 @@ export default function TourDetailPage() {
                     setRejectionComment('')
                   }}
                   className="flex-1"
+                  size="sm"
                 >
                   Abbrechen
                 </Button>

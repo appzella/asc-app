@@ -305,7 +305,11 @@ export default function ProfilePage() {
   }
 
   if (!user) {
-    return <div>Lädt...</div>
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-gray-600">Lädt...</div>
+      </div>
+    )
   }
 
   return (
@@ -319,13 +323,18 @@ export default function ProfilePage() {
           cropShape="round"
         />
       )}
-      <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
-        <div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Profil</h1>
-          <p className="text-lg text-gray-600">Verwalten Sie Ihre persönlichen Informationen</p>
+      <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Profil</h1>
+            <p className="text-base text-gray-600">Verwalten Sie Ihre persönlichen Informationen</p>
+          </div>
+          <Button variant="outline" size="sm" onClick={handleLogout}>
+            Abmelden
+          </Button>
         </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Profilfoto */}
         <Card>
           <CardHeader>
@@ -340,16 +349,16 @@ export default function ProfilePage() {
                   width={128}
                   height={128}
                   unoptimized
-                  className="w-32 h-32 rounded-full object-cover border-4 border-gray-200 shadow-modern mb-4"
+                  className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-2 border-gray-300 mb-4"
                 />
               ) : (
-                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center border-4 border-gray-200 shadow-modern mb-4">
-                  <span className="text-4xl font-bold text-white">
+                <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center border-2 border-gray-300 mb-4">
+                  <span className="text-2xl md:text-4xl font-bold text-white">
                     {user.name.charAt(0).toUpperCase()}
                   </span>
                 </div>
               )}
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2 w-full">
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -362,6 +371,7 @@ export default function ProfilePage() {
                   size="sm"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isLoading}
+                  className="flex-1"
                 >
                   {user.profilePhoto ? 'Ändern' : 'Hochladen'}
                 </Button>
@@ -371,6 +381,7 @@ export default function ProfilePage() {
                     size="sm"
                     onClick={handleRemovePhoto}
                     disabled={isLoading}
+                    className="flex-1"
                   >
                     Entfernen
                   </Button>
@@ -384,14 +395,14 @@ export default function ProfilePage() {
         </Card>
 
         {/* Persönliche Informationen */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Persönliche Informationen</CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Input
                     label="Name"
                     value={formData.name}
@@ -409,7 +420,7 @@ export default function ProfilePage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Input
                     label="Telefon (Festnetz)"
                     type="tel"
@@ -427,8 +438,8 @@ export default function ProfilePage() {
                   />
                 </div>
 
-                <div className="space-y-4">
-                  <h3 className="text-sm font-semibold text-gray-700">Adresse</h3>
+                <div className="space-y-4 pt-2 border-t border-gray-200">
+                  <h3 className="text-sm font-semibold text-gray-900">Adresse</h3>
                   <Input
                     label="Strasse"
                     value={formData.street}
@@ -453,19 +464,19 @@ export default function ProfilePage() {
                 </div>
 
                 {error && (
-                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
                     {error}
                   </div>
                 )}
 
                 {success && (
-                  <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+                  <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md text-sm">
                     {success}
                   </div>
                 )}
 
-                <div className="flex gap-4 pt-4">
-                  <Button type="submit" variant="primary" disabled={isLoading} className="flex-1">
+                <div className="pt-2">
+                  <Button type="submit" variant="primary" disabled={isLoading} className="w-full">
                     {isLoading ? 'Wird gespeichert...' : 'Änderungen speichern'}
                   </Button>
                 </div>
@@ -474,7 +485,7 @@ export default function ProfilePage() {
           </Card>
 
           {/* Passwort ändern */}
-          <Card className="mt-8">
+          <Card>
             <CardHeader>
               <CardTitle>Passwort ändern</CardTitle>
             </CardHeader>
@@ -484,6 +495,7 @@ export default function ProfilePage() {
                   variant="outline"
                   onClick={() => setShowPasswordChange(true)}
                   disabled={isLoading}
+                  className="w-full"
                 >
                   Passwort ändern
                 </Button>
@@ -523,18 +535,18 @@ export default function ProfilePage() {
                   />
 
                   {passwordError && (
-                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
                       {passwordError}
                     </div>
                   )}
 
                   {passwordSuccess && (
-                    <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+                    <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md text-sm">
                       {passwordSuccess}
                     </div>
                   )}
 
-                  <div className="flex gap-3">
+                  <div className="flex flex-col sm:flex-row gap-2 pt-2">
                     <Button
                       type="button"
                       variant="outline"
@@ -549,28 +561,16 @@ export default function ProfilePage() {
                         setPasswordSuccess('')
                       }}
                       disabled={isLoading}
+                      className="flex-1"
                     >
                       Abbrechen
                     </Button>
-                    <Button type="submit" variant="primary" disabled={isLoading}>
+                    <Button type="submit" variant="primary" disabled={isLoading} className="flex-1">
                       {isLoading ? 'Wird gespeichert...' : 'Passwort ändern'}
                     </Button>
                   </div>
                 </form>
               )}
-            </CardContent>
-          </Card>
-
-          {/* Abmelden */}
-          <Card className="mt-8">
-            <CardContent className="pt-6">
-              <Button
-                variant="danger"
-                onClick={handleLogout}
-                className="w-full"
-              >
-                Abmelden
-              </Button>
             </CardContent>
           </Card>
         </div>

@@ -270,9 +270,6 @@ export default function ProtectedLayout({
                   {getRoleLabel(user.role)}
                 </span>
               </Link>
-              <Button variant="outline" size="sm" onClick={handleLogout} className="shadow-sm hidden sm:flex">
-                Abmelden
-              </Button>
             </div>
           </div>
         </div>
