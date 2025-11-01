@@ -167,23 +167,15 @@ export default function EditTourPage() {
       </div>
 
       {hasPendingChanges && (
-        <Card className="border-yellow-200 bg-yellow-50">
-          <CardContent className="pt-6">
-            <p className="text-yellow-800">
-              Diese Tour hat bereits ausstehende Änderungen, die auf Freigabe warten.
-            </p>
-          </CardContent>
-        </Card>
+        <p className="text-primary-600 opacity-90 text-sm mb-4">
+          Diese Tour hat bereits ausstehende Änderungen, die auf Freigabe warten.
+        </p>
       )}
 
       {tour.status === 'published' && (
-        <Card className="border-blue-200 bg-blue-50">
-          <CardContent className="pt-6">
-            <p className="text-blue-800">
-              Diese Tour ist bereits veröffentlicht. Ihre Änderungen sind sofort sichtbar.
-            </p>
-          </CardContent>
-        </Card>
+        <p className="text-primary-600 opacity-90 text-sm mb-4">
+          Diese Tour ist bereits veröffentlicht. Ihre Änderungen sind sofort sichtbar.
+        </p>
       )}
 
       <Card>

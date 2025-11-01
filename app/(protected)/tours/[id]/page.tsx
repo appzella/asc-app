@@ -453,12 +453,15 @@ export default function TourDetailPage() {
                   <div className="space-y-2">
                     {isFull ? (
                       <p className="text-sm text-red-600 font-medium">Tour ist ausgebucht</p>
+                    ) : !canRegister ? (
+                      <p className="text-sm text-gray-600 font-medium">
+                        {isLeader ? 'Sie sind der Tourenleiter' : 'Anmeldung nicht möglich'}
+                      </p>
                     ) : (
                       <Button
                         variant="primary"
                         onClick={handleRegister}
                         className="w-full"
-                        disabled={user.role === 'admin'}
                       >
                         Anmelden
                       </Button>
