@@ -1,6 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
-import { Tour } from '@/lib/types'
+import { Tour, UserRole } from '@/lib/types'
 import { Card, CardContent } from '@/components/ui/Card'
 import { formatDifficulty } from '@/lib/difficulty'
 import { Calendar, Clock, Mountain, Users } from 'lucide-react'
@@ -10,9 +10,10 @@ import { getTourIcon, getTourIconColor } from '@/lib/tourIcons'
 interface TourCardProps {
   tour: Tour
   tourTypeIcons?: { [key: string]: string }
+  userRole?: UserRole
 }
 
-export const TourCard: React.FC<TourCardProps> = ({ tour, tourTypeIcons }) => {
+export const TourCard: React.FC<TourCardProps> = ({ tour, tourTypeIcons, userRole }) => {
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString('de-CH', {
       day: 'numeric',
@@ -22,6 +23,12 @@ export const TourCard: React.FC<TourCardProps> = ({ tour, tourTypeIcons }) => {
   }
 
   const getStatusBadge = () => {
+    // Für normale Mitglieder (member) keine Status-Badges anzeigen
+    // Nur Entwurf und Abgesagt sind auch für Members relevant
+    if (userRole === 'member' && tour.status === 'published') {
+      return null
+    }
+
     if (tour.status === 'draft') {
       return (
         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
