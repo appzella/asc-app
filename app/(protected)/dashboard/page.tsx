@@ -7,7 +7,7 @@ import { User, Tour } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
-import { HelpCircle, ChevronRight } from 'lucide-react'
+import { HelpCircle, ChevronRight, ListChecks, Calendar, Archive, BookOpen } from 'lucide-react'
 
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null)
@@ -124,8 +124,9 @@ export default function DashboardPage() {
             </div>
             <div className="mt-auto pt-4">
               <Link href="/tours?my=true" className="hidden sm:block">
-                <Button variant="primary" size="sm" className="w-full">
-                  Anzeigen
+                <Button variant="outline" size="sm" className="w-full shadow-sm">
+                  <ListChecks className="w-4 h-4 mr-2" strokeWidth={2} />
+                  Meine Touren öffnen
                 </Button>
               </Link>
             </div>
@@ -152,8 +153,9 @@ export default function DashboardPage() {
             </div>
             <div className="mt-auto pt-4">
               <Link href="/tours" className="hidden sm:block">
-                <Button variant="primary" size="sm" className="w-full">
-                  Anzeigen
+                <Button variant="outline" size="sm" className="w-full shadow-sm">
+                  <Calendar className="w-4 h-4 mr-2" strokeWidth={2} />
+                  Alle Touren durchsuchen
                 </Button>
               </Link>
             </div>
@@ -180,7 +182,8 @@ export default function DashboardPage() {
             </div>
             <div className="mt-auto pt-4">
               <Link href="/tours/archive" className="hidden sm:block">
-                <Button variant="primary" size="sm" className="w-full">
+                <Button variant="outline" size="sm" className="w-full shadow-sm">
+                  <Archive className="w-4 h-4 mr-2" strokeWidth={2} />
                   Archiv öffnen
                 </Button>
               </Link>
@@ -230,8 +233,9 @@ export default function DashboardPage() {
             </div>
             <div className="mt-auto pt-4">
               <Link href="/help" className="hidden sm:block">
-                <Button variant="primary" size="sm" className="w-full">
-                  Hilfe-Seite öffnen
+                <Button variant="outline" size="sm" className="w-full shadow-sm">
+                  <BookOpen className="w-4 h-4 mr-2" strokeWidth={2} />
+                  Hilfe öffnen
                 </Button>
               </Link>
             </div>
