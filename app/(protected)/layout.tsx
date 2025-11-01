@@ -11,6 +11,17 @@ import { Drawer } from '@/components/navigation/Drawer'
 import { MenuButton } from '@/components/navigation/MenuButton'
 import { ChevronRight, ChevronDown } from 'lucide-react'
 import Image from 'next/image'
+import { UserRole } from '@/lib/types'
+
+// Helper function to translate user roles to German
+function getRoleLabel(role: UserRole): string {
+  const roleLabels: Record<UserRole, string> = {
+    admin: 'Admin',
+    leader: 'Tourenleiter',
+    member: 'Mitglied',
+  }
+  return roleLabels[role]
+}
 
 export default function ProtectedLayout({
   children,
@@ -278,7 +289,7 @@ export default function ProtectedLayout({
                 )}
                 <span className="text-sm font-medium text-gray-900">{user.name}</span>
                 <span className="text-xs font-semibold text-primary-600 bg-primary-100 px-2.5 py-1 rounded-lg">
-                  {user.role}
+                  {getRoleLabel(user.role)}
                 </span>
               </Link>
               <Button variant="outline" size="sm" onClick={handleLogout} className="shadow-sm">
