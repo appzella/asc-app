@@ -300,15 +300,17 @@ export default function TourDetailPage() {
             </CardContent>
           </Card>
 
-          {/* Chat */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Chat</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ChatWindow tourId={tourId} userId={user.id} />
-            </CardContent>
-          </Card>
+          {/* Chat - nur bei veröffentlichten Touren */}
+          {tour.status === 'published' && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Chat</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ChatWindow tourId={tourId} userId={user.id} />
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Sidebar */}
@@ -320,7 +322,7 @@ export default function TourDetailPage() {
                 <CardTitle className="text-blue-800">Tour einreichen</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-blue-700 mb-4">
+                <p className="text-sm text-primary-600 opacity-90 mb-4">
                   Reichen Sie diese Tour zur Veröffentlichung ein. Ein Admin wird sie prüfen und veröffentlichen.
                 </p>
                 <Button variant="primary" onClick={handleSubmitForPublishing} className="w-full">
