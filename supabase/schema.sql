@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS public.tours (
   duration INTEGER NOT NULL, -- Dauer in Stunden
   leader_id UUID NOT NULL REFERENCES public.users(id),
   max_participants INTEGER NOT NULL CHECK (max_participants > 0),
-  status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'published')),
+  status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'published', 'cancelled')),
   submitted_for_publishing BOOLEAN DEFAULT FALSE,
   pending_changes JSONB, -- Ausstehende Änderungen, die auf Freigabe warten
   created_by UUID NOT NULL REFERENCES public.users(id),
@@ -93,9 +93,9 @@ CREATE TABLE IF NOT EXISTS public.tours (
 ALTER TABLE public.tours ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for tours
-CREATE POLICY "Everyone can view published tours"
+CREATE POLICY "Everyone can view published and cancelled tours"
   ON public.tours FOR SELECT
-  USING (status = 'published' OR auth.uid() = leader_id OR auth.uid() = created_by);
+  USING (status IN ('published', 'cancelled') OR auth.uid() = leader_id OR auth.uid() = created_by);
 
 CREATE POLICY "Admins can view all tours"
   ON public.tours FOR SELECT

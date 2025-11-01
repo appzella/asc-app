@@ -275,6 +275,19 @@ export class SupabaseDataRepository implements IDataRepository {
     return this.getTourById(id)
   }
 
+  async cancelTour(id: string): Promise<Tour | null> {
+    const { error } = await supabase
+      .from('tours')
+      .update({ 
+        status: 'cancelled',
+        submitted_for_publishing: false,
+      })
+      .eq('id', id)
+
+    if (error) throw error
+    return this.getTourById(id)
+  }
+
   async submitTourForPublishing(id: string): Promise<Tour | null> {
     const { error } = await supabase
       .from('tours')
@@ -295,6 +308,12 @@ export class SupabaseDataRepository implements IDataRepository {
   }
 
   async registerForTour(tourId: string, userId: string): Promise<boolean> {
+    // Check if tour is published (not draft, cancelled, etc.)
+    const tour = await this.getTourById(tourId)
+    if (!tour || tour.status !== 'published') {
+      return false
+    }
+    
     const { error } = await supabase
       .from('tour_participants')
       .insert({
@@ -604,7 +623,9 @@ export class SupabaseDataRepository implements IDataRepository {
 
   private mapDbTourToTour(row: any): Tour {
     // Ensure status is valid (fallback to 'draft' if invalid)
-    const validStatus = row.status === 'published' ? 'published' : 'draft'
+    const validStatus = ['draft', 'published', 'cancelled'].includes(row.status) 
+      ? row.status 
+      : 'draft'
     
     return {
       id: row.id,

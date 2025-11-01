@@ -1,6 +1,6 @@
 export type UserRole = 'admin' | 'leader' | 'member'
 
-export type TourStatus = 'draft' | 'published'
+export type TourStatus = 'draft' | 'published' | 'cancelled'
 
 export type TourType = 'Wanderung' | 'Skitour' | 'Bike'
 

@@ -51,11 +51,15 @@ export default function ToursPage() {
           allTours = await dataRepository.getDraftTours()
           setStatusFilter('draft')
         } else if (currentUser.role !== 'admin' && currentUser.role !== 'leader') {
-          // Mitglieder sehen nur veröffentlichte Touren
-          allTours = allTours.filter((t) => t.status === 'published')
+          // Mitglieder sehen veröffentlichte und abgesagte Touren
+          allTours = allTours.filter((t) => t.status === 'published' || t.status === 'cancelled')
         } else if (currentUser.role === 'leader') {
-          // Leaders sehen ihre eigenen Entwürfe und alle veröffentlichten Touren
-          allTours = allTours.filter((t) => t.status === 'published' || (t.status === 'draft' && t.leaderId === currentUser.id))
+          // Leaders sehen ihre eigenen Entwürfe, veröffentlichte und abgesagte Touren
+          allTours = allTours.filter((t) => 
+            t.status === 'published' || 
+            t.status === 'cancelled' || 
+            (t.status === 'draft' && t.leaderId === currentUser.id)
+          )
         }
 
         if (myParam === 'true') {
@@ -103,6 +107,8 @@ export default function ToursPage() {
         filtered = filtered.filter((t) => t.status === 'published')
       } else if (statusFilter === 'draft') {
         filtered = filtered.filter((t) => t.status === 'draft')
+      } else if (statusFilter === 'cancelled') {
+        filtered = filtered.filter((t) => t.status === 'cancelled')
       } else if (statusFilter === 'submitted') {
         filtered = filtered.filter((t) => t.status === 'draft' && t.submittedForPublishing === true)
       }
@@ -196,6 +202,7 @@ export default function ToursPage() {
                 { value: '', label: 'Alle' },
                 { value: 'published', label: 'Veröffentlicht' },
                 { value: 'draft', label: 'Entwurf' },
+                { value: 'cancelled', label: 'Abgesagt' },
                 { value: 'submitted', label: 'Zur Veröffentlichung eingereicht' },
               ]}
             />

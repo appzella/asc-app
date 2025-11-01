@@ -168,8 +168,24 @@ class DataStore {
     return this.getTourById(id)!
   }
 
+  cancelTour(id: string): Tour | null {
+    const tour = this.getTourById(id)
+    if (!tour) return null
+
+    const index = this.tours.findIndex((t) => t.id === id)
+    this.tours[index] = {
+      ...tour,
+      status: 'cancelled',
+      submittedForPublishing: false,
+      updatedAt: new Date(),
+    }
+
+    return this.getTourById(id)!
+  }
+
   registerForTour(tourId: string, userId: string): boolean {
     const tour = this.tours.find((t) => t.id === tourId)
+    // Only allow registration for published tours (not draft, cancelled, etc.)
     if (!tour || tour.status !== 'published') return false
     if (tour.participants.includes(userId)) return false
     if (tour.participants.length >= tour.maxParticipants) return false

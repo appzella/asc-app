@@ -83,6 +83,14 @@ export class MockDataRepository implements IDataRepository {
     return tour
   }
 
+  async cancelTour(id: string): Promise<Tour | null> {
+    const tour = dataStore.getTourById(id)
+    if (!tour) return null
+    tour.status = 'cancelled'
+    tour.submittedForPublishing = false
+    return tour
+  }
+
   async submitTourForPublishing(id: string): Promise<Tour | null> {
     const tour = dataStore.getTourById(id)
     if (!tour) return null
@@ -108,6 +116,11 @@ export class MockDataRepository implements IDataRepository {
   }
 
   async registerForTour(tourId: string, userId: string): Promise<boolean> {
+    // Check if tour is published (not draft, cancelled, etc.)
+    const tour = await this.getTourById(tourId)
+    if (!tour || tour.status !== 'published') {
+      return false
+    }
     return dataStore.registerForTour(tourId, userId)
   }
 

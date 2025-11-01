@@ -155,6 +155,21 @@ export default function TourDetailPage() {
     }
   }
 
+  const handleCancel = async () => {
+    if (!user || !tour) return
+    if (!confirm('Möchten Sie diese Tour wirklich absagen?')) return
+
+    try {
+      const updatedTour = await dataRepository.cancelTour(tourId)
+      if (updatedTour) {
+        setTour(updatedTour)
+        router.refresh()
+      }
+    } catch (error) {
+      console.error('Error cancelling tour:', error)
+    }
+  }
+
   const handleDelete = async () => {
     if (!user || !tour) return
     if (!confirm('Möchten Sie diese Tour wirklich löschen?')) return
@@ -289,6 +304,11 @@ export default function TourDetailPage() {
                     Zur Veröffentlichung eingereicht
                   </span>
                 )}
+                {tour.status === 'cancelled' && (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                    Abgesagt
+                  </span>
+                )}
               </div>
 
               {tour.leader && (
@@ -369,6 +389,28 @@ export default function TourDetailPage() {
                 <CardTitle className="text-green-800">Verwaltung</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
+                <Button variant="outline" onClick={handleCancel} className="w-full">
+                  Tour absagen
+                </Button>
+                <Button variant="outline" onClick={handleUnpublish} className="w-full">
+                  Auf Entwurf setzen
+                </Button>
+                <Button variant="danger" onClick={handleDelete} className="w-full">
+                  Tour löschen
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {canPublish && tour.status === 'cancelled' && (
+            <Card className="border-red-200 bg-red-50">
+              <CardHeader>
+                <CardTitle className="text-red-800">Verwaltung</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Button variant="primary" onClick={handleApprove} className="w-full">
+                  Tour wieder aktivieren
+                </Button>
                 <Button variant="outline" onClick={handleUnpublish} className="w-full">
                   Auf Entwurf setzen
                 </Button>

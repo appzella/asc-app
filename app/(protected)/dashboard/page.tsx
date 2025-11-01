@@ -24,11 +24,11 @@ export default function DashboardPage() {
         const today = new Date()
         today.setHours(0, 0, 0, 0)
         
-        // Zukünftige Touren
+        // Zukünftige Touren (published oder cancelled - beide sollen sichtbar sein)
         const futureTours = allTours.filter((t) => {
           const tourDate = new Date(t.date)
           tourDate.setHours(0, 0, 0, 0)
-          return tourDate >= today && t.status === 'published'
+          return tourDate >= today && (t.status === 'published' || t.status === 'cancelled')
         })
         setTours(futureTours)
         

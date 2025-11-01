@@ -168,6 +168,7 @@ export default function ToursArchivePage() {
                 { value: '', label: 'Alle' },
                 { value: 'published', label: 'Veröffentlicht' },
                 { value: 'draft', label: 'Entwurf' },
+                { value: 'cancelled', label: 'Abgesagt' },
               ]}
             />
           )}

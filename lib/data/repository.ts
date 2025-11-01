@@ -23,6 +23,7 @@ export interface IDataRepository {
   updateTour(id: string, updates: Partial<Tour>, submitForApproval?: boolean): Promise<Tour | null>
   publishTour(id: string): Promise<Tour | null>
   unpublishTour(id: string): Promise<Tour | null>
+  cancelTour(id: string): Promise<Tour | null>
   submitTourForPublishing(id: string): Promise<Tour | null>
   registerForTour(tourId: string, userId: string): Promise<boolean>
   unregisterFromTour(tourId: string, userId: string): Promise<boolean>
