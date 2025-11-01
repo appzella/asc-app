@@ -261,6 +261,13 @@ class SupabaseAuthService {
         }
       }
 
+      // Determine redirect URL for email confirmation
+      // If invitation token exists, redirect to registration page with token
+      // Otherwise, redirect to dashboard after confirmation
+      const redirectUrl = token 
+        ? `${typeof window !== 'undefined' ? window.location.origin : 'https://asc-app.vercel.app'}/register/${token}`
+        : `${typeof window !== 'undefined' ? window.location.origin : 'https://asc-app.vercel.app'}/dashboard`
+
       // Sign up user in Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
@@ -270,6 +277,9 @@ class SupabaseAuthService {
             name,
             role: 'member', // Default role, can be updated later by admin
           },
+          emailRedirectTo: redirectUrl,
+          // For invitations, we can skip email confirmation if configured in Supabase
+          // The invitation system already validates the email
         },
       })
 
@@ -293,6 +303,12 @@ class SupabaseAuthService {
       }
 
       const updatedUser = await dataRepository.updateUser(authData.user.id, updates)
+      
+      // Auto-confirm email for invited users (trigger handles this, but we wait a bit)
+      if (invitation && updatedUser) {
+        // Wait for the auto-confirm trigger to run
+        await new Promise((resolve) => setTimeout(resolve, 300))
+      }
 
       if (!updatedUser) {
         console.error('Failed to update user profile')
