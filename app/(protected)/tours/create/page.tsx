@@ -202,28 +202,33 @@ export default function CreateTourPage() {
   }
 
   if (!user) {
-    return <div>Lädt...</div>
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-gray-600">Lädt...</div>
+      </div>
+    )
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto space-y-4 animate-fade-in">
       <div>
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-3 mb-3">
           <Link 
             href="/tours" 
-            className="hidden sm:inline-block text-primary-600 hover:text-primary-700 text-sm mb-2"
+            className="hidden sm:inline-flex items-center gap-1 text-primary-600 hover:text-primary-700 text-sm transition-colors"
           >
-            ← Zurück zur Übersicht
+            <ChevronLeft className="w-4 h-4" strokeWidth={2} />
+            Zurück zur Übersicht
           </Link>
           <Link 
             href="/tours"
-            className="sm:hidden flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200 touch-manipulation bg-primary-100 hover:bg-primary-200 transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 shadow-sm"
+            className="sm:hidden flex items-center justify-center w-10 h-10 rounded-md transition-colors touch-target bg-gray-50 hover:bg-gray-100"
             aria-label="Zurück zur Übersicht"
           >
-            <ChevronLeft className="w-5 h-5 text-primary-700" strokeWidth={1.8} />
+            <ChevronLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
           </Link>
         </div>
-        <h1 className="text-3xl font-bold text-gray-900">Neue Tour erstellen</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Neue Tour erstellen</h1>
       </div>
 
       <Card className="relative" style={{ overflow: 'visible', zIndex: 200 }}>
@@ -231,9 +236,11 @@ export default function CreateTourPage() {
           <CardTitle>Erstellungsmodus</CardTitle>
         </CardHeader>
         <CardContent style={{ overflow: 'visible' }}>
-          <div className="flex gap-4 mb-4">
-            <button
+          <div className="flex gap-2 mb-4">
+            <Button
               type="button"
+              variant={creationMode === 'new' ? 'primary' : 'outline'}
+              size="sm"
               onClick={() => {
                 setCreationMode('new')
                 setSelectedTourId('')
@@ -253,31 +260,25 @@ export default function CreateTourPage() {
                   leaderId: user?.role === 'admin' ? (formData.leaderId || user.id) : (user?.id || ''),
                 })
               }}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                creationMode === 'new'
-                  ? 'bg-primary-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              className="flex-1"
             >
               Neue Tour erstellen
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant={creationMode === 'duplicate' ? 'primary' : 'outline'}
+              size="sm"
               onClick={() => setCreationMode('duplicate')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                creationMode === 'duplicate'
-                  ? 'bg-primary-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              className="flex-1"
             >
               Tour duplizieren
-            </button>
+            </Button>
           </div>
 
           {creationMode === 'duplicate' && (
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div className="w-full flex flex-col relative" style={{ zIndex: 300 }}>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-900 mb-1">
                   Tour suchen
                 </label>
                 <input
@@ -294,11 +295,11 @@ export default function CreateTourPage() {
                     setTimeout(() => setShowResults(false), 200)
                   }}
                   placeholder="Titel der Tour eingeben..."
-                  className="w-full px-4 py-3 border rounded-lg bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all duration-200 shadow-sm hover:shadow-md border-gray-200 hover:border-gray-300"
+                  className="w-full px-4 py-2.5 border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 border-gray-300 hover:border-gray-400 min-h-[44px]"
                 />
               </div>
               {selectedTourId && (
-                <p className="text-sm text-primary-600 mt-2">
+                <p className="text-xs text-primary-600">
                   ✓ Tour ausgewählt. Felder wurden automatisch ausgefüllt.
                 </p>
               )}
@@ -310,7 +311,7 @@ export default function CreateTourPage() {
       {/* Trefferliste außerhalb der Cards mit fixed positioning */}
       {showResults && searchQuery && resultsPosition && (
         <div
-          className="fixed bg-white border border-gray-200 rounded-lg shadow-xl max-h-60 overflow-y-auto z-[9999]"
+          className="fixed bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto z-[9999]"
           style={{
             top: `${resultsPosition.top}px`,
             left: `${resultsPosition.left}px`,
@@ -334,16 +335,16 @@ export default function CreateTourPage() {
                   setShowResults(false)
                   handleDuplicateTour(tour.id)
                 }}
-                className="w-full text-left px-4 py-3 hover:bg-primary-50 transition-colors border-b border-gray-100 last:border-b-0 focus:outline-none focus:bg-primary-50 flex items-center gap-3"
+                className="w-full text-left px-4 py-3 hover:bg-primary-50 transition-colors border-b border-gray-200 last:border-b-0 focus:outline-none focus:bg-primary-50 flex items-center gap-3 touch-target"
               >
                 {(() => {
                   const IconComponent = getTourIcon(tour.tourType, settings.tourTypeIcons)
                   const iconColor = getTourIconColor(tour.tourType)
-                  return <IconComponent className={`w-5 h-5 ${iconColor} flex-shrink-0`} strokeWidth={2} />
+                  return <IconComponent className={`w-4 h-4 ${iconColor} flex-shrink-0`} strokeWidth={2} />
                 })()}
                 <div className="flex-1 min-w-0">
-                  <div className="font-medium text-gray-900">{tour.title}</div>
-                  <div className="text-sm text-gray-500">
+                  <div className="font-medium text-gray-900 text-sm">{tour.title}</div>
+                  <div className="text-xs text-gray-600">
                     {new Date(tour.date).toLocaleDateString('de-CH')} · {tour.tourType}
                   </div>
                 </div>
@@ -352,7 +353,7 @@ export default function CreateTourPage() {
           {tours.filter((tour) => 
             tour.title.toLowerCase().includes(searchQuery.toLowerCase())
           ).length === 0 && (
-            <div className="px-4 py-3 text-sm text-gray-500">
+            <div className="px-4 py-3 text-sm text-gray-500 text-center">
               Keine Touren gefunden, die "{searchQuery}" enthalten.
             </div>
           )}
@@ -382,7 +383,7 @@ export default function CreateTourPage() {
               placeholder="Beschreiben Sie die Tour..."
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-gray-200">
               <Input
                 label="Datum"
                 type="date"
@@ -483,17 +484,17 @@ export default function CreateTourPage() {
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
                 {error}
               </div>
             )}
 
-            <div className="flex gap-4 pt-4">
+            <div className="flex flex-col sm:flex-row gap-2 pt-2">
               <Button type="submit" variant="primary" disabled={isLoading} className="flex-1">
                 {isLoading ? 'Wird erstellt...' : 'Tour erstellen'}
               </Button>
-              <Link href="/tours">
-                <Button type="button" variant="outline">
+              <Link href="/tours" className="flex-1 sm:flex-initial">
+                <Button type="button" variant="outline" size="sm" className="w-full sm:w-auto">
                   Abbrechen
                 </Button>
               </Link>

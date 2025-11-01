@@ -175,39 +175,44 @@ export default function TourTypesSettingsPage() {
   ]
 
   if (!user) {
-    return <div>Lädt...</div>
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-gray-600">Lädt...</div>
+      </div>
+    )
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
+    <div className="max-w-4xl mx-auto space-y-4 animate-fade-in">
       <div>
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-3 mb-3">
           <Link 
             href="/settings" 
-            className="hidden sm:inline-block text-primary-600 hover:text-primary-700 text-sm mb-2"
+            className="hidden sm:inline-flex items-center gap-1 text-primary-600 hover:text-primary-700 text-sm transition-colors"
           >
-            ← Zurück zur Übersicht
+            <ChevronLeft className="w-4 h-4" strokeWidth={2} />
+            Zurück zur Übersicht
           </Link>
           <Link 
             href="/settings"
-            className="sm:hidden flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200 touch-manipulation bg-primary-100 hover:bg-primary-200 transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 shadow-sm"
+            className="sm:hidden flex items-center justify-center w-10 h-10 rounded-md transition-colors touch-target bg-gray-50 hover:bg-gray-100"
             aria-label="Zurück zur Übersicht"
           >
-            <ChevronLeft className="w-5 h-5 text-primary-700" strokeWidth={1.8} />
+            <ChevronLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
           </Link>
         </div>
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">Tourentypen</h1>
-        <p className="text-lg text-gray-600">Verwalten Sie die verfügbaren Tourentypen</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Tourentypen</h1>
+        <p className="text-base text-gray-600">Verwalten Sie die verfügbaren Tourentypen</p>
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
           {error}
         </div>
       )}
 
       {success && (
-        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md text-sm">
           {success}
         </div>
       )}
@@ -217,7 +222,7 @@ export default function TourTypesSettingsPage() {
           <CardTitle>Neuen Tourentyp hinzufügen</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-2 items-end">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Input
               value={newType}
               onChange={(e) => {
@@ -231,8 +236,9 @@ export default function TourTypesSettingsPage() {
                   handleAdd()
                 }
               }}
+              className="flex-1"
             />
-            <Button onClick={handleAdd}>Hinzufügen</Button>
+            <Button onClick={handleAdd} size="sm">Hinzufügen</Button>
           </div>
         </CardContent>
       </Card>
@@ -240,12 +246,12 @@ export default function TourTypesSettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Tourentypen ({tourTypes.length})</CardTitle>
-          <p className="text-sm text-gray-600 mt-2">Ziehen Sie die Einträge, um die Reihenfolge zu ändern</p>
+          <p className="text-xs text-gray-600 mt-1">Ziehen Sie die Einträge, um die Reihenfolge zu ändern</p>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
             {tourTypes.length === 0 ? (
-              <p className="text-gray-500 text-sm">Keine Tourentypen vorhanden</p>
+              <p className="text-gray-500 text-sm text-center py-4">Keine Tourentypen vorhanden</p>
             ) : (
               tourTypes.map((type, index) => {
                 const currentIconName = tourTypeIcons[type] || 'Mountain'
@@ -270,9 +276,9 @@ export default function TourTypesSettingsPage() {
                       onDragOver={(e) => handleDragOver(e, index)}
                       onDragLeave={handleDragLeave}
                       onDrop={(e) => handleDrop(e, index)}
-                      className="flex items-center justify-between gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200 cursor-move hover:bg-gray-100 transition-all group relative"
+                      className="flex items-center justify-between gap-3 p-3 bg-gray-50 rounded-md border border-gray-200 cursor-move hover:bg-gray-100 transition-all group relative"
                     >
-                    <span className="text-gray-400 group-hover:text-gray-600 flex-shrink-0">☰</span>
+                    <span className="text-gray-400 group-hover:text-gray-600 flex-shrink-0 text-sm">☰</span>
                     <div className="relative flex-shrink-0">
                       <button
                         type="button"
@@ -282,9 +288,9 @@ export default function TourTypesSettingsPage() {
                           setOpenIconPicker(isPickerOpen ? null : type)
                         }}
                         onDragStart={(e) => e.stopPropagation()}
-                        className="flex items-center gap-1 p-1 rounded hover:bg-gray-200 transition-colors"
+                        className="flex items-center gap-1 p-1.5 rounded-md hover:bg-gray-200 transition-colors touch-target"
                       >
-                        <CurrentIconComponent className="w-5 h-5 text-gray-600" strokeWidth={2} />
+                        <CurrentIconComponent className="w-4 h-4 text-gray-600" strokeWidth={2} />
                         <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isPickerOpen ? 'rotate-180' : ''}`} strokeWidth={2} />
                       </button>
                       {isPickerOpen && (
@@ -293,7 +299,7 @@ export default function TourTypesSettingsPage() {
                             className="fixed inset-0 z-10" 
                             onClick={() => setOpenIconPicker(null)}
                           />
-                          <div className="absolute top-full left-0 mt-2 z-20 bg-white rounded-lg shadow-lg border border-gray-200 p-2 grid grid-cols-4 gap-2 w-64 max-h-64 overflow-y-auto">
+                          <div className="absolute top-full left-0 mt-2 z-20 bg-white rounded-md shadow-lg border border-gray-200 p-2 grid grid-cols-4 gap-2 w-64 max-h-64 overflow-y-auto">
                             {popularIcons
                               .filter((iconOption, index, self) => {
                                 // Entferne Duplikate basierend auf value
@@ -324,12 +330,12 @@ export default function TourTypesSettingsPage() {
                                       handleIconChange(type, iconOption.value)
                                       setOpenIconPicker(null)
                                     }}
-                                    className={`flex items-center justify-center p-2 rounded hover:bg-gray-100 transition-colors ${
-                                      isSelected ? 'bg-primary-50 border-2 border-primary-500' : 'border-2 border-transparent'
+                                    className={`flex items-center justify-center p-2 rounded-md hover:bg-gray-100 transition-colors touch-target ${
+                                      isSelected ? 'bg-primary-50 border border-primary-500' : 'border border-transparent'
                                     }`}
                                   >
                                     <IconOptionComponent 
-                                      className={`w-6 h-6 ${isSelected ? 'text-primary-600' : 'text-gray-600'}`} 
+                                      className={`w-5 h-5 ${isSelected ? 'text-primary-600' : 'text-gray-600'}`} 
                                       strokeWidth={2} 
                                     />
                                   </button>
@@ -339,16 +345,16 @@ export default function TourTypesSettingsPage() {
                         </>
                       )}
                     </div>
-                    <span className="font-medium text-gray-900 flex-1 min-w-0 truncate">{type}</span>
+                    <span className="font-medium text-gray-900 flex-1 min-w-0 truncate text-sm">{type}</span>
                     <button
                       type="button"
                       draggable={false}
                       onClick={() => handleRemove(type)}
                       onDragStart={(e) => e.stopPropagation()}
-                      className="flex-shrink-0 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+                      className="flex-shrink-0 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors touch-target"
                       aria-label="Entfernen"
                     >
-                      <Trash2 className="w-5 h-5" strokeWidth={2} />
+                      <Trash2 className="w-4 h-4" strokeWidth={2} />
                     </button>
                     </div>
                   </div>

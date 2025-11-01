@@ -125,29 +125,34 @@ export default function InvitationsPage() {
   }
 
   if (!user) {
-    return <div>Lädt...</div>
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-gray-600">Lädt...</div>
+      </div>
+    )
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-3 mb-3">
           <Link 
             href="/settings" 
-            className="hidden sm:inline-block text-primary-600 hover:text-primary-700 text-sm mb-2"
+            className="hidden sm:inline-flex items-center gap-1 text-primary-600 hover:text-primary-700 text-sm transition-colors"
           >
-            ← Zurück zur Übersicht
+            <ChevronLeft className="w-4 h-4" strokeWidth={2} />
+            Zurück zur Übersicht
           </Link>
           <Link 
             href="/settings"
-            className="sm:hidden flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200 touch-manipulation bg-primary-100 hover:bg-primary-200 transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 shadow-sm"
+            className="sm:hidden flex items-center justify-center w-10 h-10 rounded-md transition-colors touch-target bg-gray-50 hover:bg-gray-100"
             aria-label="Zurück zur Übersicht"
           >
-            <ChevronLeft className="w-5 h-5 text-primary-700" strokeWidth={1.8} />
+            <ChevronLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
           </Link>
         </div>
-        <h1 className="text-3xl font-bold text-gray-900">Einladungen</h1>
-        <p className="mt-2 text-gray-600">Erstellen Sie Einladungen für neue Clubmitglieder</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Einladungen</h1>
+        <p className="text-base text-gray-600">Erstellen Sie Einladungen für neue Clubmitglieder</p>
       </div>
 
       <Card>
@@ -166,7 +171,7 @@ export default function InvitationsPage() {
             />
             {message && (
               <div
-                className={`px-4 py-3 rounded ${
+                className={`px-4 py-3 rounded-md text-sm ${
                   message.type === 'success'
                     ? 'bg-green-50 border border-green-200 text-green-700'
                     : 'bg-red-50 border border-red-200 text-red-700'
@@ -175,7 +180,7 @@ export default function InvitationsPage() {
                 {message.text}
               </div>
             )}
-            <Button type="submit" variant="primary" disabled={isLoading}>
+            <Button type="submit" variant="primary" disabled={isLoading} size="sm">
               {isLoading ? 'Wird erstellt...' : 'Einladung erstellen'}
             </Button>
           </form>
@@ -188,44 +193,45 @@ export default function InvitationsPage() {
         </CardHeader>
         <CardContent>
           {invitations.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">Noch keine Einladungen erstellt</p>
+            <p className="text-gray-500 text-center py-8 text-sm">Noch keine Einladungen erstellt</p>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {invitations.map((invitation) => {
                 const registrationLink = `${typeof window !== 'undefined' ? window.location.origin : ''}/register/${invitation.token}`
                 return (
                   <div
                     key={invitation.id}
-                    className="border rounded-lg p-4 space-y-2"
+                    className="border border-gray-200 rounded-md p-4 space-y-3"
                   >
-                    <div className="flex justify-between items-start">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                       <div>
-                        <p className="font-medium text-gray-900">{invitation.email}</p>
-                        <p className="text-sm text-gray-500">
+                        <p className="font-medium text-gray-900 text-sm">{invitation.email}</p>
+                        <p className="text-xs text-gray-600 mt-0.5">
                           Erstellt am {new Date(invitation.createdAt).toLocaleDateString('de-CH')}
                         </p>
                       </div>
                       {invitation.used ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-green-50 text-green-700 border border-green-200">
                           Verwendet
                         </span>
                       ) : (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-yellow-50 text-yellow-700 border border-yellow-200">
                           Ausstehend
                         </span>
                       )}
                     </div>
                     {!invitation.used && (
-                      <div className="flex gap-2">
+                      <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-gray-200">
                         <Input
                           value={registrationLink}
                           readOnly
-                          className="flex-1 text-sm"
+                          className="flex-1 text-xs"
                         />
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => copyToClipboard(registrationLink)}
+                          className="w-full sm:w-auto"
                         >
                           Kopieren
                         </Button>

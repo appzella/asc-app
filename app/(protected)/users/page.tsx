@@ -57,29 +57,34 @@ export default function UsersPage() {
   }
 
   if (!user) {
-    return <div>Lädt...</div>
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-gray-600">Lädt...</div>
+      </div>
+    )
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-3 mb-3">
           <Link 
             href="/settings" 
-            className="hidden sm:inline-block text-primary-600 hover:text-primary-700 text-sm mb-2"
+            className="hidden sm:inline-flex items-center gap-1 text-primary-600 hover:text-primary-700 text-sm transition-colors"
           >
-            ← Zurück zur Übersicht
+            <ChevronLeft className="w-4 h-4" strokeWidth={2} />
+            Zurück zur Übersicht
           </Link>
           <Link 
             href="/settings"
-            className="sm:hidden flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200 touch-manipulation bg-primary-100 hover:bg-primary-200 transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 shadow-sm"
+            className="sm:hidden flex items-center justify-center w-10 h-10 rounded-md transition-colors touch-target bg-gray-50 hover:bg-gray-100"
             aria-label="Zurück zur Übersicht"
           >
-            <ChevronLeft className="w-5 h-5 text-primary-700" strokeWidth={1.8} />
+            <ChevronLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
           </Link>
         </div>
-        <h1 className="text-3xl font-bold text-gray-900">Benutzerverwaltung</h1>
-        <p className="mt-2 text-gray-600">Verwalten Sie Benutzer und deren Rollen</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Benutzerverwaltung</h1>
+        <p className="text-base text-gray-600">Verwalten Sie Benutzer und deren Rollen</p>
       </div>
 
       <Card>
@@ -91,33 +96,33 @@ export default function UsersPage() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                     Name
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                     E-Mail
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                     Rolle
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Aktionen
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                    Erstellt am
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {users.map((u) => (
-                  <tr key={u.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <tr key={u.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
                       {u.name || 'Unbekannt'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
                       {u.email}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <Select
                         value={u.role}
                         onChange={(e) => handleRoleChange(u.id, e.target.value as UserRole)}
@@ -126,21 +131,22 @@ export default function UsersPage() {
                           { value: 'leader', label: 'Tourenleiter' },
                           { value: 'admin', label: 'Admin' },
                         ]}
-                        className="w-40"
+                        className="w-40 text-sm"
+                        size="sm"
                       />
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       {u.registered ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-green-50 text-green-700 border border-green-200">
                           Registriert
                         </span>
                       ) : (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-yellow-50 text-yellow-700 border border-yellow-200">
                           Ausstehend
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
                       {new Date(u.createdAt).toLocaleDateString('de-CH')}
                     </td>
                   </tr>

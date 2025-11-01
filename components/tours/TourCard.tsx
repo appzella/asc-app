@@ -38,7 +38,7 @@ export const TourCard: React.FC<TourCardProps> = ({ tour, tourTypeIcons, userRol
     }
     if (tour.status === 'published') {
       return (
-        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
+        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-green-50 text-green-700 border border-green-200">
           Veröffentlicht
         </span>
       )
