@@ -23,13 +23,24 @@ export function canApproveTour(role: UserRole): boolean {
   return role === ROLES.ADMIN
 }
 
+export function canPublishTour(role: UserRole): boolean {
+  return role === ROLES.ADMIN
+}
+
 export function canManageUsers(role: UserRole): boolean {
   return role === ROLES.ADMIN
 }
 
-export function canEditTour(role: UserRole, tourLeaderId: string, userId: string): boolean {
+export function canEditTour(role: UserRole, tourLeaderId: string, userId: string, tourStatus: string): boolean {
   if (role === ROLES.ADMIN) return true
-  if (role === ROLES.LEADER && tourLeaderId === userId) return true
+  // Leaders können nur Entwürfe bearbeiten
+  if (role === ROLES.LEADER && tourLeaderId === userId && tourStatus === 'draft') return true
+  return false
+}
+
+export function canSubmitForPublishing(role: UserRole, tourLeaderId: string, userId: string, tourStatus: string): boolean {
+  // Leaders können Entwürfe zur Veröffentlichung einreichen
+  if (role === ROLES.LEADER && tourLeaderId === userId && tourStatus === 'draft') return true
   return false
 }
 

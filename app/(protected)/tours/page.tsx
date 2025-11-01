@@ -41,15 +41,21 @@ export default function ToursPage() {
         const statusParam = searchParams.get('status')
         const myParam = searchParams.get('my')
         
-        if (statusParam === 'pending' && currentUser.role === 'admin') {
-          allTours = await dataRepository.getPendingTours()
-          setStatusFilter('pending')
-        } else if (statusParam === 'pending' && currentUser.role === 'leader') {
-          allTours = allTours.filter((t) => t.leaderId === currentUser.id && t.status === 'pending')
-          setStatusFilter('pending')
-        } else if (currentUser.role !== 'admin') {
-          // Mitglieder sehen nur freigegebene Touren
-          allTours = allTours.filter((t) => t.status === 'approved')
+        if (statusParam === 'submitted' && currentUser.role === 'admin') {
+          allTours = await dataRepository.getToursSubmittedForPublishing()
+          setStatusFilter('submitted')
+        } else if (statusParam === 'submitted' && currentUser.role === 'leader') {
+          allTours = allTours.filter((t) => t.leaderId === currentUser.id && t.status === 'draft' && t.submittedForPublishing === true)
+          setStatusFilter('submitted')
+        } else if (statusParam === 'draft' && currentUser.role === 'admin') {
+          allTours = await dataRepository.getDraftTours()
+          setStatusFilter('draft')
+        } else if (currentUser.role !== 'admin' && currentUser.role !== 'leader') {
+          // Mitglieder sehen nur veröffentlichte Touren
+          allTours = allTours.filter((t) => t.status === 'published')
+        } else if (currentUser.role === 'leader') {
+          // Leaders sehen ihre eigenen Entwürfe und alle veröffentlichten Touren
+          allTours = allTours.filter((t) => t.status === 'published' || (t.status === 'draft' && t.leaderId === currentUser.id))
         }
 
         if (myParam === 'true') {
@@ -93,7 +99,13 @@ export default function ToursPage() {
 
     // Status Filter
     if (statusFilter) {
-      filtered = filtered.filter((t) => t.status === statusFilter)
+      if (statusFilter === 'published') {
+        filtered = filtered.filter((t) => t.status === 'published')
+      } else if (statusFilter === 'draft') {
+        filtered = filtered.filter((t) => t.status === 'draft')
+      } else if (statusFilter === 'submitted') {
+        filtered = filtered.filter((t) => t.status === 'draft' && t.submittedForPublishing === true)
+      }
     }
 
     // Typ Filter
@@ -182,9 +194,9 @@ export default function ToursPage() {
               onChange={(e) => setStatusFilter(e.target.value)}
               options={[
                 { value: '', label: 'Alle' },
-                { value: 'pending', label: 'Ausstehend' },
-                { value: 'approved', label: 'Freigegeben' },
-                { value: 'rejected', label: 'Abgelehnt' },
+                { value: 'published', label: 'Veröffentlicht' },
+                { value: 'draft', label: 'Entwurf' },
+                { value: 'submitted', label: 'Zur Veröffentlichung eingereicht' },
               ]}
             />
           )}

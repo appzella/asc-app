@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Textarea } from '@/components/ui/Textarea'
 import { ChatWindow } from '@/components/chat/ChatWindow'
-import { canEditTour, canApproveTour } from '@/lib/roles'
+import { canEditTour, canApproveTour, canPublishTour, canSubmitForPublishing } from '@/lib/roles'
 import { formatDifficulty } from '@/lib/difficulty'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -49,6 +49,8 @@ export default function TourDetailPage() {
           setParticipants(participantUsers.filter((u): u is User => u !== null))
         } catch (error) {
           console.error('Error loading tour:', error)
+          const errorMessage = error instanceof Error ? error.message : String(error)
+          console.error('Error details:', errorMessage)
           router.push('/tours')
         }
       }
@@ -115,13 +117,55 @@ export default function TourDetailPage() {
     if (!user || !tour) return
 
     try {
-      const updatedTour = await dataRepository.approveTour(tourId)
+      const updatedTour = await dataRepository.publishTour(tourId)
       if (updatedTour) {
         setTour(updatedTour)
         router.refresh()
       }
     } catch (error) {
-      console.error('Error approving tour:', error)
+      console.error('Error publishing tour:', error)
+    }
+  }
+
+  const handleUnpublish = async () => {
+    if (!user || !tour) return
+
+    try {
+      const updatedTour = await dataRepository.unpublishTour(tourId)
+      if (updatedTour) {
+        setTour(updatedTour)
+        router.refresh()
+      }
+    } catch (error) {
+      console.error('Error unpublishing tour:', error)
+    }
+  }
+
+  const handleSubmitForPublishing = async () => {
+    if (!user || !tour) return
+
+    try {
+      const updatedTour = await dataRepository.submitTourForPublishing(tourId)
+      if (updatedTour) {
+        setTour(updatedTour)
+        router.refresh()
+      }
+    } catch (error) {
+      console.error('Error submitting tour for publishing:', error)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!user || !tour) return
+    if (!confirm('Möchten Sie diese Tour wirklich löschen?')) return
+
+    try {
+      const success = await dataRepository.deleteTour(tourId)
+      if (success) {
+        router.push('/tours')
+      }
+    } catch (error) {
+      console.error('Error deleting tour:', error)
     }
   }
 
@@ -134,7 +178,7 @@ export default function TourDetailPage() {
     if (!user || !tour) return
 
     try {
-      const updatedTour = await dataRepository.rejectTour(tourId, rejectionComment.trim() || undefined)
+      const updatedTour = await dataRepository.unpublishTour(tourId)
       if (updatedTour) {
         setTour(updatedTour)
         setShowRejectModal(false)
@@ -163,10 +207,12 @@ export default function TourDetailPage() {
     })
   }
 
-  const canEdit = canEditTour(user.role, tour.leaderId, user.id)
-  const canApprove = canApproveTour(user.role)
+  const canEdit = canEditTour(user.role, tour.leaderId, user.id, tour.status)
+  const canPublish = canPublishTour(user.role)
+  const canSubmit = canSubmitForPublishing(user.role, tour.leaderId, user.id, tour.status)
   const isFull = tour.participants.length >= tour.maxParticipants
-  const canRegister = tour.status === 'approved' && !isRegistered && !isFull && user.role !== 'admin'
+  const isLeader = tour.leaderId === user.id
+  const canRegister = tour.status === 'published' && !isRegistered && !isFull && !isLeader
 
   return (
     <div className="space-y-6">
@@ -228,26 +274,22 @@ export default function TourDetailPage() {
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
                   {formatDifficulty(tour.difficulty, tour.tourType)}
                 </span>
-                {tour.status === 'pending' && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
-                    Ausstehend
+                {tour.status === 'draft' && (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                    Entwurf
                   </span>
                 )}
-                {tour.status === 'rejected' && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
-                    Abgelehnt
+                {tour.status === 'published' && (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                    Veröffentlicht
+                  </span>
+                )}
+                {tour.status === 'draft' && tour.submittedForPublishing && (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                    Zur Veröffentlichung eingereicht
                   </span>
                 )}
               </div>
-
-              {tour.status === 'rejected' && tour.rejectionComment && (
-                <div className="pt-4 border-t">
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                    <h4 className="text-sm font-semibold text-red-800 mb-2">Ablehnungsgrund:</h4>
-                    <p className="text-sm text-red-700 whitespace-pre-wrap">{tour.rejectionComment}</p>
-                  </div>
-                </div>
-              )}
 
               {tour.leader && (
                 <div className="pt-4 border-t">
@@ -264,37 +306,65 @@ export default function TourDetailPage() {
               <CardTitle>Chat</CardTitle>
             </CardHeader>
             <CardContent>
-              <ChatWindow tourId={tourId} userId={user.id} />
+              <ChatWindow tourId={tourId} userId={user.id} leaderId={tour.leaderId} />
             </CardContent>
           </Card>
         </div>
 
         {/* Sidebar */}
         <div className="space-y-6">
+          {/* Leader Actions */}
+          {canSubmit && tour.status === 'draft' && !tour.submittedForPublishing && (
+            <Card className="border-blue-200 bg-blue-50">
+              <CardHeader>
+                <CardTitle className="text-blue-800">Tour einreichen</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-blue-700 mb-4">
+                  Reichen Sie diese Tour zur Veröffentlichung ein. Ein Admin wird sie prüfen und veröffentlichen.
+                </p>
+                <Button variant="primary" onClick={handleSubmitForPublishing} className="w-full">
+                  Zur Veröffentlichung einreichen
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Admin Actions */}
-          {canApprove && tour.status === 'pending' && (
+          {canPublish && tour.status === 'draft' && tour.submittedForPublishing && (
             <Card className="border-yellow-200 bg-yellow-50">
               <CardHeader>
-                <CardTitle className="text-yellow-800">Freigabe erforderlich</CardTitle>
+                <CardTitle className="text-yellow-800">Veröffentlichung</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                {tour.pendingChanges && (
-                  <p className="text-sm text-yellow-700 mb-4">
-                    Diese Tour hat ausstehende Änderungen, die auf Freigabe warten.
-                  </p>
-                )}
                 <Button variant="primary" onClick={handleApprove} className="w-full">
-                  Tour freigeben
+                  Tour veröffentlichen
                 </Button>
-                <Button variant="danger" onClick={handleReject} className="w-full">
-                  Ablehnen
+                <Button variant="outline" onClick={handleUnpublish} className="w-full">
+                  Auf Entwurf zurücksetzen
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {canPublish && tour.status === 'published' && (
+            <Card className="border-green-200 bg-green-50">
+              <CardHeader>
+                <CardTitle className="text-green-800">Verwaltung</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Button variant="outline" onClick={handleUnpublish} className="w-full">
+                  Auf Entwurf setzen
+                </Button>
+                <Button variant="danger" onClick={handleDelete} className="w-full">
+                  Tour löschen
                 </Button>
               </CardContent>
             </Card>
           )}
 
           {/* Anmeldung */}
-          {tour.status === 'approved' && (
+          {tour.status === 'published' && (
             <Card>
               <CardHeader>
                 <CardTitle>Anmeldung</CardTitle>

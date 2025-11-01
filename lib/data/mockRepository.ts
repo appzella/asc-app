@@ -42,8 +42,21 @@ export class MockDataRepository implements IDataRepository {
     return dataStore.getApprovedTours()
   }
 
+  async getPublishedTours(): Promise<Tour[]> {
+    return dataStore.getTours().filter(t => t.status === 'published')
+  }
+
+  async getDraftTours(): Promise<Tour[]> {
+    return dataStore.getTours().filter(t => t.status === 'draft')
+  }
+
+  async getToursSubmittedForPublishing(): Promise<Tour[]> {
+    return dataStore.getTours().filter(t => t.status === 'draft' && t.submittedForPublishing === true)
+  }
+
   async getPendingTours(): Promise<Tour[]> {
-    return dataStore.getPendingTours()
+    // Alias für getToursSubmittedForPublishing für Rückwärtskompatibilität
+    return this.getToursSubmittedForPublishing()
   }
 
   async createTour(tour: Omit<Tour, 'id' | 'createdAt' | 'updatedAt' | 'participants' | 'status'>): Promise<Tour> {
@@ -54,12 +67,44 @@ export class MockDataRepository implements IDataRepository {
     return dataStore.updateTour(id, updates, submitForApproval)
   }
 
+  async publishTour(id: string): Promise<Tour | null> {
+    const tour = dataStore.getTourById(id)
+    if (!tour) return null
+    tour.status = 'published'
+    tour.submittedForPublishing = false
+    return tour
+  }
+
+  async unpublishTour(id: string): Promise<Tour | null> {
+    const tour = dataStore.getTourById(id)
+    if (!tour) return null
+    tour.status = 'draft'
+    tour.submittedForPublishing = false
+    return tour
+  }
+
+  async submitTourForPublishing(id: string): Promise<Tour | null> {
+    const tour = dataStore.getTourById(id)
+    if (!tour) return null
+    tour.submittedForPublishing = true
+    return tour
+  }
+
+  async deleteTour(id: string): Promise<boolean> {
+    const index = dataStore['tours'].findIndex(t => t.id === id)
+    if (index === -1) return false
+    dataStore['tours'].splice(index, 1)
+    return true
+  }
+
   async approveTour(id: string): Promise<Tour | null> {
-    return dataStore.approveTour(id)
+    // Alias für publishTour für Rückwärtskompatibilität
+    return this.publishTour(id)
   }
 
   async rejectTour(id: string, comment?: string): Promise<Tour | null> {
-    return dataStore.rejectTour(id, comment)
+    // Alias für unpublishTour für Rückwärtskompatibilität
+    return this.unpublishTour(id)
   }
 
   async registerForTour(tourId: string, userId: string): Promise<boolean> {

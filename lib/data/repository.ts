@@ -16,14 +16,17 @@ export interface IDataRepository {
   // Tours
   getTours(): Promise<Tour[]>
   getTourById(id: string): Promise<Tour | null>
-  getApprovedTours(): Promise<Tour[]>
-  getPendingTours(): Promise<Tour[]>
+  getPublishedTours(): Promise<Tour[]>
+  getDraftTours(): Promise<Tour[]>
+  getToursSubmittedForPublishing(): Promise<Tour[]>
   createTour(tour: Omit<Tour, 'id' | 'createdAt' | 'updatedAt' | 'participants' | 'status'>): Promise<Tour>
   updateTour(id: string, updates: Partial<Tour>, submitForApproval?: boolean): Promise<Tour | null>
-  approveTour(id: string): Promise<Tour | null>
-  rejectTour(id: string, comment?: string): Promise<Tour | null>
+  publishTour(id: string): Promise<Tour | null>
+  unpublishTour(id: string): Promise<Tour | null>
+  submitTourForPublishing(id: string): Promise<Tour | null>
   registerForTour(tourId: string, userId: string): Promise<boolean>
   unregisterFromTour(tourId: string, userId: string): Promise<boolean>
+  deleteTour(id: string): Promise<boolean>
 
   // Chat Messages
   getMessagesByTourId(tourId: string): Promise<ChatMessage[]>

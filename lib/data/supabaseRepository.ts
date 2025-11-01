@@ -124,41 +124,72 @@ export class SupabaseDataRepository implements IDataRepository {
   }
 
   async getTourById(id: string): Promise<Tour | null> {
-    const { data, error } = await supabase
-      .from('tours_with_participants')
-      .select(`
-        *,
-        leader:users!leader_id(*)
-      `)
-      .eq('id', id)
-      .single()
+    try {
+      const { data, error } = await supabase
+        .from('tours_with_participants')
+        .select(`
+          *,
+          leader:users!leader_id(*)
+        `)
+        .eq('id', id)
+        .single()
 
-    if (error || !data) return null
-    return this.mapDbTourToTour(data)
+      if (error) {
+        console.error('Error fetching tour:', error)
+        return null
+      }
+      
+      if (!data) return null
+      
+      return this.mapDbTourToTour(data)
+    } catch (error) {
+      console.error('Error in getTourById:', error)
+      return null
+    }
   }
 
   async getApprovedTours(): Promise<Tour[]> {
+    // Alias für getPublishedTours für Rückwärtskompatibilität
+    return this.getPublishedTours()
+  }
+
+  async getPublishedTours(): Promise<Tour[]> {
     const { data, error } = await supabase
       .from('tours_with_participants')
       .select(`
         *,
         leader:users!leader_id(*)
       `)
-      .eq('status', 'approved')
-      .order('date', { ascending: true })
+      .eq('status', 'published')
+      .order('created_at', { ascending: false })
 
     if (error) throw error
     return (data || []).map((row: any) => this.mapDbTourToTour(row))
   }
 
-  async getPendingTours(): Promise<Tour[]> {
+  async getDraftTours(): Promise<Tour[]> {
     const { data, error } = await supabase
       .from('tours_with_participants')
       .select(`
         *,
         leader:users!leader_id(*)
       `)
-      .eq('status', 'pending')
+      .eq('status', 'draft')
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    return (data || []).map((row: any) => this.mapDbTourToTour(row))
+  }
+
+  async getToursSubmittedForPublishing(): Promise<Tour[]> {
+    const { data, error } = await supabase
+      .from('tours_with_participants')
+      .select(`
+        *,
+        leader:users!leader_id(*)
+      `)
+      .eq('status', 'draft')
+      .eq('submitted_for_publishing', true)
       .order('created_at', { ascending: false })
 
     if (error) throw error
@@ -180,7 +211,7 @@ export class SupabaseDataRepository implements IDataRepository {
         leader_id: tourData.leaderId,
         max_participants: tourData.maxParticipants,
         created_by: tourData.createdBy,
-        status: 'pending',
+        status: 'draft',
       })
       .select()
       .single()
@@ -208,15 +239,6 @@ export class SupabaseDataRepository implements IDataRepository {
     if (updates.duration !== undefined) updateData.duration = updates.duration
     if (updates.leaderId !== undefined) updateData.leader_id = updates.leaderId
     if (updates.maxParticipants !== undefined) updateData.max_participants = updates.maxParticipants
-    if (updates.rejectionComment !== undefined) updateData.rejection_comment = updates.rejectionComment
-
-    if (submitForApproval && currentTour.status === 'approved') {
-      // Store changes in pending_changes
-      updateData.pending_changes = { ...currentTour.pendingChanges, ...updates }
-      updateData.status = 'pending'
-    } else {
-      updateData.pending_changes = null
-    }
 
     const { error } = await supabase
       .from('tours')
@@ -227,56 +249,49 @@ export class SupabaseDataRepository implements IDataRepository {
     return this.getTourById(id)
   }
 
-  async approveTour(id: string): Promise<Tour | null> {
-    const tour = await this.getTourById(id)
-    if (!tour) return null
-
-    const updateData: any = { status: 'approved' }
-    
-    if (tour.pendingChanges) {
-      // Apply pending changes
-      const { error: updateError } = await supabase
-        .from('tours')
-        .update({
-          ...this.mapTourToDbTour(tour.pendingChanges as Partial<Tour>),
-          status: 'approved',
-          pending_changes: null,
-        })
-        .eq('id', id)
-
-      if (updateError) throw updateError
-    } else {
-      const { error } = await supabase
-        .from('tours')
-        .update(updateData)
-        .eq('id', id)
-
-      if (error) throw error
-    }
-
-    return this.getTourById(id)
-  }
-
-  async rejectTour(id: string, comment?: string): Promise<Tour | null> {
-    const tour = await this.getTourById(id)
-    if (!tour) return null
-
-    const updateData: any = { status: 'rejected' }
-    if (comment) updateData.rejection_comment = comment
-
-    if (tour.pendingChanges) {
-      // Discard pending changes, revert to approved
-      updateData.status = 'approved'
-      updateData.pending_changes = null
-    }
-
+  async publishTour(id: string): Promise<Tour | null> {
     const { error } = await supabase
       .from('tours')
-      .update(updateData)
+      .update({ 
+        status: 'published',
+        submitted_for_publishing: false,
+      })
       .eq('id', id)
 
     if (error) throw error
     return this.getTourById(id)
+  }
+
+  async unpublishTour(id: string): Promise<Tour | null> {
+    const { error } = await supabase
+      .from('tours')
+      .update({ 
+        status: 'draft',
+        submitted_for_publishing: false,
+      })
+      .eq('id', id)
+
+    if (error) throw error
+    return this.getTourById(id)
+  }
+
+  async submitTourForPublishing(id: string): Promise<Tour | null> {
+    const { error } = await supabase
+      .from('tours')
+      .update({ submitted_for_publishing: true })
+      .eq('id', id)
+
+    if (error) throw error
+    return this.getTourById(id)
+  }
+
+  async deleteTour(id: string): Promise<boolean> {
+    const { error } = await supabase
+      .from('tours')
+      .delete()
+      .eq('id', id)
+
+    return !error
   }
 
   async registerForTour(tourId: string, userId: string): Promise<boolean> {
@@ -588,6 +603,9 @@ export class SupabaseDataRepository implements IDataRepository {
   }
 
   private mapDbTourToTour(row: any): Tour {
+    // Ensure status is valid (fallback to 'draft' if invalid)
+    const validStatus = row.status === 'published' ? 'published' : 'draft'
+    
     return {
       id: row.id,
       title: row.title,
@@ -601,12 +619,12 @@ export class SupabaseDataRepository implements IDataRepository {
       leaderId: row.leader_id,
       leader: row.leader ? this.mapDbUserToUser(row.leader) : undefined,
       maxParticipants: row.max_participants,
-      status: row.status,
+      status: validStatus,
       participants: row.participant_ids || [],
       createdAt: new Date(row.created_at),
       updatedAt: new Date(row.updated_at),
       createdBy: row.created_by,
-      rejectionComment: row.rejection_comment || undefined,
+      submittedForPublishing: row.submitted_for_publishing === true,
       pendingChanges: row.pending_changes || undefined,
     }
   }
@@ -623,7 +641,6 @@ export class SupabaseDataRepository implements IDataRepository {
     if (tour.duration !== undefined) dbTour.duration = tour.duration
     if (tour.leaderId !== undefined) dbTour.leader_id = tour.leaderId
     if (tour.maxParticipants !== undefined) dbTour.max_participants = tour.maxParticipants
-    if (tour.rejectionComment !== undefined) dbTour.rejection_comment = tour.rejectionComment
     return dbTour
   }
 

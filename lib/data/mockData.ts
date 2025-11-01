@@ -90,21 +90,22 @@ class DataStore {
   }
 
   getApprovedTours(): Tour[] {
-    return this.getTours().filter((t) => t.status === 'approved')
+    return this.getTours().filter((t) => t.status === 'published')
   }
 
   getPendingTours(): Tour[] {
-    return this.getTours().filter((t) => t.status === 'pending')
+    return this.getTours().filter((t) => t.status === 'draft' && t.submittedForPublishing === true)
   }
 
   createTour(tour: Omit<Tour, 'id' | 'createdAt' | 'updatedAt' | 'participants' | 'status'>): Tour {
     const newTour: Tour = {
       ...tour,
       id: `tour_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      status: 'pending',
+      status: 'draft',
       participants: [],
       createdAt: new Date(),
       updatedAt: new Date(),
+      submittedForPublishing: false,
     }
     this.tours.push(newTour)
     return this.getTourById(newTour.id)!
@@ -116,73 +117,52 @@ class DataStore {
 
     const tour = this.tours[index]
 
-    if (submitForApproval && tour.status === 'approved') {
-      // Wenn Tour bereits approved ist und Änderungen vorgeschlagen werden
-      this.tours[index] = {
-        ...tour,
-        pendingChanges: { ...tour.pendingChanges, ...updates },
-        status: 'pending',
-        updatedAt: new Date(),
-      }
-    } else {
-      // Normale Aktualisierung
-      this.tours[index] = {
-        ...tour,
-        ...updates,
-        pendingChanges: undefined, // Änderungen werden übernommen
-        updatedAt: new Date(),
-      }
+    // Normale Aktualisierung
+    this.tours[index] = {
+      ...tour,
+      ...updates,
+      pendingChanges: undefined,
+      updatedAt: new Date(),
     }
 
     return this.getTourById(id)!
   }
 
   approveTour(id: string): Tour | null {
+    // Alias für publishTour für Rückwärtskompatibilität
+    return this.publishTour(id)
+  }
+
+  publishTour(id: string): Tour | null {
     const tour = this.getTourById(id)
     if (!tour) return null
 
     const index = this.tours.findIndex((t) => t.id === id)
-    if (tour.pendingChanges) {
-      // Änderungen übernehmen
-      this.tours[index] = {
-        ...tour,
-        ...tour.pendingChanges,
-        pendingChanges: undefined,
-        status: 'approved',
-        updatedAt: new Date(),
-      }
-    } else {
-      // Einfach Status ändern
-      this.tours[index] = {
-        ...tour,
-        status: 'approved',
-        updatedAt: new Date(),
-      }
+    this.tours[index] = {
+      ...tour,
+      status: 'published',
+      submittedForPublishing: false,
+      updatedAt: new Date(),
     }
 
     return this.getTourById(id)!
   }
 
   rejectTour(id: string, comment?: string): Tour | null {
+    // Alias für unpublishTour für Rückwärtskompatibilität
+    return this.unpublishTour(id)
+  }
+
+  unpublishTour(id: string): Tour | null {
     const tour = this.getTourById(id)
     if (!tour) return null
 
     const index = this.tours.findIndex((t) => t.id === id)
-    if (tour.pendingChanges) {
-      // Änderungen verwerfen, zu approved zurückkehren
-      this.tours[index] = {
-        ...tour,
-        pendingChanges: undefined,
-        status: 'approved',
-        updatedAt: new Date(),
-      }
-    } else {
-      this.tours[index] = {
-        ...tour,
-        status: 'rejected',
-        rejectionComment: comment,
-        updatedAt: new Date(),
-      }
+    this.tours[index] = {
+      ...tour,
+      status: 'draft',
+      submittedForPublishing: false,
+      updatedAt: new Date(),
     }
 
     return this.getTourById(id)!
@@ -190,7 +170,7 @@ class DataStore {
 
   registerForTour(tourId: string, userId: string): boolean {
     const tour = this.tours.find((t) => t.id === tourId)
-    if (!tour || tour.status !== 'approved') return false
+    if (!tour || tour.status !== 'published') return false
     if (tour.participants.includes(userId)) return false
     if (tour.participants.length >= tour.maxParticipants) return false
 

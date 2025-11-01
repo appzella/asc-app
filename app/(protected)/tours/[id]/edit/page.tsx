@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { authService } from '@/lib/auth'
-import { dataStore } from '@/lib/data/mockData'
-import { User, Tour, TourType, TourLength, Difficulty } from '@/lib/types'
+import { dataRepository } from '@/lib/data'
+import { User, Tour, TourType, TourLength, Difficulty, TourSettings } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -21,7 +21,8 @@ export default function EditTourPage() {
 
   const [user, setUser] = useState<User | null>(null)
   const [tour, setTour] = useState<Tour | null>(null)
-  const [settings, setSettings] = useState(dataStore.getSettings())
+  const [settings, setSettings] = useState<TourSettings>({ tourTypes: [], tourLengths: [], difficulties: {} })
+  const [users, setUsers] = useState<User[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -35,41 +36,56 @@ export default function EditTourPage() {
     elevation: '',
     duration: '',
     maxParticipants: '',
+    leaderId: '',
   })
 
   useEffect(() => {
-    const currentUser = authService.getCurrentUser()
-    setUser(currentUser)
-    setSettings(dataStore.getSettings())
+    const loadData = async () => {
+      const currentUser = authService.getCurrentUser()
+      setUser(currentUser)
 
-    if (currentUser) {
-      const tourData = dataStore.getTourById(tourId)
-      if (!tourData) {
-        router.push('/tours')
-        return
+      if (currentUser) {
+        const tourSettings = await dataRepository.getSettings()
+        setSettings(tourSettings)
+
+        const tourData = await dataRepository.getTourById(tourId)
+        if (!tourData) {
+          router.push('/tours')
+          return
+        }
+
+        if (!canEditTour(currentUser.role, tourData.leaderId, currentUser.id, tourData.status)) {
+          router.push(`/tours/${tourId}`)
+          return
+        }
+
+        setTour(tourData)
+        
+        // Load users for leader selection (only for admins)
+        if (currentUser.role === 'admin') {
+          const allUsers = await dataRepository.getUsers()
+          const leaders = allUsers.filter(u => u.role === 'leader' || u.role === 'admin')
+          setUsers(leaders)
+        }
+        
+        // Formular mit aktuellen Tour-Daten füllen
+        const displayTour = tourData.pendingChanges ? { ...tourData, ...tourData.pendingChanges } : tourData
+        setFormData({
+          title: displayTour.title,
+          description: displayTour.description,
+          date: new Date(displayTour.date).toISOString().split('T')[0],
+          difficulty: displayTour.difficulty,
+          tourType: displayTour.tourType,
+          tourLength: displayTour.tourLength,
+          elevation: displayTour.elevation.toString(),
+          duration: displayTour.duration.toString(),
+          maxParticipants: displayTour.maxParticipants.toString(),
+          leaderId: displayTour.leaderId,
+        })
       }
-
-      if (!canEditTour(currentUser.role, tourData.leaderId, currentUser.id)) {
-        router.push(`/tours/${tourId}`)
-        return
-      }
-
-      setTour(tourData)
-      
-      // Formular mit aktuellen Tour-Daten füllen
-      const displayTour = tourData.pendingChanges ? { ...tourData, ...tourData.pendingChanges } : tourData
-      setFormData({
-        title: displayTour.title,
-        description: displayTour.description,
-        date: new Date(displayTour.date).toISOString().split('T')[0],
-        difficulty: displayTour.difficulty,
-        tourType: displayTour.tourType,
-        tourLength: displayTour.tourLength,
-        elevation: displayTour.elevation.toString(),
-        duration: displayTour.duration.toString(),
-        maxParticipants: displayTour.maxParticipants.toString(),
-      })
     }
+
+    loadData()
 
     const unsubscribe = authService.subscribe((updatedUser) => {
       setUser(updatedUser)
@@ -96,7 +112,8 @@ export default function EditTourPage() {
       !formData.tourLength ||
       !formData.elevation ||
       !formData.duration ||
-      !formData.maxParticipants
+      !formData.maxParticipants ||
+      !formData.leaderId
     ) {
       setError('Bitte füllen Sie alle Felder aus')
       return
@@ -115,14 +132,16 @@ export default function EditTourPage() {
         elevation: parseInt(formData.elevation),
         duration: parseInt(formData.duration),
         maxParticipants: parseInt(formData.maxParticipants),
+        leaderId: formData.leaderId,
       }
 
       // Wenn Tour bereits approved ist, werden Änderungen als pendingChanges gespeichert
-      const submitForApproval = tour.status === 'approved'
-      dataStore.updateTour(tourId, updates, submitForApproval)
+      const submitForApproval = false // Nicht mehr benötigt mit neuer Status-Logik
+      await dataRepository.updateTour(tourId, updates, submitForApproval)
 
       router.push(`/tours/${tourId}`)
     } catch (err) {
+      console.error('Error updating tour:', err)
       setError('Fehler beim Aktualisieren der Tour')
     } finally {
       setIsLoading(false)
@@ -149,18 +168,16 @@ export default function EditTourPage() {
           <CardContent className="pt-6">
             <p className="text-yellow-800">
               Diese Tour hat bereits ausstehende Änderungen, die auf Freigabe warten.
-              Neue Änderungen werden zu den bestehenden hinzugefügt.
             </p>
           </CardContent>
         </Card>
       )}
 
-      {tour.status === 'approved' && (
+      {tour.status === 'published' && (
         <Card className="border-blue-200 bg-blue-50">
           <CardContent className="pt-6">
             <p className="text-blue-800">
-              Diese Tour ist bereits freigegeben. Ihre Änderungen müssen vom Admin genehmigt werden,
-              bevor sie live gehen.
+              Diese Tour ist bereits veröffentlicht. Ihre Änderungen sind sofort sichtbar.
             </p>
           </CardContent>
         </Card>
@@ -255,6 +272,22 @@ export default function EditTourPage() {
                 required
                 min="1"
               />
+              
+              {user?.role === 'admin' && (
+                <Select
+                  label="Tourenleiter"
+                  value={formData.leaderId}
+                  onChange={(e) => setFormData({ ...formData, leaderId: e.target.value })}
+                  required
+                  options={[
+                    { value: '', label: 'Bitte wählen' },
+                    ...users.map((u) => ({
+                      value: u.id,
+                      label: `${u.name} (${u.role})`,
+                    })),
+                  ]}
+                />
+              )}
             </div>
 
             {error && (
@@ -265,7 +298,7 @@ export default function EditTourPage() {
 
             <div className="flex gap-4 pt-4">
               <Button type="submit" variant="primary" disabled={isLoading} className="flex-1">
-                {isLoading ? 'Wird gespeichert...' : tour.status === 'approved' ? 'Änderungen zur Freigabe einreichen' : 'Tour aktualisieren'}
+                {isLoading ? 'Wird gespeichert...' : 'Tour aktualisieren'}
               </Button>
               <Link href={`/tours/${tourId}`}>
                 <Button type="button" variant="outline">

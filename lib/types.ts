@@ -1,6 +1,6 @@
 export type UserRole = 'admin' | 'leader' | 'member'
 
-export type TourStatus = 'pending' | 'approved' | 'rejected'
+export type TourStatus = 'draft' | 'published'
 
 export type TourType = 'Wanderung' | 'Skitour' | 'Bike'
 
@@ -51,7 +51,7 @@ export interface Tour {
   createdAt: Date
   updatedAt: Date
   createdBy: string // User-ID
-  rejectionComment?: string // Kommentar bei Ablehnung vom Admin
+  submittedForPublishing?: boolean // Ob die Tour zur Veröffentlichung eingereicht wurde
   pendingChanges?: Partial<Tour> // Ausstehende Änderungen, die auf Freigabe warten
 }
 

@@ -12,9 +12,10 @@ import { Send } from 'lucide-react'
 interface ChatWindowProps {
   tourId: string
   userId: string
+  leaderId?: string
 }
 
-export const ChatWindow: React.FC<ChatWindowProps> = ({ tourId, userId }) => {
+export const ChatWindow: React.FC<ChatWindowProps> = ({ tourId, userId, leaderId }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [newMessage, setNewMessage] = useState('')
   const [isLoading, setIsLoading] = useState(true)
@@ -133,8 +134,17 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ tourId, userId }) => {
                 }`}
               >
                 {message.user && message.userId !== userId && (
-                  <p className="text-xs font-semibold mb-1 text-primary-600 opacity-90">
+                  <p 
+                    className={`text-xs font-semibold mb-1 ${
+                      leaderId && message.userId === leaderId
+                        ? 'text-amber-600 dark:text-amber-400'
+                        : 'text-primary-600 opacity-90'
+                    }`}
+                  >
                     {message.user.name}
+                    {leaderId && message.userId === leaderId && (
+                      <span className="ml-1 text-[10px]">👤</span>
+                    )}
                   </p>
                 )}
                 <p className="text-sm">{message.message}</p>

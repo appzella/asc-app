@@ -18,6 +18,7 @@ export default function CreateTourPage() {
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
   const [settings, setSettings] = useState<TourSettings>({ tourTypes: [], tourLengths: [], difficulties: {} })
+  const [users, setUsers] = useState<User[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -31,6 +32,7 @@ export default function CreateTourPage() {
     elevation: '',
     duration: '',
     maxParticipants: '',
+    leaderId: '',
   })
 
   useEffect(() => {
@@ -41,6 +43,19 @@ export default function CreateTourPage() {
       if (currentUser) {
         const tourSettings = await dataRepository.getSettings()
         setSettings(tourSettings)
+        
+        // Load users for leader selection (only for admins)
+        if (currentUser.role === 'admin') {
+          const allUsers = await dataRepository.getUsers()
+          // Filter to only show leaders and admins as potential tour leaders
+          const leaders = allUsers.filter(u => u.role === 'leader' || u.role === 'admin')
+          setUsers(leaders)
+          // Set default leader to current user
+          setFormData(prev => ({ ...prev, leaderId: currentUser.id }))
+        } else {
+          // For non-admins, set leaderId to current user
+          setFormData(prev => ({ ...prev, leaderId: currentUser.id }))
+        }
         
         if (!canCreateTour(currentUser.role)) {
           router.push('/tours')
@@ -78,7 +93,8 @@ export default function CreateTourPage() {
       !formData.tourLength ||
       !formData.elevation ||
       !formData.duration ||
-      !formData.maxParticipants
+      !formData.maxParticipants ||
+      !formData.leaderId
     ) {
       setError('Bitte füllen Sie alle Felder aus')
       return
@@ -97,7 +113,7 @@ export default function CreateTourPage() {
         elevation: parseInt(formData.elevation),
         duration: parseInt(formData.duration),
         maxParticipants: parseInt(formData.maxParticipants),
-        leaderId: user.id,
+        leaderId: formData.leaderId,
         createdBy: user.id,
       })
 
@@ -228,6 +244,22 @@ export default function CreateTourPage() {
                 required
                 min="1"
               />
+              
+              {user?.role === 'admin' && (
+                <Select
+                  label="Tourenleiter"
+                  value={formData.leaderId}
+                  onChange={(e) => setFormData({ ...formData, leaderId: e.target.value })}
+                  required
+                  options={[
+                    { value: '', label: 'Bitte wählen' },
+                    ...users.map((u) => ({
+                      value: u.id,
+                      label: `${u.name} (${u.role})`,
+                    })),
+                  ]}
+                />
+              )}
             </div>
 
             {error && (

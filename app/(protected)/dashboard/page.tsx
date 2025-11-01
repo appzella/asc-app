@@ -28,7 +28,7 @@ export default function DashboardPage() {
         const futureTours = allTours.filter((t) => {
           const tourDate = new Date(t.date)
           tourDate.setHours(0, 0, 0, 0)
-          return tourDate >= today && t.status === 'approved'
+          return tourDate >= today && t.status === 'published'
         })
         setTours(futureTours)
         
@@ -41,11 +41,12 @@ export default function DashboardPage() {
         setArchivedTours(pastTours)
         
         if (currentUser.role === 'admin') {
-          const pending = await dataRepository.getPendingTours()
-          setPendingTours(pending)
+          const submitted = await dataRepository.getToursSubmittedForPublishing()
+          setPendingTours(submitted)
         } else if (currentUser.role === 'leader') {
-          const pending = allTours.filter((t) => t.leaderId === currentUser.id && t.status === 'pending')
-          setPendingTours(pending)
+          const allTours = await dataRepository.getTours()
+          const submitted = allTours.filter((t) => t.leaderId === currentUser.id && t.status === 'draft' && t.submittedForPublishing === true)
+          setPendingTours(submitted)
         }
       }
       
@@ -84,8 +85,8 @@ export default function DashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Link href="/tours?status=pending">
-              <Button variant="primary">Zur Freigabe</Button>
+            <Link href="/tours?status=submitted">
+              <Button variant="primary">Zur Veröffentlichung</Button>
             </Link>
           </CardContent>
         </Card>

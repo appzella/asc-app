@@ -81,8 +81,8 @@ CREATE TABLE IF NOT EXISTS public.tours (
   duration INTEGER NOT NULL, -- Dauer in Stunden
   leader_id UUID NOT NULL REFERENCES public.users(id),
   max_participants INTEGER NOT NULL CHECK (max_participants > 0),
-  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
-  rejection_comment TEXT,
+  status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'published')),
+  submitted_for_publishing BOOLEAN DEFAULT FALSE,
   pending_changes JSONB, -- Ausstehende Änderungen, die auf Freigabe warten
   created_by UUID NOT NULL REFERENCES public.users(id),
   created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -93,9 +93,9 @@ CREATE TABLE IF NOT EXISTS public.tours (
 ALTER TABLE public.tours ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for tours
-CREATE POLICY "Everyone can view approved tours"
+CREATE POLICY "Everyone can view published tours"
   ON public.tours FOR SELECT
-  USING (status = 'approved' OR auth.uid() = leader_id OR auth.uid() = created_by);
+  USING (status = 'published' OR auth.uid() = leader_id OR auth.uid() = created_by);
 
 CREATE POLICY "Admins can view all tours"
   ON public.tours FOR SELECT
@@ -368,7 +368,23 @@ CREATE TRIGGER update_tour_settings_updated_at
 -- View for tours with participant count
 CREATE OR REPLACE VIEW public.tours_with_participants AS
 SELECT 
-  t.*,
+  t.id,
+  t.title,
+  t.description,
+  t.date,
+  t.difficulty,
+  t.tour_type,
+  t.tour_length,
+  t.elevation,
+  t.duration,
+  t.leader_id,
+  t.max_participants,
+  t.status,
+  t.submitted_for_publishing,
+  t.pending_changes,
+  t.created_by,
+  t.created_at,
+  t.updated_at,
   COUNT(tp.user_id) as participant_count,
   array_agg(tp.user_id) FILTER (WHERE tp.user_id IS NOT NULL) as participant_ids
 FROM public.tours t

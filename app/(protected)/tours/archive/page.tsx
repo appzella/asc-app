@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { authService } from '@/lib/auth'
-import { dataStore } from '@/lib/data/mockData'
-import { User, Tour } from '@/lib/types'
+import { dataRepository } from '@/lib/data'
+import { User, Tour, TourSettings } from '@/lib/types'
 import { TourCard } from '@/components/tours/TourCard'
 import { Select } from '@/components/ui/Select'
 import { Input } from '@/components/ui/Input'
@@ -16,7 +16,7 @@ export default function ToursArchivePage() {
   const [user, setUser] = useState<User | null>(null)
   const [tours, setTours] = useState<Tour[]>([])
   const [filteredTours, setFilteredTours] = useState<Tour[]>([])
-  const [settings, setSettings] = useState(dataStore.getSettings())
+  const [settings, setSettings] = useState<TourSettings>({ tourTypes: [], tourLengths: [], difficulties: {} })
   
   // Filter state
   const [statusFilter, setStatusFilter] = useState<string>('')
@@ -31,40 +31,34 @@ export default function ToursArchivePage() {
     setUser(currentUser)
 
     if (currentUser) {
-      setSettings(dataStore.getSettings())
-      let allTours = dataStore.getTours()
-      
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
+      const loadData = async () => {
+        const tourSettings = await dataRepository.getSettings()
+        setSettings(tourSettings)
+        
+        let allTours = await dataRepository.getTours()
+        
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
 
-      // Nur vergangene Touren anzeigen
-      allTours = allTours.filter((t) => {
-        const tourDate = new Date(t.date)
-        tourDate.setHours(0, 0, 0, 0)
-        return tourDate < today
-      })
+        // Nur vergangene Touren anzeigen
+        allTours = allTours.filter((t) => {
+          const tourDate = new Date(t.date)
+          tourDate.setHours(0, 0, 0, 0)
+          return tourDate < today
+        })
 
-      // URL-Parameter prüfen
-      const statusParam = searchParams.get('status')
-      const myParam = searchParams.get('my')
-      
-      if (statusParam === 'pending' && currentUser.role === 'admin') {
-        allTours = allTours.filter((t) => t.status === 'pending')
-        setStatusFilter('pending')
-      } else if (statusParam === 'pending' && currentUser.role === 'leader') {
-        allTours = allTours.filter((t) => t.leaderId === currentUser.id && t.status === 'pending')
-        setStatusFilter('pending')
-      } else if (currentUser.role !== 'admin') {
-        // Mitglieder sehen nur freigegebene Touren
-        allTours = allTours.filter((t) => t.status === 'approved')
+        // URL-Parameter prüfen
+        const myParam = searchParams.get('my')
+        
+        if (myParam === 'true') {
+          setShowMyTours(true)
+        }
+
+        setTours(allTours)
+        setFilteredTours(allTours)
       }
-
-      if (myParam === 'true') {
-        setShowMyTours(true)
-      }
-
-      setTours(allTours)
-      setFilteredTours(allTours)
+      
+      loadData()
     }
 
     const unsubscribe = authService.subscribe((updatedUser) => {
@@ -172,9 +166,8 @@ export default function ToursArchivePage() {
               onChange={(e) => setStatusFilter(e.target.value)}
               options={[
                 { value: '', label: 'Alle' },
-                { value: 'pending', label: 'Ausstehend' },
-                { value: 'approved', label: 'Freigegeben' },
-                { value: 'rejected', label: 'Abgelehnt' },
+                { value: 'published', label: 'Veröffentlicht' },
+                { value: 'draft', label: 'Entwurf' },
               ]}
             />
           )}
