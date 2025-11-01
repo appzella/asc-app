@@ -453,11 +453,15 @@ export class SupabaseDataRepository implements IDataRepository {
       tourTypes: [],
       tourLengths: [],
       difficulties: {},
+      tourTypeIcons: {},
     }
 
     ;(data || []).forEach((row: any) => {
       if (row.setting_type === 'tour_type') {
         settings.tourTypes.push(row.setting_key)
+        if (row.icon_name) {
+          settings.tourTypeIcons![row.setting_key] = row.icon_name
+        }
       } else if (row.setting_type === 'tour_length') {
         settings.tourLengths.push(row.setting_key)
       } else if (row.setting_type === 'difficulty') {
@@ -483,13 +487,32 @@ export class SupabaseDataRepository implements IDataRepository {
   }
 
   async addTourType(type: string): Promise<boolean> {
+    // Set default icon based on type
+    const defaultIcons: { [key: string]: string } = {
+      Wanderung: 'Mountain',
+      Skitour: 'Ski',
+      Bike: 'Bike',
+    }
+    const defaultIcon = defaultIcons[type] || 'Mountain'
+
     const { error } = await supabase
       .from('tour_settings')
       .insert({
         setting_type: 'tour_type',
         setting_key: type,
+        icon_name: defaultIcon,
         display_order: 0,
       })
+
+    return !error
+  }
+
+  async updateTourTypeIcon(tourType: string, iconName: string): Promise<boolean> {
+    const { error } = await supabase
+      .from('tour_settings')
+      .update({ icon_name: iconName })
+      .eq('setting_type', 'tour_type')
+      .eq('setting_key', tourType)
 
     return !error
   }

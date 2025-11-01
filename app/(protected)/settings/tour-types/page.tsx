@@ -4,17 +4,20 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { authService } from '@/lib/auth'
 import { dataRepository } from '@/lib/data'
-import { User } from '@/lib/types'
+import { User, TourSettings } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
+import { Select } from '@/components/ui/Select'
 import { canManageUsers } from '@/lib/roles'
 import Link from 'next/link'
+import { getIconByName, getTourIcon } from '@/lib/tourIcons'
 
 export default function TourTypesSettingsPage() {
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
   const [tourTypes, setTourTypes] = useState<string[]>([])
+  const [tourTypeIcons, setTourTypeIcons] = useState<{ [key: string]: string }>({})
   const [newType, setNewType] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -32,6 +35,7 @@ export default function TourTypesSettingsPage() {
       if (currentUser) {
         const settings = await dataRepository.getSettings()
         setTourTypes(settings.tourTypes)
+        setTourTypeIcons(settings.tourTypeIcons || {})
       }
     }
 
@@ -44,6 +48,7 @@ export default function TourTypesSettingsPage() {
       } else {
         const settings = await dataRepository.getSettings()
         setTourTypes(settings.tourTypes)
+        setTourTypeIcons(settings.tourTypeIcons || {})
       }
     })
 
@@ -62,6 +67,7 @@ export default function TourTypesSettingsPage() {
     if (success) {
       const settings = await dataRepository.getSettings()
       setTourTypes(settings.tourTypes)
+      setTourTypeIcons(settings.tourTypeIcons || {})
       setNewType('')
       setSuccess('Tourentyp hinzugefügt!')
       setTimeout(() => setSuccess(''), 3000)
@@ -76,8 +82,20 @@ export default function TourTypesSettingsPage() {
     if (success) {
       const settings = await dataRepository.getSettings()
       setTourTypes(settings.tourTypes)
+      setTourTypeIcons(settings.tourTypeIcons || {})
       setSuccess('Tourentyp entfernt!')
       setTimeout(() => setSuccess(''), 3000)
+    }
+  }
+
+  const handleIconChange = async (tourType: string, iconName: string) => {
+    const success = await dataRepository.updateTourTypeIcon(tourType, iconName)
+    if (success) {
+      setTourTypeIcons({ ...tourTypeIcons, [tourType]: iconName })
+      setSuccess(`Icon für ${tourType} aktualisiert!`)
+      setTimeout(() => setSuccess(''), 3000)
+    } else {
+      setError('Fehler beim Aktualisieren des Icons')
     }
   }
 
@@ -106,6 +124,23 @@ export default function TourTypesSettingsPage() {
     setSuccess('Reihenfolge aktualisiert!')
     setTimeout(() => setSuccess(''), 3000)
   }
+
+  // Beliebte Icons für Tourenarten
+  const popularIcons = [
+    { value: 'Mountain', label: 'Mountain' },
+    { value: 'Hiking', label: 'Hiking' },
+    { value: 'Footprints', label: 'Footprints' },
+    { value: 'Ski', label: 'Ski' },
+    { value: 'Snowflake', label: 'Snowflake' },
+    { value: 'Alpine', label: 'Alpine' },
+    { value: 'Bike', label: 'Bike' },
+    { value: 'Bicycle', label: 'Bicycle' },
+    { value: 'MapPin', label: 'MapPin' },
+    { value: 'Compass', label: 'Compass' },
+    { value: 'TreePine', label: 'TreePine' },
+    { value: 'Trees', label: 'Trees' },
+    { value: 'MountainSnow', label: 'MountainSnow' },
+  ]
 
   if (!user) {
     return <div>Lädt...</div>
@@ -177,17 +212,29 @@ export default function TourTypesSettingsPage() {
                   onDrop={(e) => handleDrop(e, index)}
                   className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 cursor-move hover:bg-gray-100 transition-colors group"
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 flex-1">
                     <span className="text-gray-400 group-hover:text-gray-600">☰</span>
+                    {(() => {
+                      const IconComponent = getTourIcon(type as any, tourTypeIcons)
+                      return <IconComponent className="w-5 h-5 text-gray-600 flex-shrink-0" strokeWidth={2} />
+                    })()}
                     <span className="font-medium text-gray-900">{type}</span>
                   </div>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => handleRemove(type)}
-                  >
-                    Entfernen
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Select
+                      value={tourTypeIcons[type] || 'Mountain'}
+                      onChange={(e) => handleIconChange(type, e.target.value)}
+                      options={popularIcons}
+                      className="w-40"
+                    />
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => handleRemove(type)}
+                    >
+                      Entfernen
+                    </Button>
+                  </div>
                 </div>
               ))
             )}

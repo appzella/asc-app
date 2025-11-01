@@ -44,6 +44,7 @@ export interface IDataRepository {
   updateSettings(updates: Partial<TourSettings>): Promise<TourSettings>
   addTourType(type: string): Promise<boolean>
   removeTourType(type: string): Promise<boolean>
+  updateTourTypeIcon(tourType: string, iconName: string): Promise<boolean>
   addTourLength(length: string): Promise<boolean>
   removeTourLength(length: string): Promise<boolean>
   updateTourTypesOrder(orderedTypes: string[]): Promise<void>

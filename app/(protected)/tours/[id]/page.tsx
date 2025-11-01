@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { authService } from '@/lib/auth'
 import { dataRepository } from '@/lib/data'
-import { User, Tour } from '@/lib/types'
+import { User, Tour, TourSettings } from '@/lib/types'
+import { getTourIcon, getTourIconColor } from '@/lib/tourIcons'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Textarea } from '@/components/ui/Textarea'
@@ -21,6 +22,7 @@ export default function TourDetailPage() {
 
   const [user, setUser] = useState<User | null>(null)
   const [tour, setTour] = useState<Tour | null>(null)
+  const [settings, setSettings] = useState<TourSettings | null>(null)
   const [participants, setParticipants] = useState<User[]>([])
   const [isRegistered, setIsRegistered] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
@@ -34,12 +36,17 @@ export default function TourDetailPage() {
 
       if (currentUser) {
         try {
-          const tourData = await dataRepository.getTourById(tourId)
+          const [tourData, tourSettings] = await Promise.all([
+            dataRepository.getTourById(tourId),
+            dataRepository.getSettings()
+          ])
+          
           if (!tourData) {
             router.push('/tours')
             return
           }
           setTour(tourData)
+          setSettings(tourSettings)
           setIsRegistered(tourData.participants.includes(currentUser.id))
 
           // Load participant details
@@ -236,7 +243,14 @@ export default function TourDetailPage() {
           <Link href="/tours" className="text-primary-600 hover:text-primary-700 text-sm mb-2 inline-block">
             ← Zurück zur Übersicht
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900">{tour.title}</h1>
+          <div className="flex items-center gap-3">
+            {(() => {
+              const IconComponent = getTourIcon(tour.tourType, settings?.tourTypeIcons)
+              const iconColor = getTourIconColor(tour.tourType)
+              return <IconComponent className={`w-8 h-8 ${iconColor} flex-shrink-0`} strokeWidth={2} />
+            })()}
+            <h1 className="text-3xl font-bold text-gray-900">{tour.title}</h1>
+          </div>
         </div>
         {canEdit && (
           <Link href={`/tours/${tourId}/edit`}>

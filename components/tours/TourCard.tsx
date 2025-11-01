@@ -5,12 +5,14 @@ import { Card, CardContent } from '@/components/ui/Card'
 import { formatDifficulty } from '@/lib/difficulty'
 import { Calendar, Clock, Mountain, Users } from 'lucide-react'
 import Image from 'next/image'
+import { getTourIcon, getTourIconColor } from '@/lib/tourIcons'
 
 interface TourCardProps {
   tour: Tour
+  tourTypeIcons?: { [key: string]: string }
 }
 
-export const TourCard: React.FC<TourCardProps> = ({ tour }) => {
+export const TourCard: React.FC<TourCardProps> = ({ tour, tourTypeIcons }) => {
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString('de-CH', {
       day: 'numeric',
@@ -62,7 +64,14 @@ export const TourCard: React.FC<TourCardProps> = ({ tour }) => {
       <Card className="hover:shadow-modern-xl active:shadow-modern-lg cursor-pointer h-full group animate-slide-up transition-shadow">
         <CardContent className="p-6">
           <div className="flex justify-between items-start mb-2">
-            <h3 className="text-xl font-semibold text-gray-900">{tour.title}</h3>
+            <div className="flex items-center gap-2 flex-1">
+              {(() => {
+                const IconComponent = getTourIcon(tour.tourType, tourTypeIcons)
+                const iconColor = getTourIconColor(tour.tourType)
+                return <IconComponent className={`w-5 h-5 ${iconColor} flex-shrink-0`} strokeWidth={2} />
+              })()}
+              <h3 className="text-xl font-semibold text-gray-900">{tour.title}</h3>
+            </div>
             {getStatusBadge()}
           </div>
           

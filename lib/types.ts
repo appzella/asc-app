@@ -80,4 +80,5 @@ export interface TourSettings {
   difficulties: {
     [tourType: string]: string[] // z.B. { 'Wanderung': ['T1', 'T2', ...], 'Skitour': ['L', 'WS', ...] }
   }
+  tourTypeIcons?: { [tourType: string]: string } // z.B. { 'Wanderung': 'Mountain', 'Skitour': 'Ski' }
 }

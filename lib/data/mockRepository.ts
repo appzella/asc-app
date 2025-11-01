@@ -171,6 +171,12 @@ export class MockDataRepository implements IDataRepository {
     return dataStore.removeTourType(type)
   }
 
+  async updateTourTypeIcon(tourType: string, iconName: string): Promise<boolean> {
+    // Mock implementation - always returns true
+    // In real implementation, this would update mockData
+    return true
+  }
+
   async addTourLength(length: string): Promise<boolean> {
     return dataStore.addTourLength(length)
   }
