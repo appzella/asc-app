@@ -12,6 +12,8 @@ class SupabaseAuthService {
   private listeners: Set<(user: User | null) => void> = new Set()
   private currentUser: User | null = null
   private isLoadingProfile: boolean = false
+  private isInitializing: boolean = false
+  private initializationPromise: Promise<void> | null = null
 
   constructor() {
     // Listen to auth state changes
@@ -20,27 +22,42 @@ class SupabaseAuthService {
         if (event === 'SIGNED_OUT') {
           this.currentUser = null
           this.notifyListeners(null)
+        } else if (event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') {
+          // Load profile on initial session (page reload) or token refresh
+          // INITIAL_SESSION is fired when Supabase restores the session from localStorage
+          // SIGNED_IN is handled by login() function to avoid race conditions
+          if (session?.user && !this.currentUser) {
+            await this.loadUserProfile(session.user.id)
+          }
         }
-        // Don't load profile here during login - let login() handle it
-        // This prevents race conditions
       })
 
-      // Load initial session
+      // Load initial session (fallback, in case onAuthStateChange doesn't fire)
       this.initializeSession()
     }
   }
 
   private async initializeSession() {
-    if (!isSupabaseConfigured || !supabase) return
-
-    try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session?.user) {
-        await this.loadUserProfile(session.user.id)
-      }
-    } catch (error) {
-      console.error('Error initializing session:', error)
+    if (!isSupabaseConfigured || !supabase || this.isInitializing) {
+      return this.initializationPromise
     }
+
+    this.isInitializing = true
+
+    this.initializationPromise = (async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session?.user) {
+          await this.loadUserProfile(session.user.id)
+        }
+      } catch (error) {
+        console.error('Error initializing session:', error)
+      } finally {
+        this.isInitializing = false
+      }
+    })()
+
+    return this.initializationPromise
   }
 
   private async loadUserProfile(userId: string): Promise<User | null> {
@@ -154,10 +171,8 @@ class SupabaseAuthService {
         return null
       }
 
-      // Load user profile directly after successful login
-      // Give Supabase a moment to establish the session
-      await new Promise((resolve) => setTimeout(resolve, 100))
-      
+      // Wait for session to be established and load user profile
+      // We load it directly here to avoid race conditions with authStateChange listener
       const user = await this.loadUserProfile(data.user.id)
 
       return user
@@ -190,11 +205,17 @@ class SupabaseAuthService {
       return null
     }
 
+    // Wait for initialization to complete if it's in progress
+    if (this.isInitializing && this.initializationPromise) {
+      await this.initializationPromise
+    }
+
     if (this.currentUser) {
       return this.currentUser
     }
 
     try {
+      // Try to get session and load profile if we don't have a user yet
       const { data: { session } } = await supabase.auth.getSession()
       if (session?.user) {
         await this.loadUserProfile(session.user.id)

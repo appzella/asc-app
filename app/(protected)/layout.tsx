@@ -24,8 +24,18 @@ export default function ProtectedLayout({
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   useEffect(() => {
+    let isMounted = true
+
     const initializeAuth = async () => {
+      // Wait for Supabase to restore session from localStorage
+      // onAuthStateChange with INITIAL_SESSION should fire, but we also wait a bit
+      // to ensure the session is fully restored
+      await new Promise(resolve => setTimeout(resolve, 200))
+      
       const currentUser = await authService.getCurrentUserAsync()
+      
+      if (!isMounted) return
+
       setUser(currentUser)
       setIsLoading(false)
 
@@ -38,13 +48,19 @@ export default function ProtectedLayout({
     initializeAuth()
 
     const unsubscribe = authService.subscribe((updatedUser) => {
+      if (!isMounted) return
+      
       setUser(updatedUser)
-      if (!updatedUser) {
+      // Don't set isLoading to false here if we're still initializing
+      // The initial load will handle that
+      
+      if (!updatedUser && !isLoading) {
         router.push('/login')
       }
     })
 
     return () => {
+      isMounted = false
       unsubscribe()
     }
   }, [router])
