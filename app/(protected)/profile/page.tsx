@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Textarea } from '@/components/ui/Textarea'
+import { ImageCropper } from '@/components/ui/ImageCropper'
 import Image from 'next/image'
 
 export default function ProfilePage() {
@@ -15,6 +16,8 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [showCropper, setShowCropper] = useState(false)
+  const [imageToCrop, setImageToCrop] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [formData, setFormData] = useState({
@@ -77,10 +80,38 @@ export default function ProfilePage() {
       return
     }
 
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+
+    // Read file as data URL to show in cropper
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      const imageDataUrl = reader.result as string
+      setImageToCrop(imageDataUrl)
+      setShowCropper(true)
+    }
+    reader.onerror = () => {
+      setError('Fehler beim Lesen der Datei')
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const handleCropComplete = async (croppedImageBlob: Blob) => {
+    if (!user) return
+
+    setShowCropper(false)
+    setImageToCrop(null)
     setIsLoading(true)
     setError('')
 
     try {
+      // Convert blob to File
+      const croppedFile = new File([croppedImageBlob], 'profile-photo.jpg', {
+        type: 'image/jpeg',
+      })
+
       // Delete old photo if exists
       if (user.profilePhoto && !user.profilePhoto.startsWith('data:')) {
         // Only delete if it's a URL (from storage), not base64
@@ -99,7 +130,7 @@ export default function ProfilePage() {
       // Check if we have uploadProfilePhoto method (Supabase repository)
       const repo = dataRepository as any
       if (typeof repo.uploadProfilePhoto === 'function') {
-        const photoUrl = await repo.uploadProfilePhoto(user.id, file)
+        const photoUrl = await repo.uploadProfilePhoto(user.id, croppedFile)
         
         // Update user with new photo URL
         const updatedUser = await dataRepository.updateUser(user.id, {
@@ -128,7 +159,7 @@ export default function ProfilePage() {
         reader.onerror = () => {
           setError('Fehler beim Lesen der Datei')
         }
-        reader.readAsDataURL(file)
+        reader.readAsDataURL(croppedFile)
       }
     } catch (err) {
       console.error('Upload error:', err)
@@ -136,6 +167,11 @@ export default function ProfilePage() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleCropCancel = () => {
+    setShowCropper(false)
+    setImageToCrop(null)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -208,11 +244,21 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
-      <div>
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">Profil</h1>
-        <p className="text-lg text-gray-600">Verwalten Sie Ihre persönlichen Informationen</p>
-      </div>
+    <>
+      {showCropper && imageToCrop && (
+        <ImageCropper
+          image={imageToCrop}
+          onCropComplete={handleCropComplete}
+          onCancel={handleCropCancel}
+          aspectRatio={1}
+          cropShape="round"
+        />
+      )}
+      <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
+        <div>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Profil</h1>
+          <p className="text-lg text-gray-600">Verwalten Sie Ihre persönlichen Informationen</p>
+        </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Profilfoto */}
@@ -364,6 +410,7 @@ export default function ProfilePage() {
         </div>
       </div>
     </div>
+    </>
   )
 }
 
