@@ -229,10 +229,10 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent className="flex flex-col flex-1">
             <Link href="/help" className="sm:hidden touch-manipulation block flex-1">
-              <p className="text-sm text-gray-600 text-center">Benötigen Sie Hilfe bei der Nutzung der App</p>
+              <p className="text-sm text-gray-600">Benötigen Sie Hilfe bei der Nutzung der App</p>
             </Link>
             <div className="sm:block hidden">
-              <p className="text-sm text-gray-600 text-center">Benötigen Sie Hilfe bei der Nutzung der App</p>
+              <p className="text-sm text-gray-600">Benötigen Sie Hilfe bei der Nutzung der App</p>
             </div>
             <div className="mt-auto pt-4">
               <Link href="/help" className="hidden sm:block">
