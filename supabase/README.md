@@ -73,13 +73,23 @@ Für Echtzeit-Chat-Updates muss Realtime für die `chat_messages` Tabelle aktivi
   ```
   Wenn eine Zeile zurückkommt, ist Realtime aktiviert.
 
-## 7. Nächste Schritte
+## 7. E-Mail Service Setup
+
+Für automatischen E-Mail-Versand von Einladungslinks:
+1. Siehe `supabase/README-email.md` für detaillierte Anleitung
+2. Kurzfassung:
+   - Resend Account erstellen (kostenlos)
+   - Supabase CLI installieren und Projekt verlinken
+   - `RESEND_API_KEY` als Secret setzen
+   - Edge Function deployen: `supabase functions deploy send-invitation-email`
+
+## 8. Nächste Schritte
 
 Nach dem Schema-Setup:
 1. ✅ Repository-Abstraktionsschicht erstellt
 2. ✅ Migration von mockData.ts zu Supabase Client
 3. ✅ Supabase Auth implementiert
 4. ✅ Supabase Realtime für Chat-Updates implementiert
-5. ⏭️ Web Push API Setup und Notification-Events implementieren
-6. ⏭️ E-Mail-Service für Einladungslinks einrichten
+5. ✅ E-Mail-Service für Einladungslinks eingerichtet
+6. ⏭️ Web Push API Setup und Notification-Events implementieren
 

@@ -70,13 +70,43 @@ export default function InvitationsPage() {
 
       const invitation = await dataRepository.createInvitation(email, user.id)
       
-      // Generiere Registrierungslink
-      const registrationLink = `${window.location.origin}/register/${invitation.token}`
+      // Automatically send email
+      try {
+        const emailResponse = await fetch('/api/invitations/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ invitationId: invitation.id }),
+        })
+
+        if (emailResponse.ok) {
+          setMessage({
+            type: 'success',
+            text: `Einladung erstellt und E-Mail an ${email} gesendet!`,
+          })
+        } else {
+          // Fallback: Show link if email fails
+          const registrationLink = `${window.location.origin}/register/${invitation.token}`
+          const errorData = await emailResponse.json().catch(() => ({}))
+          
+          setMessage({
+            type: 'success',
+            text: `Einladung erstellt! E-Mail konnte nicht automatisch gesendet werden. Link: ${registrationLink}`,
+          })
+          
+          console.warn('Email sending failed:', errorData)
+        }
+      } catch (emailError) {
+        // Fallback: Show link if email request fails completely
+        const registrationLink = `${window.location.origin}/register/${invitation.token}`
+        
+        setMessage({
+          type: 'success',
+          text: `Einladung erstellt! E-Mail konnte nicht gesendet werden. Link: ${registrationLink}`,
+        })
+        
+        console.warn('Email sending error:', emailError)
+      }
       
-      setMessage({
-        type: 'success',
-        text: `Einladung erstellt! Registrierungslink: ${registrationLink}`,
-      })
       setEmail('')
       const allInvitations = await dataRepository.getInvitations()
       setInvitations(allInvitations)
