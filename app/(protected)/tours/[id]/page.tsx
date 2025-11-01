@@ -412,12 +412,14 @@ export default function TourDetailPage() {
                 <CardTitle className="text-yellow-800">Veröffentlichung</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Button variant="primary" onClick={handleApprove} className="w-full">
+                <Button variant="primary" onClick={handleApprove} className="w-full" disabled={isArchived}>
                   Tour veröffentlichen
                 </Button>
-                <Button variant="outline" onClick={handleUnpublish} className="w-full">
-                  Auf Entwurf zurücksetzen
-                </Button>
+                {!isArchived && (
+                  <Button variant="outline" onClick={handleUnpublish} className="w-full">
+                    Auf Entwurf zurücksetzen
+                  </Button>
+                )}
               </CardContent>
             </Card>
           )}
@@ -429,9 +431,14 @@ export default function TourDetailPage() {
                 <CardTitle className="text-gray-800">Admin-Aktionen</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Button variant="primary" onClick={handleApprove} className="w-full">
+                <Button variant="primary" onClick={handleApprove} className="w-full" disabled={isArchived}>
                   Tour veröffentlichen
                 </Button>
+                {isArchived && (
+                  <p className="text-sm text-gray-600 mt-2">
+                    Archivierte Touren können nicht mehr veröffentlicht werden.
+                  </p>
+                )}
               </CardContent>
             </Card>
           )}
@@ -442,12 +449,16 @@ export default function TourDetailPage() {
                 <CardTitle className="text-green-800">Verwaltung</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Button variant="outline" onClick={handleCancel} className="w-full">
-                  Tour absagen
-                </Button>
-                <Button variant="outline" onClick={handleUnpublish} className="w-full">
-                  Auf Entwurf setzen
-                </Button>
+                {!isArchived && (
+                  <>
+                    <Button variant="outline" onClick={handleCancel} className="w-full">
+                      Tour absagen
+                    </Button>
+                    <Button variant="outline" onClick={handleUnpublish} className="w-full">
+                      Auf Entwurf setzen
+                    </Button>
+                  </>
+                )}
                 <Button variant="danger" onClick={handleDelete} className="w-full">
                   Tour löschen
                 </Button>
@@ -461,12 +472,16 @@ export default function TourDetailPage() {
                 <CardTitle className="text-red-800">Verwaltung</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Button variant="primary" onClick={handleApprove} className="w-full">
-                  Tour wieder aktivieren
-                </Button>
-                <Button variant="outline" onClick={handleUnpublish} className="w-full">
-                  Auf Entwurf setzen
-                </Button>
+                {!isArchived && (
+                  <>
+                    <Button variant="primary" onClick={handleApprove} className="w-full">
+                      Tour wieder aktivieren
+                    </Button>
+                    <Button variant="outline" onClick={handleUnpublish} className="w-full">
+                      Auf Entwurf setzen
+                    </Button>
+                  </>
+                )}
                 <Button variant="danger" onClick={handleDelete} className="w-full">
                   Tour löschen
                 </Button>
