@@ -104,50 +104,89 @@ export default function DashboardPage() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Link href="/tours?my=true" className="touch-manipulation">
-          <Card className="flex flex-col hover:shadow-modern-lg transition-all h-full group">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                Meine Touren
+        <Card className="flex flex-col hover:shadow-modern-lg transition-all h-full group">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span>Meine Touren</span>
+              <Link href="/tours?my=true" className="sm:hidden touch-manipulation">
                 <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-primary-600 transition-colors" strokeWidth={1.8} />
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col flex-1">
+              </Link>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col flex-1">
+            <Link href="/tours?my=true" className="sm:hidden touch-manipulation block flex-1">
               <div className="text-3xl font-bold text-primary-600">{myTours.length}</div>
               <p className="text-sm text-gray-600 mt-2">Angemeldete oder geleitete Touren</p>
-            </CardContent>
-          </Card>
-        </Link>
+            </Link>
+            <div className="sm:block hidden">
+              <div className="text-3xl font-bold text-primary-600">{myTours.length}</div>
+              <p className="text-sm text-gray-600 mt-2">Angemeldete oder geleitete Touren</p>
+            </div>
+            <div className="mt-auto pt-4">
+              <Link href="/tours?my=true" className="hidden sm:block">
+                <Button variant="primary" size="sm" className="w-full">
+                  Anzeigen
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
 
-        <Link href="/tours" className="touch-manipulation">
-          <Card className="flex flex-col hover:shadow-modern-lg transition-all h-full group">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                Verfügbare Touren
+        <Card className="flex flex-col hover:shadow-modern-lg transition-all h-full group">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span>Verfügbare Touren</span>
+              <Link href="/tours" className="sm:hidden touch-manipulation">
                 <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-primary-600 transition-colors" strokeWidth={1.8} />
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col flex-1">
+              </Link>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col flex-1">
+            <Link href="/tours" className="sm:hidden touch-manipulation block flex-1">
               <div className="text-3xl font-bold text-primary-600">{tours.length}</div>
               <p className="text-sm text-gray-600 mt-2">Freigegebene Touren</p>
-            </CardContent>
-          </Card>
-        </Link>
+            </Link>
+            <div className="sm:block hidden">
+              <div className="text-3xl font-bold text-primary-600">{tours.length}</div>
+              <p className="text-sm text-gray-600 mt-2">Freigegebene Touren</p>
+            </div>
+            <div className="mt-auto pt-4">
+              <Link href="/tours" className="hidden sm:block">
+                <Button variant="primary" size="sm" className="w-full">
+                  Anzeigen
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
 
-        <Link href="/tours/archive" className="touch-manipulation">
-          <Card className="flex flex-col hover:shadow-modern-lg transition-all h-full group">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                Tourenarchiv
+        <Card className="flex flex-col hover:shadow-modern-lg transition-all h-full group">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span>Tourenarchiv</span>
+              <Link href="/tours/archive" className="sm:hidden touch-manipulation">
                 <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-primary-600 transition-colors" strokeWidth={1.8} />
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col flex-1">
+              </Link>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col flex-1">
+            <Link href="/tours/archive" className="sm:hidden touch-manipulation block flex-1">
               <div className="text-3xl font-bold text-primary-600">{archivedTours.length}</div>
               <p className="text-sm text-gray-600 mt-2">Vergangene Touren</p>
-            </CardContent>
-          </Card>
-        </Link>
+            </Link>
+            <div className="sm:block hidden">
+              <div className="text-3xl font-bold text-primary-600">{archivedTours.length}</div>
+              <p className="text-sm text-gray-600 mt-2">Vergangene Touren</p>
+            </div>
+            <div className="mt-auto pt-4">
+              <Link href="/tours/archive" className="hidden sm:block">
+                <Button variant="primary" size="sm" className="w-full">
+                  Archiv öffnen
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
 
         {(user.role === 'admin' || user.role === 'leader') && (
           <Card className="flex flex-col">
@@ -167,22 +206,37 @@ export default function DashboardPage() {
           </Card>
         )}
 
-        <Link href="/help" className="touch-manipulation">
-          <Card className="flex flex-col hover:shadow-modern-lg transition-all h-full group">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                Hilfe
+        <Card className="flex flex-col hover:shadow-modern-lg transition-all h-full group">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span>Hilfe</span>
+              <Link href="/help" className="sm:hidden touch-manipulation">
                 <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-primary-600 transition-colors" strokeWidth={1.8} />
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col flex-1">
+              </Link>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col flex-1">
+            <Link href="/help" className="sm:hidden touch-manipulation block flex-1">
               <div className="flex-1 flex items-center justify-center mb-4">
                 <HelpCircle className="w-12 h-12 text-primary-600" strokeWidth={1.5} />
               </div>
               <p className="text-sm text-gray-600 text-center">Benötigen Sie Hilfe bei der Nutzung der App?</p>
-            </CardContent>
-          </Card>
-        </Link>
+            </Link>
+            <div className="sm:block hidden">
+              <div className="flex-1 flex items-center justify-center mb-4">
+                <HelpCircle className="w-12 h-12 text-primary-600" strokeWidth={1.5} />
+              </div>
+              <p className="text-sm text-gray-600 text-center">Benötigen Sie Hilfe bei der Nutzung der App?</p>
+            </div>
+            <div className="mt-auto pt-4">
+              <Link href="/help" className="hidden sm:block">
+                <Button variant="primary" size="sm" className="w-full">
+                  Hilfe-Seite öffnen
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
