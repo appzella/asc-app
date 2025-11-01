@@ -146,10 +146,10 @@ export default function TourLengthsSettingsPage() {
           </Link>
           <Link 
             href="/settings"
-            className="sm:hidden flex items-center justify-center w-10 h-10 rounded-lg transition-colors touch-manipulation bg-primary-50 hover:bg-primary-100"
+            className="sm:hidden flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200 touch-manipulation bg-primary-100 hover:bg-primary-200 transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 shadow-sm"
             aria-label="Zurück zur Übersicht"
           >
-            <ChevronLeft className="w-5 h-5 text-primary-600" strokeWidth={1.8} />
+            <ChevronLeft className="w-5 h-5 text-primary-700" strokeWidth={1.8} />
           </Link>
         </div>
         <h1 className="text-4xl font-bold text-gray-900 mb-2">Tourlängen</h1>

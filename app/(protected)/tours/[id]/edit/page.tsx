@@ -13,6 +13,7 @@ import { Select } from '@/components/ui/Select'
 import { canEditTour } from '@/lib/roles'
 import { getDifficultyOptions } from '@/lib/difficulty'
 import Link from 'next/link'
+import { ChevronLeft } from 'lucide-react'
 
 export default function EditTourPage() {
   const params = useParams()
@@ -160,9 +161,21 @@ export default function EditTourPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div>
-        <Link href={`/tours/${tourId}`} className="text-primary-600 hover:text-primary-700 text-sm mb-2 inline-block">
-          ← Zurück zur Tour
-        </Link>
+        <div className="flex items-center gap-3 mb-4">
+          <Link 
+            href={`/tours/${tourId}`} 
+            className="hidden sm:inline-block text-primary-600 hover:text-primary-700 text-sm mb-2"
+          >
+            ← Zurück zur Tour
+          </Link>
+          <Link 
+            href={`/tours/${tourId}`}
+            className="sm:hidden flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200 touch-manipulation bg-primary-100 hover:bg-primary-200 transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 shadow-sm"
+            aria-label="Zurück zur Tour"
+          >
+            <ChevronLeft className="w-5 h-5 text-primary-700" strokeWidth={1.8} />
+          </Link>
+        </div>
         <h1 className="text-3xl font-bold text-gray-900">Tour bearbeiten</h1>
       </div>
 

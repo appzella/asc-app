@@ -121,6 +121,16 @@ export class MockDataRepository implements IDataRepository {
     if (!tour || tour.status !== 'published') {
       return false
     }
+    
+    // Prüfe ob Tour archiviert ist (Datum in der Vergangenheit)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const tourDate = new Date(tour.date)
+    tourDate.setHours(0, 0, 0, 0)
+    if (tourDate < today) {
+      return false
+    }
+    
     return dataStore.registerForTour(tourId, userId)
   }
 

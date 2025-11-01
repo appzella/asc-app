@@ -9,6 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { canManageUsers } from '@/lib/roles'
+import Link from 'next/link'
+import { ChevronLeft } from 'lucide-react'
 
 export default function InvitationsPage() {
   const router = useRouter()
@@ -129,6 +131,21 @@ export default function InvitationsPage() {
   return (
     <div className="space-y-6">
       <div>
+        <div className="flex items-center gap-3 mb-4">
+          <Link 
+            href="/settings" 
+            className="hidden sm:inline-block text-primary-600 hover:text-primary-700 text-sm mb-2"
+          >
+            ← Zurück zur Übersicht
+          </Link>
+          <Link 
+            href="/settings"
+            className="sm:hidden flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200 touch-manipulation bg-primary-100 hover:bg-primary-200 transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 shadow-sm"
+            aria-label="Zurück zur Übersicht"
+          >
+            <ChevronLeft className="w-5 h-5 text-primary-700" strokeWidth={1.8} />
+          </Link>
+        </div>
         <h1 className="text-3xl font-bold text-gray-900">Einladungen</h1>
         <p className="mt-2 text-gray-600">Erstellen Sie Einladungen für neue Clubmitglieder</p>
       </div>

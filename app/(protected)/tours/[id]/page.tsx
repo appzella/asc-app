@@ -14,6 +14,7 @@ import { canEditTour, canApproveTour, canPublishTour, canSubmitForPublishing } f
 import { formatDifficulty } from '@/lib/difficulty'
 import Link from 'next/link'
 import Image from 'next/image'
+import { ChevronLeft } from 'lucide-react'
 
 export default function TourDetailPage() {
   const params = useParams()
@@ -234,15 +235,35 @@ export default function TourDetailPage() {
   const canSubmit = canSubmitForPublishing(user.role, tour.leaderId, user.id, tour.status)
   const isFull = tour.participants.length >= tour.maxParticipants
   const isLeader = tour.leaderId === user.id
-  const canRegister = tour.status === 'published' && !isRegistered && !isFull && !isLeader
+  
+  // Prüfe ob Tour archiviert ist (Datum in der Vergangenheit)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const tourDate = new Date(tour.date)
+  tourDate.setHours(0, 0, 0, 0)
+  const isArchived = tourDate < today
+  
+  const canRegister = tour.status === 'published' && !isRegistered && !isFull && !isLeader && !isArchived
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-start">
         <div>
-          <Link href="/tours" className="text-primary-600 hover:text-primary-700 text-sm mb-2 inline-block">
-            ← Zurück zur Übersicht
-          </Link>
+          <div className="flex items-center gap-3 mb-4">
+            <Link 
+              href="/tours" 
+              className="hidden sm:inline-block text-primary-600 hover:text-primary-700 text-sm mb-2"
+            >
+              ← Zurück zur Übersicht
+            </Link>
+            <Link 
+              href="/tours"
+              className="sm:hidden flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200 touch-manipulation bg-primary-100 hover:bg-primary-200 transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 shadow-sm"
+              aria-label="Zurück zur Übersicht"
+            >
+              <ChevronLeft className="w-5 h-5 text-primary-700" strokeWidth={1.8} />
+            </Link>
+          </div>
           <div className="flex items-center gap-3">
             {(() => {
               const IconComponent = getTourIcon(tour.tourType, settings?.tourTypeIcons)
@@ -487,7 +508,11 @@ export default function TourDetailPage() {
                       <p className="text-sm text-red-600 font-medium">Tour ist ausgebucht</p>
                     ) : !canRegister ? (
                       <p className="text-sm text-gray-600 font-medium">
-                        {isLeader ? 'Sie sind der Tourenleiter' : 'Anmeldung nicht möglich'}
+                        {isLeader 
+                          ? 'Sie sind der Tourenleiter' 
+                          : isArchived 
+                          ? 'Diese Tour liegt in der Vergangenheit'
+                          : 'Anmeldung nicht möglich'}
                       </p>
                     ) : (
                       <Button
