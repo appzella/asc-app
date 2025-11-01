@@ -80,24 +80,24 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 animate-fade-in px-4 sm:px-0">
-      <div className="relative">
-        <Link
-          href="/dashboard"
-          className="sm:hidden absolute left-0 top-0 flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200 touch-manipulation bg-primary-100 hover:bg-primary-200 shadow-sm transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 z-10"
-          aria-label="Zurück zum Dashboard"
-        >
-          <ChevronLeft className="w-6 h-6 text-primary-700" strokeWidth={2} />
-        </Link>
-        <Link
-          href="/dashboard"
-          className="hidden sm:inline-block text-primary-600 hover:text-primary-700 text-sm mb-4"
-        >
-          ← Zurück zum Dashboard
-        </Link>
-        <div className="sm:ml-0 ml-12">
-          <h1 className="text-3xl font-bold text-gray-900 mb-1">Einstellungen</h1>
-          <p className="text-base text-gray-600">Verwalten Sie die Optionen für Touren</p>
+      <div>
+        <div className="mb-4">
+          <Link 
+            href="/dashboard" 
+            className="hidden sm:inline-block text-primary-600 hover:text-primary-700 text-sm mb-2"
+          >
+            ← Zurück zum Dashboard
+          </Link>
+          <Link 
+            href="/dashboard"
+            className="sm:hidden flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200 touch-manipulation bg-primary-100 hover:bg-primary-200 transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 shadow-sm"
+            aria-label="Zurück zum Dashboard"
+          >
+            <ChevronLeft className="w-6 h-6 text-primary-700" strokeWidth={2} />
+          </Link>
         </div>
+        <h1 className="text-3xl font-bold text-gray-900 mb-1">Einstellungen</h1>
+        <p className="text-base text-gray-600">Verwalten Sie die Optionen für Touren</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
