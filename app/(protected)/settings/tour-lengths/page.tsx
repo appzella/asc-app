@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { canManageUsers } from '@/lib/roles'
 import Link from 'next/link'
+import { Trash2, ChevronLeft } from 'lucide-react'
 
 export default function TourLengthsSettingsPage() {
   const router = useRouter()
@@ -18,6 +19,7 @@ export default function TourLengthsSettingsPage() {
   const [newLength, setNewLength] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -83,19 +85,40 @@ export default function TourLengthsSettingsPage() {
 
   const handleDragStart = (e: React.DragEvent, index: number) => {
     e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('application/json', index.toString())
     e.dataTransfer.setData('text/html', index.toString())
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.opacity = '0.5'
+    }
   }
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault()
+    e.stopPropagation()
     e.dataTransfer.dropEffect = 'move'
+    if (dragOverIndex !== index) {
+      setDragOverIndex(index)
+    }
+  }
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    // Ignoriere dragLeave wenn wir über ein Child-Element fahren
+    const relatedTarget = e.relatedTarget as HTMLElement
+    if (relatedTarget && e.currentTarget.contains(relatedTarget)) {
+      return
+    }
+    setDragOverIndex(null)
   }
 
   const handleDrop = async (e: React.DragEvent, dropIndex: number) => {
     e.preventDefault()
-    const dragIndex = parseInt(e.dataTransfer.getData('text/html'))
+    e.stopPropagation()
+    setDragOverIndex(null)
     
-    if (dragIndex === dropIndex) return
+    const dragIndexStr = e.dataTransfer.getData('application/json') || e.dataTransfer.getData('text/html')
+    const dragIndex = parseInt(dragIndexStr)
+    
+    if (isNaN(dragIndex) || dragIndex === dropIndex) return
 
     const newOrder = [...tourLengths]
     const [removed] = newOrder.splice(dragIndex, 1)
@@ -114,9 +137,21 @@ export default function TourLengthsSettingsPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
       <div>
-        <Link href="/settings" className="text-primary-600 hover:text-primary-700 text-sm mb-2 inline-block">
-          ← Zurück zur Übersicht
-        </Link>
+        <div className="flex items-center gap-3 mb-4">
+          <Link 
+            href="/settings" 
+            className="hidden sm:inline-block text-primary-600 hover:text-primary-700 text-sm mb-2"
+          >
+            ← Zurück zur Übersicht
+          </Link>
+          <Link 
+            href="/settings"
+            className="sm:hidden flex items-center justify-center w-10 h-10 rounded-lg transition-colors touch-manipulation bg-primary-50 hover:bg-primary-100"
+            aria-label="Zurück zur Übersicht"
+          >
+            <ChevronLeft className="w-5 h-5 text-primary-600" strokeWidth={1.8} />
+          </Link>
+        </div>
         <h1 className="text-4xl font-bold text-gray-900 mb-2">Tourlängen</h1>
         <p className="text-lg text-gray-600">Verwalten Sie die verfügbaren Tourlängen</p>
       </div>
@@ -168,28 +203,46 @@ export default function TourLengthsSettingsPage() {
             {tourLengths.length === 0 ? (
               <p className="text-gray-500 text-sm">Keine Tourlängen vorhanden</p>
             ) : (
-              tourLengths.map((length, index) => (
-                <div
-                  key={length}
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, index)}
-                  onDragOver={handleDragOver}
-                  onDrop={(e) => handleDrop(e, index)}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 cursor-move hover:bg-gray-100 transition-colors group"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-gray-400 group-hover:text-gray-600">☰</span>
-                    <span className="font-medium text-gray-900">{length}</span>
+              tourLengths.map((length, index) => {
+                const isDragOver = dragOverIndex === index
+                
+                return (
+                  <div key={length} className="relative">
+                    {isDragOver && (
+                      <div className="absolute -top-1 left-0 right-0 h-0.5 bg-primary-400 rounded-full z-10" />
+                    )}
+                    <div
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, index)}
+                      onDragEnd={(e) => {
+                        if (e.currentTarget instanceof HTMLElement) {
+                          e.currentTarget.style.opacity = '1'
+                        }
+                        setDragOverIndex(null)
+                      }}
+                      onDragOver={(e) => handleDragOver(e, index)}
+                      onDragLeave={handleDragLeave}
+                      onDrop={(e) => handleDrop(e, index)}
+                      className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 cursor-move hover:bg-gray-100 transition-all group relative"
+                    >
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <span className="text-gray-400 group-hover:text-gray-600 flex-shrink-0">☰</span>
+                    <span className="font-medium text-gray-900 truncate">{length}</span>
                   </div>
-                  <Button
-                    variant="danger"
-                    size="sm"
+                  <button
+                    type="button"
+                    draggable={false}
                     onClick={() => handleRemove(length)}
+                    onDragStart={(e) => e.stopPropagation()}
+                    className="flex-shrink-0 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+                    aria-label="Entfernen"
                   >
-                    Entfernen
-                  </Button>
+                    <Trash2 className="w-5 h-5" strokeWidth={2} />
+                  </button>
+                  </div>
                 </div>
-              ))
+              )
+              })
             )}
           </div>
         </CardContent>

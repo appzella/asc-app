@@ -8,10 +8,10 @@ import { User, TourSettings } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { Select } from '@/components/ui/Select'
 import { canManageUsers } from '@/lib/roles'
 import Link from 'next/link'
 import { getIconByName, getTourIcon } from '@/lib/tourIcons'
+import { Trash2, ChevronDown, ChevronLeft } from 'lucide-react'
 
 export default function TourTypesSettingsPage() {
   const router = useRouter()
@@ -21,6 +21,8 @@ export default function TourTypesSettingsPage() {
   const [newType, setNewType] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [openIconPicker, setOpenIconPicker] = useState<string | null>(null)
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -101,19 +103,43 @@ export default function TourTypesSettingsPage() {
 
   const handleDragStart = (e: React.DragEvent, index: number) => {
     e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('application/json', index.toString())
+    // Setze auch text/html als Fallback für ältere Browser
     e.dataTransfer.setData('text/html', index.toString())
+    // Setze Opacity für besseres visuelles Feedback
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.opacity = '0.5'
+    }
   }
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault()
+    e.stopPropagation()
     e.dataTransfer.dropEffect = 'move'
+    // Nur updaten wenn sich der Index wirklich ändert
+    if (dragOverIndex !== index) {
+      setDragOverIndex(index)
+    }
+  }
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    // Ignoriere dragLeave wenn wir über ein Child-Element fahren
+    const relatedTarget = e.relatedTarget as HTMLElement
+    if (relatedTarget && e.currentTarget.contains(relatedTarget)) {
+      return
+    }
+    setDragOverIndex(null)
   }
 
   const handleDrop = async (e: React.DragEvent, dropIndex: number) => {
     e.preventDefault()
-    const dragIndex = parseInt(e.dataTransfer.getData('text/html'))
+    e.stopPropagation()
+    setDragOverIndex(null)
     
-    if (dragIndex === dropIndex) return
+    const dragIndexStr = e.dataTransfer.getData('application/json') || e.dataTransfer.getData('text/html')
+    const dragIndex = parseInt(dragIndexStr)
+    
+    if (isNaN(dragIndex) || dragIndex === dropIndex) return
 
     const newOrder = [...tourTypes]
     const [removed] = newOrder.splice(dragIndex, 1)
@@ -125,21 +151,27 @@ export default function TourTypesSettingsPage() {
     setTimeout(() => setSuccess(''), 3000)
   }
 
-  // Beliebte Icons für Tourenarten
+  // Beliebte Icons für Tourenarten (nur existierende lucide-react Icons)
+  // Icons werden zur Laufzeit gefiltert, um nur existierende anzuzeigen
   const popularIcons = [
     { value: 'Mountain', label: 'Mountain' },
-    { value: 'Hiking', label: 'Hiking' },
     { value: 'Footprints', label: 'Footprints' },
-    { value: 'Ski', label: 'Ski' },
     { value: 'Snowflake', label: 'Snowflake' },
-    { value: 'Alpine', label: 'Alpine' },
     { value: 'Bike', label: 'Bike' },
-    { value: 'Bicycle', label: 'Bicycle' },
     { value: 'MapPin', label: 'MapPin' },
     { value: 'Compass', label: 'Compass' },
-    { value: 'TreePine', label: 'TreePine' },
     { value: 'Trees', label: 'Trees' },
+    { value: 'TreePine', label: 'TreePine' },
+    { value: 'Route', label: 'Route' },
+    { value: 'Navigation', label: 'Navigation' },
+    { value: 'Map', label: 'Map' },
+    { value: 'Award', label: 'Award' },
+    { value: 'Target', label: 'Target' },
+    { value: 'Flag', label: 'Flag' },
+    { value: 'Tent', label: 'Tent' },
     { value: 'MountainSnow', label: 'MountainSnow' },
+    { value: 'MapPinned', label: 'MapPinned' },
+    { value: 'Landmark', label: 'Landmark' },
   ]
 
   if (!user) {
@@ -149,9 +181,21 @@ export default function TourTypesSettingsPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
       <div>
-        <Link href="/settings" className="text-primary-600 hover:text-primary-700 text-sm mb-2 inline-block">
-          ← Zurück zur Übersicht
-        </Link>
+        <div className="flex items-center gap-3 mb-4">
+          <Link 
+            href="/settings" 
+            className="hidden sm:inline-block text-primary-600 hover:text-primary-700 text-sm mb-2"
+          >
+            ← Zurück zur Übersicht
+          </Link>
+          <Link 
+            href="/settings"
+            className="sm:hidden flex items-center justify-center w-10 h-10 rounded-lg transition-colors touch-manipulation bg-primary-50 hover:bg-primary-100"
+            aria-label="Zurück zur Übersicht"
+          >
+            <ChevronLeft className="w-5 h-5 text-primary-600" strokeWidth={1.8} />
+          </Link>
+        </div>
         <h1 className="text-4xl font-bold text-gray-900 mb-2">Tourentypen</h1>
         <p className="text-lg text-gray-600">Verwalten Sie die verfügbaren Tourentypen</p>
       </div>
@@ -203,40 +247,113 @@ export default function TourTypesSettingsPage() {
             {tourTypes.length === 0 ? (
               <p className="text-gray-500 text-sm">Keine Tourentypen vorhanden</p>
             ) : (
-              tourTypes.map((type, index) => (
-                <div
-                  key={type}
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, index)}
-                  onDragOver={handleDragOver}
-                  onDrop={(e) => handleDrop(e, index)}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 cursor-move hover:bg-gray-100 transition-colors group"
-                >
-                  <div className="flex items-center gap-3 flex-1">
-                    <span className="text-gray-400 group-hover:text-gray-600">☰</span>
-                    {(() => {
-                      const IconComponent = getTourIcon(type as any, tourTypeIcons)
-                      return <IconComponent className="w-5 h-5 text-gray-600 flex-shrink-0" strokeWidth={2} />
-                    })()}
-                    <span className="font-medium text-gray-900">{type}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Select
-                      value={tourTypeIcons[type] || 'Mountain'}
-                      onChange={(e) => handleIconChange(type, e.target.value)}
-                      options={popularIcons}
-                      className="w-40"
-                    />
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={() => handleRemove(type)}
+              tourTypes.map((type, index) => {
+                const currentIconName = tourTypeIcons[type] || 'Mountain'
+                const CurrentIconComponent = getTourIcon(type as any, tourTypeIcons)
+                const isPickerOpen = openIconPicker === type
+                const isDragOver = dragOverIndex === index
+                
+                return (
+                  <div key={type} className="relative">
+                    {isDragOver && (
+                      <div className="absolute -top-1 left-0 right-0 h-0.5 bg-primary-400 rounded-full z-10" />
+                    )}
+                    <div
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, index)}
+                      onDragEnd={(e) => {
+                        if (e.currentTarget instanceof HTMLElement) {
+                          e.currentTarget.style.opacity = '1'
+                        }
+                        setDragOverIndex(null)
+                      }}
+                      onDragOver={(e) => handleDragOver(e, index)}
+                      onDragLeave={handleDragLeave}
+                      onDrop={(e) => handleDrop(e, index)}
+                      className="flex items-center justify-between gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200 cursor-move hover:bg-gray-100 transition-all group relative"
                     >
-                      Entfernen
-                    </Button>
+                    <span className="text-gray-400 group-hover:text-gray-600 flex-shrink-0">☰</span>
+                    <div className="relative flex-shrink-0">
+                      <button
+                        type="button"
+                        draggable={false}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setOpenIconPicker(isPickerOpen ? null : type)
+                        }}
+                        onDragStart={(e) => e.stopPropagation()}
+                        className="flex items-center gap-1 p-1 rounded hover:bg-gray-200 transition-colors"
+                      >
+                        <CurrentIconComponent className="w-5 h-5 text-gray-600" strokeWidth={2} />
+                        <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isPickerOpen ? 'rotate-180' : ''}`} strokeWidth={2} />
+                      </button>
+                      {isPickerOpen && (
+                        <>
+                          <div 
+                            className="fixed inset-0 z-10" 
+                            onClick={() => setOpenIconPicker(null)}
+                          />
+                          <div className="absolute top-full left-0 mt-2 z-20 bg-white rounded-lg shadow-lg border border-gray-200 p-2 grid grid-cols-4 gap-2 w-64 max-h-64 overflow-y-auto">
+                            {popularIcons
+                              .filter((iconOption, index, self) => {
+                                // Entferne Duplikate basierend auf value
+                                const firstIndex = self.findIndex(i => i.value === iconOption.value)
+                                if (firstIndex !== index) return false
+                                
+                                // Prüfe, ob Icon wirklich existiert
+                                try {
+                                  const testIcon = getIconByName(iconOption.value)
+                                  // Wenn das Icon nicht existiert, gibt getIconByName das Mountain Fallback zurück
+                                  // Prüfe, ob es wirklich existiert, indem wir testen ob es ein anderes Icon zurückgibt als bei einem ungültigen Namen
+                                  const fallbackTest = getIconByName('NonExistentIcon12345')
+                                  // Wenn beide gleich sind (beide Mountain), dann existiert das Icon nicht wirklich
+                                  return testIcon !== fallbackTest || iconOption.value === 'Mountain'
+                                } catch {
+                                  return false
+                                }
+                              })
+                              .map((iconOption) => {
+                                const IconOptionComponent = getIconByName(iconOption.value)
+                                const isSelected = iconOption.value === currentIconName
+                                return (
+                                  <button
+                                    key={iconOption.value}
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      handleIconChange(type, iconOption.value)
+                                      setOpenIconPicker(null)
+                                    }}
+                                    className={`flex items-center justify-center p-2 rounded hover:bg-gray-100 transition-colors ${
+                                      isSelected ? 'bg-primary-50 border-2 border-primary-500' : 'border-2 border-transparent'
+                                    }`}
+                                  >
+                                    <IconOptionComponent 
+                                      className={`w-6 h-6 ${isSelected ? 'text-primary-600' : 'text-gray-600'}`} 
+                                      strokeWidth={2} 
+                                    />
+                                  </button>
+                                )
+                              })}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                    <span className="font-medium text-gray-900 flex-1 min-w-0 truncate">{type}</span>
+                    <button
+                      type="button"
+                      draggable={false}
+                      onClick={() => handleRemove(type)}
+                      onDragStart={(e) => e.stopPropagation()}
+                      className="flex-shrink-0 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+                      aria-label="Entfernen"
+                    >
+                      <Trash2 className="w-5 h-5" strokeWidth={2} />
+                    </button>
+                    </div>
                   </div>
-                </div>
-              ))
+                )
+              })
             )}
           </div>
         </CardContent>

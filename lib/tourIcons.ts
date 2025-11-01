@@ -8,7 +8,7 @@ import { TourType } from './types'
 export function getIconByName(iconName: string): React.ComponentType<any> {
   const IconComponent = (LucideIcons as any)[iconName]
   if (!IconComponent) {
-    console.warn(`Icon "${iconName}" not found in lucide-react, falling back to Mountain`)
+    // Keine Warnung mehr - einfach Fallback verwenden
     return LucideIcons.Mountain
   }
   return IconComponent

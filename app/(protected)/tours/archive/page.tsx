@@ -258,7 +258,10 @@ export default function ToursArchivePage() {
                     type="checkbox"
                     checked={showMyTours}
                     onChange={(e) => setShowMyTours(e.target.checked)}
-                    className="mr-2"
+                    className="mr-2 w-4 h-4 focus:ring-primary-500 focus:ring-2 cursor-pointer"
+                    style={{
+                      accentColor: '#2563eb',
+                    }}
                   />
                   <span className="text-sm text-gray-700">Nur meine Touren</span>
                 </label>
@@ -359,7 +362,10 @@ export default function ToursArchivePage() {
                 type="checkbox"
                 checked={showMyTours}
                 onChange={(e) => setShowMyTours(e.target.checked)}
-                className="mr-2"
+                className="mr-2 w-4 h-4 focus:ring-primary-500 focus:ring-2 cursor-pointer"
+                style={{
+                  accentColor: '#2563eb',
+                }}
               />
               <span className="text-sm text-gray-700">Nur meine Touren</span>
             </label>
