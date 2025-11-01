@@ -10,13 +10,13 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'default',
+    statusBarStyle: 'black-translucent',
     title: 'ASC App',
   },
 }
 
 export const viewport: Viewport = {
-  themeColor: '#0ea5e9',
+  themeColor: '#ffffff',
 }
 
 export default function RootLayout({

@@ -29,8 +29,14 @@ export function MobileTabBar() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 block sm:hidden"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+      className="fixed bottom-0 left-0 right-0 z-50 block sm:hidden"
+      style={{ 
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        position: 'fixed',
+        transform: 'translateZ(0)', // Hardware acceleration für iOS
+        WebkitTransform: 'translateZ(0)',
+        willChange: 'transform'
+      }}
       aria-label="Mobile Tab Bar"
     >
       <div className="mx-auto max-w-7xl px-4">
