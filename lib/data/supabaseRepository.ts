@@ -91,7 +91,10 @@ export class SupabaseDataRepository implements IDataRepository {
     if (updates.invitedBy !== undefined) updateData.invited_by = updates.invitedBy
     if (updates.registrationToken !== undefined) updateData.registration_token = updates.registrationToken
     if (updates.registered !== undefined) updateData.registered = updates.registered
-    if (updates.profilePhoto !== undefined) updateData.profile_photo = updates.profilePhoto
+    // Handle profilePhoto: null or undefined both set to null (to remove photo)
+    if (updates.profilePhoto !== undefined) {
+      updateData.profile_photo = updates.profilePhoto ?? null
+    }
     if (updates.phone !== undefined) updateData.phone = updates.phone
     if (updates.mobile !== undefined) updateData.mobile = updates.mobile
     if (updates.street !== undefined) updateData.street = updates.street

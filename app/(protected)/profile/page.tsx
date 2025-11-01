@@ -186,9 +186,9 @@ export default function ProfilePage() {
         }
       }
 
-      // Remove from database
+      // Remove from database (use null to explicitly remove the photo)
       const updatedUser = await dataRepository.updateUser(user.id, {
-        profilePhoto: undefined,
+        profilePhoto: null,
       })
 
       if (updatedUser) {

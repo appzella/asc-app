@@ -25,7 +25,7 @@ export interface User {
   invitedBy?: string // Admin-ID, der die Einladung erstellt hat
   registrationToken?: string // Token für Registrierung
   registered: boolean // Ob der User bereits registriert ist
-  profilePhoto?: string // Base64 encoded image oder URL
+  profilePhoto?: string | null // Base64 encoded image, URL oder null (entfernt)
   phone?: string // Festnetz
   mobile?: string // Mobiltelefon
   street?: string // Strasse
