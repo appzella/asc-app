@@ -166,15 +166,16 @@ export default function ProtectedLayout({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex flex-col">
-      <nav className="glass sticky top-0 z-50 border-b border-gray-200/50 backdrop-blur-xl flex-shrink-0">
-        {/* Safe-Area Bereich mit Glass-Effekt für nahtlosen Übergang zur Statusleiste */}
-        <div 
-          className="block sm:hidden"
-          style={{ 
-            height: 'env(safe-area-inset-top, 0px)',
-            minHeight: 'env(safe-area-inset-top, 0px)',
-          }}
-        />
+      {/* Status-Bar Bereich für nahtlosen Übergang */}
+      <div 
+        className="bg-white sticky top-0 left-0 right-0 z-50 block sm:hidden"
+        style={{ 
+          height: 'env(safe-area-inset-top, 0px)',
+          minHeight: 'env(safe-area-inset-top, 0px)',
+        }}
+      />
+      {/* Navbar mit weißem Hintergrund auf Mobile für nahtlosen Übergang zur Statusleiste */}
+      <nav className="sticky top-0 z-40 border-b border-gray-200/50 flex-shrink-0 bg-white sm:glass sm:backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20">
             <div className="flex items-center gap-2">
