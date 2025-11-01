@@ -7,9 +7,7 @@ import { User } from '@/lib/types'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 import { MobileTabBar } from '@/components/navigation/MobileTabBar'
-import { Drawer } from '@/components/navigation/Drawer'
-import { MenuButton } from '@/components/navigation/MenuButton'
-import { ChevronRight, ChevronDown } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
 import Image from 'next/image'
 import { UserRole } from '@/lib/types'
 
@@ -32,7 +30,6 @@ export default function ProtectedLayout({
   const pathname = usePathname()
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   useEffect(() => {
     let isMounted = true
@@ -81,20 +78,6 @@ export default function ProtectedLayout({
     router.push('/login')
   }
 
-  const closeDrawer = useCallback(() => setIsDrawerOpen(false), [])
-  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set())
-
-  const toggleExpanded = useCallback((key: string) => {
-    setExpandedItems((prev) => {
-      const next = new Set(prev)
-      if (next.has(key)) {
-        next.delete(key)
-      } else {
-        next.add(key)
-      }
-      return next
-    })
-  }, [])
 
   // Alle Hooks müssen VOR frühen Returns aufgerufen werden!
   const [desktopExpandedItems, setDesktopExpandedItems] = useState<Set<string>>(new Set())
@@ -125,32 +108,6 @@ export default function ProtectedLayout({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const drawerItems = useMemo(() => {
-    if (!user) return []
-    const items: Array<{ href?: string; label: string; children?: Array<{ href: string; label: string }> }> = [
-      { href: '/dashboard', label: 'Dashboard' },
-      {
-        label: 'Touren',
-        children: [
-          { href: '/tours', label: 'Touren-Übersicht' },
-          ...(user.role === 'admin' || user.role === 'leader' ? [{ href: '/tours/create', label: 'Tour erstellen' }] : []),
-        ],
-      },
-      { href: '/help', label: 'Hilfe' },
-    ]
-    if (user.role === 'admin') {
-      items.push({
-        label: 'Einstellungen',
-        children: [
-          { href: '/settings', label: 'Allgemein' },
-          { href: '/users', label: 'Benutzerverwaltung' },
-          { href: '/invitations', label: 'Einladungen' },
-        ],
-      })
-    }
-    items.push({ href: '/profile', label: 'Profil' })
-    return items
-  }, [user])
 
   // Desktop Navigation Items mit 2-Ebenen-Struktur
   const desktopNavItems = useMemo(() => {
@@ -198,9 +155,6 @@ export default function ProtectedLayout({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20">
             <div className="flex items-center gap-2">
-              {user && user.role !== 'member' && (
-                <MenuButton open={isDrawerOpen} onToggle={() => setIsDrawerOpen((v) => !v)} />
-              )}
               <div className="flex-shrink-0 flex items-center">
                 <span className="text-2xl font-bold gradient-text tracking-tight">ASC</span>
               </div>
@@ -295,7 +249,7 @@ export default function ProtectedLayout({
                   {getRoleLabel(user.role)}
                 </span>
               </Link>
-              <Button variant="outline" size="sm" onClick={handleLogout} className="shadow-sm">
+              <Button variant="outline" size="sm" onClick={handleLogout} className="shadow-sm hidden sm:flex">
                 Abmelden
               </Button>
             </div>
@@ -305,83 +259,6 @@ export default function ProtectedLayout({
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-24 sm:pb-12 w-full" style={{ paddingBottom: 'clamp(5rem, 4rem + env(safe-area-inset-bottom, 0px), 6rem)' }}>
         {children}
       </main>
-      {/* Mobile Drawer - Nur für Admins und Leaders */}
-      {user && user.role !== 'member' && (
-        <Drawer open={isDrawerOpen} onClose={closeDrawer} title="Navigation">
-        <ul className="space-y-1" id="mobile-drawer">
-          {drawerItems.map((item) => {
-            const itemKey = item.href || item.label
-            const isExpanded = expandedItems.has(itemKey)
-            const hasChildren = item.children && item.children.length > 0
-            
-            if (hasChildren) {
-              return (
-                <li key={itemKey}>
-                  <button
-                    onClick={() => toggleExpanded(itemKey)}
-                    className="w-full flex items-center justify-between px-3 py-3 rounded-lg text-base font-medium touch-manipulation text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors"
-                  >
-                    <span>{item.label}</span>
-                    <ChevronRight
-                      className={`w-5 h-5 stroke-gray-500 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
-                      strokeWidth={1.8}
-                    />
-                  </button>
-                  {isExpanded && item.children && (
-                    <ul className="ml-4 mt-1 space-y-1 border-l-2 border-gray-200 pl-2">
-                      {item.children.map((child) => {
-                        const isActive = pathname === child.href || (child.href === '/tours' && pathname?.startsWith('/tours/'))
-                        return (
-                          <li key={child.href}>
-                            <Link
-                              href={child.href}
-                              onClick={closeDrawer}
-                              className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium touch-manipulation ${
-                                isActive
-                                  ? 'bg-primary-50 text-primary-700'
-                                  : 'text-gray-600 hover:bg-gray-50 active:bg-gray-100'
-                              }`}
-                            >
-                              <span>{child.label}</span>
-                              {isActive ? (
-                                <span className="w-1.5 h-1.5 rounded-full bg-primary-500" />
-                              ) : null}
-                            </Link>
-                          </li>
-                        )
-                      })}
-                    </ul>
-                  )}
-                </li>
-              )
-            }
-            
-            // Normales Link-Item ohne Untermenü
-            if (!item.href) return null
-            
-            const isActive = pathname === item.href || (item.href === '/tours' && pathname?.startsWith('/tours/'))
-            return (
-              <li key={itemKey}>
-                <Link
-                  href={item.href}
-                  onClick={closeDrawer}
-                  className={`flex items-center justify-between px-3 py-3 rounded-lg text-base font-medium touch-manipulation ${
-                    isActive
-                      ? 'bg-primary-50 text-primary-700'
-                      : 'text-gray-700 hover:bg-gray-50 active:bg-gray-100'
-                  }`}
-                >
-                  <span>{item.label}</span>
-                  {isActive ? (
-                    <span className="w-2 h-2 rounded-full bg-primary-500" />
-                  ) : null}
-                </Link>
-              </li>
-            )
-          })}
-        </ul>
-        </Drawer>
-      )}
       {/* Mobile Tab Bar */}
       <MobileTabBar />
     </div>
