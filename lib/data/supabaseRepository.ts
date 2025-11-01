@@ -7,6 +7,40 @@ import { supabase, isSupabaseConfigured } from '../supabase/client'
  * Implementiert IDataRepository mit Supabase als Backend
  */
 export class SupabaseDataRepository implements IDataRepository {
+  /**
+   * Prüft, ob ein Supabase-Fehler ein Session-Fehler ist
+   * und behandelt diesen entsprechend (Session löschen, zum Login umleiten)
+   * @returns true wenn es ein Session-Fehler war (und behandelt wurde), false sonst
+   */
+  private handleSupabaseError(error: any): boolean {
+    if (!error) return false
+
+    // Prüfe auf session_not_found oder ähnliche Auth-Fehler
+    const isSessionError = 
+      error.code === 'PGRST301' || // JWT expired
+      error.message?.includes('session_not_found') ||
+      error.message?.includes('JWT expired') ||
+      error.message?.includes('Invalid JWT') ||
+      (error.status === 401 && error.message?.includes('session'))
+
+    if (isSessionError) {
+      console.warn('Session invalid or expired, signing out...', error)
+      
+      // Session löschen
+      if (typeof window !== 'undefined' && supabase) {
+        supabase.auth.signOut().catch(() => {
+          // Ignore errors during signout
+        })
+        
+        // Zum Login umleiten
+        window.location.href = '/login'
+      }
+      
+      return true
+    }
+    
+    return false
+  }
   // User Management
   async getUsers(): Promise<User[]> {
     const { data, error } = await supabase
@@ -14,7 +48,13 @@ export class SupabaseDataRepository implements IDataRepository {
       .select('*')
       .order('created_at', { ascending: false })
 
-    if (error) throw error
+    if (error) {
+      if (!this.handleSupabaseError(error)) {
+        throw error
+      }
+      // Wenn Session-Fehler, return leeres Array (wird ohnehin nicht erreicht wegen redirect)
+      return []
+    }
     return (data || []).map(this.mapDbUserToUser)
   }
 
@@ -27,6 +67,10 @@ export class SupabaseDataRepository implements IDataRepository {
         .single()
 
       if (error) {
+        // Handle session errors
+        if (this.handleSupabaseError(error)) {
+          return null
+        }
         // Only log unexpected errors (not "not found")
         if (error.code !== 'PGRST116') {
           console.error('Error getting user by ID:', error)
@@ -55,7 +99,13 @@ export class SupabaseDataRepository implements IDataRepository {
       .eq('email', email)
       .single()
 
-    if (error || !data) return null
+    if (error) {
+      if (this.handleSupabaseError(error)) {
+        return null
+      }
+      return null
+    }
+    if (!data) return null
     return this.mapDbUserToUser(data)
   }
 
@@ -79,7 +129,12 @@ export class SupabaseDataRepository implements IDataRepository {
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      if (!this.handleSupabaseError(error)) {
+        throw error
+      }
+      throw new Error('Session expired')
+    }
     return this.mapDbUserToUser(data)
   }
 
@@ -108,7 +163,13 @@ export class SupabaseDataRepository implements IDataRepository {
       .select()
       .single()
 
-    if (error || !data) return null
+    if (error) {
+      if (this.handleSupabaseError(error)) {
+        return null
+      }
+      return null
+    }
+    if (!data) return null
     return this.mapDbUserToUser(data)
   }
 
@@ -122,7 +183,12 @@ export class SupabaseDataRepository implements IDataRepository {
       `)
       .order('date', { ascending: true })
 
-    if (error) throw error
+    if (error) {
+      if (!this.handleSupabaseError(error)) {
+        throw error
+      }
+      return []
+    }
     return (data || []).map((row: any) => this.mapDbTourToTour(row))
   }
 
@@ -138,6 +204,9 @@ export class SupabaseDataRepository implements IDataRepository {
         .single()
 
       if (error) {
+        if (this.handleSupabaseError(error)) {
+          return null
+        }
         console.error('Error fetching tour:', error)
         return null
       }
@@ -166,7 +235,12 @@ export class SupabaseDataRepository implements IDataRepository {
       .eq('status', 'published')
       .order('created_at', { ascending: false })
 
-    if (error) throw error
+    if (error) {
+      if (!this.handleSupabaseError(error)) {
+        throw error
+      }
+      return []
+    }
     return (data || []).map((row: any) => this.mapDbTourToTour(row))
   }
 
@@ -180,7 +254,12 @@ export class SupabaseDataRepository implements IDataRepository {
       .eq('status', 'draft')
       .order('created_at', { ascending: false })
 
-    if (error) throw error
+    if (error) {
+      if (!this.handleSupabaseError(error)) {
+        throw error
+      }
+      return []
+    }
     return (data || []).map((row: any) => this.mapDbTourToTour(row))
   }
 
@@ -195,7 +274,12 @@ export class SupabaseDataRepository implements IDataRepository {
       .eq('submitted_for_publishing', true)
       .order('created_at', { ascending: false })
 
-    if (error) throw error
+    if (error) {
+      if (!this.handleSupabaseError(error)) {
+        throw error
+      }
+      return []
+    }
     return (data || []).map((row: any) => this.mapDbTourToTour(row))
   }
 
@@ -219,7 +303,12 @@ export class SupabaseDataRepository implements IDataRepository {
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      if (!this.handleSupabaseError(error)) {
+        throw error
+      }
+      throw new Error('Session expired')
+    }
     
     const createdTour = await this.getTourById(data.id)
     if (!createdTour) throw new Error('Failed to retrieve created tour')
@@ -248,7 +337,12 @@ export class SupabaseDataRepository implements IDataRepository {
       .update(updateData)
       .eq('id', id)
 
-    if (error) throw error
+    if (error) {
+      if (!this.handleSupabaseError(error)) {
+        throw error
+      }
+      return null
+    }
     return this.getTourById(id)
   }
 
@@ -261,7 +355,12 @@ export class SupabaseDataRepository implements IDataRepository {
       })
       .eq('id', id)
 
-    if (error) throw error
+    if (error) {
+      if (!this.handleSupabaseError(error)) {
+        throw error
+      }
+      return null
+    }
     return this.getTourById(id)
   }
 
@@ -274,7 +373,12 @@ export class SupabaseDataRepository implements IDataRepository {
       })
       .eq('id', id)
 
-    if (error) throw error
+    if (error) {
+      if (!this.handleSupabaseError(error)) {
+        throw error
+      }
+      return null
+    }
     return this.getTourById(id)
   }
 
@@ -287,7 +391,12 @@ export class SupabaseDataRepository implements IDataRepository {
       })
       .eq('id', id)
 
-    if (error) throw error
+    if (error) {
+      if (!this.handleSupabaseError(error)) {
+        throw error
+      }
+      return null
+    }
     return this.getTourById(id)
   }
 
@@ -297,7 +406,12 @@ export class SupabaseDataRepository implements IDataRepository {
       .update({ submitted_for_publishing: true })
       .eq('id', id)
 
-    if (error) throw error
+    if (error) {
+      if (!this.handleSupabaseError(error)) {
+        throw error
+      }
+      return null
+    }
     return this.getTourById(id)
   }
 
@@ -345,7 +459,12 @@ export class SupabaseDataRepository implements IDataRepository {
       .eq('tour_id', tourId)
       .order('created_at', { ascending: true })
 
-    if (error) throw error
+    if (error) {
+      if (!this.handleSupabaseError(error)) {
+        throw error
+      }
+      return []
+    }
     return (data || []).map((row: any) => this.mapDbMessageToMessage(row))
   }
 
@@ -360,7 +479,12 @@ export class SupabaseDataRepository implements IDataRepository {
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      if (!this.handleSupabaseError(error)) {
+        throw error
+      }
+      throw new Error('Session expired')
+    }
     
     // Get user info
     const user = await this.getUserById(message.userId)
@@ -388,7 +512,12 @@ export class SupabaseDataRepository implements IDataRepository {
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      if (!this.handleSupabaseError(error)) {
+        throw error
+      }
+      throw new Error('Session expired')
+    }
     return this.mapDbInvitationToInvitation(data)
   }
 
@@ -417,7 +546,12 @@ export class SupabaseDataRepository implements IDataRepository {
       })
       .eq('token', token)
 
-    if (updateError) throw updateError
+    if (updateError) {
+      if (!this.handleSupabaseError(updateError)) {
+        throw updateError
+      }
+      return null
+    }
 
     // Update user
     const user = await this.getUserByEmail(invitation.email)
@@ -436,7 +570,12 @@ export class SupabaseDataRepository implements IDataRepository {
       .select('*')
       .order('created_at', { ascending: false })
 
-    if (error) throw error
+    if (error) {
+      if (!this.handleSupabaseError(error)) {
+        throw error
+      }
+      return []
+    }
     return (data || []).map(this.mapDbInvitationToInvitation)
   }
 
@@ -447,7 +586,18 @@ export class SupabaseDataRepository implements IDataRepository {
       .select('*')
       .order('display_order', { ascending: true })
 
-    if (error) throw error
+    if (error) {
+      if (!this.handleSupabaseError(error)) {
+        throw error
+      }
+      // Return empty settings if session error
+      return {
+        tourTypes: [],
+        tourLengths: [],
+        difficulties: {},
+        tourTypeIcons: {},
+      }
+    }
 
     const settings: TourSettings = {
       tourTypes: [],
@@ -591,7 +741,11 @@ export class SupabaseDataRepository implements IDataRepository {
       .eq('setting_key', difficulty)
       .eq('setting_value', tourType)
 
-    return !error
+    if (error) {
+      this.handleSupabaseError(error)
+      return false
+    }
+    return true
   }
 
   async updateDifficultiesOrder(tourType: string, orderedDifficulties: string[]): Promise<void> {
@@ -613,7 +767,12 @@ export class SupabaseDataRepository implements IDataRepository {
       .eq('setting_value', tourType)
       .order('display_order', { ascending: true })
 
-    if (error) throw error
+    if (error) {
+      if (!this.handleSupabaseError(error)) {
+        throw error
+      }
+      return []
+    }
     return (data || []).map((row: any) => row.setting_key)
   }
 
@@ -747,6 +906,9 @@ export class SupabaseDataRepository implements IDataRepository {
       })
 
     if (error) {
+      if (this.handleSupabaseError(error)) {
+        throw new Error('Session expired')
+      }
       console.error('Error uploading profile photo:', error)
       throw error
     }
@@ -774,12 +936,18 @@ export class SupabaseDataRepository implements IDataRepository {
       const urlParts = photoUrl.split('/avatars/')
       if (urlParts.length > 1) {
         const filePath = urlParts[1]
-        await supabase.storage
+        const { error: removeError } = await supabase.storage
           .from('avatars')
           .remove([filePath])
+        
+        if (removeError) {
+          this.handleSupabaseError(removeError)
+          // Don't throw - deletion is not critical
+        }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting profile photo:', error)
+      this.handleSupabaseError(error)
       // Don't throw - deletion is not critical
     }
   }

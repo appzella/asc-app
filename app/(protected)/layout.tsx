@@ -140,13 +140,13 @@ export default function ProtectedLayout({
     ]
     if (user.role === 'admin') {
       items.push({
-        label: 'Benutzer',
+        label: 'Einstellungen',
         children: [
+          { href: '/settings', label: 'Allgemein' },
           { href: '/users', label: 'Benutzerverwaltung' },
           { href: '/invitations', label: 'Einladungen' },
         ],
       })
-      items.push({ href: '/settings', label: 'Einstellungen' })
     }
     items.push({ href: '/profile', label: 'Profil' })
     return items
@@ -164,18 +164,19 @@ export default function ProtectedLayout({
           ...(user.role === 'admin' || user.role === 'leader' ? [{ href: '/tours/create', label: 'Tour erstellen' }] : []),
         ],
       },
-      { href: '/help', label: 'Hilfe' },
     ]
     if (user.role === 'admin') {
       items.push({
-        label: 'Benutzer',
+        label: 'Einstellungen',
         children: [
+          { href: '/settings', label: 'Allgemein' },
           { href: '/users', label: 'Benutzerverwaltung' },
           { href: '/invitations', label: 'Einladungen' },
         ],
       })
-      items.push({ href: '/settings', label: 'Einstellungen' })
     }
+    // Hilfe als letzter Navigationspunkt
+    items.push({ href: '/help', label: 'Hilfe' })
     return items
   }, [user])
 
@@ -197,7 +198,9 @@ export default function ProtectedLayout({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20">
             <div className="flex items-center gap-2">
-              <MenuButton open={isDrawerOpen} onToggle={() => setIsDrawerOpen((v) => !v)} />
+              {user && user.role !== 'member' && (
+                <MenuButton open={isDrawerOpen} onToggle={() => setIsDrawerOpen((v) => !v)} />
+              )}
               <div className="flex-shrink-0 flex items-center">
                 <span className="text-2xl font-bold gradient-text tracking-tight">ASC</span>
               </div>
@@ -302,8 +305,9 @@ export default function ProtectedLayout({
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-24 sm:pb-12 w-full" style={{ paddingBottom: 'clamp(5rem, 4rem + env(safe-area-inset-bottom, 0px), 6rem)' }}>
         {children}
       </main>
-      {/* Mobile Drawer */}
-      <Drawer open={isDrawerOpen} onClose={closeDrawer} title="Navigation">
+      {/* Mobile Drawer - Nur für Admins und Leaders */}
+      {user && user.role !== 'member' && (
+        <Drawer open={isDrawerOpen} onClose={closeDrawer} title="Navigation">
         <ul className="space-y-1" id="mobile-drawer">
           {drawerItems.map((item) => {
             const itemKey = item.href || item.label
@@ -376,7 +380,8 @@ export default function ProtectedLayout({
             )
           })}
         </ul>
-      </Drawer>
+        </Drawer>
+      )}
       {/* Mobile Tab Bar */}
       <MobileTabBar />
     </div>

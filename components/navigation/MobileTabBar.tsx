@@ -3,7 +3,8 @@
 import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, List, User } from 'lucide-react'
+import { Home, List, User, Settings } from 'lucide-react'
+import { authService } from '@/lib/auth'
 
 interface TabItem {
   href: string
@@ -13,16 +14,34 @@ interface TabItem {
 
 export function MobileTabBar() {
   const pathname = usePathname()
+  const [user, setUser] = React.useState<any>(null)
+
+  React.useEffect(() => {
+    const currentUser = authService.getCurrentUser()
+    setUser(currentUser)
+
+    const unsubscribe = authService.subscribe((updatedUser) => {
+      setUser(updatedUser)
+    })
+
+    return () => {
+      unsubscribe()
+    }
+  }, [])
 
   const tabs: TabItem[] = [
     { href: '/dashboard', label: 'Dashboard', icon: Home },
     { href: '/tours', label: 'Touren', icon: List },
     { href: '/profile', label: 'Profil', icon: User },
+    ...(user?.role === 'admin' ? [{ href: '/settings', label: 'Einstellungen', icon: Settings }] : []),
   ]
 
   const isActive = (href: string) => {
     if (href === '/tours') {
       return pathname === '/tours' || pathname?.startsWith('/tours/')
+    }
+    if (href === '/settings') {
+      return pathname === '/settings' || pathname?.startsWith('/settings/')
     }
     return pathname === href
   }
@@ -41,7 +60,7 @@ export function MobileTabBar() {
     >
       <div className="mx-auto max-w-7xl px-4">
         <div className="glass rounded-t-xl border-t border-gray-200/70 shadow-modern backdrop-blur-xl bg-white/70">
-          <ul className="grid grid-cols-3">
+          <ul className={`grid ${tabs.length === 4 ? 'grid-cols-4' : 'grid-cols-3'}`}>
             {tabs.map((tab) => {
               const active = isActive(tab.href)
               const IconComponent = tab.icon

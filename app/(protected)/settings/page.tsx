@@ -9,6 +9,7 @@ import { canManageUsers } from '@/lib/roles'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 import { SettingsIcon } from '@/components/ui/SettingsIcon'
+import { Users, Mail } from 'lucide-react'
 
 export default function SettingsPage() {
   const router = useRouter()
@@ -39,24 +40,41 @@ export default function SettingsPage() {
     return <div>Lädt...</div>
   }
 
-  const settingsCategories = [
+  const settingsCategories: Array<{
+    title: string
+    description: string
+    href: string
+    iconType: 'tour-types' | 'tour-lengths' | 'difficulties' | 'users' | 'invitations'
+  }> = [
     {
       title: 'Tourentypen',
       description: 'Verwalten Sie die verfügbaren Tourentypen',
       href: '/settings/tour-types',
-      iconType: 'tour-types' as const,
+      iconType: 'tour-types',
     },
     {
       title: 'Tourlängen',
       description: 'Verwalten Sie die verfügbaren Tourlängen',
       href: '/settings/tour-lengths',
-      iconType: 'tour-lengths' as const,
+      iconType: 'tour-lengths',
     },
     {
       title: 'Schwierigkeitsgrade',
       description: 'Verwalten Sie die Schwierigkeitsgrade für jede Tourenart',
       href: '/settings/difficulties',
-      iconType: 'difficulties' as const,
+      iconType: 'difficulties',
+    },
+    {
+      title: 'Benutzerverwaltung',
+      description: 'Verwalten Sie Benutzer, Rollen und Zugriffsrechte',
+      href: '/users',
+      iconType: 'users',
+    },
+    {
+      title: 'Einladungen',
+      description: 'Verwalten Sie Einladungen für neue Benutzer',
+      href: '/invitations',
+      iconType: 'invitations',
     },
   ]
 
@@ -68,14 +86,22 @@ export default function SettingsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {settingsCategories.map((category) => (
-          <Link key={category.href} href={category.href} className="touch-manipulation">
-            <Card className="hover:shadow-modern-lg active:shadow-modern transition-all cursor-pointer h-full group">
-              <CardContent className="p-4">
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0">
-                    <SettingsIcon type={category.iconType} className="w-10 h-10 group-hover:stroke-primary-600 transition-colors" />
-                  </div>
+        {settingsCategories.map((category) => {
+          const isCustomIcon = category.iconType === 'users' || category.iconType === 'invitations'
+          const IconComponent = category.iconType === 'users' ? Users : category.iconType === 'invitations' ? Mail : null
+          
+          return (
+            <Link key={category.href} href={category.href} className="touch-manipulation">
+              <Card className="hover:shadow-modern-lg active:shadow-modern transition-all cursor-pointer h-full group">
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0">
+                      {isCustomIcon && IconComponent ? (
+                        <IconComponent className="w-10 h-10 stroke-gray-600 group-hover:stroke-primary-600 transition-colors" strokeWidth={1.8} />
+                      ) : (
+                        <SettingsIcon type={category.iconType as 'tour-types' | 'tour-lengths' | 'difficulties'} className="w-10 h-10 group-hover:stroke-primary-600 transition-colors" />
+                      )}
+                    </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-primary-600 transition-colors">
                       {category.title}
@@ -89,7 +115,8 @@ export default function SettingsPage() {
               </CardContent>
             </Card>
           </Link>
-        ))}
+        )
+        })}
       </div>
     </div>
   )

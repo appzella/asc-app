@@ -7,6 +7,7 @@ import { User, Tour } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
+import { HelpCircle } from 'lucide-react'
 
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null)
@@ -165,6 +166,23 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         )}
+
+        <Card className="flex flex-col">
+          <CardHeader>
+            <CardTitle>Hilfe</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col flex-1">
+            <div className="flex-1 flex items-center justify-center mb-4">
+              <HelpCircle className="w-12 h-12 text-primary-600" strokeWidth={1.5} />
+            </div>
+            <p className="text-sm text-gray-600 text-center mb-4">Benötigen Sie Hilfe bei der Nutzung der App?</p>
+            <Link href="/help" className="mt-auto">
+              <Button variant="outline" size="sm" className="w-full">
+                Hilfe-Seite öffnen
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
