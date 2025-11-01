@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { authService } from '@/lib/auth'
-import { dataStore } from '@/lib/data/mockData'
+import { dataRepository } from '@/lib/data'
 import { User, UserRole } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -16,24 +16,30 @@ export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([])
 
   useEffect(() => {
-    const currentUser = authService.getCurrentUser()
-    setUser(currentUser)
+    const loadUsers = async () => {
+      const currentUser = authService.getCurrentUser()
+      setUser(currentUser)
 
-    if (currentUser && !canManageUsers(currentUser.role)) {
-      router.push('/dashboard')
-      return
+      if (currentUser && !canManageUsers(currentUser.role)) {
+        router.push('/dashboard')
+        return
+      }
+
+      if (currentUser) {
+        const allUsers = await dataRepository.getUsers()
+        setUsers(allUsers)
+      }
     }
 
-    if (currentUser) {
-      setUsers(dataStore.getUsers())
-    }
+    loadUsers()
 
-    const unsubscribe = authService.subscribe((updatedUser) => {
+    const unsubscribe = authService.subscribe(async (updatedUser) => {
       setUser(updatedUser)
       if (!updatedUser || !canManageUsers(updatedUser.role)) {
         router.push('/dashboard')
       } else {
-        setUsers(dataStore.getUsers())
+        const allUsers = await dataRepository.getUsers()
+        setUsers(allUsers)
       }
     })
 
@@ -42,9 +48,10 @@ export default function UsersPage() {
     }
   }, [router])
 
-  const handleRoleChange = (userId: string, newRole: UserRole) => {
-    dataStore.updateUser(userId, { role: newRole })
-    setUsers(dataStore.getUsers())
+  const handleRoleChange = async (userId: string, newRole: UserRole) => {
+    await dataRepository.updateUser(userId, { role: newRole })
+    const allUsers = await dataRepository.getUsers()
+    setUsers(allUsers)
   }
 
   if (!user) {

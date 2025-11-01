@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { authService } from '@/lib/auth'
-import { dataStore } from '@/lib/data/mockData'
+import { dataRepository } from '@/lib/data'
 import { User, Invitation } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -19,24 +19,30 @@ export default function InvitationsPage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   useEffect(() => {
-    const currentUser = authService.getCurrentUser()
-    setUser(currentUser)
+    const loadInvitations = async () => {
+      const currentUser = authService.getCurrentUser()
+      setUser(currentUser)
 
-    if (currentUser && !canManageUsers(currentUser.role)) {
-      router.push('/dashboard')
-      return
+      if (currentUser && !canManageUsers(currentUser.role)) {
+        router.push('/dashboard')
+        return
+      }
+
+      if (currentUser) {
+        const allInvitations = await dataRepository.getInvitations()
+        setInvitations(allInvitations)
+      }
     }
 
-    if (currentUser) {
-      setInvitations(dataStore.getInvitations())
-    }
+    loadInvitations()
 
-    const unsubscribe = authService.subscribe((updatedUser) => {
+    const unsubscribe = authService.subscribe(async (updatedUser) => {
       setUser(updatedUser)
       if (!updatedUser || !canManageUsers(updatedUser.role)) {
         router.push('/dashboard')
       } else {
-        setInvitations(dataStore.getInvitations())
+        const allInvitations = await dataRepository.getInvitations()
+        setInvitations(allInvitations)
       }
     })
 
@@ -55,14 +61,14 @@ export default function InvitationsPage() {
 
     try {
       // Prüfen ob E-Mail bereits existiert
-      const existingUser = dataStore.getUserByEmail(email)
+      const existingUser = await dataRepository.getUserByEmail(email)
       if (existingUser && existingUser.registered) {
         setMessage({ type: 'error', text: 'Diese E-Mail ist bereits registriert' })
         setIsLoading(false)
         return
       }
 
-      const invitation = dataStore.createInvitation(email, user.id)
+      const invitation = await dataRepository.createInvitation(email, user.id)
       
       // Generiere Registrierungslink
       const registrationLink = `${window.location.origin}/register/${invitation.token}`
@@ -72,7 +78,8 @@ export default function InvitationsPage() {
         text: `Einladung erstellt! Registrierungslink: ${registrationLink}`,
       })
       setEmail('')
-      setInvitations(dataStore.getInvitations())
+      const allInvitations = await dataRepository.getInvitations()
+      setInvitations(allInvitations)
     } catch (err) {
       setMessage({ type: 'error', text: 'Fehler beim Erstellen der Einladung' })
     } finally {

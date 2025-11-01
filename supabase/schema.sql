@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS public.users (
   invited_by UUID REFERENCES public.users(id),
   registration_token TEXT,
   registered BOOLEAN DEFAULT false,
-  profile_photo TEXT, -- Base64 encoded image or URL
+  profile_photo TEXT, -- URL to image in Supabase Storage (avatars bucket) or Base64 (legacy)
   phone TEXT, -- Festnetz
   mobile TEXT, -- Mobiltelefon
   street TEXT,

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { authService } from '@/lib/auth'
-import { dataStore } from '@/lib/data/mockData'
+import { dataRepository } from '@/lib/data'
 import { User } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -20,25 +20,29 @@ export default function TourTypesSettingsPage() {
   const [success, setSuccess] = useState('')
 
   useEffect(() => {
-    const currentUser = authService.getCurrentUser()
-    setUser(currentUser)
+    const loadSettings = async () => {
+      const currentUser = authService.getCurrentUser()
+      setUser(currentUser)
 
-    if (currentUser && !canManageUsers(currentUser.role)) {
-      router.push('/dashboard')
-      return
+      if (currentUser && !canManageUsers(currentUser.role)) {
+        router.push('/dashboard')
+        return
+      }
+
+      if (currentUser) {
+        const settings = await dataRepository.getSettings()
+        setTourTypes(settings.tourTypes)
+      }
     }
 
-    if (currentUser) {
-      const settings = dataStore.getSettings()
-      setTourTypes(settings.tourTypes)
-    }
+    loadSettings()
 
-    const unsubscribe = authService.subscribe((updatedUser) => {
+    const unsubscribe = authService.subscribe(async (updatedUser) => {
       setUser(updatedUser)
       if (!updatedUser || !canManageUsers(updatedUser.role)) {
         router.push('/dashboard')
       } else {
-        const settings = dataStore.getSettings()
+        const settings = await dataRepository.getSettings()
         setTourTypes(settings.tourTypes)
       }
     })
@@ -48,15 +52,16 @@ export default function TourTypesSettingsPage() {
     }
   }, [router])
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!newType.trim()) {
       setError('Bitte geben Sie einen Tourentyp ein')
       return
     }
 
-    const success = dataStore.addTourType(newType.trim())
+    const success = await dataRepository.addTourType(newType.trim())
     if (success) {
-      setTourTypes(dataStore.getSettings().tourTypes)
+      const settings = await dataRepository.getSettings()
+      setTourTypes(settings.tourTypes)
       setNewType('')
       setSuccess('Tourentyp hinzugefügt!')
       setTimeout(() => setSuccess(''), 3000)
@@ -66,10 +71,11 @@ export default function TourTypesSettingsPage() {
     }
   }
 
-  const handleRemove = (type: string) => {
-    const success = dataStore.removeTourType(type)
+  const handleRemove = async (type: string) => {
+    const success = await dataRepository.removeTourType(type)
     if (success) {
-      setTourTypes(dataStore.getSettings().tourTypes)
+      const settings = await dataRepository.getSettings()
+      setTourTypes(settings.tourTypes)
       setSuccess('Tourentyp entfernt!')
       setTimeout(() => setSuccess(''), 3000)
     }
@@ -85,7 +91,7 @@ export default function TourTypesSettingsPage() {
     e.dataTransfer.dropEffect = 'move'
   }
 
-  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+  const handleDrop = async (e: React.DragEvent, dropIndex: number) => {
     e.preventDefault()
     const dragIndex = parseInt(e.dataTransfer.getData('text/html'))
     
@@ -95,7 +101,7 @@ export default function TourTypesSettingsPage() {
     const [removed] = newOrder.splice(dragIndex, 1)
     newOrder.splice(dropIndex, 0, removed)
 
-    dataStore.updateTourTypesOrder(newOrder)
+    await dataRepository.updateTourTypesOrder(newOrder)
     setTourTypes(newOrder)
     setSuccess('Reihenfolge aktualisiert!')
     setTimeout(() => setSuccess(''), 3000)

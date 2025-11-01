@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { authService } from '@/lib/auth'
-import { dataStore } from '@/lib/data/mockData'
+import { dataRepository } from '@/lib/data'
 import { User } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -15,7 +15,7 @@ import Link from 'next/link'
 export default function DifficultiesSettingsPage() {
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
-  const [settings, setSettings] = useState(dataStore.getSettings())
+  const [settings, setSettings] = useState<{ tourTypes: string[]; tourLengths: string[]; difficulties: Record<string, string[]> }>({ tourTypes: [], tourLengths: [], difficulties: {} })
   const [selectedTourType, setSelectedTourType] = useState<string>('')
   const [difficulties, setDifficulties] = useState<string[]>([])
   const [newDifficulty, setNewDifficulty] = useState('')
@@ -23,28 +23,32 @@ export default function DifficultiesSettingsPage() {
   const [success, setSuccess] = useState('')
 
   useEffect(() => {
-    const currentUser = authService.getCurrentUser()
-    setUser(currentUser)
+    const loadSettings = async () => {
+      const currentUser = authService.getCurrentUser()
+      setUser(currentUser)
 
-    if (currentUser && !canManageUsers(currentUser.role)) {
-      router.push('/dashboard')
-      return
-    }
+      if (currentUser && !canManageUsers(currentUser.role)) {
+        router.push('/dashboard')
+        return
+      }
 
-    if (currentUser) {
-      const currentSettings = dataStore.getSettings()
-      setSettings(currentSettings)
-      if (currentSettings.tourTypes.length > 0 && !selectedTourType) {
-        setSelectedTourType(currentSettings.tourTypes[0])
+      if (currentUser) {
+        const currentSettings = await dataRepository.getSettings()
+        setSettings(currentSettings)
+        if (currentSettings.tourTypes.length > 0 && !selectedTourType) {
+          setSelectedTourType(currentSettings.tourTypes[0])
+        }
       }
     }
 
-    const unsubscribe = authService.subscribe((updatedUser) => {
+    loadSettings()
+
+    const unsubscribe = authService.subscribe(async (updatedUser) => {
       setUser(updatedUser)
       if (!updatedUser || !canManageUsers(updatedUser.role)) {
         router.push('/dashboard')
       } else {
-        const currentSettings = dataStore.getSettings()
+        const currentSettings = await dataRepository.getSettings()
         setSettings(currentSettings)
       }
     })
@@ -55,13 +59,16 @@ export default function DifficultiesSettingsPage() {
   }, [router, selectedTourType])
 
   useEffect(() => {
-    if (selectedTourType) {
-      const diffs = dataStore.getDifficultiesForTourType(selectedTourType)
-      setDifficulties(diffs)
+    const loadDifficulties = async () => {
+      if (selectedTourType) {
+        const diffs = await dataRepository.getDifficultiesForTourType(selectedTourType)
+        setDifficulties(diffs)
+      }
     }
+    loadDifficulties()
   }, [selectedTourType])
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!newDifficulty.trim()) {
       setError('Bitte geben Sie einen Schwierigkeitsgrad ein')
       return
@@ -72,9 +79,10 @@ export default function DifficultiesSettingsPage() {
       return
     }
 
-    const success = dataStore.addDifficulty(selectedTourType, newDifficulty.trim())
+    const success = await dataRepository.addDifficulty(selectedTourType, newDifficulty.trim())
     if (success) {
-      setDifficulties(dataStore.getDifficultiesForTourType(selectedTourType))
+      const diffs = await dataRepository.getDifficultiesForTourType(selectedTourType)
+      setDifficulties(diffs)
       setNewDifficulty('')
       setSuccess('Schwierigkeitsgrad hinzugefügt!')
       setTimeout(() => setSuccess(''), 3000)
@@ -84,12 +92,13 @@ export default function DifficultiesSettingsPage() {
     }
   }
 
-  const handleRemove = (difficulty: string) => {
+  const handleRemove = async (difficulty: string) => {
     if (!selectedTourType) return
 
-    const success = dataStore.removeDifficulty(selectedTourType, difficulty)
+    const success = await dataRepository.removeDifficulty(selectedTourType, difficulty)
     if (success) {
-      setDifficulties(dataStore.getDifficultiesForTourType(selectedTourType))
+      const diffs = await dataRepository.getDifficultiesForTourType(selectedTourType)
+      setDifficulties(diffs)
       setSuccess('Schwierigkeitsgrad entfernt!')
       setTimeout(() => setSuccess(''), 3000)
     }
@@ -105,7 +114,7 @@ export default function DifficultiesSettingsPage() {
     e.dataTransfer.dropEffect = 'move'
   }
 
-  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+  const handleDrop = async (e: React.DragEvent, dropIndex: number) => {
     e.preventDefault()
     if (!selectedTourType) return
 
@@ -117,7 +126,7 @@ export default function DifficultiesSettingsPage() {
     const [removed] = newOrder.splice(dragIndex, 1)
     newOrder.splice(dropIndex, 0, removed)
 
-    dataStore.updateDifficultiesOrder(selectedTourType, newOrder)
+    await dataRepository.updateDifficultiesOrder(selectedTourType, newOrder)
     setDifficulties(newOrder)
     setSuccess('Reihenfolge aktualisiert!')
     setTimeout(() => setSuccess(''), 3000)

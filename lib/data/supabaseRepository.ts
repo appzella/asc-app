@@ -1,6 +1,6 @@
 import { IDataRepository } from './repository'
 import { User, Tour, ChatMessage, Invitation, TourSettings } from '../types'
-import { supabase } from '../supabase/client'
+import { supabase, isSupabaseConfigured } from '../supabase/client'
 
 /**
  * Supabase Data Repository Implementation
@@ -693,6 +693,68 @@ export class SupabaseDataRepository implements IDataRepository {
       createdAt: new Date(row.created_at),
       used: row.used,
       usedAt: row.used_at ? new Date(row.used_at) : undefined,
+    }
+  }
+
+  /**
+   * Upload profile photo to Supabase Storage
+   * @param userId User ID
+   * @param file File to upload
+   * @returns Public URL of uploaded image
+   */
+  async uploadProfilePhoto(userId: string, file: File): Promise<string> {
+    if (!isSupabaseConfigured || !supabase) {
+      throw new Error('Supabase not configured')
+    }
+
+    // Generate unique filename
+    const fileExt = file.name.split('.').pop()
+    const fileName = `${userId}/${Date.now()}.${fileExt}`
+    const filePath = `profile-photos/${fileName}`
+
+    // Upload file to Storage
+    const { data, error } = await supabase.storage
+      .from('avatars')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false,
+      })
+
+    if (error) {
+      console.error('Error uploading profile photo:', error)
+      throw error
+    }
+
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(filePath)
+
+    return urlData.publicUrl
+  }
+
+  /**
+   * Delete profile photo from Supabase Storage
+   * @param photoUrl URL of the photo to delete
+   */
+  async deleteProfilePhoto(photoUrl: string): Promise<void> {
+    if (!isSupabaseConfigured || !supabase) {
+      return
+    }
+
+    // Extract file path from URL
+    // URL format: https://[project].supabase.co/storage/v1/object/public/avatars/profile-photos/[userId]/[filename]
+    try {
+      const urlParts = photoUrl.split('/avatars/')
+      if (urlParts.length > 1) {
+        const filePath = urlParts[1]
+        await supabase.storage
+          .from('avatars')
+          .remove([filePath])
+      }
+    } catch (error) {
+      console.error('Error deleting profile photo:', error)
+      // Don't throw - deletion is not critical
     }
   }
 }

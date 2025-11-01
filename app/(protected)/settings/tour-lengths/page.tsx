@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { authService } from '@/lib/auth'
-import { dataStore } from '@/lib/data/mockData'
+import { dataRepository } from '@/lib/data'
 import { User } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -20,25 +20,29 @@ export default function TourLengthsSettingsPage() {
   const [success, setSuccess] = useState('')
 
   useEffect(() => {
-    const currentUser = authService.getCurrentUser()
-    setUser(currentUser)
+    const loadSettings = async () => {
+      const currentUser = authService.getCurrentUser()
+      setUser(currentUser)
 
-    if (currentUser && !canManageUsers(currentUser.role)) {
-      router.push('/dashboard')
-      return
+      if (currentUser && !canManageUsers(currentUser.role)) {
+        router.push('/dashboard')
+        return
+      }
+
+      if (currentUser) {
+        const settings = await dataRepository.getSettings()
+        setTourLengths(settings.tourLengths)
+      }
     }
 
-    if (currentUser) {
-      const settings = dataStore.getSettings()
-      setTourLengths(settings.tourLengths)
-    }
+    loadSettings()
 
-    const unsubscribe = authService.subscribe((updatedUser) => {
+    const unsubscribe = authService.subscribe(async (updatedUser) => {
       setUser(updatedUser)
       if (!updatedUser || !canManageUsers(updatedUser.role)) {
         router.push('/dashboard')
       } else {
-        const settings = dataStore.getSettings()
+        const settings = await dataRepository.getSettings()
         setTourLengths(settings.tourLengths)
       }
     })
@@ -48,15 +52,16 @@ export default function TourLengthsSettingsPage() {
     }
   }, [router])
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!newLength.trim()) {
       setError('Bitte geben Sie eine Tourlänge ein')
       return
     }
 
-    const success = dataStore.addTourLength(newLength.trim())
+    const success = await dataRepository.addTourLength(newLength.trim())
     if (success) {
-      setTourLengths(dataStore.getSettings().tourLengths)
+      const settings = await dataRepository.getSettings()
+      setTourLengths(settings.tourLengths)
       setNewLength('')
       setSuccess('Tourlänge hinzugefügt!')
       setTimeout(() => setSuccess(''), 3000)
@@ -66,10 +71,11 @@ export default function TourLengthsSettingsPage() {
     }
   }
 
-  const handleRemove = (length: string) => {
-    const success = dataStore.removeTourLength(length)
+  const handleRemove = async (length: string) => {
+    const success = await dataRepository.removeTourLength(length)
     if (success) {
-      setTourLengths(dataStore.getSettings().tourLengths)
+      const settings = await dataRepository.getSettings()
+      setTourLengths(settings.tourLengths)
       setSuccess('Tourlänge entfernt!')
       setTimeout(() => setSuccess(''), 3000)
     }
@@ -85,7 +91,7 @@ export default function TourLengthsSettingsPage() {
     e.dataTransfer.dropEffect = 'move'
   }
 
-  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+  const handleDrop = async (e: React.DragEvent, dropIndex: number) => {
     e.preventDefault()
     const dragIndex = parseInt(e.dataTransfer.getData('text/html'))
     
@@ -95,7 +101,7 @@ export default function TourLengthsSettingsPage() {
     const [removed] = newOrder.splice(dragIndex, 1)
     newOrder.splice(dropIndex, 0, removed)
 
-    dataStore.updateTourLengthsOrder(newOrder)
+    await dataRepository.updateTourLengthsOrder(newOrder)
     setTourLengths(newOrder)
     setSuccess('Reihenfolge aktualisiert!')
     setTimeout(() => setSuccess(''), 3000)

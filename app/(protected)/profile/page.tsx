@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { authService } from '@/lib/auth'
-import { dataStore } from '@/lib/data/mockData'
+import { dataRepository } from '@/lib/data'
 import { User } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -81,26 +81,59 @@ export default function ProfilePage() {
     setError('')
 
     try {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        const base64String = reader.result as string
-        const updatedUser = dataStore.updateUser(user.id, {
-          profilePhoto: base64String,
+      // Delete old photo if exists
+      if (user.profilePhoto && !user.profilePhoto.startsWith('data:')) {
+        // Only delete if it's a URL (from storage), not base64
+        try {
+          const repo = dataRepository as any
+          if (repo.deleteProfilePhoto) {
+            await repo.deleteProfilePhoto(user.profilePhoto)
+          }
+        } catch (deleteError) {
+          // Ignore delete errors
+          console.warn('Could not delete old photo:', deleteError)
+        }
+      }
+
+      // Upload to Supabase Storage
+      // Check if we have uploadProfilePhoto method (Supabase repository)
+      const repo = dataRepository as any
+      if (typeof repo.uploadProfilePhoto === 'function') {
+        const photoUrl = await repo.uploadProfilePhoto(user.id, file)
+        
+        // Update user with new photo URL
+        const updatedUser = await dataRepository.updateUser(user.id, {
+          profilePhoto: photoUrl,
         })
+        
         if (updatedUser) {
           setUser(updatedUser)
           setSuccess('Profilfoto erfolgreich aktualisiert!')
           setTimeout(() => setSuccess(''), 3000)
         }
-        setIsLoading(false)
+      } else {
+        // Fallback: Base64 if storage not available
+        const reader = new FileReader()
+        reader.onloadend = async () => {
+          const base64String = reader.result as string
+          const updatedUser = await dataRepository.updateUser(user.id, {
+            profilePhoto: base64String,
+          })
+          if (updatedUser) {
+            setUser(updatedUser)
+            setSuccess('Profilfoto erfolgreich aktualisiert!')
+            setTimeout(() => setSuccess(''), 3000)
+          }
+        }
+        reader.onerror = () => {
+          setError('Fehler beim Lesen der Datei')
+        }
+        reader.readAsDataURL(file)
       }
-      reader.onerror = () => {
-        setError('Fehler beim Lesen der Datei')
-        setIsLoading(false)
-      }
-      reader.readAsDataURL(file)
     } catch (err) {
+      console.error('Upload error:', err)
       setError('Fehler beim Hochladen des Profilfotos')
+    } finally {
       setIsLoading(false)
     }
   }
@@ -114,7 +147,7 @@ export default function ProfilePage() {
     setSuccess('')
 
     try {
-      const updatedUser = dataStore.updateUser(user.id, {
+      const updatedUser = await dataRepository.updateUser(user.id, {
         name: formData.name,
         phone: formData.phone || undefined,
         mobile: formData.mobile || undefined,
@@ -135,17 +168,38 @@ export default function ProfilePage() {
     }
   }
 
-  const handleRemovePhoto = () => {
-    if (!user) return
+  const handleRemovePhoto = async () => {
+    if (!user || !user.profilePhoto) return
 
-    const updatedUser = dataStore.updateUser(user.id, {
-      profilePhoto: undefined,
-    })
+    setIsLoading(true)
+    try {
+      // Delete from storage if it's a URL
+      if (!user.profilePhoto.startsWith('data:')) {
+        try {
+          const repo = dataRepository as any
+          if (typeof repo.deleteProfilePhoto === 'function') {
+            await repo.deleteProfilePhoto(user.profilePhoto)
+          }
+        } catch (deleteError) {
+          // Ignore delete errors
+          console.warn('Could not delete photo from storage:', deleteError)
+        }
+      }
 
-    if (updatedUser) {
-      setUser(updatedUser)
-      setSuccess('Profilfoto entfernt!')
-      setTimeout(() => setSuccess(''), 3000)
+      // Remove from database
+      const updatedUser = await dataRepository.updateUser(user.id, {
+        profilePhoto: undefined,
+      })
+
+      if (updatedUser) {
+        setUser(updatedUser)
+        setSuccess('Profilfoto entfernt!')
+        setTimeout(() => setSuccess(''), 3000)
+      }
+    } catch (err) {
+      setError('Fehler beim Entfernen des Profilfotos')
+    } finally {
+      setIsLoading(false)
     }
   }
 
