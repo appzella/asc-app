@@ -12,6 +12,7 @@ import { ChatWindow } from '@/components/chat/ChatWindow'
 import { canEditTour, canApproveTour } from '@/lib/roles'
 import { formatDifficulty } from '@/lib/difficulty'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function TourDetailPage() {
   const params = useParams()
@@ -349,8 +350,24 @@ export default function TourDetailPage() {
               <CardContent>
                 <ul className="space-y-2">
                   {participants.map((participant) => (
-                    <li key={participant.id} className="text-sm text-gray-700">
-                      {participant.name}
+                    <li key={participant.id} className="flex items-center gap-3 text-sm text-gray-700">
+                      {participant.profilePhoto ? (
+                        <Image
+                          src={participant.profilePhoto}
+                          alt={participant.name}
+                          width={32}
+                          height={32}
+                          unoptimized
+                          className="w-8 h-8 rounded-full object-cover border-2 border-gray-200 flex-shrink-0"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center border-2 border-gray-200 flex-shrink-0">
+                          <span className="text-xs font-semibold text-primary-600">
+                            {participant.name.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                      )}
+                      <span className="font-medium">{participant.name}</span>
                     </li>
                   ))}
                 </ul>

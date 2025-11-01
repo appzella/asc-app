@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { supabase, isSupabaseConfigured } from '@/lib/supabase/client'
 import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
+import { Send } from 'lucide-react'
 
 interface ChatWindowProps {
   tourId: string
@@ -132,13 +133,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ tourId, userId }) => {
                 }`}
               >
                 {message.user && message.userId !== userId && (
-                  <p className="text-xs font-medium mb-1 opacity-75">
+                  <p className="text-xs font-semibold mb-1 text-primary-600 opacity-90">
                     {message.user.name}
                   </p>
                 )}
                 <p className="text-sm">{message.message}</p>
                 <p
-                  className={`text-xs mt-1 ${
+                  className={`text-xs mt-1 text-right ${
                     message.userId === userId ? 'text-primary-100' : 'text-gray-500'
                   }`}
                 >
@@ -159,8 +160,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ tourId, userId }) => {
           className="flex-1"
           autoComplete="off"
         />
-        <Button type="submit" disabled={!newMessage.trim()} className="touch-target">
-          Senden
+        <Button 
+          type="submit" 
+          disabled={!newMessage.trim()} 
+          className="touch-target p-3 flex-shrink-0"
+          aria-label="Nachricht senden"
+        >
+          <Send className="w-5 h-5" strokeWidth={2} />
         </Button>
       </form>
     </div>
