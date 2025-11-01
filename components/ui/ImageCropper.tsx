@@ -75,8 +75,36 @@ export function ImageCropper({
       pixelCrop.height
     )
 
+    // Optimize image size: Scale down to max 512x512px for profile photos
+    // This reduces file size significantly without visible quality loss
+    const MAX_SIZE = 512
+    let finalCanvas = canvas
+
+    if (pixelCrop.width > MAX_SIZE || pixelCrop.height > MAX_SIZE) {
+      const scale = MAX_SIZE / Math.max(pixelCrop.width, pixelCrop.height)
+      const newWidth = Math.round(pixelCrop.width * scale)
+      const newHeight = Math.round(pixelCrop.height * scale)
+
+      // Create optimized canvas
+      const optimizedCanvas = document.createElement('canvas')
+      optimizedCanvas.width = newWidth
+      optimizedCanvas.height = newHeight
+      const optimizedCtx = optimizedCanvas.getContext('2d')
+
+      if (!optimizedCtx) {
+        throw new Error('No 2d context for optimization')
+      }
+
+      // Draw scaled image with high quality
+      optimizedCtx.imageSmoothingEnabled = true
+      optimizedCtx.imageSmoothingQuality = 'high'
+      optimizedCtx.drawImage(canvas, 0, 0, newWidth, newHeight)
+
+      finalCanvas = optimizedCanvas
+    }
+
     return new Promise((resolve, reject) => {
-      canvas.toBlob(
+      finalCanvas.toBlob(
         (blob) => {
           if (!blob) {
             reject(new Error('Canvas is empty'))
@@ -85,7 +113,7 @@ export function ImageCropper({
           resolve(blob)
         },
         'image/jpeg',
-        0.92
+        0.85 // Slightly lower quality (0.85) since we're optimizing size
       )
     })
   }
