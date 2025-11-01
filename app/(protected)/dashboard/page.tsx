@@ -7,7 +7,7 @@ import { User, Tour } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
-import { ChevronRight, ListChecks, Calendar, Archive, BookOpen } from 'lucide-react'
+import { ChevronRight, ListChecks, Calendar, Archive, BookOpen, PlusCircle } from 'lucide-react'
 
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null)
@@ -200,7 +200,10 @@ export default function DashboardPage() {
         {(user.role === 'admin' || user.role === 'leader') && (
           <Card className="flex flex-col">
             <CardHeader>
-              <CardTitle>Tour erstellen</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <PlusCircle className="w-5 h-5 text-primary-600" strokeWidth={2} />
+                <span>Tour erstellen</span>
+              </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col flex-1">
               <div className="flex-1">
