@@ -319,14 +319,14 @@ export default function TourDetailPage() {
                       <Image
                         src={tour.leader.profilePhoto}
                         alt={tour.leader.name}
-                        width={20}
-                        height={20}
+                        width={32}
+                        height={32}
                         unoptimized
-                        className="w-5 h-5 rounded-full object-cover border border-gray-200 flex-shrink-0"
+                        className="w-8 h-8 rounded-full object-cover border-2 border-gray-200 flex-shrink-0"
                       />
                     ) : (
-                      <div className="w-5 h-5 rounded-full bg-primary-100 flex items-center justify-center border border-gray-200 flex-shrink-0">
-                        <span className="text-[10px] font-semibold text-primary-600">
+                      <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center border-2 border-gray-200 flex-shrink-0">
+                        <span className="text-xs font-semibold text-primary-600">
                           {tour.leader.name.charAt(0).toUpperCase()}
                         </span>
                       </div>
