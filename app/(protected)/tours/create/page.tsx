@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { authService } from '@/lib/auth'
 import { dataRepository } from '@/lib/data'
-import { User, TourType, TourLength, Difficulty } from '@/lib/types'
+import { User, TourType, TourLength, Difficulty, TourSettings } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -17,7 +17,7 @@ import Link from 'next/link'
 export default function CreateTourPage() {
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
-  const [settings, setSettings] = useState({ tourTypes: [], tourLengths: [], difficulties: [] })
+  const [settings, setSettings] = useState<TourSettings>({ tourTypes: [], tourLengths: [], difficulties: {} })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
