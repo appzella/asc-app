@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation'
 import { authService } from '@/lib/auth'
 import { dataRepository } from '@/lib/data'
 import { User, TourSettings } from '@/lib/types'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -177,8 +178,32 @@ export default function TourTypesSettingsPage() {
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-gray-600">Lädt...</div>
+      <div className="max-w-4xl mx-auto space-y-4 animate-fade-in">
+        <div>
+          <Skeleton className="h-9 w-32 mb-2" />
+          <Skeleton className="h-5 w-96" />
+        </div>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-48" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-10 w-full" />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-48 mb-2" />
+            <Skeleton className="h-4 w-64" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-12 w-full" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     )
   }
@@ -211,7 +236,7 @@ export default function TourTypesSettingsPage() {
           </Button>
         </div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Tourentypen</h1>
-        <p className="text-base text-gray-600">Verwalten Sie die verfügbaren Tourentypen</p>
+        <CardDescription className="text-base">Verwalten Sie die verfügbaren Tourentypen</CardDescription>
       </div>
 
       {error && (
@@ -255,7 +280,7 @@ export default function TourTypesSettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Tourentypen ({tourTypes.length})</CardTitle>
-          <p className="text-xs text-gray-600 mt-1">Ziehen Sie die Einträge, um die Reihenfolge zu ändern</p>
+          <CardDescription>Ziehen Sie die Einträge, um die Reihenfolge zu ändern</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
@@ -289,19 +314,21 @@ export default function TourTypesSettingsPage() {
                     >
                     <span className="text-gray-400 group-hover:text-gray-600 flex-shrink-0 text-sm">☰</span>
                     <div className="relative flex-shrink-0">
-                      <button
+                      <Button
                         type="button"
+                        variant="ghost"
+                        size="sm"
                         draggable={false}
                         onClick={(e) => {
                           e.stopPropagation()
                           setOpenIconPicker(isPickerOpen ? null : type)
                         }}
                         onDragStart={(e) => e.stopPropagation()}
-                        className="flex items-center gap-1 p-1.5 rounded-md hover:bg-gray-200 transition-colors touch-target"
+                        className="h-auto p-1.5 gap-1"
                       >
                         <CurrentIconComponent className="w-4 h-4 text-gray-600" strokeWidth={2} />
                         <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isPickerOpen ? 'rotate-180' : ''}`} strokeWidth={2} />
-                      </button>
+                      </Button>
                       {isPickerOpen && (
                         <>
                           <div 
@@ -355,16 +382,18 @@ export default function TourTypesSettingsPage() {
                       )}
                     </div>
                     <span className="font-medium text-gray-900 flex-1 min-w-0 truncate text-sm">{type}</span>
-                    <button
+                    <Button
                       type="button"
+                      variant="ghost"
+                      size="sm"
                       draggable={false}
                       onClick={() => handleRemove(type)}
                       onDragStart={(e) => e.stopPropagation()}
-                      className="flex-shrink-0 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors touch-target"
+                      className="flex-shrink-0 text-red-600 hover:text-red-700 hover:bg-red-50"
                       aria-label="Entfernen"
                     >
                       <Trash2 className="w-4 h-4" strokeWidth={2} />
-                    </button>
+                    </Button>
                     </div>
                   </div>
                 )

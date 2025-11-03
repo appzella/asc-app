@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation'
 import { authService } from '@/lib/auth'
 import { dataRepository } from '@/lib/data'
 import { User } from '@/lib/types'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -158,8 +159,27 @@ export default function DifficultiesSettingsPage() {
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-gray-600">Lädt...</div>
+      <div className="max-w-4xl mx-auto space-y-4 animate-fade-in">
+        <div>
+          <Skeleton className="h-9 w-32 mb-2" />
+          <Skeleton className="h-5 w-96" />
+        </div>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-48" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-10 w-full" />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-48" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-10 w-full" />
+          </CardContent>
+        </Card>
       </div>
     )
   }
@@ -192,7 +212,7 @@ export default function DifficultiesSettingsPage() {
           </Button>
         </div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Schwierigkeitsgrade</h1>
-        <p className="text-base text-gray-600">Verwalten Sie die Schwierigkeitsgrade für jede Tourenart</p>
+        <CardDescription className="text-base">Verwalten Sie die Schwierigkeitsgrade für jede Tourenart</CardDescription>
       </div>
 
       {error && (
@@ -268,7 +288,7 @@ export default function DifficultiesSettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle>Schwierigkeitsgrade für {selectedTourType} ({difficulties.length})</CardTitle>
-              <p className="text-xs text-gray-600 mt-1">Ziehen Sie die Einträge, um die Reihenfolge zu ändern</p>
+              <CardDescription>Ziehen Sie die Einträge, um die Reihenfolge zu ändern</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
@@ -301,16 +321,18 @@ export default function DifficultiesSettingsPage() {
                         <span className="text-gray-400 group-hover:text-gray-600 flex-shrink-0 text-sm">☰</span>
                         <span className="font-medium text-gray-900 truncate text-sm">{difficulty}</span>
                       </div>
-                      <button
+                      <Button
                         type="button"
+                        variant="ghost"
+                        size="sm"
                         draggable={false}
                         onClick={() => handleRemove(difficulty)}
                         onDragStart={(e) => e.stopPropagation()}
-                        className="flex-shrink-0 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors touch-target"
+                        className="flex-shrink-0 text-red-600 hover:text-red-700 hover:bg-red-50"
                         aria-label="Entfernen"
                       >
                         <Trash2 className="w-4 h-4" strokeWidth={2} />
-                      </button>
+                      </Button>
                       </div>
                     </div>
                   )

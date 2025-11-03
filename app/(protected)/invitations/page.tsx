@@ -9,10 +9,13 @@ import { authService } from '@/lib/auth'
 import { dataRepository } from '@/lib/data'
 import { User, Invitation } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Copy } from 'lucide-react'
 import {
   Form,
   FormControl,
@@ -150,8 +153,32 @@ export default function InvitationsPage() {
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-gray-600">Lädt...</div>
+      <div className="space-y-4">
+        <div>
+          <Skeleton className="h-9 w-32 mb-2" />
+          <Skeleton className="h-5 w-96" />
+        </div>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-48" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-10 w-full mb-4" />
+            <Skeleton className="h-9 w-32" />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-48" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-24 w-full" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     )
   }
@@ -232,51 +259,59 @@ export default function InvitationsPage() {
           {invitations.length === 0 ? (
             <p className="text-gray-500 text-center py-8 text-sm">Noch keine Einladungen erstellt</p>
           ) : (
-            <div className="space-y-3">
-              {invitations.map((invitation) => {
-                const registrationLink = `${typeof window !== 'undefined' ? window.location.origin : ''}/register/${invitation.token}`
-                return (
-                  <div
-                    key={invitation.id}
-                    className="border border-gray-200 rounded-md p-4 space-y-3"
-                  >
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                      <div>
-                        <p className="font-medium text-gray-900 text-sm">{invitation.email}</p>
-                        <p className="text-xs text-gray-600 mt-0.5">
-                          Erstellt am {new Date(invitation.createdAt).toLocaleDateString('de-CH')}
-                        </p>
-                      </div>
-                      {invitation.used ? (
-                        <Badge variant="default">
-                          Verwendet
-                        </Badge>
-                      ) : (
-                        <Badge variant="secondary">
-                          Ausstehend
-                        </Badge>
-                      )}
-                    </div>
-                    {!invitation.used && (
-                      <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-gray-200">
-                        <Input
-                          value={registrationLink}
-                          readOnly
-                          className="flex-1 text-xs"
-                        />
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => copyToClipboard(registrationLink)}
-                          className="w-full sm:w-auto"
-                        >
-                          Kopieren
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>E-Mail</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Erstellt am</TableHead>
+                    <TableHead>Registrierungslink</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {invitations.map((invitation) => {
+                    const registrationLink = `${typeof window !== 'undefined' ? window.location.origin : ''}/register/${invitation.token}`
+                    return (
+                      <TableRow key={invitation.id}>
+                        <TableCell className="font-medium">{invitation.email}</TableCell>
+                        <TableCell>
+                          {invitation.used ? (
+                            <Badge variant="default">Verwendet</Badge>
+                          ) : (
+                            <Badge variant="secondary">Ausstehend</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-gray-600">
+                          {new Date(invitation.createdAt).toLocaleDateString('de-CH')}
+                        </TableCell>
+                        <TableCell>
+                          {!invitation.used ? (
+                            <div className="flex items-center gap-2">
+                              <Input
+                                value={registrationLink}
+                                readOnly
+                                className="flex-1 text-xs h-8"
+                              />
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => copyToClipboard(registrationLink)}
+                                className="h-8 w-8"
+                                aria-label="Link kopieren"
+                              >
+                                <Copy className="w-4 h-4" strokeWidth={2} />
+                              </Button>
+                            </div>
+                          ) : (
+                            <span className="text-sm text-gray-500">-</span>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })}
+                </TableBody>
+              </Table>
             </div>
           )}
         </CardContent>

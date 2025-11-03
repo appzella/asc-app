@@ -6,17 +6,21 @@ import { authService } from '@/lib/auth'
 import { dataRepository } from '@/lib/data'
 import { User, Tour, TourSettings } from '@/lib/types'
 import { getTourIcon, getTourIconColor } from '@/lib/tourIcons'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
+import { Progress } from '@/components/ui/progress'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Skeleton } from '@/components/ui/skeleton'
 import { ChatWindow } from '@/components/chat/ChatWindow'
 import { canEditTour, canApproveTour, canPublishTour, canSubmitForPublishing } from '@/lib/roles'
 import { formatDifficulty } from '@/lib/difficulty'
 import Link from 'next/link'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, Calendar, Clock, ArrowUpRight, Users, ChartNoAxesColumnIncreasing } from 'lucide-react'
 
 export default function TourDetailPage() {
   const params = useParams()
@@ -217,8 +221,48 @@ export default function TourDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-gray-600">Lädt...</div>
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-9 w-9" />
+          <Skeleton className="h-9 w-64" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-2 space-y-4">
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-6 w-32" />
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Skeleton className="h-20 w-full" />
+                <div className="grid grid-cols-2 gap-4">
+                  <Skeleton className="h-16 w-full" />
+                  <Skeleton className="h-16 w-full" />
+                  <Skeleton className="h-16 w-full" />
+                  <Skeleton className="h-16 w-full" />
+                </div>
+                <Skeleton className="h-8 w-48" />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-6 w-24" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-96 w-full" />
+              </CardContent>
+            </Card>
+          </div>
+          <div className="space-y-4">
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-6 w-32" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-24 w-full" />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     )
   }
@@ -314,36 +358,37 @@ export default function TourDetailPage() {
                 <p className="text-gray-600 whitespace-pre-wrap text-sm leading-relaxed">{tour.description}</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200">
-                <div>
-                  <span className="text-xs font-medium text-gray-600 block mb-1">Datum:</span>
-                  <p className="text-gray-900 text-sm">{formatDate(tour.date)}</p>
+              <Separator />
+              <div className="grid grid-cols-2 gap-3 text-sm text-gray-600">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-primary-600 flex-shrink-0" strokeWidth={2} />
+                  <span className="text-xs">{formatDate(tour.date)}</span>
                 </div>
-                <div>
-                  <span className="text-xs font-medium text-gray-600 block mb-1">Dauer:</span>
-                  <p className="text-gray-900 text-sm">{tour.duration} Stunden</p>
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-primary-600 flex-shrink-0" strokeWidth={2} />
+                  <span className="text-xs">{tour.duration} h</span>
                 </div>
-                <div>
-                  <span className="text-xs font-medium text-gray-600 block mb-1">Höhenmeter:</span>
-                  <p className="text-gray-900 text-sm">{tour.elevation} m</p>
+                <div className="flex items-center gap-2">
+                  <ArrowUpRight className="w-4 h-4 text-primary-600 flex-shrink-0" strokeWidth={2} />
+                  <span className="text-xs">{tour.elevation} Hm</span>
                 </div>
-                <div>
-                  <span className="text-xs font-medium text-gray-600 block mb-1">Teilnehmer:</span>
-                  <p className="text-gray-900 text-sm">
-                    {tour.participants.length} / {tour.maxParticipants}
-                  </p>
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-primary-600 flex-shrink-0" strokeWidth={2} />
+                  <span className="text-xs">{tour.participants.length}/{tour.maxParticipants}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <ChartNoAxesColumnIncreasing className="w-4 h-4 text-primary-600 flex-shrink-0" strokeWidth={2} />
+                  <span className="text-xs">{formatDifficulty(tour.difficulty, tour.tourType)}</span>
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2 pt-4 border-t border-gray-200">
+              <Separator />
+              <div className="flex flex-wrap gap-2">
                 <Badge variant="outline">
                   {tour.tourType}
                 </Badge>
                 <Badge variant="outline">
                   {tour.tourLength}
-                </Badge>
-                <Badge variant="outline">
-                  {formatDifficulty(tour.difficulty, tour.tourType)}
                 </Badge>
                 {tour.status === 'draft' && (
                   <Badge variant="outline">
@@ -368,22 +413,25 @@ export default function TourDetailPage() {
               </div>
 
               {tour.leader && (
-                <div className="pt-4 border-t border-gray-200">
-                  <span className="text-xs font-medium text-gray-600 block mb-2">Tourenleiter:</span>
-                  <div className="flex items-center gap-2">
-                    <Avatar className="w-8 h-8 border border-gray-300 flex-shrink-0">
-                      <AvatarImage
-                        src={tour.leader.profilePhoto || undefined}
-                        alt={tour.leader.name}
-                        className="object-cover"
-                      />
-                      <AvatarFallback className="bg-primary-100 text-primary-600 text-xs font-semibold">
-                        {tour.leader.name.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <p className="text-gray-900 text-sm font-medium">{tour.leader.name}</p>
+                <>
+                  <Separator />
+                  <div>
+                    <span className="text-xs font-medium text-gray-600 block mb-2">Tourenleiter:</span>
+                    <div className="flex items-center gap-2">
+                      <Avatar className="w-8 h-8 flex-shrink-0">
+                        <AvatarImage
+                          src={tour.leader.profilePhoto || undefined}
+                          alt={tour.leader.name}
+                          className="object-cover"
+                        />
+                        <AvatarFallback className="bg-primary-100 text-primary-600 text-xs font-semibold">
+                          {tour.leader.name.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <p className="text-gray-900 text-sm font-medium">{tour.leader.name}</p>
+                    </div>
                   </div>
-                </div>
+                </>
               )}
             </CardContent>
           </Card>
@@ -408,11 +456,11 @@ export default function TourDetailPage() {
             <Card className="border-blue-300 bg-blue-50/50">
               <CardHeader>
                 <CardTitle className="text-blue-800 text-base">Tour einreichen</CardTitle>
+                <CardDescription className="text-xs">
+                  Reichen Sie diese Tour zur Veröffentlichung ein. Ein Admin wird sie prüfen und veröffentlichen.
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-xs text-gray-600 mb-4">
-                  Reichen Sie diese Tour zur Veröffentlichung ein. Ein Admin wird sie prüfen und veröffentlichen.
-                </p>
                 <Button variant="default" onClick={handleSubmitForPublishing} className="w-full" size="sm">
                   Zur Veröffentlichung einreichen
                 </Button>
@@ -515,14 +563,7 @@ export default function TourDetailPage() {
                   <p className="text-xs text-gray-600 mb-2">
                     {tour.participants.length} von {tour.maxParticipants} Plätzen belegt
                   </p>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-primary-600 h-2 rounded-full transition-all"
-                      style={{
-                        width: `${(tour.participants.length / tour.maxParticipants) * 100}%`,
-                      }}
-                    />
-                  </div>
+                  <Progress value={(tour.participants.length / tour.maxParticipants) * 100} className="h-2" />
                 </div>
 
                 {isRegistered ? (
@@ -570,7 +611,7 @@ export default function TourDetailPage() {
                 <ul className="space-y-3">
                   {participants.map((participant) => (
                     <li key={participant.id} className="flex items-center gap-3">
-                      <Avatar className="w-8 h-8 border border-gray-300 flex-shrink-0">
+                      <Avatar className="w-8 h-8 flex-shrink-0">
                         <AvatarImage
                           src={participant.profilePhoto || undefined}
                           alt={participant.name}
@@ -590,52 +631,46 @@ export default function TourDetailPage() {
         </div>
       </div>
 
-      {/* Reject Modal */}
-      {showRejectModal && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-[2px] flex items-center justify-center z-50 p-4">
-          <Card className="max-w-md w-full">
-            <CardHeader>
-              <CardTitle>Tour ablehnen</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-gray-600">
-                Möchten Sie diese Tour wirklich ablehnen? Sie können optional einen Kommentar hinzufügen.
-              </p>
-              <div className="space-y-2">
-                <Label htmlFor="rejection-comment">Kommentar (optional)</Label>
-                <Textarea
-                  id="rejection-comment"
-                  value={rejectionComment}
-                  onChange={(e) => setRejectionComment(e.target.value)}
-                  placeholder="Grund für die Ablehnung..."
-                  rows={4}
-                />
-              </div>
-              <div className="flex gap-2 pt-2">
-                <Button
-                  variant="destructive"
-                  onClick={handleConfirmReject}
-                  className="flex-1"
-                  size="sm"
-                >
-                  Ablehnen
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setShowRejectModal(false)
-                    setRejectionComment('')
-                  }}
-                  className="flex-1"
-                  size="sm"
-                >
-                  Abbrechen
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      {/* Reject Dialog */}
+      <Dialog open={showRejectModal} onOpenChange={setShowRejectModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Tour ablehnen</DialogTitle>
+            <DialogDescription>
+              Möchten Sie diese Tour wirklich ablehnen? Sie können optional einen Kommentar hinzufügen.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="rejection-comment">Kommentar (optional)</Label>
+              <Textarea
+                id="rejection-comment"
+                value={rejectionComment}
+                onChange={(e) => setRejectionComment(e.target.value)}
+                placeholder="Grund für die Ablehnung..."
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowRejectModal(false)
+                setRejectionComment('')
+              }}
+            >
+              Abbrechen
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmReject}
+            >
+              Ablehnen
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

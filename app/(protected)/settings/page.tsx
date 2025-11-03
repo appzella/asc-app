@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { authService } from '@/lib/auth'
 import { User } from '@/lib/types'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { canManageUsers } from '@/lib/roles'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -37,7 +38,25 @@ export default function SettingsPage() {
   }, [router])
 
   if (!user) {
-    return <div>Lädt...</div>
+    return (
+      <div className="max-w-6xl mx-auto space-y-6 animate-fade-in px-4 sm:px-0">
+        <div>
+          <Skeleton className="h-9 w-64 mb-2" />
+          <Skeleton className="h-5 w-96" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-4">
+                <Skeleton className="h-10 w-10 mb-4" />
+                <Skeleton className="h-6 w-3/4 mb-2" />
+                <Skeleton className="h-4 w-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    )
   }
 
   const settingsCategories: Array<{
@@ -81,8 +100,8 @@ export default function SettingsPage() {
   return (
     <div className="max-w-6xl mx-auto space-y-6 animate-fade-in px-4 sm:px-0">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-1">Einstellungen</h1>
-        <p className="text-base text-gray-600">Verwalten Sie die Optionen für Touren</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Einstellungen</h1>
+        <CardDescription className="text-base">Verwalten Sie die Optionen für Touren</CardDescription>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -106,7 +125,7 @@ export default function SettingsPage() {
                       <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-primary-600 transition-colors">
                         {category.title}
                       </h3>
-                      <p className="text-gray-600 text-sm line-clamp-2">{category.description}</p>
+                      <CardDescription className="line-clamp-2">{category.description}</CardDescription>
                     </div>
                     <ChevronRight className="w-7 h-7 text-gray-400 group-hover:text-primary-600 transition-colors flex-shrink-0" strokeWidth={1.8} />
                   </div>

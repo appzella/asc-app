@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import { authService } from '@/lib/auth'
 import { User } from '@/lib/types'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
@@ -26,8 +27,21 @@ export default function HelpPage() {
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-gray-600">Lädt...</div>
+      <div className="max-w-4xl mx-auto space-y-4 animate-fade-in">
+        <div>
+          <Skeleton className="h-9 w-32 mb-2" />
+          <Skeleton className="h-5 w-96" />
+        </div>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-32" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-4 w-full mb-2" />
+            <Skeleton className="h-4 w-full mb-2" />
+            <Skeleton className="h-4 w-3/4" />
+          </CardContent>
+        </Card>
       </div>
     )
   }
@@ -60,7 +74,7 @@ export default function HelpPage() {
           </Button>
         </div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Hilfe</h1>
-        <p className="text-base text-gray-600">Erfahren Sie, wie Sie die ASC Skitouren App verwenden</p>
+        <CardDescription className="text-base">Erfahren Sie, wie Sie die ASC Skitouren App verwenden</CardDescription>
       </div>
 
       {/* Übersicht */}

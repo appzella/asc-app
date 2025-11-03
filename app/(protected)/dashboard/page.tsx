@@ -4,11 +4,12 @@ import { useEffect, useState } from 'react'
 import { authService } from '@/lib/auth'
 import { dataRepository } from '@/lib/data'
 import { User, Tour } from '@/lib/types'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { ChevronRight, ListChecks, Calendar, Archive, BookOpen, PlusCircle } from 'lucide-react'
+import { ListChecks, Calendar, Archive, BookOpen, PlusCircle, AlertCircle } from 'lucide-react'
 
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null)
@@ -71,25 +72,23 @@ export default function DashboardPage() {
           <Skeleton className="h-9 w-64 mb-2" />
           <Skeleton className="h-5 w-96" />
         </div>
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <Skeleton className="h-6 w-32" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-20 w-full mb-4" />
-              <Skeleton className="h-9 w-full" />
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <Skeleton className="h-6 w-32" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-20 w-full mb-4" />
-              <Skeleton className="h-9 w-full" />
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <Card key={i} className="flex flex-col h-full">
+              <CardHeader>
+                <Skeleton className="h-6 w-32 mb-2" />
+                <Skeleton className="h-4 w-48" />
+              </CardHeader>
+              <CardContent className="flex flex-col flex-1">
+                <div className="flex-1">
+                  <Skeleton className="h-10 w-16 mb-2" />
+                </div>
+                <div className="mt-auto pt-4">
+                  <Skeleton className="h-8 w-full" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
     )
@@ -107,44 +106,43 @@ export default function DashboardPage() {
       </div>
 
       {user.role === 'admin' && pendingTours.length > 0 && (
-        <Card className="border-yellow-300 bg-yellow-50/50">
-          <CardHeader>
-            <CardTitle className="text-yellow-800">
-              {pendingTours.length} Tour{pendingTours.length !== 1 ? 'en' : ''} wartet{pendingTours.length === 1 ? '' : ''} auf Freigabe
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        <Alert className="border-yellow-300 bg-yellow-50/50">
+          <AlertCircle className="h-4 w-4 text-yellow-600" />
+          <AlertTitle className="text-yellow-800">
+            {pendingTours.length} Tour{pendingTours.length !== 1 ? 'en' : ''} wartet{pendingTours.length === 1 ? '' : ''} auf Freigabe
+          </AlertTitle>
+          <AlertDescription className="mt-2">
             <Link href="/tours?status=submitted">
-              <Button variant="default">Zur Veröffentlichung</Button>
+              <Button variant="default" size="sm">Zur Veröffentlichung</Button>
             </Link>
-          </CardContent>
-        </Card>
+          </AlertDescription>
+        </Alert>
       )}
 
       {user.role === 'leader' && pendingTours.length > 0 && (
-        <Card className="border-blue-300 bg-blue-50/50">
-          <CardHeader>
-            <CardTitle className="text-blue-800">
-              {pendingTours.length} Ihrer Tour{pendingTours.length !== 1 ? 'en' : ''} wartet{pendingTours.length === 1 ? '' : ''} auf Freigabe
-            </CardTitle>
-          </CardHeader>
-        </Card>
+        <Alert className="border-blue-300 bg-blue-50/50">
+          <AlertCircle className="h-4 w-4 text-blue-600" />
+          <AlertTitle className="text-blue-800">
+            {pendingTours.length} Ihrer Tour{pendingTours.length !== 1 ? 'en' : ''} wartet{pendingTours.length === 1 ? '' : ''} auf Freigabe
+          </AlertTitle>
+          <AlertDescription className="mt-2 text-blue-700">
+            Ein Admin wird Ihre Tour{pendingTours.length !== 1 ? 'en' : ''} in Kürze prüfen und veröffentlichen.
+          </AlertDescription>
+        </Alert>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="flex flex-col transition-all h-full group">
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <ListChecks className="w-5 h-5 text-primary-600" strokeWidth={2} />
-                <span className="text-base">Meine Touren</span>
-              </div>
+            <CardTitle className="flex items-center gap-2">
+              <ListChecks className="w-5 h-5 text-primary-600" strokeWidth={2} />
+              <span className="text-lg">Meine Touren</span>
             </CardTitle>
+            <CardDescription>Angemeldete oder geleitete Touren</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col flex-1">
             <div className="flex-1">
-              <div className="text-2xl font-bold text-primary-600">{myTours.length}</div>
-              <p className="text-sm text-gray-600 mt-1">Angemeldete oder geleitete Touren</p>
+              <div className="text-3xl font-bold text-primary-600 mb-2">{myTours.length}</div>
             </div>
             <div className="mt-auto pt-4">
               <Link href="/tours?my=true">
@@ -158,17 +156,15 @@ export default function DashboardPage() {
 
         <Card className="flex flex-col transition-all h-full group">
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-primary-600" strokeWidth={2} />
-                <span className="text-base">Verfügbare Touren</span>
-              </div>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-primary-600" strokeWidth={2} />
+              <span className="text-lg">Verfügbare Touren</span>
             </CardTitle>
+            <CardDescription>Freigegebene Touren</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col flex-1">
             <div className="flex-1">
-              <div className="text-2xl font-bold text-primary-600">{tours.length}</div>
-              <p className="text-sm text-gray-600 mt-1">Freigegebene Touren</p>
+              <div className="text-3xl font-bold text-primary-600 mb-2">{tours.length}</div>
             </div>
             <div className="mt-auto pt-4">
               <Link href="/tours">
@@ -182,17 +178,15 @@ export default function DashboardPage() {
 
         <Card className="flex flex-col transition-all h-full group">
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Archive className="w-5 h-5 text-primary-600" strokeWidth={2} />
-                <span className="text-base">Tourenarchiv</span>
-              </div>
+            <CardTitle className="flex items-center gap-2">
+              <Archive className="w-5 h-5 text-primary-600" strokeWidth={2} />
+              <span className="text-lg">Tourenarchiv</span>
             </CardTitle>
+            <CardDescription>Vergangene Touren</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col flex-1">
             <div className="flex-1">
-              <div className="text-2xl font-bold text-primary-600">{archivedTours.length}</div>
-              <p className="text-sm text-gray-600 mt-1">Vergangene Touren</p>
+              <div className="text-3xl font-bold text-primary-600 mb-2">{archivedTours.length}</div>
             </div>
             <div className="mt-auto pt-4">
               <Link href="/tours/archive">
@@ -205,39 +199,37 @@ export default function DashboardPage() {
         </Card>
 
         {(user.role === 'admin' || user.role === 'leader') && (
-          <Card className="flex flex-col">
+          <Card className="flex flex-col transition-all h-full group">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <PlusCircle className="w-5 h-5 text-primary-600" strokeWidth={2} />
-                <span className="text-base">Tour erstellen</span>
+                <span className="text-lg">Tour erstellen</span>
               </CardTitle>
+              <CardDescription>Erstellen Sie eine neue Tour</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col flex-1">
-              <div className="flex-1">
-                <p className="text-sm text-gray-600 mt-1">Erstellen Sie eine neue Tour</p>
+              <div className="flex-1"></div>
+              <div className="mt-auto pt-4">
+                <Link href="/tours/create">
+                  <Button variant="default" size="sm" className="w-full">
+                    Neue Tour
+                  </Button>
+                </Link>
               </div>
-              <Link href="/tours/create" className="mt-auto pt-4">
-                <Button variant="outline" size="sm" className="w-full">
-                  Neue Tour
-                </Button>
-              </Link>
             </CardContent>
           </Card>
         )}
 
         <Card className="flex flex-col transition-all h-full group">
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-primary-600" strokeWidth={2} />
-                <span className="text-base">Hilfe</span>
-              </div>
+            <CardTitle className="flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-primary-600" strokeWidth={2} />
+              <span className="text-lg">Hilfe</span>
             </CardTitle>
+            <CardDescription>Benötigen Sie Hilfe bei der Nutzung der App?</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col flex-1">
-            <div className="flex-1">
-              <p className="text-sm text-gray-600">Benötigen Sie Hilfe bei der Nutzung der App</p>
-            </div>
+            <div className="flex-1"></div>
             <div className="mt-auto pt-4">
               <Link href="/help">
                 <Button variant="outline" size="sm" className="w-full">

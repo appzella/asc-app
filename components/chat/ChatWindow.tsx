@@ -5,6 +5,9 @@ import { dataRepository } from '@/lib/data'
 import { ChatMessage } from '@/lib/types'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { Skeleton } from '@/components/ui/skeleton'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { supabase, isSupabaseConfigured } from '@/lib/supabase/client'
 import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 import { Send } from 'lucide-react'
@@ -114,43 +117,95 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ tourId, userId }) => {
 
   return (
     <div className="flex flex-col h-96 sm:h-96 max-h-[60vh] sm:max-h-none">
-      <div className="flex-1 overflow-y-auto space-y-4 mb-4 p-2 overscroll-contain">
-        {isLoading ? (
-          <p className="text-center text-gray-500 text-sm">Lade Nachrichten...</p>
-        ) : messages.length === 0 ? (
-          <p className="text-center text-gray-500 text-sm">Noch keine Nachrichten</p>
-        ) : (
-          messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${message.userId === userId ? 'justify-end' : 'justify-start'}`}
-            >
-              <div
-                className={`max-w-[75%] sm:max-w-xs lg:max-w-md px-4 py-2 rounded-lg break-words ${
-                  message.userId === userId
-                    ? 'bg-primary-600 text-white'
-                    : 'bg-gray-200 text-gray-900'
-                }`}
-              >
-                {message.user && message.userId !== userId && (
-                  <p className="text-xs font-semibold mb-1 text-primary-600 opacity-90">
-                    {message.user.name}
-                  </p>
-                )}
-                <p className="text-sm">{message.message}</p>
-                <p
-                  className={`text-xs mt-1 text-right ${
-                    message.userId === userId ? 'text-primary-100' : 'text-gray-500'
-                  }`}
-                >
-                  {formatTime(message.createdAt)}
-                </p>
-              </div>
+      <ScrollArea className="flex-1 mb-4 px-2">
+        <div className="space-y-4 pr-4">
+          {isLoading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-start gap-2">
+                  <Skeleton className="w-8 h-8 rounded-full flex-shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-16 w-3/4 rounded-lg" />
+                  </div>
+                </div>
+              ))}
             </div>
-          ))
-        )}
-        <div ref={messagesEndRef} />
-      </div>
+          ) : messages.length === 0 ? (
+            <p className="text-center text-gray-500 text-sm py-8">Noch keine Nachrichten</p>
+          ) : (
+            <>
+              {messages.map((message) => {
+                const isOwnMessage = message.userId === userId
+                // Debug logging
+                if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+                  console.log('Rendering message:', {
+                    id: message.id,
+                    userId: message.userId,
+                    currentUserId: userId,
+                    isOwnMessage,
+                    messageText: message.message,
+                    hasUser: !!message.user,
+                  })
+                }
+                return (
+                  <div
+                    key={message.id}
+                    className={`flex items-start gap-2 ${
+                      isOwnMessage ? 'flex-row-reverse' : 'flex-row'
+                    }`}
+                  >
+                    <Avatar className="w-8 h-8 flex-shrink-0">
+                      <AvatarImage
+                        src={message.user?.profilePhoto || undefined}
+                        alt={message.user?.name || 'Benutzer'}
+                        className="object-cover"
+                      />
+                      <AvatarFallback className="bg-primary-100 text-primary-600 text-xs font-semibold">
+                        {message.user?.name?.charAt(0).toUpperCase() || '?'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div
+                      className={`max-w-[75%] sm:max-w-xs lg:max-w-md px-4 py-2 rounded-lg break-words ${
+                        isOwnMessage
+                          ? 'bg-primary-600'
+                          : 'bg-gray-200'
+                      }`}
+                      style={{
+                        color: isOwnMessage ? '#ffffff' : '#111827',
+                      }}
+                    >
+                      {message.user && !isOwnMessage && (
+                        <p className="text-xs font-semibold mb-1 text-primary-600">
+                          {message.user.name}
+                        </p>
+                      )}
+                      <p 
+                        className="text-sm"
+                        style={{
+                          color: isOwnMessage ? '#ffffff' : '#111827',
+                          whiteSpace: 'pre-wrap',
+                        }}
+                      >
+                        {message.message || '(Keine Nachricht)'}
+                      </p>
+                      <p
+                        className="text-xs mt-1 text-right"
+                        style={{
+                          color: isOwnMessage ? 'rgba(255, 255, 255, 0.8)' : '#6b7280',
+                        }}
+                      >
+                        {formatTime(message.createdAt)}
+                      </p>
+                    </div>
+                  </div>
+                )
+              })}
+              <div ref={messagesEndRef} />
+            </>
+          )}
+        </div>
+      </ScrollArea>
 
       <form onSubmit={handleSend} className="flex gap-2 items-end touch-manipulation" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
         <Input

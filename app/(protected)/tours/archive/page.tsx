@@ -11,7 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Switch } from '@/components/ui/switch'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Filter, ChevronLeft } from 'lucide-react'
 
 export default function ToursArchivePage() {
@@ -135,8 +138,37 @@ export default function ToursArchivePage() {
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-gray-600">Lädt...</div>
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <Skeleton className="h-9 w-32" />
+          <Skeleton className="h-9 w-48" />
+        </div>
+        <Skeleton className="h-24 w-full" />
+        <Card>
+          <CardContent className="p-4 md:p-6">
+            <div className="space-y-4">
+              <Skeleton className="h-10 w-full" />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-6">
+                <Skeleton className="h-6 w-3/4 mb-4" />
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-4 w-2/3" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     )
   }
@@ -173,17 +205,27 @@ export default function ToursArchivePage() {
         </div>
       </div>
 
-      <div className="bg-primary-50 border border-primary-200 rounded-lg p-4">
-        <p className="text-sm text-primary-800">
+      <Alert>
+        <AlertDescription>
           Hier finden Sie alle vergangenen Touren. Das Archiv enthält automatisch alle Touren, deren Datum in der Vergangenheit liegt.
-        </p>
-      </div>
+        </AlertDescription>
+      </Alert>
 
       {/* Filter */}
       <Card>
-        <CardContent>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg">Filter</CardTitle>
+            {(statusFilter || typeFilter || lengthFilter || difficultyFilter || searchQuery || showMyTours) && (
+              <Button variant="ghost" size="sm" onClick={clearFilters} className="h-8">
+                Zurücksetzen
+              </Button>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
           {/* Mobile: Kompakte Suchzeile mit Filter-Toggle */}
-          <div className="md:hidden space-y-3">
+          <div className="md:hidden space-y-4">
             <div className="flex gap-2">
               <Input
                 placeholder="Suche..."
@@ -191,23 +233,20 @@ export default function ToursArchivePage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="flex-1"
               />
-              <div className="flex flex-col">
-                <div className="h-5 mb-1"></div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="flex-shrink-0 flex items-center justify-center px-3 h-[3rem]"
-                  aria-label={showFilters ? 'Filter schließen' : 'Filter anzeigen'}
-                >
-                  <Filter className="w-4 h-4" strokeWidth={2} />
-                </Button>
-              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex-shrink-0"
+                aria-label={showFilters ? 'Filter schließen' : 'Filter anzeigen'}
+              >
+                <Filter className="w-4 h-4" strokeWidth={1.8} />
+              </Button>
             </div>
           
           {/* Ausklappbare Filter auf Mobile */}
           {showFilters && (
-            <div className="space-y-3 pt-3 border-t border-gray-200">
+            <div className="space-y-4 pt-2 border-t">
               <div className="space-y-3">
                 {user.role === 'admin' && (
                   <div className="space-y-2">
@@ -291,22 +330,15 @@ export default function ToursArchivePage() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2 pt-3 border-t border-gray-200">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={showMyTours}
-                    onChange={(e) => setShowMyTours(e.target.checked)}
-                    className="mr-2 w-4 h-4 focus:ring-primary-500 focus:ring-2 cursor-pointer"
-                  />
-                  <span className="text-sm text-gray-700">Nur meine Touren</span>
-                </label>
-                
-                {(statusFilter || typeFilter || lengthFilter || difficultyFilter || searchQuery || showMyTours) && (
-                  <Button variant="outline" size="sm" onClick={clearFilters} className="w-full">
-                    Filter zurücksetzen
-                  </Button>
-                )}
+              <div className="flex items-center space-x-3 pt-2 border-t">
+                <Switch
+                  id="my-tours-archive-mobile"
+                  checked={showMyTours}
+                  onCheckedChange={setShowMyTours}
+                />
+                <Label htmlFor="my-tours-archive-mobile" className="text-sm font-medium cursor-pointer">
+                  Nur meine Touren
+                </Label>
               </div>
             </div>
           )}
@@ -315,11 +347,14 @@ export default function ToursArchivePage() {
         {/* Desktop: Normale Ansicht */}
         <div className="hidden md:block space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <Input
-              placeholder="Suche..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+            <div className="space-y-2">
+              <Label>Suche</Label>
+              <Input
+                placeholder="Suche..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
             
             {user.role === 'admin' && (
               <div className="space-y-2">
@@ -403,22 +438,15 @@ export default function ToursArchivePage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                checked={showMyTours}
-                onChange={(e) => setShowMyTours(e.target.checked)}
-                className="mr-2 w-4 h-4 focus:ring-primary-500 focus:ring-2 cursor-pointer"
-              />
-              <span className="text-sm text-gray-700">Nur meine Touren</span>
-            </label>
-            
-            {(statusFilter || typeFilter || lengthFilter || difficultyFilter || searchQuery || showMyTours) && (
-              <Button variant="outline" size="sm" onClick={clearFilters}>
-                Filter zurücksetzen
-              </Button>
-            )}
+          <div className="flex items-center space-x-3 pt-2 border-t">
+            <Switch
+              id="my-tours-archive-desktop"
+              checked={showMyTours}
+              onCheckedChange={setShowMyTours}
+            />
+            <Label htmlFor="my-tours-archive-desktop" className="text-sm font-medium cursor-pointer">
+              Nur meine Touren
+            </Label>
           </div>
         </div>
       </CardContent>
@@ -427,11 +455,15 @@ export default function ToursArchivePage() {
       {/* Tour Liste */}
       {filteredTours.length === 0 ? (
         <Card>
-          <CardContent>
-            <div className="text-center py-8">
-              <p className="text-base text-gray-600">Keine vergangenen Touren gefunden.</p>
-              <p className="text-sm text-gray-500 mt-2">Alle zukünftigen Touren finden Sie in der <Link href="/tours" className="text-primary-600 hover:text-primary-700 underline">Tourenübersicht</Link>.</p>
-            </div>
+          <CardContent className="text-center py-12">
+            <p className="text-gray-600 text-base">Keine vergangenen Touren gefunden.</p>
+            <CardDescription className="mt-2">
+              Alle zukünftigen Touren finden Sie in der{' '}
+              <Link href="/tours" className="text-primary-600 hover:text-primary-700 underline">
+                Tourenübersicht
+              </Link>
+              .
+            </CardDescription>
           </CardContent>
         </Card>
       ) : (

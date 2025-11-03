@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { Tour, UserRole } from '@/lib/types'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
 import { formatDifficulty } from '@/lib/difficulty'
 import { Calendar, Clock, ArrowUpRight, Users, ChartNoAxesColumnIncreasing } from 'lucide-react'
 import Image from 'next/image'
@@ -56,8 +57,8 @@ export const TourCard: React.FC<TourCardProps> = ({ tour, tourTypeIcons, userRol
 
   return (
     <Link href={`/tours/${tour.id}`} className="touch-target">
-      <Card className="cursor-pointer h-full group transition-all">
-        <CardContent className="p-4 md:p-6">
+      <Card className="cursor-pointer h-full group transition-all flex flex-col">
+        <CardContent className="p-4 md:p-6 flex flex-col flex-1">
           <div className="flex justify-between items-start mb-3">
             <div className="flex items-center gap-2 flex-1 min-w-0">
               {(() => {
@@ -71,6 +72,8 @@ export const TourCard: React.FC<TourCardProps> = ({ tour, tourTypeIcons, userRol
           </div>
           
           <p className="text-gray-600 mb-3 line-clamp-2 text-sm">{tour.description}</p>
+          
+          <Separator className="mb-3" />
           
           <div className="flex flex-wrap gap-2 mb-3">
             <Badge variant="outline">{tour.tourType}</Badge>
@@ -99,6 +102,8 @@ export const TourCard: React.FC<TourCardProps> = ({ tour, tourTypeIcons, userRol
               <span className="text-xs">{formatDifficulty(tour.difficulty, tour.tourType)}</span>
             </div>
           </div>
+
+          <div className="flex-1"></div>
 
           {tour.leader && (
             <div className="flex items-center justify-end gap-2 text-sm text-gray-600">
