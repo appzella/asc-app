@@ -240,7 +240,7 @@ export default function CreateTourPage() {
           <div className="flex gap-2 mb-4">
             <Button
               type="button"
-              variant={creationMode === 'new' ? 'primary' : 'outline'}
+              variant={creationMode === 'new' ? 'default' : 'outline'}
               size="sm"
               onClick={() => {
                 setCreationMode('new')
@@ -267,7 +267,7 @@ export default function CreateTourPage() {
             </Button>
             <Button
               type="button"
-              variant={creationMode === 'duplicate' ? 'primary' : 'outline'}
+              variant={creationMode === 'duplicate' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setCreationMode('duplicate')}
               className="flex-1"
@@ -367,120 +367,162 @@ export default function CreateTourPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <Input
-              label="Titel"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              required
-              placeholder="z.B. Skitour auf den Säntis"
-            />
+            <div className="space-y-2">
+              <Label htmlFor="create-title">Titel</Label>
+              <Input
+                id="create-title"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                required
+                placeholder="z.B. Skitour auf den Säntis"
+              />
+            </div>
 
-            <Textarea
-              label="Beschreibung"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              required
-              rows={4}
-              placeholder="Beschreiben Sie die Tour..."
-            />
+            <div className="space-y-2">
+              <Label htmlFor="create-description">Beschreibung</Label>
+              <Textarea
+                id="create-description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                required
+                rows={4}
+                placeholder="Beschreiben Sie die Tour..."
+              />
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-gray-200">
-              <Input
-                label="Datum"
-                type="date"
-                value={formData.date}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                required
-              />
+              <div className="space-y-2">
+                <Label htmlFor="create-date">Datum</Label>
+                <Input
+                  id="create-date"
+                  type="date"
+                  value={formData.date}
+                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                  required
+                />
+              </div>
 
-              <Select
-                label="Tourenart"
-                value={formData.tourType}
-                onChange={(e) => {
-                  const newTourType = e.target.value as TourType
-                  // Schwierigkeit zurücksetzen, wenn Tourenart geändert wird
-                  setFormData({ ...formData, tourType: newTourType, difficulty: '' })
-                }}
-                required
-                options={[
-                  { value: '', label: 'Bitte wählen' },
-                  ...settings.tourTypes.map((type) => ({
-                    value: type,
-                    label: type,
-                  })),
-                ]}
-              />
+              <div className="space-y-2">
+                <Label htmlFor="create-tour-type">Tourenart</Label>
+                <Select
+                  value={formData.tourType}
+                  onValueChange={(value) => {
+                    const newTourType = value as TourType
+                    // Schwierigkeit zurücksetzen, wenn Tourenart geändert wird
+                    setFormData({ ...formData, tourType: newTourType, difficulty: '' })
+                  }}
+                  required
+                >
+                  <SelectTrigger id="create-tour-type" className="w-full">
+                    <SelectValue placeholder="Bitte wählen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {settings.tourTypes.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-              <Select
-                label="Tourlänge"
-                value={formData.tourLength}
-                onChange={(e) => setFormData({ ...formData, tourLength: e.target.value as TourLength })}
-                required
-                options={[
-                  { value: '', label: 'Bitte wählen' },
-                  ...settings.tourLengths.map((length) => ({
-                    value: length,
-                    label: length,
-                  })),
-                ]}
-              />
+              <div className="space-y-2">
+                <Label htmlFor="create-tour-length">Tourlänge</Label>
+                <Select
+                  value={formData.tourLength}
+                  onValueChange={(value) => setFormData({ ...formData, tourLength: value as TourLength })}
+                  required
+                >
+                  <SelectTrigger id="create-tour-length" className="w-full">
+                    <SelectValue placeholder="Bitte wählen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {settings.tourLengths.map((length) => (
+                      <SelectItem key={length} value={length}>
+                        {length}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-              <Select
-                label="Schwierigkeit (SAC-Skala)"
-                value={formData.difficulty}
-                onChange={(e) => setFormData({ ...formData, difficulty: e.target.value as Difficulty })}
-                required
-                options={[
-                  { value: '', label: 'Bitte zuerst Tourenart wählen' },
-                  ...getDifficultyOptions(formData.tourType).map((opt) => ({
-                    value: opt.value,
-                    label: opt.label,
-                  })),
-                ]}
-                disabled={!formData.tourType}
-              />
+              <div className="space-y-2">
+                <Label htmlFor="create-difficulty">Schwierigkeit (SAC-Skala)</Label>
+                <Select
+                  value={formData.difficulty}
+                  onValueChange={(value) => setFormData({ ...formData, difficulty: value as Difficulty })}
+                  required
+                  disabled={!formData.tourType}
+                >
+                  <SelectTrigger id="create-difficulty" className="w-full">
+                    <SelectValue placeholder={formData.tourType ? "Bitte wählen" : "Bitte zuerst Tourenart wählen"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getDifficultyOptions(formData.tourType).map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-              <Input
-                label="Höhenmeter"
-                type="number"
-                value={formData.elevation}
-                onChange={(e) => setFormData({ ...formData, elevation: e.target.value })}
-                required
-                min="0"
-              />
+              <div className="space-y-2">
+                <Label htmlFor="create-elevation">Höhenmeter</Label>
+                <Input
+                  id="create-elevation"
+                  type="number"
+                  value={formData.elevation}
+                  onChange={(e) => setFormData({ ...formData, elevation: e.target.value })}
+                  required
+                  min="0"
+                />
+              </div>
 
-              <Input
-                label="Dauer (Stunden)"
-                type="number"
-                value={formData.duration}
-                onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                required
-                min="1"
-              />
+              <div className="space-y-2">
+                <Label htmlFor="create-duration">Dauer (Stunden)</Label>
+                <Input
+                  id="create-duration"
+                  type="number"
+                  value={formData.duration}
+                  onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                  required
+                  min="1"
+                />
+              </div>
 
-              <Input
-                label="Max. Teilnehmer"
-                type="number"
-                value={formData.maxParticipants}
-                onChange={(e) => setFormData({ ...formData, maxParticipants: e.target.value })}
-                required
-                min="1"
-              />
+              <div className="space-y-2">
+                <Label htmlFor="create-max-participants">Max. Teilnehmer</Label>
+                <Input
+                  id="create-max-participants"
+                  type="number"
+                  value={formData.maxParticipants}
+                  onChange={(e) => setFormData({ ...formData, maxParticipants: e.target.value })}
+                  required
+                  min="1"
+                />
+              </div>
               
               {user?.role === 'admin' && (
-                <Select
-                  label="Tourenleiter"
-                  value={formData.leaderId}
-                  onChange={(e) => setFormData({ ...formData, leaderId: e.target.value })}
-                  required
-                  options={[
-                    { value: '', label: 'Bitte wählen' },
-                    ...users.map((u) => ({
-                      value: u.id,
-                      label: `${u.name} (${u.role})`,
-                    })),
-                  ]}
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="create-leader">Tourenleiter</Label>
+                  <Select
+                    value={formData.leaderId}
+                    onValueChange={(value) => setFormData({ ...formData, leaderId: value })}
+                    required
+                  >
+                    <SelectTrigger id="create-leader" className="w-full">
+                      <SelectValue placeholder="Bitte wählen" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {users.map((u) => (
+                        <SelectItem key={u.id} value={u.id}>
+                          {u.name} ({u.role})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               )}
             </div>
 

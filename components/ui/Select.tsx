@@ -6,7 +6,7 @@ import { Check, ChevronDown, ChevronUp } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-const Select = SelectPrimitive.Root
+const SelectRoot = SelectPrimitive.Root
 
 const SelectGroup = SelectPrimitive.Group
 
@@ -144,6 +144,67 @@ const SelectSeparator = React.forwardRef<
   />
 ))
 SelectSeparator.displayName = SelectPrimitive.Separator.displayName
+
+// Wrapper component for simplified Select API with label and options
+interface SelectFieldProps {
+  label?: string
+  value?: string
+  onChange?: (e: { target: { value: string } }) => void
+  options?: Array<{ value: string; label: string }>
+  required?: boolean
+  disabled?: boolean
+  placeholder?: string
+  className?: string
+}
+
+export const SelectField = React.forwardRef<HTMLButtonElement, SelectFieldProps>(
+  ({ label, value, onChange, options = [], required, disabled, placeholder, className }, ref) => {
+    const handleValueChange = (newValue: string) => {
+      if (onChange) {
+        onChange({ target: { value: newValue } })
+      }
+    }
+
+    return (
+      <div className={className}>
+        {label && (
+          <label className="text-sm font-medium leading-none mb-2 block">
+            {label}
+            {required && <span className="text-destructive ml-1">*</span>}
+          </label>
+        )}
+        <SelectRoot value={value} onValueChange={handleValueChange} disabled={disabled} required={required}>
+          <SelectTrigger ref={ref} className="w-full">
+            <SelectValue placeholder={placeholder || 'Bitte wählen'} />
+          </SelectTrigger>
+          <SelectContent>
+            {options.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </SelectRoot>
+      </div>
+    )
+  }
+)
+SelectField.displayName = "SelectField"
+
+// Export Select as a polymorphic component that supports both APIs
+// If label and options props are provided, use SelectField, otherwise use SelectRoot
+const Select = React.forwardRef<HTMLButtonElement, SelectFieldProps | React.ComponentProps<typeof SelectRoot>>(
+  (props, ref) => {
+    // If label or options are provided, use SelectField wrapper
+    const hasLabelOrOptions = 'label' in props || 'options' in props
+    if (hasLabelOrOptions) {
+      return <SelectField {...(props as SelectFieldProps)} ref={ref} />
+    }
+    // Otherwise, use the standard SelectRoot
+    return <SelectRoot {...(props as React.ComponentProps<typeof SelectRoot>)} />
+  }
+)
+Select.displayName = "Select"
 
 export {
   Select,

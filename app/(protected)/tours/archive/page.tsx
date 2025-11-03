@@ -202,74 +202,85 @@ export default function ToursArchivePage() {
             <div className="space-y-3 pt-3 border-t border-gray-200">
               <div className="space-y-3">
                 {user.role === 'admin' && (
-                  <Select
-                    label="Status"
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    options={[
-                      { value: '', label: 'Alle' },
-                      { value: 'published', label: 'Veröffentlicht' },
-                      { value: 'draft', label: 'Entwurf' },
-                      { value: 'cancelled', label: 'Abgesagt' },
-                    ]}
-                  />
+                  <div className="space-y-2">
+                    <Label htmlFor="filter-status-mobile">Status</Label>
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                      <SelectTrigger id="filter-status-mobile" className="w-full">
+                        <SelectValue placeholder="Alle" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Alle</SelectItem>
+                        <SelectItem value="published">Veröffentlicht</SelectItem>
+                        <SelectItem value="draft">Entwurf</SelectItem>
+                        <SelectItem value="cancelled">Abgesagt</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 )}
 
-                <Select
-                  label="Tourenart"
-                  value={typeFilter}
-                  onChange={(e) => setTypeFilter(e.target.value)}
-                  options={[
-                    { value: '', label: 'Alle' },
-                    ...settings.tourTypes.map((type) => ({
-                      value: type,
-                      label: type,
-                    })),
-                  ]}
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="filter-type-mobile">Tourenart</Label>
+                  <Select value={typeFilter} onValueChange={setTypeFilter}>
+                    <SelectTrigger id="filter-type-mobile" className="w-full">
+                      <SelectValue placeholder="Alle" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Alle</SelectItem>
+                      {settings.tourTypes.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                <Select
-                  label="Tourlänge"
-                  value={lengthFilter}
-                  onChange={(e) => setLengthFilter(e.target.value)}
-                  options={[
-                    { value: '', label: 'Alle' },
-                    ...settings.tourLengths.map((length) => ({
-                      value: length,
-                      label: length,
-                    })),
-                  ]}
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="filter-length-mobile">Tourlänge</Label>
+                  <Select value={lengthFilter} onValueChange={setLengthFilter}>
+                    <SelectTrigger id="filter-length-mobile" className="w-full">
+                      <SelectValue placeholder="Alle" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Alle</SelectItem>
+                      {settings.tourLengths.map((length) => (
+                        <SelectItem key={length} value={length}>
+                          {length}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                <Select
-                  label="Schwierigkeit"
-                  value={difficultyFilter}
-                  onChange={(e) => setDifficultyFilter(e.target.value)}
-                  options={[
-                    { value: '', label: 'Alle' },
-                    // T-Skala (Wanderungen)
-                    { value: 'T1', label: 'T1 - Wandern' },
-                    { value: 'T2', label: 'T2 - Bergwandern' },
-                    { value: 'T3', label: 'T3 - Anspruchsvolles Bergwandern' },
-                    { value: 'T4', label: 'T4 - Alpinwandern' },
-                    { value: 'T5', label: 'T5 - Anspruchsvolles Alpinwandern' },
-                    { value: 'T6', label: 'T6 - Schwieriges Alpinwandern' },
-                    // SAC-Skala (Skitouren)
-                    { value: 'L', label: 'L - Leicht' },
-                    { value: 'WS', label: 'WS - Wenig schwierig' },
-                    { value: 'ZS', label: 'ZS - Ziemlich schwierig' },
-                    { value: 'S', label: 'S - Schwierig' },
-                    { value: 'SS', label: 'SS - Sehr schwierig' },
-                    { value: 'AS', label: 'AS - Äußerst schwierig' },
-                    { value: 'EX', label: 'EX - Extrem schwierig' },
-                    // Bike-Skala
-                    { value: 'B1', label: 'B1 - Leicht' },
-                    { value: 'B2', label: 'B2 - Mittel' },
-                    { value: 'B3', label: 'B3 - Schwer' },
-                    { value: 'B4', label: 'B4 - Sehr schwierig' },
-                    { value: 'B5', label: 'B5 - Extrem' },
-                  ]}
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="filter-difficulty-mobile">Schwierigkeit</Label>
+                  <Select value={difficultyFilter} onValueChange={setDifficultyFilter}>
+                    <SelectTrigger id="filter-difficulty-mobile" className="w-full">
+                      <SelectValue placeholder="Alle" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Alle</SelectItem>
+                      <SelectItem value="T1">T1 - Wandern</SelectItem>
+                      <SelectItem value="T2">T2 - Bergwandern</SelectItem>
+                      <SelectItem value="T3">T3 - Anspruchsvolles Bergwandern</SelectItem>
+                      <SelectItem value="T4">T4 - Alpinwandern</SelectItem>
+                      <SelectItem value="T5">T5 - Anspruchsvolles Alpinwandern</SelectItem>
+                      <SelectItem value="T6">T6 - Schwieriges Alpinwandern</SelectItem>
+                      <SelectItem value="L">L - Leicht</SelectItem>
+                      <SelectItem value="WS">WS - Wenig schwierig</SelectItem>
+                      <SelectItem value="ZS">ZS - Ziemlich schwierig</SelectItem>
+                      <SelectItem value="S">S - Schwierig</SelectItem>
+                      <SelectItem value="SS">SS - Sehr schwierig</SelectItem>
+                      <SelectItem value="AS">AS - Äußerst schwierig</SelectItem>
+                      <SelectItem value="EX">EX - Extrem schwierig</SelectItem>
+                      <SelectItem value="B1">B1 - Leicht</SelectItem>
+                      <SelectItem value="B2">B2 - Mittel</SelectItem>
+                      <SelectItem value="B3">B3 - Schwer</SelectItem>
+                      <SelectItem value="B4">B4 - Sehr schwierig</SelectItem>
+                      <SelectItem value="B5">B5 - Extrem</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               <div className="flex flex-col gap-2 pt-3 border-t border-gray-200">
@@ -303,74 +314,85 @@ export default function ToursArchivePage() {
             />
             
             {user.role === 'admin' && (
-              <Select
-                label="Status"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                options={[
-                  { value: '', label: 'Alle' },
-                  { value: 'published', label: 'Veröffentlicht' },
-                  { value: 'draft', label: 'Entwurf' },
-                  { value: 'cancelled', label: 'Abgesagt' },
-                ]}
-              />
+              <div className="space-y-2">
+                <Label htmlFor="filter-status-desktop">Status</Label>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger id="filter-status-desktop" className="w-full">
+                    <SelectValue placeholder="Alle" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Alle</SelectItem>
+                    <SelectItem value="published">Veröffentlicht</SelectItem>
+                    <SelectItem value="draft">Entwurf</SelectItem>
+                    <SelectItem value="cancelled">Abgesagt</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             )}
 
-            <Select
-              label="Tourenart"
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
-              options={[
-                { value: '', label: 'Alle' },
-                ...settings.tourTypes.map((type) => ({
-                  value: type,
-                  label: type,
-                })),
-              ]}
-            />
+            <div className="space-y-2">
+              <Label htmlFor="filter-type-desktop">Tourenart</Label>
+              <Select value={typeFilter} onValueChange={setTypeFilter}>
+                <SelectTrigger id="filter-type-desktop" className="w-full">
+                  <SelectValue placeholder="Alle" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Alle</SelectItem>
+                  {settings.tourTypes.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-            <Select
-              label="Tourlänge"
-              value={lengthFilter}
-              onChange={(e) => setLengthFilter(e.target.value)}
-              options={[
-                { value: '', label: 'Alle' },
-                ...settings.tourLengths.map((length) => ({
-                  value: length,
-                  label: length,
-                })),
-              ]}
-            />
+            <div className="space-y-2">
+              <Label htmlFor="filter-length-desktop">Tourlänge</Label>
+              <Select value={lengthFilter} onValueChange={setLengthFilter}>
+                <SelectTrigger id="filter-length-desktop" className="w-full">
+                  <SelectValue placeholder="Alle" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Alle</SelectItem>
+                  {settings.tourLengths.map((length) => (
+                    <SelectItem key={length} value={length}>
+                      {length}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-            <Select
-              label="Schwierigkeit"
-              value={difficultyFilter}
-              onChange={(e) => setDifficultyFilter(e.target.value)}
-              options={[
-                { value: '', label: 'Alle' },
-                // T-Skala (Wanderungen)
-                { value: 'T1', label: 'T1 - Wandern' },
-                { value: 'T2', label: 'T2 - Bergwandern' },
-                { value: 'T3', label: 'T3 - Anspruchsvolles Bergwandern' },
-                { value: 'T4', label: 'T4 - Alpinwandern' },
-                { value: 'T5', label: 'T5 - Anspruchsvolles Alpinwandern' },
-                { value: 'T6', label: 'T6 - Schwieriges Alpinwandern' },
-                // SAC-Skala (Skitouren)
-                { value: 'L', label: 'L - Leicht' },
-                { value: 'WS', label: 'WS - Wenig schwierig' },
-                { value: 'ZS', label: 'ZS - Ziemlich schwierig' },
-                { value: 'S', label: 'S - Schwierig' },
-                { value: 'SS', label: 'SS - Sehr schwierig' },
-                { value: 'AS', label: 'AS - Äußerst schwierig' },
-                { value: 'EX', label: 'EX - Extrem schwierig' },
-                // Bike-Skala
-                { value: 'B1', label: 'B1 - Leicht' },
-                { value: 'B2', label: 'B2 - Mittel' },
-                { value: 'B3', label: 'B3 - Schwer' },
-                { value: 'B4', label: 'B4 - Sehr schwierig' },
-                { value: 'B5', label: 'B5 - Extrem' },
-              ]}
-            />
+            <div className="space-y-2">
+              <Label htmlFor="filter-difficulty-desktop">Schwierigkeit</Label>
+              <Select value={difficultyFilter} onValueChange={setDifficultyFilter}>
+                <SelectTrigger id="filter-difficulty-desktop" className="w-full">
+                  <SelectValue placeholder="Alle" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Alle</SelectItem>
+                  <SelectItem value="T1">T1 - Wandern</SelectItem>
+                  <SelectItem value="T2">T2 - Bergwandern</SelectItem>
+                  <SelectItem value="T3">T3 - Anspruchsvolles Bergwandern</SelectItem>
+                  <SelectItem value="T4">T4 - Alpinwandern</SelectItem>
+                  <SelectItem value="T5">T5 - Anspruchsvolles Alpinwandern</SelectItem>
+                  <SelectItem value="T6">T6 - Schwieriges Alpinwandern</SelectItem>
+                  <SelectItem value="L">L - Leicht</SelectItem>
+                  <SelectItem value="WS">WS - Wenig schwierig</SelectItem>
+                  <SelectItem value="ZS">ZS - Ziemlich schwierig</SelectItem>
+                  <SelectItem value="S">S - Schwierig</SelectItem>
+                  <SelectItem value="SS">SS - Sehr schwierig</SelectItem>
+                  <SelectItem value="AS">AS - Äußerst schwierig</SelectItem>
+                  <SelectItem value="EX">EX - Extrem schwierig</SelectItem>
+                  <SelectItem value="B1">B1 - Leicht</SelectItem>
+                  <SelectItem value="B2">B2 - Mittel</SelectItem>
+                  <SelectItem value="B3">B3 - Schwer</SelectItem>
+                  <SelectItem value="B4">B4 - Sehr schwierig</SelectItem>
+                  <SelectItem value="B5">B5 - Extrem</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="flex items-center gap-4">

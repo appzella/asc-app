@@ -203,22 +203,28 @@ export default function DifficultiesSettingsPage() {
           <CardTitle>Tourenart auswählen</CardTitle>
         </CardHeader>
         <CardContent>
-          <Select
-            label="Tourenart"
-            value={selectedTourType}
-            onChange={(e) => {
-              setSelectedTourType(e.target.value)
-              setNewDifficulty('')
-              setError('')
-            }}
-            options={[
-              { value: '', label: 'Bitte wählen' },
-              ...settings.tourTypes.map((type) => ({
-                value: type,
-                label: type,
-              })),
-            ]}
-          />
+          <div className="space-y-2">
+            <Label htmlFor="tour-type-select">Tourenart</Label>
+            <Select
+              value={selectedTourType}
+              onValueChange={(value) => {
+                setSelectedTourType(value)
+                setNewDifficulty('')
+                setError('')
+              }}
+            >
+              <SelectTrigger id="tour-type-select" className="w-full">
+                <SelectValue placeholder="Bitte wählen" />
+              </SelectTrigger>
+              <SelectContent>
+                {settings.tourTypes.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </CardContent>
       </Card>
 

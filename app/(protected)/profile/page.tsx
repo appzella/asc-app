@@ -404,63 +404,84 @@ export default function ProfilePage() {
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Input
-                    label="Name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
-                    placeholder="Ihr Name"
-                  />
+                  <div className="space-y-2">
+                    <Label htmlFor="profile-name">Name</Label>
+                    <Input
+                      id="profile-name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      required
+                      placeholder="Ihr Name"
+                    />
+                  </div>
 
-                  <Input
-                    label="E-Mail"
-                    type="email"
-                    value={formData.email}
-                    disabled
-                    className="bg-gray-50"
-                  />
+                  <div className="space-y-2">
+                    <Label htmlFor="profile-email">E-Mail</Label>
+                    <Input
+                      id="profile-email"
+                      type="email"
+                      value={formData.email}
+                      disabled
+                      className="bg-gray-50"
+                    />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Input
-                    label="Telefon (Festnetz)"
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    placeholder="+41 XX XXX XX XX"
-                  />
+                  <div className="space-y-2">
+                    <Label htmlFor="profile-phone">Telefon (Festnetz)</Label>
+                    <Input
+                      id="profile-phone"
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      placeholder="+41 XX XXX XX XX"
+                    />
+                  </div>
 
-                  <Input
-                    label="Mobile"
-                    type="tel"
-                    value={formData.mobile}
-                    onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
-                    placeholder="+41 XX XXX XX XX"
-                  />
+                  <div className="space-y-2">
+                    <Label htmlFor="profile-mobile">Mobile</Label>
+                    <Input
+                      id="profile-mobile"
+                      type="tel"
+                      value={formData.mobile}
+                      onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
+                      placeholder="+41 XX XXX XX XX"
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-4 pt-2 border-t border-gray-200">
                   <h3 className="text-sm font-semibold text-gray-900">Adresse</h3>
-                  <Input
-                    label="Strasse"
-                    value={formData.street}
-                    onChange={(e) => setFormData({ ...formData, street: e.target.value })}
-                    placeholder="Musterstrasse 123"
-                  />
+                  <div className="space-y-2">
+                    <Label htmlFor="profile-street">Strasse</Label>
+                    <Input
+                      id="profile-street"
+                      value={formData.street}
+                      onChange={(e) => setFormData({ ...formData, street: e.target.value })}
+                      placeholder="Musterstrasse 123"
+                    />
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Input
-                      label="PLZ"
-                      value={formData.zip}
-                      onChange={(e) => setFormData({ ...formData, zip: e.target.value })}
-                      placeholder="9000"
-                    />
+                    <div className="space-y-2">
+                      <Label htmlFor="profile-zip">PLZ</Label>
+                      <Input
+                        id="profile-zip"
+                        value={formData.zip}
+                        onChange={(e) => setFormData({ ...formData, zip: e.target.value })}
+                        placeholder="9000"
+                      />
+                    </div>
 
-                    <Input
-                      label="Ort"
-                      value={formData.city}
-                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                      placeholder="St. Gallen"
-                    />
+                    <div className="space-y-2">
+                      <Label htmlFor="profile-city">Ort</Label>
+                      <Input
+                        id="profile-city"
+                        value={formData.city}
+                        onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                        placeholder="St. Gallen"
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -502,38 +523,47 @@ export default function ProfilePage() {
                 </Button>
               ) : (
                 <form onSubmit={handlePasswordChange} className="space-y-4">
-                  <Input
-                    label="Aktuelles Passwort"
-                    type="password"
-                    value={passwordData.currentPassword}
-                    onChange={(e) =>
-                      setPasswordData({ ...passwordData, currentPassword: e.target.value })
-                    }
-                    required
-                    placeholder="Ihr aktuelles Passwort"
-                  />
-                  <Input
-                    label="Neues Passwort"
-                    type="password"
-                    value={passwordData.newPassword}
-                    onChange={(e) =>
-                      setPasswordData({ ...passwordData, newPassword: e.target.value })
-                    }
-                    required
-                    placeholder="Mindestens 6 Zeichen"
-                    minLength={6}
-                  />
-                  <Input
-                    label="Neues Passwort bestätigen"
-                    type="password"
-                    value={passwordData.confirmPassword}
-                    onChange={(e) =>
-                      setPasswordData({ ...passwordData, confirmPassword: e.target.value })
-                    }
-                    required
-                    placeholder="Passwort wiederholen"
-                    minLength={6}
-                  />
+                  <div className="space-y-2">
+                    <Label htmlFor="current-password">Aktuelles Passwort</Label>
+                    <Input
+                      id="current-password"
+                      type="password"
+                      value={passwordData.currentPassword}
+                      onChange={(e) =>
+                        setPasswordData({ ...passwordData, currentPassword: e.target.value })
+                      }
+                      required
+                      placeholder="Ihr aktuelles Passwort"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="new-password">Neues Passwort</Label>
+                    <Input
+                      id="new-password"
+                      type="password"
+                      value={passwordData.newPassword}
+                      onChange={(e) =>
+                        setPasswordData({ ...passwordData, newPassword: e.target.value })
+                      }
+                      required
+                      placeholder="Mindestens 6 Zeichen"
+                      minLength={6}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirm-password">Neues Passwort bestätigen</Label>
+                    <Input
+                      id="confirm-password"
+                      type="password"
+                      value={passwordData.confirmPassword}
+                      onChange={(e) =>
+                        setPasswordData({ ...passwordData, confirmPassword: e.target.value })
+                      }
+                      required
+                      placeholder="Passwort wiederholen"
+                      minLength={6}
+                    />
+                  </div>
 
                   {passwordError && (
                     <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">

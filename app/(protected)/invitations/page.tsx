@@ -8,6 +8,7 @@ import { User, Invitation } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { canManageUsers } from '@/lib/roles'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
@@ -161,14 +162,17 @@ export default function InvitationsPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleCreateInvitation} className="space-y-4">
-            <Input
-              label="E-Mail-Adresse"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="neues.mitglied@example.com"
-            />
+            <div className="space-y-2">
+              <Label htmlFor="invitation-email">E-Mail-Adresse</Label>
+              <Input
+                id="invitation-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                placeholder="neues.mitglied@example.com"
+              />
+            </div>
             {message && (
               <div
                 className={`px-4 py-3 rounded-md text-sm ${

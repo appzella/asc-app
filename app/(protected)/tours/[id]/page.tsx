@@ -9,6 +9,7 @@ import { getTourIcon, getTourIconColor } from '@/lib/tourIcons'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
 import { ChatWindow } from '@/components/chat/ChatWindow'
 import { canEditTour, canApproveTour, canPublishTour, canSubmitForPublishing } from '@/lib/roles'
 import { formatDifficulty } from '@/lib/difficulty'
@@ -603,13 +604,16 @@ export default function TourDetailPage() {
               <p className="text-sm text-gray-600">
                 Möchten Sie diese Tour wirklich ablehnen? Sie können optional einen Kommentar hinzufügen.
               </p>
-              <Textarea
-                label="Kommentar (optional)"
-                value={rejectionComment}
-                onChange={(e) => setRejectionComment(e.target.value)}
-                placeholder="Grund für die Ablehnung..."
-                rows={4}
-              />
+              <div className="space-y-2">
+                <Label htmlFor="rejection-comment">Kommentar (optional)</Label>
+                <Textarea
+                  id="rejection-comment"
+                  value={rejectionComment}
+                  onChange={(e) => setRejectionComment(e.target.value)}
+                  placeholder="Grund für die Ablehnung..."
+                  rows={4}
+                />
+              </div>
               <div className="flex gap-2 pt-2">
                 <Button
                   variant="destructive"
