@@ -25,10 +25,10 @@ export default function ToursArchivePage() {
   const [settings, setSettings] = useState<TourSettings>({ tourTypes: [], tourLengths: [], difficulties: {} })
   
   // Filter state
-  const [statusFilter, setStatusFilter] = useState<string>('')
-  const [typeFilter, setTypeFilter] = useState<string>('')
-  const [lengthFilter, setLengthFilter] = useState<string>('')
-  const [difficultyFilter, setDifficultyFilter] = useState<string>('')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [typeFilter, setTypeFilter] = useState<string>('all')
+  const [lengthFilter, setLengthFilter] = useState<string>('all')
+  const [difficultyFilter, setDifficultyFilter] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [showMyTours, setShowMyTours] = useState<boolean>(false)
   const [showFilters, setShowFilters] = useState<boolean>(false)
@@ -88,22 +88,22 @@ export default function ToursArchivePage() {
     }
 
     // Status Filter
-    if (statusFilter) {
+    if (statusFilter && statusFilter !== 'all') {
       filtered = filtered.filter((t) => t.status === statusFilter)
     }
 
     // Typ Filter
-    if (typeFilter) {
+    if (typeFilter && typeFilter !== 'all') {
       filtered = filtered.filter((t) => t.tourType === typeFilter)
     }
 
     // Länge Filter
-    if (lengthFilter) {
+    if (lengthFilter && lengthFilter !== 'all') {
       filtered = filtered.filter((t) => t.tourLength === lengthFilter)
     }
 
     // Schwierigkeit Filter
-    if (difficultyFilter) {
+    if (difficultyFilter && difficultyFilter !== 'all') {
       filtered = filtered.filter((t) => t.difficulty === difficultyFilter)
     }
 
@@ -128,10 +128,10 @@ export default function ToursArchivePage() {
   }, [tours, statusFilter, typeFilter, lengthFilter, difficultyFilter, searchQuery, showMyTours, user])
 
   const clearFilters = () => {
-    setStatusFilter('')
-    setTypeFilter('')
-    setLengthFilter('')
-    setDifficultyFilter('')
+    setStatusFilter('all')
+    setTypeFilter('all')
+    setLengthFilter('all')
+    setDifficultyFilter('all')
     setSearchQuery('')
     setShowMyTours(false)
   }
@@ -216,7 +216,7 @@ export default function ToursArchivePage() {
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg">Filter</CardTitle>
-            {(statusFilter || typeFilter || lengthFilter || difficultyFilter || searchQuery || showMyTours) && (
+            {(statusFilter !== 'all' || typeFilter !== 'all' || lengthFilter !== 'all' || difficultyFilter !== 'all' || searchQuery || showMyTours) && (
               <Button variant="ghost" size="sm" onClick={clearFilters} className="h-8">
                 Zurücksetzen
               </Button>
@@ -256,7 +256,7 @@ export default function ToursArchivePage() {
                         <SelectValue placeholder="Alle" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Alle</SelectItem>
+                        <SelectItem value="all">Alle</SelectItem>
                         <SelectItem value="published">Veröffentlicht</SelectItem>
                         <SelectItem value="draft">Entwurf</SelectItem>
                         <SelectItem value="cancelled">Abgesagt</SelectItem>
@@ -272,7 +272,7 @@ export default function ToursArchivePage() {
                       <SelectValue placeholder="Alle" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Alle</SelectItem>
+                      <SelectItem value="all">Alle</SelectItem>
                       {settings.tourTypes.map((type) => (
                         <SelectItem key={type} value={type}>
                           {type}
@@ -289,7 +289,7 @@ export default function ToursArchivePage() {
                       <SelectValue placeholder="Alle" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Alle</SelectItem>
+                      <SelectItem value="all">Alle</SelectItem>
                       {settings.tourLengths.map((length) => (
                         <SelectItem key={length} value={length}>
                           {length}
@@ -306,7 +306,7 @@ export default function ToursArchivePage() {
                       <SelectValue placeholder="Alle" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Alle</SelectItem>
+                      <SelectItem value="all">Alle</SelectItem>
                       <SelectItem value="T1">T1 - Wandern</SelectItem>
                       <SelectItem value="T2">T2 - Bergwandern</SelectItem>
                       <SelectItem value="T3">T3 - Anspruchsvolles Bergwandern</SelectItem>
@@ -330,7 +330,7 @@ export default function ToursArchivePage() {
                 </div>
               </div>
 
-              <div className="flex items-center space-x-3 pt-2 border-t">
+              <div className="flex items-center space-x-3 pt-2">
                 <Switch
                   id="my-tours-archive-mobile"
                   checked={showMyTours}
@@ -364,7 +364,7 @@ export default function ToursArchivePage() {
                     <SelectValue placeholder="Alle" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Alle</SelectItem>
+                    <SelectItem value="all">Alle</SelectItem>
                     <SelectItem value="published">Veröffentlicht</SelectItem>
                     <SelectItem value="draft">Entwurf</SelectItem>
                     <SelectItem value="cancelled">Abgesagt</SelectItem>
@@ -380,7 +380,7 @@ export default function ToursArchivePage() {
                   <SelectValue placeholder="Alle" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Alle</SelectItem>
+                  <SelectItem value="all">Alle</SelectItem>
                   {settings.tourTypes.map((type) => (
                     <SelectItem key={type} value={type}>
                       {type}
@@ -397,7 +397,7 @@ export default function ToursArchivePage() {
                   <SelectValue placeholder="Alle" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Alle</SelectItem>
+                  <SelectItem value="all">Alle</SelectItem>
                   {settings.tourLengths.map((length) => (
                     <SelectItem key={length} value={length}>
                       {length}
@@ -414,7 +414,7 @@ export default function ToursArchivePage() {
                   <SelectValue placeholder="Alle" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Alle</SelectItem>
+                  <SelectItem value="all">Alle</SelectItem>
                   <SelectItem value="T1">T1 - Wandern</SelectItem>
                   <SelectItem value="T2">T2 - Bergwandern</SelectItem>
                   <SelectItem value="T3">T3 - Anspruchsvolles Bergwandern</SelectItem>
@@ -438,7 +438,7 @@ export default function ToursArchivePage() {
             </div>
           </div>
 
-          <div className="flex items-center space-x-3 pt-2 border-t">
+          <div className="flex items-center space-x-3 pt-2">
             <Switch
               id="my-tours-archive-desktop"
               checked={showMyTours}
