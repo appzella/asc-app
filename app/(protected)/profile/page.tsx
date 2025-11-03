@@ -8,7 +8,7 @@ import * as z from 'zod'
 import { authService } from '@/lib/auth'
 import { dataRepository } from '@/lib/data'
 import { User } from '@/lib/types'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -20,11 +20,12 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Separator } from '@/components/ui/separator'
+import { cn } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { ImageCropper } from '@/components/ui/ImageCropper'
-import { UserCircle, Lock, LogOut, Upload, X, Camera, ImageIcon } from 'lucide-react'
+import { UserCircle, Lock, LogOut, Upload, X, Camera, ImageIcon, Trash2 } from 'lucide-react'
 
 const profileSchema = z.object({
   name: z.string().min(1, 'Name ist erforderlich'),
@@ -58,6 +59,7 @@ export default function ProfilePage() {
   const [imageToCrop, setImageToCrop] = useState<string | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
+  const [activeTab, setActiveTab] = useState<'profile' | 'password'>('profile')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const profileForm = useForm<ProfileFormValues>({
@@ -420,11 +422,11 @@ export default function ProfilePage() {
           cropShape="round"
         />
       )}
-      <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
+      <div className="max-w-7xl mx-auto space-y-6 animate-fade-in">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Profil</h1>
-            <p className="text-base text-gray-600">Verwalten Sie Ihre persönlichen Informationen</p>
+            <p className="text-base text-gray-600">Verwalten Sie Ihre persönlichen Informationen und E-Mail-Einstellungen</p>
           </div>
           <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2">
             <LogOut className="w-4 h-4" />
@@ -432,134 +434,163 @@ export default function ProfilePage() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Profilfoto */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Camera className="w-5 h-5" />
-                Profilfoto
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex flex-col items-center">
-                {/* Profilfoto Anzeige mit Drag & Drop */}
-                <div className="relative mb-4">
-                  <div
-                    className="relative group"
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
-                  >
-                    <Avatar className="w-28 h-28 md:w-36 md:h-36 shadow-lg transition-transform group-hover:scale-105">
-                      <AvatarImage
-                        src={user.profilePhoto || undefined}
-                        alt={user.name}
-                        className="object-cover"
-                      />
-                      <AvatarFallback className="bg-gradient-to-br from-primary-400 to-primary-600 text-white text-4xl md:text-5xl font-bold">
-                        {user.name.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    {user.profilePhoto && (
-                      <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                        <Camera className="w-6 h-6 text-white" />
-                      </div>
+        <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-6">
+          {/* Sidebar Navigation */}
+          <aside className="hidden lg:block">
+            <Card className="p-2">
+              <CardContent className="p-0">
+                <nav className="space-y-1">
+                  <button
+                    onClick={() => setActiveTab('profile')}
+                    className={cn(
+                      "w-full flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors",
+                      activeTab === 'profile'
+                        ? "bg-primary-50 text-primary-600"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                     )}
-                  </div>
-                </div>
-
-                {/* Hidden file input */}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="hidden"
-                  disabled={isLoading}
-                />
-
-                {/* Drag & Drop Overlay - nur sichtbar beim Dragging */}
-                {isDragging && (
-                  <div
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
-                    className="fixed inset-0 z-50 bg-primary-50/95 backdrop-blur-sm flex items-center justify-center"
                   >
-                    <div className="flex flex-col items-center gap-4 p-8 rounded-lg border-2 border-dashed border-primary-500 bg-white shadow-xl">
-                      <Upload className="w-12 h-12 text-primary-600 animate-bounce" />
-                      <p className="text-lg font-medium text-primary-600">Loslassen zum Hochladen</p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Button Gruppe - nebeneinander */}
-                <div className="flex flex-row gap-2 w-full justify-center">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={isLoading}
-                    className="gap-2 h-9"
+                    <UserCircle className="w-4 h-4" />
+                    Profil
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('password')}
+                    className={cn(
+                      "w-full flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors",
+                      activeTab === 'password'
+                        ? "bg-primary-50 text-primary-600"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    )}
                   >
-                    <Upload className="w-4 h-4" />
-                    {user.profilePhoto ? 'Ändern' : 'Auswählen'}
-                  </Button>
-                  {user.profilePhoto && (
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={handleRemovePhoto}
-                      disabled={isLoading}
-                      className="gap-2 h-9"
-                    >
-                      <X className="w-4 h-4" />
-                      Entfernen
-                    </Button>
-                  )}
-                </div>
+                    <Lock className="w-4 h-4" />
+                    Passwort
+                  </button>
+                </nav>
+              </CardContent>
+            </Card>
+          </aside>
 
-                {/* Upload Progress (falls implementiert) */}
-                {uploadProgress > 0 && uploadProgress < 100 && (
-                  <div className="w-full">
-                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-primary-600 transition-all duration-300"
-                        style={{ width: `${uploadProgress}%` }}
-                      />
-                    </div>
-                    <p className="text-xs text-gray-500 text-center mt-1">
-                      {uploadProgress}% hochgeladen
-                    </p>
-                  </div>
+          {/* Mobile Navigation */}
+          <div className="lg:hidden">
+            <div className="grid grid-cols-2 gap-2 p-1 bg-gray-100 rounded-lg">
+              <button
+                onClick={() => setActiveTab('profile')}
+                className={cn(
+                  "flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors",
+                  activeTab === 'profile'
+                    ? "bg-white text-primary-600 shadow-sm"
+                    : "text-gray-600"
                 )}
-              </div>
-            </CardContent>
-          </Card>
+              >
+                <UserCircle className="w-4 h-4" />
+                Profil
+              </button>
+              <button
+                onClick={() => setActiveTab('password')}
+                className={cn(
+                  "flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors",
+                  activeTab === 'password'
+                    ? "bg-white text-primary-600 shadow-sm"
+                    : "text-gray-600"
+                )}
+              >
+                <Lock className="w-4 h-4" />
+                Passwort
+              </button>
+            </div>
+          </div>
 
-          {/* Tabs für Profil & Passwort */}
-          <div className="lg:col-span-2">
-            <Tabs defaultValue="profile" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="profile" className="gap-2">
-                  <UserCircle className="w-4 h-4" />
-                  Profil
-                </TabsTrigger>
-                <TabsTrigger value="password" className="gap-2">
-                  <Lock className="w-4 h-4" />
-                  Passwort
-                </TabsTrigger>
-              </TabsList>
+          {/* Main Content */}
+          <div className="space-y-6">
+            {activeTab === 'profile' && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Persönliche Informationen</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Form {...profileForm}>
+                    <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-6">
+                      {/* Profilfoto Section - Horizontal Layout */}
+                      <div className="flex items-center gap-4">
+                        <div
+                          className="relative group flex-shrink-0"
+                          onDragOver={handleDragOver}
+                          onDragLeave={handleDragLeave}
+                          onDrop={handleDrop}
+                        >
+                          <Avatar className="w-20 h-20">
+                            <AvatarImage
+                              src={user.profilePhoto || undefined}
+                              alt={user.name}
+                              className="object-cover"
+                            />
+                            <AvatarFallback className="bg-gray-100 text-gray-400">
+                              <UserCircle className="w-8 h-8" />
+                            </AvatarFallback>
+                          </Avatar>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            type="button"
+                            variant="default"
+                            size="sm"
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={isLoading}
+                            className="w-fit"
+                          >
+                            {user.profilePhoto ? 'Bild ändern' : 'Bild hochladen'}
+                          </Button>
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            onChange={handleFileChange}
+                            className="hidden"
+                            disabled={isLoading}
+                          />
+                          {user.profilePhoto && (
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              onClick={handleRemovePhoto}
+                              disabled={isLoading}
+                              className="h-9 w-9"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
 
-              <TabsContent value="profile" className="space-y-4 mt-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Persönliche Informationen</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Form {...profileForm}>
-                      <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-4">
+                      {/* Drag & Drop Overlay */}
+                      {isDragging && (
+                        <div
+                          onDragOver={handleDragOver}
+                          onDragLeave={handleDragLeave}
+                          onDrop={handleDrop}
+                          className="fixed inset-0 z-50 bg-primary-50/95 backdrop-blur-sm flex items-center justify-center"
+                        >
+                          <div className="flex flex-col items-center gap-4 p-8 rounded-lg border-2 border-dashed border-primary-500 bg-white shadow-xl">
+                            <Upload className="w-12 h-12 text-primary-600 animate-bounce" />
+                            <p className="text-lg font-medium text-primary-600">Loslassen zum Hochladen</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Upload Progress */}
+                      {uploadProgress > 0 && uploadProgress < 100 && (
+                        <div className="w-full">
+                          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-primary-600 transition-all duration-300"
+                              style={{ width: `${uploadProgress}%` }}
+                            />
+                          </div>
+                          <p className="text-xs text-gray-500 text-center mt-1">
+                            {uploadProgress}% hochgeladen
+                          </p>
+                        </div>
+                      )}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <FormField
                             control={profileForm.control}
@@ -620,8 +651,12 @@ export default function ProfilePage() {
                           />
                         </div>
 
-                        <div className="space-y-4 pt-2 border-t border-gray-200">
-                          <h3 className="text-sm font-semibold text-gray-900">Adresse</h3>
+                        <Separator />
+                        <div className="space-y-4">
+                          <div>
+                            <h3 className="text-sm font-semibold text-gray-900 mb-1">Adresse</h3>
+                            <p className="text-xs text-gray-500">Ihre Kontaktadresse</p>
+                          </div>
                           <FormField
                             control={profileForm.control}
                             name="street"
@@ -679,7 +714,7 @@ export default function ProfilePage() {
                         )}
 
                         <div className="pt-2">
-                          <Button type="submit" variant="default" disabled={isLoading} className="w-full">
+                          <Button type="submit" variant="default" disabled={isLoading} className="w-full sm:w-auto">
                             {isLoading ? 'Wird gespeichert...' : 'Änderungen speichern'}
                           </Button>
                         </div>
@@ -687,16 +722,16 @@ export default function ProfilePage() {
                     </Form>
                   </CardContent>
                 </Card>
-              </TabsContent>
+            )}
 
-              <TabsContent value="password" className="space-y-4 mt-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Passwort ändern</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Form {...passwordForm}>
-                      <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-4">
+            {activeTab === 'password' && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Passwort ändern</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Form {...passwordForm}>
+                    <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-6">
                         <FormField
                           control={passwordForm.control}
                           name="currentPassword"
@@ -762,7 +797,7 @@ export default function ProfilePage() {
                         )}
 
                         <div className="pt-2">
-                          <Button type="submit" variant="default" disabled={isLoading} className="w-full">
+                          <Button type="submit" variant="default" disabled={isLoading} className="w-full sm:w-auto">
                             {isLoading ? 'Wird gespeichert...' : 'Passwort ändern'}
                           </Button>
                         </div>
@@ -770,8 +805,7 @@ export default function ProfilePage() {
                     </Form>
                   </CardContent>
                 </Card>
-              </TabsContent>
-            </Tabs>
+            )}
           </div>
         </div>
       </div>
