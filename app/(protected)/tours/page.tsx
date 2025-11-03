@@ -369,15 +369,15 @@ export default function ToursPage() {
                   </Select>
                 </div>
 
-                <div className="flex items-center justify-between pt-2 border-t">
-                  <Label htmlFor="my-tours-mobile" className="text-sm font-medium cursor-pointer">
-                    Nur meine Touren
-                  </Label>
+                <div className="flex items-center space-x-3 pt-2">
                   <Switch
                     id="my-tours-mobile"
                     checked={showMyTours}
                     onCheckedChange={setShowMyTours}
                   />
+                  <Label htmlFor="my-tours-mobile" className="text-sm font-medium cursor-pointer">
+                    Nur meine Touren
+                  </Label>
                 </div>
               </div>
             )}
@@ -474,15 +474,15 @@ export default function ToursPage() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-2 border-t">
-              <Label htmlFor="my-tours-desktop" className="text-sm font-medium cursor-pointer">
-                Nur meine Touren
-              </Label>
+            <div className="flex items-center space-x-3 pt-2">
               <Switch
                 id="my-tours-desktop"
                 checked={showMyTours}
                 onCheckedChange={setShowMyTours}
               />
+              <Label htmlFor="my-tours-desktop" className="text-sm font-medium cursor-pointer">
+                Nur meine Touren
+              </Label>
             </div>
           </div>
         </CardContent>

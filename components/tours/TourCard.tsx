@@ -2,8 +2,9 @@ import React from 'react'
 import Link from 'next/link'
 import { Tour, UserRole } from '@/lib/types'
 import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import { formatDifficulty } from '@/lib/difficulty'
-import { Calendar, Clock, Mountain, Users } from 'lucide-react'
+import { Calendar, Clock, ArrowUpRight, Users, ChartNoAxesColumnIncreasing } from 'lucide-react'
 import Image from 'next/image'
 import { getTourIcon, getTourIconColor } from '@/lib/tourIcons'
 
@@ -31,34 +32,26 @@ export const TourCard: React.FC<TourCardProps> = ({ tour, tourTypeIcons, userRol
 
     if (tour.status === 'draft') {
       return (
-        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
+        <Badge variant="outline">
           Entwurf
-        </span>
+        </Badge>
       )
     }
     if (tour.status === 'published') {
       return (
-        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-green-50 text-green-700 border border-green-200">
+        <Badge variant="default">
           Veröffentlicht
-        </span>
+        </Badge>
       )
     }
     if (tour.status === 'cancelled') {
       return (
-        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-red-50 text-red-700 border border-red-200">
+        <Badge variant="destructive">
           Abgesagt
-        </span>
+        </Badge>
       )
     }
     return null
-  }
-
-  const getTypeBadge = () => {
-    return (
-      <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
-        {tour.tourType}
-      </span>
-    )
   }
 
   return (
@@ -80,13 +73,8 @@ export const TourCard: React.FC<TourCardProps> = ({ tour, tourTypeIcons, userRol
           <p className="text-gray-600 mb-3 line-clamp-2 text-sm">{tour.description}</p>
           
           <div className="flex flex-wrap gap-2 mb-3">
-            {getTypeBadge()}
-            <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
-              {tour.tourLength}
-            </span>
-            <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
-              {formatDifficulty(tour.difficulty, tour.tourType)}
-            </span>
+            <Badge variant="outline">{tour.tourType}</Badge>
+            <Badge variant="outline">{tour.tourLength}</Badge>
           </div>
 
           <div className="grid grid-cols-2 gap-3 text-sm text-gray-600 mb-3">
@@ -99,17 +87,21 @@ export const TourCard: React.FC<TourCardProps> = ({ tour, tourTypeIcons, userRol
               <span className="text-xs">{tour.duration} h</span>
             </div>
             <div className="flex items-center gap-2">
-              <Mountain className="w-4 h-4 text-primary-600 flex-shrink-0" strokeWidth={2} />
+              <ArrowUpRight className="w-4 h-4 text-primary-600 flex-shrink-0" strokeWidth={2} />
               <span className="text-xs">{tour.elevation} Hm</span>
             </div>
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4 text-primary-600 flex-shrink-0" strokeWidth={2} />
               <span className="text-xs">{tour.participants.length}/{tour.maxParticipants}</span>
             </div>
+            <div className="flex items-center gap-2">
+              <ChartNoAxesColumnIncreasing className="w-4 h-4 text-primary-600 flex-shrink-0" strokeWidth={2} />
+              <span className="text-xs">{formatDifficulty(tour.difficulty, tour.tourType)}</span>
+            </div>
           </div>
 
           {tour.leader && (
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+            <div className="flex items-center justify-end gap-2 text-sm text-gray-600">
               {tour.leader.profilePhoto ? (
                 <Image
                   src={tour.leader.profilePhoto}
