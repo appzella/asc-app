@@ -26,6 +26,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { ImageCropper } from '@/components/ui/ImageCropper'
 import { UserCircle, Lock, LogOut, Upload, X, Camera, ImageIcon, Trash2 } from 'lucide-react'
+import PhoneInput from 'react-phone-number-input'
+import 'react-phone-number-input/style.css'
 
 const profileSchema = z.object({
   name: z.string().min(1, 'Name ist erforderlich'),
@@ -629,7 +631,14 @@ export default function ProfilePage() {
                               <FormItem>
                                 <FormLabel>Telefon (Festnetz)</FormLabel>
                                 <FormControl>
-                                  <Input type="tel" placeholder="+41 XX XXX XX XX" {...field} />
+                                  <PhoneInput
+                                    international
+                                    defaultCountry="CH"
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    placeholder="+41 XX XXX XX XX"
+                                    className="w-full"
+                                  />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -643,7 +652,14 @@ export default function ProfilePage() {
                               <FormItem>
                                 <FormLabel>Mobile</FormLabel>
                                 <FormControl>
-                                  <Input type="tel" placeholder="+41 XX XXX XX XX" {...field} />
+                                  <PhoneInput
+                                    international
+                                    defaultCountry="CH"
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    placeholder="+41 XX XXX XX XX"
+                                    className="w-full"
+                                  />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
