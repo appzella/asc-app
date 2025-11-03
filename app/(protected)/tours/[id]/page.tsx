@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { authService } from '@/lib/auth'
 import { dataRepository } from '@/lib/data'
 import { User, Tour, TourSettings } from '@/lib/types'
-import { getTourIcon, getTourIconColor } from '@/lib/tourIcons'
+import { getTourIcon } from '@/lib/tourIcons'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -332,8 +332,7 @@ export default function TourDetailPage() {
           <div className="flex items-center gap-2">
             {(() => {
               const IconComponent = getTourIcon(tour.tourType, settings?.tourTypeIcons)
-              const iconColor = getTourIconColor(tour.tourType)
-              return <IconComponent className={`w-6 h-6 ${iconColor} flex-shrink-0`} strokeWidth={2} />
+              return <IconComponent className="w-6 h-6 text-gray-600 flex-shrink-0" strokeWidth={2} />
             })()}
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{tour.title}</h1>
           </div>

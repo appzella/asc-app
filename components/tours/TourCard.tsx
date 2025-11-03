@@ -7,7 +7,7 @@ import { Separator } from '@/components/ui/separator'
 import { formatDifficulty } from '@/lib/difficulty'
 import { Calendar, Clock, ArrowUpRight, Users, ChartNoAxesColumnIncreasing } from 'lucide-react'
 import Image from 'next/image'
-import { getTourIcon, getTourIconColor } from '@/lib/tourIcons'
+import { getTourIcon } from '@/lib/tourIcons'
 
 interface TourCardProps {
   tour: Tour
@@ -63,8 +63,7 @@ export const TourCard: React.FC<TourCardProps> = ({ tour, tourTypeIcons, userRol
             <div className="flex items-center gap-2 flex-1 min-w-0">
               {(() => {
                 const IconComponent = getTourIcon(tour.tourType, tourTypeIcons)
-                const iconColor = getTourIconColor(tour.tourType)
-                return <IconComponent className={`w-4 h-4 ${iconColor} flex-shrink-0`} strokeWidth={2} />
+                return <IconComponent className="w-4 h-4 text-gray-600 flex-shrink-0" strokeWidth={2} />
               })()}
               <h3 className="text-lg font-semibold text-gray-900 truncate">{tour.title}</h3>
             </div>

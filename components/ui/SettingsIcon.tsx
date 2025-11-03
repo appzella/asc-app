@@ -4,21 +4,20 @@ import { Mountain, Calendar, Zap } from 'lucide-react'
 interface SettingsIconProps {
   type: 'tour-types' | 'tour-lengths' | 'difficulties'
   className?: string
+  strokeWidth?: number
 }
 
-export function SettingsIcon({ type, className = '' }: SettingsIconProps) {
-  const baseClasses = `stroke-gray-600 ${className}`
-
+export function SettingsIcon({ type, className = '', strokeWidth = 2 }: SettingsIconProps) {
   if (type === 'tour-types') {
-    return <Mountain className={baseClasses} strokeWidth={1.8} />
+    return <Mountain className={className} strokeWidth={strokeWidth} />
   }
 
   if (type === 'tour-lengths') {
-    return <Calendar className={baseClasses} strokeWidth={1.8} />
+    return <Calendar className={className} strokeWidth={strokeWidth} />
   }
 
   if (type === 'difficulties') {
-    return <Zap className={baseClasses} strokeWidth={1.8} />
+    return <Zap className={className} strokeWidth={strokeWidth} />
   }
 
   return null

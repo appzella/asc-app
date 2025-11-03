@@ -25,7 +25,7 @@ import {
 import { DatePicker } from '@/components/ui/date-picker'
 import { canCreateTour } from '@/lib/roles'
 import { getDifficultyOptions } from '@/lib/difficulty'
-import { getTourIcon, getTourIconColor } from '@/lib/tourIcons'
+import { getTourIcon } from '@/lib/tourIcons'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 
@@ -380,8 +380,7 @@ export default function CreateTourPage() {
               >
                 {(() => {
                   const IconComponent = getTourIcon(tour.tourType, settings.tourTypeIcons)
-                  const iconColor = getTourIconColor(tour.tourType)
-                  return <IconComponent className={`w-4 h-4 ${iconColor} flex-shrink-0`} strokeWidth={2} />
+                  return <IconComponent className="w-4 h-4 text-gray-600 flex-shrink-0" strokeWidth={2} />
                 })()}
                 <div className="flex-1 min-w-0">
                   <div className="font-medium text-gray-900 text-sm">{tour.title}</div>

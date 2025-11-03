@@ -111,23 +111,23 @@ export default function SettingsPage() {
           
           return (
             <Link key={category.href} href={category.href} className="touch-manipulation">
-              <Card className="hover:shadow-modern-lg active:shadow-modern transition-all cursor-pointer h-full group">
-                <CardContent className="p-4">
+              <Card className="hover:shadow-lg transition-all cursor-pointer h-full group flex flex-col">
+                <CardContent className="p-4 md:p-6">
                   <div className="flex items-center gap-4">
-                    <div className="flex-shrink-0">
-                      {isCustomIcon && IconComponent ? (
-                        <IconComponent className="w-10 h-10 stroke-gray-600 group-hover:stroke-primary-600 transition-colors" strokeWidth={1.8} />
-                      ) : (
-                        <SettingsIcon type={category.iconType as 'tour-types' | 'tour-lengths' | 'difficulties'} className="w-10 h-10 group-hover:stroke-primary-600 transition-colors" />
-                      )}
-                    </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-primary-600 transition-colors">
-                        {category.title}
-                      </h3>
-                      <CardDescription className="line-clamp-2">{category.description}</CardDescription>
+                      <div className="flex items-center gap-2 mb-1">
+                        {isCustomIcon && IconComponent ? (
+                          <IconComponent className="w-5 h-5 text-primary-600 flex-shrink-0" strokeWidth={2} />
+                        ) : (
+                          <SettingsIcon type={category.iconType as 'tour-types' | 'tour-lengths' | 'difficulties'} className="w-5 h-5 text-primary-600 flex-shrink-0" strokeWidth={2} />
+                        )}
+                        <h3 className="text-lg font-bold text-gray-900 group-hover:text-primary-600 transition-colors">
+                          {category.title}
+                        </h3>
+                      </div>
+                      <CardDescription className="hidden sm:block line-clamp-2">{category.description}</CardDescription>
                     </div>
-                    <ChevronRight className="w-7 h-7 text-gray-400 group-hover:text-primary-600 transition-colors flex-shrink-0" strokeWidth={1.8} />
+                    <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-primary-600 transition-colors flex-shrink-0" strokeWidth={2} />
                   </div>
                 </CardContent>
               </Card>
