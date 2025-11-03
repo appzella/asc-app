@@ -88,29 +88,27 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
-              <div className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex items-center justify-between">
                       <FormLabel>Passwort</FormLabel>
-                      <FormControl>
-                        <Input type="password" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="text-right">
-                  <a
-                    href="/forgot-password"
-                    className="text-sm text-primary-600 hover:text-primary-700 hover:underline transition-colors"
-                  >
-                    Passwort vergessen?
-                  </a>
-                </div>
-              </div>
+                      <a
+                        href="/forgot-password"
+                        className="text-sm text-primary-600 hover:text-primary-700 hover:underline transition-colors"
+                      >
+                        Passwort vergessen?
+                      </a>
+                    </div>
+                    <FormControl>
+                      <Input type="password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               {error && (
                 <Alert variant="destructive">
                   <AlertDescription>{error}</AlertDescription>
