@@ -2,26 +2,49 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as z from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
 import { authService } from '@/lib/auth'
+
+const loginSchema = z.object({
+  email: z.string().email('Ungültige E-Mail-Adresse').min(1, 'E-Mail ist erforderlich'),
+  password: z.string().min(1, 'Passwort ist erforderlich'),
+})
+
+type LoginFormValues = z.infer<typeof loginSchema>
 
 export default function LoginPage() {
   const router = useRouter()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  })
+
+  const onSubmit = async (values: LoginFormValues) => {
     setError('')
     setIsLoading(true)
 
     try {
-      const user = await authService.login(email, password)
+      const user = await authService.login(values.email, values.password)
       if (user) {
         router.push('/dashboard')
         router.refresh()
@@ -46,47 +69,58 @@ export default function LoginPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">E-Mail</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                placeholder="ihre.email@example.com"
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>E-Mail</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="ihre.email@example.com"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="password">Passwort</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Passwort</FormLabel>
+                      <FormControl>
+                        <Input type="password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
+                <div className="text-right">
+                  <a
+                    href="/forgot-password"
+                    className="text-sm text-primary-600 hover:text-primary-700 hover:underline transition-colors"
+                  >
+                    Passwort vergessen?
+                  </a>
+                </div>
               </div>
-              <div className="text-right">
-                <a
-                  href="/forgot-password"
-                  className="text-sm text-primary-600 hover:text-primary-700 hover:underline transition-colors"
-                >
-                  Passwort vergessen?
-                </a>
-              </div>
-            </div>
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
-                {error}
-              </div>
-            )}
-            <Button type="submit" className="w-full mt-6" disabled={isLoading}>
-              {isLoading ? 'Wird angemeldet...' : 'Anmelden'}
-            </Button>
-          </form>
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              <Button type="submit" className="w-full mt-6" disabled={isLoading}>
+                {isLoading ? 'Wird angemeldet...' : 'Anmelden'}
+              </Button>
+            </form>
+          </Form>
         </CardContent>
       </Card>
     </div>

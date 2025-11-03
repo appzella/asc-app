@@ -10,11 +10,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
+import { Badge } from '@/components/ui/badge'
 import { ChatWindow } from '@/components/chat/ChatWindow'
 import { canEditTour, canApproveTour, canPublishTour, canSubmitForPublishing } from '@/lib/roles'
 import { formatDifficulty } from '@/lib/difficulty'
 import Link from 'next/link'
-import Image from 'next/image'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { ChevronLeft } from 'lucide-react'
 
 export default function TourDetailPage() {
@@ -327,34 +328,34 @@ export default function TourDetailPage() {
               </div>
 
               <div className="flex flex-wrap gap-2 pt-4 border-t border-gray-200">
-                <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
+                <Badge variant="outline">
                   {tour.tourType}
-                </span>
-                <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
+                </Badge>
+                <Badge variant="outline">
                   {tour.tourLength}
-                </span>
-                <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
+                </Badge>
+                <Badge variant="outline">
                   {formatDifficulty(tour.difficulty, tour.tourType)}
-                </span>
+                </Badge>
                 {tour.status === 'draft' && (
-                  <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
+                  <Badge variant="outline">
                     Entwurf
-                  </span>
+                  </Badge>
                 )}
                 {tour.status === 'published' && (
-                  <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-green-50 text-green-700 border border-green-200">
+                  <Badge variant="default">
                     Veröffentlicht
-                  </span>
+                  </Badge>
                 )}
                 {tour.status === 'draft' && tour.submittedForPublishing && (
-                  <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-yellow-50 text-yellow-700 border border-yellow-200">
+                  <Badge variant="secondary">
                     Zur Veröffentlichung eingereicht
-                  </span>
+                  </Badge>
                 )}
                 {tour.status === 'cancelled' && (
-                  <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-red-50 text-red-700 border border-red-200">
+                  <Badge variant="destructive">
                     Abgesagt
-                  </span>
+                  </Badge>
                 )}
               </div>
 
@@ -362,22 +363,16 @@ export default function TourDetailPage() {
                 <div className="pt-4 border-t border-gray-200">
                   <span className="text-xs font-medium text-gray-600 block mb-2">Tourenleiter:</span>
                   <div className="flex items-center gap-2">
-                    {tour.leader.profilePhoto ? (
-                      <Image
-                        src={tour.leader.profilePhoto}
+                    <Avatar className="w-8 h-8 border border-gray-300 flex-shrink-0">
+                      <AvatarImage
+                        src={tour.leader.profilePhoto || undefined}
                         alt={tour.leader.name}
-                        width={32}
-                        height={32}
-                        unoptimized
-                        className="w-8 h-8 rounded-full object-cover border border-gray-300 flex-shrink-0"
+                        className="object-cover"
                       />
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center border border-gray-300 flex-shrink-0">
-                        <span className="text-xs font-semibold text-primary-600">
-                          {tour.leader.name.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                    )}
+                      <AvatarFallback className="bg-primary-100 text-primary-600 text-xs font-semibold">
+                        {tour.leader.name.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
                     <p className="text-gray-900 text-sm font-medium">{tour.leader.name}</p>
                   </div>
                 </div>
@@ -567,22 +562,16 @@ export default function TourDetailPage() {
                 <ul className="space-y-3">
                   {participants.map((participant) => (
                     <li key={participant.id} className="flex items-center gap-3">
-                      {participant.profilePhoto ? (
-                        <Image
-                          src={participant.profilePhoto}
+                      <Avatar className="w-8 h-8 border border-gray-300 flex-shrink-0">
+                        <AvatarImage
+                          src={participant.profilePhoto || undefined}
                           alt={participant.name}
-                          width={32}
-                          height={32}
-                          unoptimized
-                          className="w-8 h-8 rounded-full object-cover border border-gray-300 flex-shrink-0"
+                          className="object-cover"
                         />
-                      ) : (
-                        <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center border border-gray-300 flex-shrink-0">
-                          <span className="text-xs font-semibold text-primary-600">
-                            {participant.name.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                      )}
+                        <AvatarFallback className="bg-primary-100 text-primary-600 text-xs font-semibold">
+                          {participant.name.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
                       <span className="text-sm font-medium text-gray-900">{participant.name}</span>
                     </li>
                   ))}

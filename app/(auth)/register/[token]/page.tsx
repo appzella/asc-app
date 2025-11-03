@@ -2,24 +2,52 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as z from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
 import { dataRepository } from '@/lib/data'
 import { authService } from '@/lib/auth'
+
+const registerSchema = z.object({
+  name: z.string().min(1, 'Name ist erforderlich'),
+  password: z.string().min(6, 'Passwort muss mindestens 6 Zeichen lang sein'),
+  confirmPassword: z.string().min(6, 'Passwort-Bestätigung ist erforderlich'),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: 'Passwörter stimmen nicht überein',
+  path: ['confirmPassword'],
+})
+
+type RegisterFormValues = z.infer<typeof registerSchema>
 
 export default function RegisterPage() {
   const router = useRouter()
   const params = useParams()
   const token = params.token as string
 
-  const [name, setName] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [invitation, setInvitation] = useState<any>(null)
+
+  const form = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      name: '',
+      password: '',
+      confirmPassword: '',
+    },
+  })
 
   useEffect(() => {
     const loadInvitation = async () => {
@@ -37,24 +65,12 @@ export default function RegisterPage() {
     loadInvitation()
   }, [token])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const onSubmit = async (values: RegisterFormValues) => {
     setError('')
-
-    if (password !== confirmPassword) {
-      setError('Passwörter stimmen nicht überein')
-      return
-    }
-
-    if (password.length < 6) {
-      setError('Passwort muss mindestens 6 Zeichen lang sein')
-      return
-    }
-
     setIsLoading(true)
 
     try {
-      const user = await authService.register(invitation.email, password, name, token)
+      const user = await authService.register(invitation.email, values.password, values.name, token)
       if (user) {
         router.push('/dashboard')
         router.refresh()
@@ -87,53 +103,65 @@ export default function RegisterPage() {
         </CardHeader>
         <CardContent>
           {error && !invitation ? (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
-              {error}
-            </div>
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  placeholder="Ihr Name"
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="text"
+                          placeholder="Ihr Name"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Passwort</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Passwort</FormLabel>
+                      <FormControl>
+                        <Input type="password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Passwort bestätigen</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  minLength={6}
+                <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Passwort bestätigen</FormLabel>
+                      <FormControl>
+                        <Input type="password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </div>
-              {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
-                  {error}
-                </div>
-              )}
-              <Button type="submit" className="w-full mt-6" disabled={isLoading}>
-                {isLoading ? 'Wird registriert...' : 'Registrieren'}
-              </Button>
-            </form>
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
+                <Button type="submit" className="w-full mt-6" disabled={isLoading}>
+                  {isLoading ? 'Wird registriert...' : 'Registrieren'}
+                </Button>
+              </form>
+            </Form>
           )}
         </CardContent>
       </Card>

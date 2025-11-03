@@ -8,6 +8,7 @@ import { User, UserRole } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Badge } from '@/components/ui/badge'
 import { canManageUsers } from '@/lib/roles'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
@@ -139,13 +140,13 @@ export default function UsersPage() {
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       {u.registered ? (
-                        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-green-50 text-green-700 border border-green-200">
+                        <Badge variant="default">
                           Registriert
-                        </span>
+                        </Badge>
                       ) : (
-                        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-yellow-50 text-yellow-700 border border-yellow-200">
+                        <Badge variant="secondary">
                           Ausstehend
-                        </span>
+                        </Badge>
                       )}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">

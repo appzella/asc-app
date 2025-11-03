@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { canManageUsers } from '@/lib/roles'
 import Link from 'next/link'
 import { Trash2, ChevronLeft } from 'lucide-react'
@@ -187,15 +188,15 @@ export default function DifficultiesSettingsPage() {
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
-          {error}
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       {success && (
-        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md text-sm">
-          {success}
-        </div>
+        <Alert>
+          <AlertDescription>{success}</AlertDescription>
+        </Alert>
       )}
 
       <Card>

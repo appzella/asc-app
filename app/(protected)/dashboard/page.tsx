@@ -5,6 +5,7 @@ import { authService } from '@/lib/auth'
 import { dataRepository } from '@/lib/data'
 import { User, Tour } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ChevronRight, ListChecks, Calendar, Archive, BookOpen, PlusCircle } from 'lucide-react'
@@ -64,7 +65,34 @@ export default function DashboardPage() {
   }, [])
 
   if (!user) {
-    return <div>Lädt...</div>
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <div>
+          <Skeleton className="h-9 w-64 mb-2" />
+          <Skeleton className="h-5 w-96" />
+        </div>
+        <div className="grid gap-6 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-32" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-20 w-full mb-4" />
+              <Skeleton className="h-9 w-full" />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-32" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-20 w-full mb-4" />
+              <Skeleton className="h-9 w-full" />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
   }
 
   const myTours = tours.filter((t) => 

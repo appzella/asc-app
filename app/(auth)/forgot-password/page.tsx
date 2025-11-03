@@ -2,28 +2,50 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as z from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
 import { authService } from '@/lib/auth'
+
+const forgotPasswordSchema = z.object({
+  email: z.string().email('Ungültige E-Mail-Adresse').min(1, 'E-Mail ist erforderlich'),
+})
+
+type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>
 
 export default function ForgotPasswordPage() {
   const router = useRouter()
-  const [email, setEmail] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [success, setSuccess] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const form = useForm<ForgotPasswordFormValues>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: {
+      email: '',
+    },
+  })
+
+  const onSubmit = async (values: ForgotPasswordFormValues) => {
     setError('')
     setIsLoading(true)
 
     try {
       // Use Supabase Auth resetPassword function
       // This will send a password reset email if the user exists
-      const result = await authService.resetPassword(email)
+      const result = await authService.resetPassword(values.email)
       
       if (result) {
         // Success - email sent (or at least no error occurred)
@@ -51,12 +73,12 @@ export default function ForgotPasswordPage() {
         <CardContent>
           {success ? (
             <div className="space-y-4">
-              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
-                <p className="font-semibold mb-1">E-Mail gesendet!</p>
-                <p className="text-sm">
+              <Alert>
+                <AlertTitle>E-Mail gesendet!</AlertTitle>
+                <AlertDescription>
                   Falls ein Konto mit dieser E-Mail-Adresse existiert, haben wir Ihnen einen Link zum Zurücksetzen des Passworts gesendet.
-                </p>
-              </div>
+                </AlertDescription>
+              </Alert>
               <Button
                 onClick={() => router.push('/login')}
                 className="w-full"
@@ -65,40 +87,48 @@ export default function ForgotPasswordPage() {
               </Button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <p className="text-sm text-gray-600 mb-4">
-                Geben Sie Ihre E-Mail-Adresse ein. Wir senden Ihnen einen Link zum Zurücksetzen Ihres Passworts.
-              </p>
-              <div className="space-y-2">
-                <Label htmlFor="email">E-Mail</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  placeholder="ihre.email@example.com"
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <p className="text-sm text-gray-600 mb-4">
+                  Geben Sie Ihre E-Mail-Adresse ein. Wir senden Ihnen einen Link zum Zurücksetzen Ihres Passworts.
+                </p>
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>E-Mail</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="email"
+                          placeholder="ihre.email@example.com"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </div>
-              {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-                  {error}
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
+                <div className="flex gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => router.push('/login')}
+                    className="flex-1"
+                  >
+                    Abbrechen
+                  </Button>
+                  <Button type="submit" className="flex-1" disabled={isLoading}>
+                    {isLoading ? 'Wird gesendet...' : 'Link senden'}
+                  </Button>
                 </div>
-              )}
-              <div className="flex gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => router.push('/login')}
-                  className="flex-1"
-                >
-                  Abbrechen
-                </Button>
-                <Button type="submit" className="flex-1" disabled={isLoading}>
-                  {isLoading ? 'Wird gesendet...' : 'Link senden'}
-                </Button>
-              </div>
-            </form>
+              </form>
+            </Form>
           )}
         </CardContent>
       </Card>

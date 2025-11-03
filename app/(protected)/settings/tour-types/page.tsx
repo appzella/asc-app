@@ -8,6 +8,7 @@ import { User, TourSettings } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { canManageUsers } from '@/lib/roles'
 import Link from 'next/link'
 import { getIconByName, getTourIcon } from '@/lib/tourIcons'
@@ -206,15 +207,15 @@ export default function TourTypesSettingsPage() {
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
-          {error}
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       {success && (
-        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md text-sm">
-          {success}
-        </div>
+        <Alert>
+          <AlertDescription>{success}</AlertDescription>
+        </Alert>
       )}
 
       <Card>

@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as z from 'zod'
 import { authService } from '@/lib/auth'
 import { dataRepository } from '@/lib/data'
 import { User, Tour, TourType, TourLength, Difficulty, TourSettings } from '@/lib/types'
@@ -10,11 +13,46 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Label } from '@/components/ui/label'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
+import { DatePicker } from '@/components/ui/date-picker'
 import { canEditTour } from '@/lib/roles'
 import { getDifficultyOptions } from '@/lib/difficulty'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
+
+const editTourSchema = z.object({
+  title: z.string().min(1, 'Titel ist erforderlich'),
+  description: z.string().min(1, 'Beschreibung ist erforderlich'),
+  date: z.string().min(1, 'Datum ist erforderlich'),
+  tourType: z.string().min(1, 'Tourenart ist erforderlich'),
+  difficulty: z.string().min(1, 'Schwierigkeit ist erforderlich'),
+  tourLength: z.string().min(1, 'Tourlänge ist erforderlich'),
+  elevation: z.string().min(1, 'Höhenmeter ist erforderlich').refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+    message: 'Höhenmeter muss eine positive Zahl sein',
+  }),
+  duration: z.string().min(1, 'Dauer ist erforderlich').refine((val) => !isNaN(Number(val)) && Number(val) >= 1, {
+    message: 'Dauer muss mindestens 1 Stunde sein',
+  }),
+  maxParticipants: z.string().min(1, 'Max. Teilnehmer ist erforderlich').refine((val) => !isNaN(Number(val)) && Number(val) >= 1, {
+    message: 'Max. Teilnehmer muss mindestens 1 sein',
+  }),
+  leaderId: z.string().optional(),
+}).refine((data) => {
+  return true
+}, {
+  message: 'Tourenleiter ist erforderlich',
+  path: ['leaderId'],
+})
+
+type EditTourFormValues = z.infer<typeof editTourSchema>
 
 export default function EditTourPage() {
   const params = useParams()
@@ -28,18 +66,23 @@ export default function EditTourPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    date: '',
-    difficulty: '' as Difficulty | '',
-    tourType: '' as TourType | '',
-    tourLength: '' as TourLength | '',
-    elevation: '',
-    duration: '',
-    maxParticipants: '',
-    leaderId: '',
+  const form = useForm<EditTourFormValues>({
+    resolver: zodResolver(editTourSchema),
+    defaultValues: {
+      title: '',
+      description: '',
+      date: '',
+      tourType: '',
+      difficulty: '',
+      tourLength: '',
+      elevation: '',
+      duration: '',
+      maxParticipants: '',
+      leaderId: '',
+    },
   })
+
+  const tourType = form.watch('tourType')
 
   useEffect(() => {
     const loadData = async () => {
@@ -72,7 +115,7 @@ export default function EditTourPage() {
         
         // Formular mit aktuellen Tour-Daten füllen
         const displayTour = tourData.pendingChanges ? { ...tourData, ...tourData.pendingChanges } : tourData
-        setFormData({
+        form.reset({
           title: displayTour.title,
           description: displayTour.description,
           date: new Date(displayTour.date).toISOString().split('T')[0],
@@ -98,26 +141,14 @@ export default function EditTourPage() {
     }
   }, [tourId, router])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const onSubmit = async (values: EditTourFormValues) => {
     setError('')
 
     if (!user || !tour) return
 
-    // Validation
-    if (
-      !formData.title ||
-      !formData.description ||
-      !formData.date ||
-      !formData.difficulty ||
-      !formData.tourType ||
-      !formData.tourLength ||
-      !formData.elevation ||
-      !formData.duration ||
-      !formData.maxParticipants ||
-      (user.role === 'admin' && !formData.leaderId)
-    ) {
-      setError('Bitte füllen Sie alle Felder aus')
+    // Additional validation for leaderId (only for admins)
+    if (user.role === 'admin' && !values.leaderId) {
+      form.setError('leaderId', { message: 'Tourenleiter ist erforderlich' })
       return
     }
 
@@ -125,18 +156,18 @@ export default function EditTourPage() {
 
     try {
       // For leaders, always use their own ID as leaderId (cannot be changed)
-      const finalLeaderId = user.role === 'admin' ? formData.leaderId : user.id
+      const finalLeaderId = user.role === 'admin' ? values.leaderId! : user.id
       
       const updates = {
-        title: formData.title,
-        description: formData.description,
-        date: new Date(formData.date),
-        difficulty: formData.difficulty as Difficulty,
-        tourType: formData.tourType as TourType,
-        tourLength: formData.tourLength as TourLength,
-        elevation: parseInt(formData.elevation),
-        duration: parseInt(formData.duration),
-        maxParticipants: parseInt(formData.maxParticipants),
+        title: values.title,
+        description: values.description,
+        date: new Date(values.date),
+        difficulty: values.difficulty as Difficulty,
+        tourType: values.tourType as TourType,
+        tourLength: values.tourLength as TourLength,
+        elevation: parseInt(values.elevation),
+        duration: parseInt(values.duration),
+        maxParticipants: parseInt(values.maxParticipants),
         leaderId: finalLeaderId,
       }
 
@@ -197,163 +228,219 @@ export default function EditTourPage() {
           <CardTitle>Tour-Details</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit-title">Titel</Label>
-              <Input
-                id="edit-title"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                required
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Titel</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="edit-description">Beschreibung</Label>
-              <Textarea
-                id="edit-description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                required
-                rows={4}
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Beschreibung</FormLabel>
+                    <FormControl>
+                      <Textarea rows={4} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-date">Datum</Label>
-                <Input
-                  id="edit-date"
-                  type="date"
-                  value={formData.date}
-                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  required
-                />
-              </div>
+              <FormField
+                control={form.control}
+                name="date"
+                render={({ field }) => (
+                  <FormItem className="md:col-start-1 md:row-start-1">
+                    <FormLabel>Datum</FormLabel>
+                    <FormControl>
+                      <DatePicker
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Datum auswählen"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-              <div className="space-y-2">
-                <Label htmlFor="edit-tour-type">Tourenart</Label>
-                <Select
-                  value={formData.tourType}
-                  onValueChange={(value) => setFormData({ ...formData, tourType: value as TourType })}
-                  required
-                >
-                  <SelectTrigger id="edit-tour-type" className="w-full">
-                    <SelectValue placeholder="Bitte wählen" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {settings.tourTypes.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <FormField
+                control={form.control}
+                name="tourType"
+                render={({ field }) => (
+                  <FormItem className="md:col-start-2 md:row-start-1">
+                    <FormLabel>Tourenart</FormLabel>
+                    <Select
+                      value={field.value}
+                      onValueChange={(value) => {
+                        field.onChange(value)
+                        form.setValue('difficulty', '')
+                      }}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Bitte wählen" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {settings.tourTypes.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-              <div className="space-y-2">
-                <Label htmlFor="edit-tour-length">Tourlänge</Label>
-                <Select
-                  value={formData.tourLength}
-                  onValueChange={(value) => setFormData({ ...formData, tourLength: value as TourLength })}
-                  required
-                >
-                  <SelectTrigger id="edit-tour-length" className="w-full">
-                    <SelectValue placeholder="Bitte wählen" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {settings.tourLengths.map((length) => (
-                      <SelectItem key={length} value={length}>
-                        {length}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <FormField
+                control={form.control}
+                name="difficulty"
+                render={({ field }) => (
+                  <FormItem className="md:col-start-2 md:row-start-2">
+                    <FormLabel>Schwierigkeit (SAC-Skala)</FormLabel>
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Bitte wählen" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {getDifficultyOptions(tourType as TourType).map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-              <div className="space-y-2">
-                <Label htmlFor="edit-difficulty">Schwierigkeit (SAC-Skala)</Label>
-                <Select
-                  value={formData.difficulty}
-                  onValueChange={(value) => setFormData({ ...formData, difficulty: value as Difficulty })}
-                  required
-                >
-                  <SelectTrigger id="edit-difficulty" className="w-full">
-                    <SelectValue placeholder="Bitte wählen" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {getDifficultyOptions(formData.tourType).map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <FormField
+                control={form.control}
+                name="tourLength"
+                render={({ field }) => (
+                  <FormItem className="md:col-start-1 md:row-start-2">
+                    <FormLabel>Tourlänge</FormLabel>
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Bitte wählen" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {settings.tourLengths.map((length) => (
+                          <SelectItem key={length} value={length}>
+                            {length}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-              <div className="space-y-2">
-                <Label htmlFor="edit-elevation">Höhenmeter</Label>
-                <Input
-                  id="edit-elevation"
-                  type="number"
-                  value={formData.elevation}
-                  onChange={(e) => setFormData({ ...formData, elevation: e.target.value })}
-                  required
-                  min="0"
-                />
-              </div>
+              <FormField
+                control={form.control}
+                name="elevation"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Höhenmeter</FormLabel>
+                    <FormControl>
+                      <Input type="number" min="0" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-              <div className="space-y-2">
-                <Label htmlFor="edit-duration">Dauer (Stunden)</Label>
-                <Input
-                  id="edit-duration"
-                  type="number"
-                  value={formData.duration}
-                  onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                  required
-                  min="1"
-                />
-              </div>
+              <FormField
+                control={form.control}
+                name="duration"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Dauer (Stunden)</FormLabel>
+                    <FormControl>
+                      <Input type="number" min="1" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-              <div className="space-y-2">
-                <Label htmlFor="edit-max-participants">Max. Teilnehmer</Label>
-                <Input
-                  id="edit-max-participants"
-                  type="number"
-                  value={formData.maxParticipants}
-                  onChange={(e) => setFormData({ ...formData, maxParticipants: e.target.value })}
-                  required
-                  min="1"
-                />
-              </div>
+              <FormField
+                control={form.control}
+                name="maxParticipants"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Max. Teilnehmer</FormLabel>
+                    <FormControl>
+                      <Input type="number" min="1" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               
               {user?.role === 'admin' && (
-                <div className="space-y-2">
-                  <Label htmlFor="edit-leader">Tourenleiter</Label>
-                  <Select
-                    value={formData.leaderId}
-                    onValueChange={(value) => setFormData({ ...formData, leaderId: value })}
-                    required
-                  >
-                    <SelectTrigger id="edit-leader" className="w-full">
-                      <SelectValue placeholder="Bitte wählen" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {users.map((u) => (
-                        <SelectItem key={u.id} value={u.id}>
-                          {u.name} ({u.role})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                <FormField
+                  control={form.control}
+                  name="leaderId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tourenleiter</FormLabel>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Bitte wählen" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {users.map((u) => (
+                            <SelectItem key={u.id} value={u.id}>
+                              {u.name} ({u.role})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               )}
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-                {error}
-              </div>
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
             )}
 
             <div className="flex gap-4 pt-4">
@@ -366,7 +453,8 @@ export default function EditTourPage() {
                 </Button>
               </Link>
             </div>
-          </form>
+            </form>
+          </Form>
         </CardContent>
       </Card>
     </div>

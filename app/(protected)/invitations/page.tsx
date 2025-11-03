@@ -2,24 +2,48 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as z from 'zod'
 import { authService } from '@/lib/auth'
 import { dataRepository } from '@/lib/data'
 import { User, Invitation } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
 import { canManageUsers } from '@/lib/roles'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
+
+const invitationSchema = z.object({
+  email: z.string().email('Ungültige E-Mail-Adresse').min(1, 'E-Mail ist erforderlich'),
+})
+
+type InvitationFormValues = z.infer<typeof invitationSchema>
 
 export default function InvitationsPage() {
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
   const [invitations, setInvitations] = useState<Invitation[]>([])
-  const [email, setEmail] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+
+  const form = useForm<InvitationFormValues>({
+    resolver: zodResolver(invitationSchema),
+    defaultValues: {
+      email: '',
+    },
+  })
 
   useEffect(() => {
     const loadInvitations = async () => {
@@ -54,24 +78,23 @@ export default function InvitationsPage() {
     }
   }, [router])
 
-  const handleCreateInvitation = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const onSubmit = async (values: InvitationFormValues) => {
     setMessage(null)
 
-    if (!user || !email) return
+    if (!user) return
 
     setIsLoading(true)
 
     try {
       // Prüfen ob E-Mail bereits existiert
-      const existingUser = await dataRepository.getUserByEmail(email)
+      const existingUser = await dataRepository.getUserByEmail(values.email)
       if (existingUser && existingUser.registered) {
         setMessage({ type: 'error', text: 'Diese E-Mail ist bereits registriert' })
         setIsLoading(false)
         return
       }
 
-      const invitation = await dataRepository.createInvitation(email, user.id)
+      const invitation = await dataRepository.createInvitation(values.email, user.id)
       
       // Automatically send email
       try {
@@ -84,7 +107,7 @@ export default function InvitationsPage() {
         if (emailResponse.ok) {
           setMessage({
             type: 'success',
-            text: `Einladung erstellt und E-Mail an ${email} gesendet!`,
+            text: `Einladung erstellt und E-Mail an ${values.email} gesendet!`,
           })
         } else {
           // Fallback: Show link if email fails
@@ -110,7 +133,7 @@ export default function InvitationsPage() {
         console.warn('Email sending error:', emailError)
       }
       
-      setEmail('')
+      form.reset()
       const allInvitations = await dataRepository.getInvitations()
       setInvitations(allInvitations)
     } catch (err) {
@@ -161,33 +184,35 @@ export default function InvitationsPage() {
           <CardTitle>Neue Einladung erstellen</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleCreateInvitation} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="invitation-email">E-Mail-Adresse</Label>
-              <Input
-                id="invitation-email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                placeholder="neues.mitglied@example.com"
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>E-Mail-Adresse</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="neues.mitglied@example.com"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            {message && (
-              <div
-                className={`px-4 py-3 rounded-md text-sm ${
-                  message.type === 'success'
-                    ? 'bg-green-50 border border-green-200 text-green-700'
-                    : 'bg-red-50 border border-red-200 text-red-700'
-                }`}
-              >
-                {message.text}
-              </div>
-            )}
-            <Button type="submit" variant="default" disabled={isLoading} size="sm">
-              {isLoading ? 'Wird erstellt...' : 'Einladung erstellen'}
-            </Button>
-          </form>
+              {message && (
+                <Alert variant={message.type === 'success' ? 'default' : 'destructive'}>
+                  <AlertDescription>{message.text}</AlertDescription>
+                </Alert>
+              )}
+              <Button type="submit" variant="default" disabled={isLoading} size="sm">
+                {isLoading ? 'Wird erstellt...' : 'Einladung erstellen'}
+              </Button>
+            </form>
+          </Form>
         </CardContent>
       </Card>
 
@@ -215,13 +240,13 @@ export default function InvitationsPage() {
                         </p>
                       </div>
                       {invitation.used ? (
-                        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-green-50 text-green-700 border border-green-200">
+                        <Badge variant="default">
                           Verwendet
-                        </span>
+                        </Badge>
                       ) : (
-                        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-yellow-50 text-yellow-700 border border-yellow-200">
+                        <Badge variant="secondary">
                           Ausstehend
-                        </span>
+                        </Badge>
                       )}
                     </div>
                     {!invitation.used && (

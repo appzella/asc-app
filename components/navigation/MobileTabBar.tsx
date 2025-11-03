@@ -4,6 +4,8 @@ import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Home, List, User } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 interface TabItem {
   href: string
@@ -40,28 +42,41 @@ export function MobileTabBar() {
       aria-label="Mobile Tab Bar"
     >
       <div className="w-full">
-        <div className="glass rounded-t-lg border-t border-gray-200 shadow-sm">
+        <div className="bg-white rounded-t-lg border-t border-gray-200 shadow-lg">
           <ul className="grid grid-cols-3">
             {tabs.map((tab) => {
               const active = isActive(tab.href)
               const IconComponent = tab.icon
               return (
                 <li key={tab.href}>
-                  <Link
-                    href={tab.href}
-                    className={`flex flex-col items-center justify-center py-3 gap-1 outline-none transition-colors touch-manipulation min-h-[60px] ${
-                      active ? 'text-primary-600' : 'text-gray-600 active:text-gray-900'
-                    }`}
-                    aria-current={active ? 'page' : undefined}
+                  <Button
+                    variant="ghost"
+                    asChild
+                    className={cn(
+                      "flex flex-col items-center justify-center h-auto py-3 gap-1 rounded-none w-full touch-manipulation min-h-[60px]",
+                      active && "bg-primary-50 text-primary-600"
+                    )}
                   >
-                    <IconComponent
-                      className={`w-5 h-5 ${active ? 'stroke-primary-600' : 'stroke-gray-500'}`}
-                      strokeWidth={2}
-                    />
-                    <span className={`text-xs font-medium ${active ? 'text-primary-600' : 'text-gray-600'}`}>
-                      {tab.label}
-                    </span>
-                  </Link>
+                    <Link
+                      href={tab.href}
+                      className="flex flex-col items-center justify-center gap-1 w-full"
+                      aria-current={active ? 'page' : undefined}
+                    >
+                      <IconComponent
+                        className={cn(
+                          "w-5 h-5",
+                          active ? "text-primary-600" : "text-gray-500"
+                        )}
+                        strokeWidth={2}
+                      />
+                      <span className={cn(
+                        "text-xs font-medium",
+                        active ? "text-primary-600" : "text-gray-600"
+                      )}>
+                        {tab.label}
+                      </span>
+                    </Link>
+                  </Button>
                 </li>
               )
             })}

@@ -1,14 +1,21 @@
 'use client'
 
-import { useEffect, useState, useMemo, useCallback } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { authService } from '@/lib/auth'
 import { User } from '@/lib/types'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
 import { MobileTabBar } from '@/components/navigation/MobileTabBar'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { ChevronDown, Settings } from 'lucide-react'
-import Image from 'next/image'
 import { UserRole } from '@/lib/types'
 
 // Helper function to translate user roles to German
@@ -79,34 +86,6 @@ export default function ProtectedLayout({
   }
 
 
-  // Alle Hooks müssen VOR frühen Returns aufgerufen werden!
-  const [desktopExpandedItems, setDesktopExpandedItems] = useState<Set<string>>(new Set())
-  
-  const toggleDesktopExpanded = useCallback((key: string) => {
-    setDesktopExpandedItems((prev) => {
-      const next = new Set(prev)
-      if (next.has(key)) {
-        next.delete(key)
-      } else {
-        // Schließe andere Dropdowns
-        next.clear()
-        next.add(key)
-      }
-      return next
-    })
-  }, [])
-
-  // Schließe Dropdowns beim Klick außerhalb
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as HTMLElement
-      if (!target.closest('.desktop-nav-dropdown')) {
-        setDesktopExpandedItems(new Set())
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
 
 
   // Desktop Navigation Items mit 2-Ebenen-Struktur
@@ -151,58 +130,62 @@ export default function ProtectedLayout({
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <nav className="glass sticky top-0 z-50 border-b border-gray-200 flex-shrink-0">
+      <nav className="bg-white/95 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-200 flex-shrink-0 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20">
             <div className="flex items-center gap-2">
               <div className="flex-shrink-0 flex items-center">
                 <span className="text-2xl font-bold gradient-text tracking-tight">ASC</span>
               </div>
-              <div className="hidden sm:ml-8 sm:flex sm:space-x-1 relative">
+              <div className="hidden sm:ml-8 sm:flex sm:space-x-1">
                 {desktopNavItems.map((item) => {
                   const itemKey = item.href || item.label
                   const hasChildren = item.children && item.children.length > 0
-                  const isExpanded = desktopExpandedItems.has(itemKey)
+                  const isParentActive = hasChildren && item.children?.some(
+                    c => pathname === c.href || 
+                    (c.href === '/tours' && pathname?.startsWith('/tours/')) || 
+                    (c.href === '/users' && pathname?.startsWith('/users/')) || 
+                    (c.href === '/invitations' && pathname?.startsWith('/invitations/'))
+                  )
 
                   if (hasChildren) {
                     return (
-                      <div key={itemKey} className="relative desktop-nav-dropdown">
-                        <button
-                          onClick={() => toggleDesktopExpanded(itemKey)}
-                          className={`inline-flex items-center gap-1 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                            item.children?.some(c => pathname === c.href || (c.href === '/tours' && pathname?.startsWith('/tours/')) || (c.href === '/users' && pathname?.startsWith('/users/')) || (c.href === '/invitations' && pathname?.startsWith('/invitations/')))
-                              ? 'bg-primary-50 text-primary-600'
-                              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                          }`}
-                        >
-                          {item.label}
-                          <ChevronDown
-                            className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                            strokeWidth={1.8}
-                          />
-                        </button>
-                        {isExpanded && (
-                          <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50">
-                            {item.children?.map((child) => {
-                              const isActive = pathname === child.href || (child.href === '/tours' && pathname?.startsWith('/tours/')) || (child.href === '/users' && pathname?.startsWith('/users/')) || (child.href === '/invitations' && pathname?.startsWith('/invitations/'))
-                              return (
+                      <DropdownMenu key={itemKey}>
+                        <DropdownMenuTrigger asChild>
+                          <button
+                            className={`inline-flex items-center gap-1 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                              isParentActive
+                                ? 'bg-primary-50 text-primary-600'
+                                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                            }`}
+                          >
+                            {item.label}
+                            <ChevronDown className="w-4 h-4" strokeWidth={1.8} />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start" className="w-48">
+                          {item.children?.map((child) => {
+                            const isActive = pathname === child.href || 
+                              (child.href === '/tours' && pathname?.startsWith('/tours/')) || 
+                              (child.href === '/users' && pathname?.startsWith('/users/')) || 
+                              (child.href === '/invitations' && pathname?.startsWith('/invitations/'))
+                            return (
+                              <DropdownMenuItem key={child.href} asChild>
                                 <Link
-                                  key={child.href}
                                   href={child.href}
-                                  onClick={() => setDesktopExpandedItems(new Set())}
-                                  className={`block px-3 py-2 text-sm transition-colors ${
+                                  className={`w-full ${
                                     isActive
                                       ? 'bg-primary-50 text-primary-600'
-                                      : 'text-gray-700 hover:bg-gray-50'
+                                      : ''
                                   }`}
                                 >
                                   {child.label}
                                 </Link>
-                              )
-                            })}
-                          </div>
-                        )}
-                      </div>
+                              </DropdownMenuItem>
+                            )
+                          })}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     )
                   }
 
@@ -248,28 +231,30 @@ export default function ProtectedLayout({
                   />
                 </Link>
               )}
-                <Link href="/profile" className="hidden sm:flex items-center space-x-2 px-3 py-2 rounded-md bg-gray-50 hover:bg-gray-100 transition-colors">
-                {user.profilePhoto ? (
-                  <Image 
-                    src={user.profilePhoto} 
-                    alt={user.name}
-                    width={32}
-                    height={32}
-                    unoptimized
-                    className="w-8 h-8 rounded-full object-cover border border-gray-300"
-                  />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center border border-gray-300">
-                    <span className="text-xs font-semibold text-primary-600">
-                      {user.name.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                )}
-                <span className="text-sm font-medium text-gray-900">{user.name}</span>
-                <span className="text-xs font-medium text-primary-600 bg-primary-50 px-2 py-0.5 rounded-md border border-primary-200">
-                  {getRoleLabel(user.role)}
-                </span>
-              </Link>
+                <Button
+                  variant="ghost"
+                  asChild
+                  className={`hidden sm:flex items-center gap-2 ${
+                    pathname === '/profile' ? 'bg-primary-50 text-primary-600' : ''
+                  }`}
+                >
+                  <Link href="/profile">
+                    <Avatar className="w-8 h-8">
+                      <AvatarImage
+                        src={user.profilePhoto || undefined}
+                        alt={user.name}
+                        className="object-cover"
+                      />
+                      <AvatarFallback className="bg-primary-100 text-primary-600 text-xs font-semibold">
+                        {user.name.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm font-medium">{user.name}</span>
+                    <Badge variant="secondary" className="text-xs">
+                      {getRoleLabel(user.role)}
+                    </Badge>
+                  </Link>
+                </Button>
             </div>
           </div>
         </div>

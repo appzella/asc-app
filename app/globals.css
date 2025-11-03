@@ -57,6 +57,9 @@
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
   }
+  .theme {
+    --animate-aurora: aurora 60s linear infinite;
+  }
 }
 
 @layer base {
@@ -68,3 +71,13 @@
   }
 }
 
+@theme inline {
+  @keyframes aurora {
+  from {
+    backgroundPosition: 50% 50%, 50% 50%;
+    }
+  to {
+    backgroundPosition: 350% 50%, 350% 50%;
+    }
+  }
+}
