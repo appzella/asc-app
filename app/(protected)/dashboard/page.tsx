@@ -111,22 +111,15 @@ export default function DashboardPage() {
                 <ListChecks className="w-5 h-5 text-primary-600" strokeWidth={2} />
                 <span className="text-base">Meine Touren</span>
               </div>
-              <Link href="/tours?my=true" className="sm:hidden touch-target">
-                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-primary-600 transition-colors" strokeWidth={2} />
-              </Link>
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col flex-1">
-            <Link href="/tours?my=true" className="sm:hidden touch-target block flex-1">
-              <div className="text-2xl font-bold text-primary-600">{myTours.length}</div>
-              <p className="text-sm text-gray-600 mt-1">Angemeldete oder geleitete Touren</p>
-            </Link>
-            <div className="sm:block hidden">
+            <div className="flex-1">
               <div className="text-2xl font-bold text-primary-600">{myTours.length}</div>
               <p className="text-sm text-gray-600 mt-1">Angemeldete oder geleitete Touren</p>
             </div>
             <div className="mt-auto pt-4">
-              <Link href="/tours?my=true" className="hidden sm:block">
+              <Link href="/tours?my=true">
                 <Button variant="outline" size="sm" className="w-full">
                   Meine Touren öffnen
                 </Button>
@@ -142,22 +135,15 @@ export default function DashboardPage() {
                 <Calendar className="w-5 h-5 text-primary-600" strokeWidth={2} />
                 <span className="text-base">Verfügbare Touren</span>
               </div>
-              <Link href="/tours" className="sm:hidden touch-target">
-                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-primary-600 transition-colors" strokeWidth={2} />
-              </Link>
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col flex-1">
-            <Link href="/tours" className="sm:hidden touch-target block flex-1">
-              <div className="text-2xl font-bold text-primary-600">{tours.length}</div>
-              <p className="text-sm text-gray-600 mt-1">Freigegebene Touren</p>
-            </Link>
-            <div className="sm:block hidden">
+            <div className="flex-1">
               <div className="text-2xl font-bold text-primary-600">{tours.length}</div>
               <p className="text-sm text-gray-600 mt-1">Freigegebene Touren</p>
             </div>
             <div className="mt-auto pt-4">
-              <Link href="/tours" className="hidden sm:block">
+              <Link href="/tours">
                 <Button variant="outline" size="sm" className="w-full">
                   Alle Touren durchsuchen
                 </Button>
@@ -173,22 +159,15 @@ export default function DashboardPage() {
                 <Archive className="w-5 h-5 text-primary-600" strokeWidth={2} />
                 <span className="text-base">Tourenarchiv</span>
               </div>
-              <Link href="/tours/archive" className="sm:hidden touch-target">
-                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-primary-600 transition-colors" strokeWidth={2} />
-              </Link>
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col flex-1">
-            <Link href="/tours/archive" className="sm:hidden touch-target block flex-1">
-              <div className="text-2xl font-bold text-primary-600">{archivedTours.length}</div>
-              <p className="text-sm text-gray-600 mt-1">Vergangene Touren</p>
-            </Link>
-            <div className="sm:block hidden">
+            <div className="flex-1">
               <div className="text-2xl font-bold text-primary-600">{archivedTours.length}</div>
               <p className="text-sm text-gray-600 mt-1">Vergangene Touren</p>
             </div>
             <div className="mt-auto pt-4">
-              <Link href="/tours/archive" className="hidden sm:block">
+              <Link href="/tours/archive">
                 <Button variant="outline" size="sm" className="w-full">
                   Archiv öffnen
                 </Button>
@@ -225,20 +204,14 @@ export default function DashboardPage() {
                 <BookOpen className="w-5 h-5 text-primary-600" strokeWidth={2} />
                 <span className="text-base">Hilfe</span>
               </div>
-              <Link href="/help" className="sm:hidden touch-target">
-                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-primary-600 transition-colors" strokeWidth={2} />
-              </Link>
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col flex-1">
-            <Link href="/help" className="sm:hidden touch-target block flex-1">
-              <p className="text-sm text-gray-600">Benötigen Sie Hilfe bei der Nutzung der App</p>
-            </Link>
-            <div className="sm:block hidden">
+            <div className="flex-1">
               <p className="text-sm text-gray-600">Benötigen Sie Hilfe bei der Nutzung der App</p>
             </div>
             <div className="mt-auto pt-4">
-              <Link href="/help" className="hidden sm:block">
+              <Link href="/help">
                 <Button variant="outline" size="sm" className="w-full">
                   Hilfe öffnen
                 </Button>
