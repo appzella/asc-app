@@ -554,9 +554,9 @@ export default function ProfilePage() {
                               size="icon"
                               onClick={handleRemovePhoto}
                               disabled={isLoading}
-                              className="h-9 w-9"
+                              className="h-8 w-8"
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-3.5 h-3.5" />
                             </Button>
                           )}
                         </div>
