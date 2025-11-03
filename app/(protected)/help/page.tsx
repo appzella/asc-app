@@ -36,13 +36,28 @@ export default function HelpPage() {
     <div className="max-w-4xl mx-auto space-y-4 animate-fade-in">
       <div>
         <div className="flex items-center gap-3 mb-3">
-          <Link 
-            href="/dashboard" 
-            className="inline-flex items-center gap-1 text-primary-600 hover:text-primary-700 text-sm transition-colors"
+          <Button
+            variant="ghost"
+            size="sm"
+            asChild
+            className="hidden sm:inline-flex items-center gap-1 text-primary-600 hover:text-primary-700"
           >
-            <ChevronLeft className="w-4 h-4" strokeWidth={2} />
-            Zurück zum Dashboard
-          </Link>
+            <Link href="/dashboard">
+              <ChevronLeft className="w-4 h-4" strokeWidth={2} />
+              Zurück zum Dashboard
+            </Link>
+          </Button>
+          <Button
+            variant="secondary"
+            size="icon"
+            asChild
+            className="sm:hidden"
+            aria-label="Zurück zum Dashboard"
+          >
+            <Link href="/dashboard">
+              <ChevronLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
+            </Link>
+          </Button>
         </div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Hilfe</h1>
         <p className="text-base text-gray-600">Erfahren Sie, wie Sie die ASC Skitouren App verwenden</p>

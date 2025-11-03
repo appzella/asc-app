@@ -146,20 +146,28 @@ export default function ToursArchivePage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-3">
-            <Link 
-              href="/tours" 
-              className="hidden sm:inline-flex items-center gap-1 text-primary-600 hover:text-primary-700 text-sm transition-colors"
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className="hidden sm:inline-flex items-center gap-1 text-primary-600 hover:text-primary-700"
             >
-              <ChevronLeft className="w-4 h-4" strokeWidth={2} />
-              Zurück zu Touren
-            </Link>
-            <Link 
-              href="/tours"
-              className="sm:hidden flex items-center justify-center w-10 h-10 rounded-md transition-colors touch-target bg-gray-50 hover:bg-gray-100"
+              <Link href="/tours">
+                <ChevronLeft className="w-4 h-4" strokeWidth={2} />
+                Zurück zu Touren
+              </Link>
+            </Button>
+            <Button
+              variant="secondary"
+              size="icon"
+              asChild
+              className="sm:hidden"
               aria-label="Zurück zu Touren"
             >
-              <ChevronLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
-            </Link>
+              <Link href="/tours">
+                <ChevronLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
+              </Link>
+            </Button>
           </div>
           <h1 className="text-3xl font-bold text-gray-900">Tourenarchiv</h1>
         </div>

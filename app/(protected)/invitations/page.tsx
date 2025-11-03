@@ -8,7 +8,7 @@ import * as z from 'zod'
 import { authService } from '@/lib/auth'
 import { dataRepository } from '@/lib/data'
 import { User, Invitation } from '@/lib/types'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -160,23 +160,31 @@ export default function InvitationsPage() {
     <div className="space-y-4">
       <div>
         <div className="flex items-center gap-3 mb-3">
-          <Link 
-            href="/settings" 
-            className="hidden sm:inline-flex items-center gap-1 text-primary-600 hover:text-primary-700 text-sm transition-colors"
+          <Button
+            variant="ghost"
+            size="sm"
+            asChild
+            className="hidden sm:inline-flex items-center gap-1 text-primary-600 hover:text-primary-700"
           >
-            <ChevronLeft className="w-4 h-4" strokeWidth={2} />
-            Zurück zur Übersicht
-          </Link>
-          <Link 
-            href="/settings"
-            className="sm:hidden flex items-center justify-center w-10 h-10 rounded-md transition-colors touch-target bg-gray-50 hover:bg-gray-100"
+            <Link href="/settings">
+              <ChevronLeft className="w-4 h-4" strokeWidth={2} />
+              Zurück zur Übersicht
+            </Link>
+          </Button>
+          <Button
+            variant="secondary"
+            size="icon"
+            asChild
+            className="sm:hidden"
             aria-label="Zurück zur Übersicht"
           >
-            <ChevronLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
-          </Link>
+            <Link href="/settings">
+              <ChevronLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
+            </Link>
+          </Button>
         </div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Einladungen</h1>
-        <p className="text-base text-gray-600">Erstellen Sie Einladungen für neue Clubmitglieder</p>
+        <CardDescription className="text-base">Erstellen Sie Einladungen für neue Clubmitglieder</CardDescription>
       </div>
 
       <Card>

@@ -194,19 +194,28 @@ export default function EditTourPage() {
     <div className="max-w-2xl mx-auto space-y-6">
       <div>
         <div className="flex items-center gap-3 mb-4">
-          <Link 
-            href={`/tours/${tourId}`} 
-            className="hidden sm:inline-block text-primary-600 hover:text-primary-700 text-sm mb-2"
+          <Button
+            variant="ghost"
+            size="sm"
+            asChild
+            className="hidden sm:inline-flex items-center gap-1 text-primary-600 hover:text-primary-700"
           >
-            ← Zurück zur Tour
-          </Link>
-          <Link 
-            href={`/tours/${tourId}`}
-            className="sm:hidden flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200 touch-manipulation bg-primary-100 hover:bg-primary-200 transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 shadow-sm"
+            <Link href={`/tours/${tourId}`}>
+              <ChevronLeft className="w-4 h-4" strokeWidth={2} />
+              Zurück zur Tour
+            </Link>
+          </Button>
+          <Button
+            variant="secondary"
+            size="icon"
+            asChild
+            className="sm:hidden"
             aria-label="Zurück zur Tour"
           >
-            <ChevronLeft className="w-5 h-5 text-primary-700" strokeWidth={1.8} />
-          </Link>
+            <Link href={`/tours/${tourId}`}>
+              <ChevronLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
+            </Link>
+          </Button>
         </div>
         <h1 className="text-3xl font-bold text-gray-900">Tour bearbeiten</h1>
       </div>

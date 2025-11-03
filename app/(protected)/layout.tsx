@@ -212,24 +212,28 @@ export default function ProtectedLayout({
             <div className="flex items-center space-x-3">
               {/* Settings Icon für Mobile (nur Admin) */}
               {user.role === 'admin' && (
-                <Link
-                  href="/settings"
-                  className={`sm:hidden flex items-center justify-center w-10 h-10 rounded-md transition-colors touch-target ${
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  asChild
+                  className={`sm:hidden ${
                     pathname === '/settings' || pathname?.startsWith('/settings/')
-                      ? 'bg-primary-50'
-                      : 'bg-gray-50 hover:bg-gray-100'
+                      ? 'bg-primary-50 text-primary-600'
+                      : ''
                   }`}
                   aria-label="Einstellungen"
                 >
-                  <Settings 
-                    className={`w-5 h-5 ${
-                      pathname === '/settings' || pathname?.startsWith('/settings/')
-                        ? 'text-primary-600'
-                        : 'text-gray-700'
-                    }`} 
-                    strokeWidth={2} 
-                  />
-                </Link>
+                  <Link href="/settings">
+                    <Settings 
+                      className={`w-5 h-5 ${
+                        pathname === '/settings' || pathname?.startsWith('/settings/')
+                          ? 'text-primary-600'
+                          : 'text-gray-700'
+                      }`} 
+                      strokeWidth={2} 
+                    />
+                  </Link>
+                </Button>
               )}
                 <Button
                   variant="ghost"
