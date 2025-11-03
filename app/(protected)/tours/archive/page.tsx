@@ -10,6 +10,7 @@ import { TourCard } from '@/components/tours/TourCard'
 import { Select } from '@/components/ui/Select'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
+import { Card, CardContent } from '@/components/ui/Card'
 import { Filter, ChevronLeft } from 'lucide-react'
 
 export default function ToursArchivePage() {
@@ -132,26 +133,31 @@ export default function ToursArchivePage() {
   }
 
   if (!user) {
-    return <div>Lädt...</div>
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-gray-600">Lädt...</div>
+      </div>
+    )
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3">
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex-1">
+          <div className="flex items-center gap-3 mb-3">
             <Link 
               href="/tours" 
-              className="hidden sm:inline-block text-primary-600 hover:text-primary-700 text-sm"
+              className="hidden sm:inline-flex items-center gap-1 text-primary-600 hover:text-primary-700 text-sm transition-colors"
             >
-              ← Zurück zu Touren
+              <ChevronLeft className="w-4 h-4" strokeWidth={2} />
+              Zurück zu Touren
             </Link>
             <Link 
               href="/tours"
-              className="sm:hidden flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200 touch-manipulation bg-primary-100 hover:bg-primary-200 transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 shadow-sm"
+              className="sm:hidden flex items-center justify-center w-10 h-10 rounded-md transition-colors touch-target bg-gray-50 hover:bg-gray-100"
               aria-label="Zurück zu Touren"
             >
-              <ChevronLeft className="w-5 h-5 text-primary-700" strokeWidth={1.8} />
+              <ChevronLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
             </Link>
           </div>
           <h1 className="text-3xl font-bold text-gray-900">Tourenarchiv</h1>
@@ -165,33 +171,34 @@ export default function ToursArchivePage() {
       </div>
 
       {/* Filter */}
-      <div className="glass p-3 md:p-6 rounded-xl shadow-modern border border-gray-100/50">
-        {/* Mobile: Kompakte Suchzeile mit Filter-Toggle */}
-        <div className="md:hidden space-y-3">
-          <div className="flex gap-2">
-            <Input
-              placeholder="Suche..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1"
-            />
-            <div className="flex flex-col">
-              <div className="h-5 mb-1"></div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowFilters(!showFilters)}
-                className="flex-shrink-0 flex items-center justify-center px-3 h-[3rem]"
-                aria-label={showFilters ? 'Filter schließen' : 'Filter anzeigen'}
-              >
-                <Filter className="w-4 h-4" strokeWidth={1.8} />
-              </Button>
+      <Card>
+        <CardContent>
+          {/* Mobile: Kompakte Suchzeile mit Filter-Toggle */}
+          <div className="md:hidden space-y-3">
+            <div className="flex gap-2">
+              <Input
+                placeholder="Suche..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="flex-1"
+              />
+              <div className="flex flex-col">
+                <div className="h-5 mb-1"></div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="flex-shrink-0 flex items-center justify-center px-3 h-[3rem]"
+                  aria-label={showFilters ? 'Filter schließen' : 'Filter anzeigen'}
+                >
+                  <Filter className="w-4 h-4" strokeWidth={2} />
+                </Button>
+              </div>
             </div>
-          </div>
           
           {/* Ausklappbare Filter auf Mobile */}
           {showFilters && (
-            <div className="space-y-3 pt-2 border-t border-gray-200">
+            <div className="space-y-3 pt-3 border-t border-gray-200">
               <div className="space-y-3">
                 {user.role === 'admin' && (
                   <Select
@@ -264,16 +271,13 @@ export default function ToursArchivePage() {
                 />
               </div>
 
-              <div className="flex flex-col gap-2 pt-2 border-t border-gray-200">
+              <div className="flex flex-col gap-2 pt-3 border-t border-gray-200">
                 <label className="flex items-center">
                   <input
                     type="checkbox"
                     checked={showMyTours}
                     onChange={(e) => setShowMyTours(e.target.checked)}
                     className="mr-2 w-4 h-4 focus:ring-primary-500 focus:ring-2 cursor-pointer"
-                    style={{
-                      accentColor: '#2563eb',
-                    }}
                   />
                   <span className="text-sm text-gray-700">Nur meine Touren</span>
                 </label>
@@ -375,9 +379,6 @@ export default function ToursArchivePage() {
                 checked={showMyTours}
                 onChange={(e) => setShowMyTours(e.target.checked)}
                 className="mr-2 w-4 h-4 focus:ring-primary-500 focus:ring-2 cursor-pointer"
-                style={{
-                  accentColor: '#2563eb',
-                }}
               />
               <span className="text-sm text-gray-700">Nur meine Touren</span>
             </label>
@@ -389,15 +390,21 @@ export default function ToursArchivePage() {
             )}
           </div>
         </div>
-      </div>
+      </CardContent>
+      </Card>
 
       {/* Tour Liste */}
       {filteredTours.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-lg shadow-sm">
-          <p className="text-gray-500">Keine vergangenen Touren gefunden.</p>
-        </div>
+        <Card>
+          <CardContent>
+            <div className="text-center py-8">
+              <p className="text-base text-gray-600">Keine vergangenen Touren gefunden.</p>
+              <p className="text-sm text-gray-500 mt-2">Alle zukünftigen Touren finden Sie in der <Link href="/tours" className="text-primary-600 hover:text-primary-700 underline">Tourenübersicht</Link>.</p>
+            </div>
+          </CardContent>
+        </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredTours.map((tour) => (
             <TourCard key={tour.id} tour={tour} tourTypeIcons={settings?.tourTypeIcons} userRole={user?.role} />
           ))}
