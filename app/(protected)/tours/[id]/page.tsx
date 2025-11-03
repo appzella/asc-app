@@ -6,9 +6,9 @@ import { authService } from '@/lib/auth'
 import { dataRepository } from '@/lib/data'
 import { User, Tour, TourSettings } from '@/lib/types'
 import { getTourIcon, getTourIconColor } from '@/lib/tourIcons'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
-import { Textarea } from '@/components/ui/Textarea'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
 import { ChatWindow } from '@/components/chat/ChatWindow'
 import { canEditTour, canApproveTour, canPublishTour, canSubmitForPublishing } from '@/lib/roles'
 import { formatDifficulty } from '@/lib/difficulty'
@@ -409,7 +409,7 @@ export default function TourDetailPage() {
                 <p className="text-xs text-gray-600 mb-4">
                   Reichen Sie diese Tour zur Veröffentlichung ein. Ein Admin wird sie prüfen und veröffentlichen.
                 </p>
-                <Button variant="primary" onClick={handleSubmitForPublishing} className="w-full" size="sm">
+                <Button variant="default" onClick={handleSubmitForPublishing} className="w-full" size="sm">
                   Zur Veröffentlichung einreichen
                 </Button>
               </CardContent>
@@ -423,7 +423,7 @@ export default function TourDetailPage() {
                 <CardTitle className="text-yellow-800 text-base">Veröffentlichung</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Button variant="primary" onClick={handleApprove} className="w-full" size="sm" disabled={isArchived}>
+                <Button variant="default" onClick={handleApprove} className="w-full" size="sm" disabled={isArchived}>
                   Tour veröffentlichen
                 </Button>
                 {!isArchived && (
@@ -442,7 +442,7 @@ export default function TourDetailPage() {
                 <CardTitle className="text-gray-800 text-base">Admin-Aktionen</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Button variant="primary" onClick={handleApprove} className="w-full" size="sm" disabled={isArchived}>
+                <Button variant="default" onClick={handleApprove} className="w-full" size="sm" disabled={isArchived}>
                   Tour veröffentlichen
                 </Button>
                 {isArchived && (
@@ -470,7 +470,7 @@ export default function TourDetailPage() {
                     </Button>
                   </>
                 )}
-                <Button variant="danger" onClick={handleDelete} className="w-full" size="sm">
+                <Button variant="destructive" onClick={handleDelete} className="w-full" size="sm">
                   Tour löschen
                 </Button>
               </CardContent>
@@ -485,7 +485,7 @@ export default function TourDetailPage() {
               <CardContent className="space-y-2">
                 {!isArchived && (
                   <>
-                    <Button variant="primary" onClick={handleApprove} className="w-full" size="sm">
+                    <Button variant="default" onClick={handleApprove} className="w-full" size="sm">
                       Tour wieder aktivieren
                     </Button>
                     <Button variant="outline" onClick={handleUnpublish} className="w-full" size="sm">
@@ -493,7 +493,7 @@ export default function TourDetailPage() {
                     </Button>
                   </>
                 )}
-                <Button variant="danger" onClick={handleDelete} className="w-full" size="sm">
+                <Button variant="destructive" onClick={handleDelete} className="w-full" size="sm">
                   Tour löschen
                 </Button>
               </CardContent>
@@ -524,7 +524,7 @@ export default function TourDetailPage() {
                 {isRegistered ? (
                   <div className="space-y-2">
                     <p className="text-xs text-green-600 font-medium">Sie sind angemeldet</p>
-                    <Button variant="danger" onClick={handleUnregister} className="w-full" size="sm">
+                    <Button variant="destructive" onClick={handleUnregister} className="w-full" size="sm">
                       Abmelden
                     </Button>
                   </div>
@@ -542,7 +542,7 @@ export default function TourDetailPage() {
                       </p>
                     ) : (
                       <Button
-                        variant="primary"
+                        variant="default"
                         onClick={handleRegister}
                         className="w-full"
                         size="sm"
@@ -612,7 +612,7 @@ export default function TourDetailPage() {
               />
               <div className="flex gap-2 pt-2">
                 <Button
-                  variant="danger"
+                  variant="destructive"
                   onClick={handleConfirmReject}
                   className="flex-1"
                   size="sm"

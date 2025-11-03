@@ -5,9 +5,9 @@ import { useRouter } from 'next/navigation'
 import { authService } from '@/lib/auth'
 import { dataRepository } from '@/lib/data'
 import { User, UserRole } from '@/lib/types'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
-import { Select } from '@/components/ui/Select'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { canManageUsers } from '@/lib/roles'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
@@ -125,14 +125,17 @@ export default function UsersPage() {
                     <td className="px-4 py-3 whitespace-nowrap">
                       <Select
                         value={u.role}
-                        onChange={(e) => handleRoleChange(u.id, e.target.value as UserRole)}
-                        options={[
-                          { value: 'member', label: 'Mitglied' },
-                          { value: 'leader', label: 'Tourenleiter' },
-                          { value: 'admin', label: 'Admin' },
-                        ]}
-                        className="w-40 text-sm"
-                      />
+                        onValueChange={(value) => handleRoleChange(u.id, value as UserRole)}
+                      >
+                        <SelectTrigger className="w-40 text-sm">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="member">Mitglied</SelectItem>
+                          <SelectItem value="leader">Tourenleiter</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       {u.registered ? (

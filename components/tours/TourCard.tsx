@@ -1,7 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { Tour, UserRole } from '@/lib/types'
-import { Card, CardContent } from '@/components/ui/Card'
+import { Card, CardContent } from '@/components/ui/card'
 import { formatDifficulty } from '@/lib/difficulty'
 import { Calendar, Clock, Mountain, Users } from 'lucide-react'
 import Image from 'next/image'

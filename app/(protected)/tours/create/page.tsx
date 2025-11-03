@@ -5,11 +5,12 @@ import { useRouter } from 'next/navigation'
 import { authService } from '@/lib/auth'
 import { dataRepository } from '@/lib/data'
 import { User, TourType, TourLength, Difficulty, TourSettings, Tour } from '@/lib/types'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
-import { Textarea } from '@/components/ui/Textarea'
-import { Select } from '@/components/ui/Select'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
 import { canCreateTour } from '@/lib/roles'
 import { getDifficultyOptions } from '@/lib/difficulty'
 import { getTourIcon, getTourIconColor } from '@/lib/tourIcons'
@@ -490,7 +491,7 @@ export default function CreateTourPage() {
             )}
 
             <div className="flex flex-col sm:flex-row gap-2 pt-2">
-              <Button type="submit" variant="primary" disabled={isLoading} className="flex-1">
+              <Button type="submit" variant="default" disabled={isLoading} className="flex-1">
                 {isLoading ? 'Wird erstellt...' : 'Tour erstellen'}
               </Button>
               <Link href="/tours" className="flex-1 sm:flex-initial">

@@ -5,10 +5,11 @@ import { useRouter } from 'next/navigation'
 import { authService } from '@/lib/auth'
 import { dataRepository } from '@/lib/data'
 import { User } from '@/lib/types'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
-import { Textarea } from '@/components/ui/Textarea'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
 import { ImageCropper } from '@/components/ui/ImageCropper'
 import Image from 'next/image'
 
@@ -377,7 +378,7 @@ export default function ProfilePage() {
                 </Button>
                 {user.profilePhoto && (
                   <Button
-                    variant="danger"
+                    variant="destructive"
                     size="sm"
                     onClick={handleRemovePhoto}
                     disabled={isLoading}
@@ -476,7 +477,7 @@ export default function ProfilePage() {
                 )}
 
                 <div className="pt-2">
-                  <Button type="submit" variant="primary" disabled={isLoading} className="w-full">
+                  <Button type="submit" variant="default" disabled={isLoading} className="w-full">
                     {isLoading ? 'Wird gespeichert...' : 'Änderungen speichern'}
                   </Button>
                 </div>
@@ -565,7 +566,7 @@ export default function ProfilePage() {
                     >
                       Abbrechen
                     </Button>
-                    <Button type="submit" variant="primary" disabled={isLoading} className="flex-1">
+                    <Button type="submit" variant="default" disabled={isLoading} className="flex-1">
                       {isLoading ? 'Wird gespeichert...' : 'Passwort ändern'}
                     </Button>
                   </div>

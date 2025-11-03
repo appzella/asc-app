@@ -5,9 +5,9 @@ import { useRouter } from 'next/navigation'
 import { authService } from '@/lib/auth'
 import { dataRepository } from '@/lib/data'
 import { User, Invitation } from '@/lib/types'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { canManageUsers } from '@/lib/roles'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
@@ -180,7 +180,7 @@ export default function InvitationsPage() {
                 {message.text}
               </div>
             )}
-            <Button type="submit" variant="primary" disabled={isLoading} size="sm">
+            <Button type="submit" variant="default" disabled={isLoading} size="sm">
               {isLoading ? 'Wird erstellt...' : 'Einladung erstellen'}
             </Button>
           </form>

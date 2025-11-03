@@ -5,11 +5,12 @@ import { useParams, useRouter } from 'next/navigation'
 import { authService } from '@/lib/auth'
 import { dataRepository } from '@/lib/data'
 import { User, Tour, TourType, TourLength, Difficulty, TourSettings } from '@/lib/types'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
-import { Textarea } from '@/components/ui/Textarea'
-import { Select } from '@/components/ui/Select'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
 import { canEditTour } from '@/lib/roles'
 import { getDifficultyOptions } from '@/lib/difficulty'
 import Link from 'next/link'
@@ -305,7 +306,7 @@ export default function EditTourPage() {
             )}
 
             <div className="flex gap-4 pt-4">
-              <Button type="submit" variant="primary" disabled={isLoading} className="flex-1">
+              <Button type="submit" variant="default" disabled={isLoading} className="flex-1">
                 {isLoading ? 'Wird gespeichert...' : 'Tour aktualisieren'}
               </Button>
               <Link href={`/tours/${tourId}`}>

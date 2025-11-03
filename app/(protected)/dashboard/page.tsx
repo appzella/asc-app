@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react'
 import { authService } from '@/lib/auth'
 import { dataRepository } from '@/lib/data'
 import { User, Tour } from '@/lib/types'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { ChevronRight, ListChecks, Calendar, Archive, BookOpen, PlusCircle } from 'lucide-react'
 
 export default function DashboardPage() {
@@ -87,7 +87,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <Link href="/tours?status=submitted">
-              <Button variant="primary">Zur Veröffentlichung</Button>
+              <Button variant="default">Zur Veröffentlichung</Button>
             </Link>
           </CardContent>
         </Card>
