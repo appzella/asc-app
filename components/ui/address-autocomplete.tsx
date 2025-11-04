@@ -15,7 +15,7 @@ interface AddressAutocompleteProps {
   placeholder?: string
   className?: string
   disabled?: boolean
-  apiKey?: string
+  useGooglePlaces?: boolean // Flag um zu bestimmen, ob Google Places verwendet werden soll
 }
 
 export function AddressAutocomplete({
@@ -25,7 +25,7 @@ export function AddressAutocomplete({
   placeholder = 'Adresse eingeben...',
   className,
   disabled = false,
-  apiKey,
+  useGooglePlaces = false, // Standardmäßig Nominatim verwenden
 }: AddressAutocompleteProps) {
   const [inputValue, setInputValue] = React.useState(value)
   const [suggestions, setSuggestions] = React.useState<any[]>([])
@@ -52,19 +52,41 @@ export function AddressAutocomplete({
 
     try {
       // Verwende Nominatim (OpenStreetMap) als kostenlose Alternative
-      // Oder Google Places API wenn apiKey vorhanden
-      if (apiKey) {
-        // Google Places API
-        const response = await fetch(
-          `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(query)}&key=${apiKey}&components=country:ch&language=de`
-        )
-        const data = await response.json()
-        
-        if (data.predictions) {
-          setSuggestions(data.predictions)
-          setShowSuggestions(true)
+      // Oder Google Places API wenn useGooglePlaces=true (API-Key wird server-seitig verwendet)
+      let googlePlacesSuccess = false
+      
+      if (useGooglePlaces) {
+        try {
+          // Google Places API über Next.js API Route (Proxy)
+          const response = await fetch(
+            `/api/places/autocomplete?input=${encodeURIComponent(query)}`
+          )
+          
+          const data = await response.json()
+          
+          if (!response.ok) {
+            console.error('Google Places API error:', data.error || data.status)
+            // Fallback zu Nominatim bei Fehler
+            throw new Error('Google Places API failed')
+          }
+          
+          if (data.predictions && data.predictions.length > 0) {
+            setSuggestions(data.predictions)
+            setShowSuggestions(true)
+            googlePlacesSuccess = true
+          } else if (data.error_message || data.status !== 'OK') {
+            console.error('Google Places API error:', data.error_message || data.status)
+            // Fallback zu Nominatim
+            throw new Error('Google Places API returned no results')
+          }
+        } catch (googleError) {
+          // Fallback zu Nominatim wenn Google Places API fehlschlägt
+          console.warn('Falling back to Nominatim:', googleError)
+          googlePlacesSuccess = false
         }
-      } else {
+      }
+      
+      if (!googlePlacesSuccess) {
         // Nominatim (OpenStreetMap) - kostenlos
         try {
           const response = await fetch(
@@ -110,26 +132,38 @@ export function AddressAutocomplete({
   }
 
   const getAddressDetails = async (placeId: string, description?: string) => {
-    if (apiKey) {
-      // Google Places API - Details abrufen
+    if (useGooglePlaces) {
+      // Google Places API - Details abrufen über Next.js API Route (Proxy)
       try {
         const response = await fetch(
-          `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=${apiKey}&fields=address_components&language=de`
+          `/api/places/details?place_id=${encodeURIComponent(placeId)}`
         )
+        
+        if (!response.ok) {
+          throw new Error(`API error: ${response.statusText}`)
+        }
+        
         const data = await response.json()
         
         if (data.result?.address_components) {
           const components = data.result.address_components
-          const street = components.find((c: any) => c.types.includes('street_number'))?.long_name || ''
+          const streetNumber = components.find((c: any) => c.types.includes('street_number'))?.long_name || ''
           const streetName = components.find((c: any) => c.types.includes('route'))?.long_name || ''
           const zip = components.find((c: any) => c.types.includes('postal_code'))?.long_name || ''
           const city = components.find((c: any) => c.types.includes('locality'))?.long_name || ''
 
+          // Straßenname vor Hausnummer (z.B. "Bahnstrasse 2" statt "2 Bahnstrasse")
+          const street = streetName && streetNumber 
+            ? `${streetName} ${streetNumber}`.trim()
+            : streetName || streetNumber
+
           onAddressSelect?.({
-            street: `${street} ${streetName}`.trim(),
+            street: street,
             zip: zip,
             city: city,
           })
+        } else if (data.error) {
+          console.error('Google Places API error:', data.error)
         }
       } catch (error) {
         console.error('Error fetching place details:', error)
@@ -142,14 +176,14 @@ export function AddressAutocomplete({
   }
 
   const handleSuggestionClick = async (suggestion: any) => {
-    const displayText = apiKey ? suggestion.description : suggestion.display_name
+    const displayText = useGooglePlaces ? suggestion.description : suggestion.display_name
     setInputValue(displayText)
     onChange?.(displayText)
     setShowSuggestions(false)
     setSuggestions([])
 
     if (onAddressSelect) {
-      if (apiKey) {
+      if (useGooglePlaces) {
         // Google Places API - Details abrufen
         await getAddressDetails(suggestion.place_id, displayText)
       } else {
@@ -200,8 +234,8 @@ export function AddressAutocomplete({
           className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-lg max-h-60 overflow-auto"
         >
           {suggestions.map((suggestion, index) => {
-            const displayText = apiKey ? suggestion.description : suggestion.display_name
-            const key = apiKey ? suggestion.place_id : (suggestion.place_id || suggestion.osm_id || index)
+            const displayText = useGooglePlaces ? suggestion.description : suggestion.display_name
+            const key = useGooglePlaces ? suggestion.place_id : (suggestion.place_id || suggestion.osm_id || index)
             return (
               <div
                 key={key}

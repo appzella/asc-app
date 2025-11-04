@@ -708,7 +708,7 @@ export default function ProfilePage() {
                                       profileForm.setValue('city', address.city)
                                     }}
                                     placeholder="Adresse eingeben (z.B. Musterstrasse 123, 9000 St. Gallen)"
-                                    apiKey={process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY}
+                                    useGooglePlaces={!!process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY}
                                   />
                                 </FormControl>
                                 <FormMessage />
