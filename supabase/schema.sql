@@ -339,7 +339,10 @@ CREATE INDEX IF NOT EXISTS idx_invitations_email ON public.invitations(email);
 -- ============================================
 -- Function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER 
+SECURITY INVOKER
+SET search_path = public, pg_catalog
+AS $$
 BEGIN
   NEW.updated_at = NOW();
   RETURN NEW;
@@ -366,7 +369,10 @@ CREATE TRIGGER update_tour_settings_updated_at
 -- VIEWS (for easier queries)
 -- ============================================
 -- View for tours with participant count
-CREATE OR REPLACE VIEW public.tours_with_participants AS
+-- Note: Explicitly set SECURITY INVOKER using WITH (security_invoker = true)
+-- This ensures RLS policies are enforced with the querying user's permissions
+CREATE OR REPLACE VIEW public.tours_with_participants
+WITH (security_invoker = true) AS
 SELECT 
   t.id,
   t.title,
@@ -391,8 +397,14 @@ FROM public.tours t
 LEFT JOIN public.tour_participants tp ON t.id = tp.tour_id
 GROUP BY t.id;
 
+-- Grant permissions
+GRANT SELECT ON public.tours_with_participants TO authenticated;
+
 -- View for chat messages with user info
-CREATE OR REPLACE VIEW public.chat_messages_with_user AS
+-- Note: Explicitly set SECURITY INVOKER using WITH (security_invoker = true)
+-- This ensures RLS policies are enforced with the querying user's permissions
+CREATE OR REPLACE VIEW public.chat_messages_with_user
+WITH (security_invoker = true) AS
 SELECT 
   cm.*,
   u.name as user_name,
@@ -400,4 +412,7 @@ SELECT
   u.profile_photo as user_profile_photo
 FROM public.chat_messages cm
 JOIN public.users u ON cm.user_id = u.id;
+
+-- Grant permissions
+GRANT SELECT ON public.chat_messages_with_user TO authenticated;
 

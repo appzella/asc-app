@@ -2,7 +2,10 @@
 -- This function is triggered by a database trigger
 
 CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER 
+SECURITY DEFINER
+SET search_path = public, pg_catalog
+AS $$
 DECLARE
   user_role TEXT := 'member';
   user_name TEXT := '';
@@ -30,7 +33,7 @@ BEGIN
 
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql;
 
 -- Drop existing trigger if it exists
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;

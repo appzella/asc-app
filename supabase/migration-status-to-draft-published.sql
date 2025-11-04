@@ -48,6 +48,7 @@ ALTER TABLE public.tours ADD CONSTRAINT tours_status_check CHECK (status IN ('dr
 
 -- Step 5: Drop and recreate the view with explicit columns
 -- We need to DROP first because column changes require dropping the view
+-- Note: Created without SECURITY DEFINER, so it uses SECURITY INVOKER (default)
 DROP VIEW IF EXISTS public.tours_with_participants CASCADE;
 
 CREATE VIEW public.tours_with_participants AS

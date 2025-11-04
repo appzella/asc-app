@@ -3,7 +3,10 @@
 
 -- Function to auto-confirm invited users
 CREATE OR REPLACE FUNCTION public.auto_confirm_invited_user()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER 
+SECURITY DEFINER
+SET search_path = public, pg_catalog
+AS $$
 BEGIN
   -- Check if user was created via invitation (has registration_token in public.users)
   -- Note: This runs AFTER the user profile is created in public.users
@@ -22,7 +25,7 @@ BEGIN
   
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql;
 
 -- Drop existing trigger if it exists
 DROP TRIGGER IF EXISTS on_user_created_auto_confirm ON public.users;

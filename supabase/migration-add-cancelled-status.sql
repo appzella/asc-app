@@ -12,6 +12,7 @@ CREATE POLICY "Everyone can view published and cancelled tours"
   USING (status IN ('published', 'cancelled') OR auth.uid() = leader_id OR auth.uid() = created_by);
 
 -- Step 3: Recreate the view with explicit columns (including cancelled status)
+-- Note: Created without SECURITY DEFINER, so it uses SECURITY INVOKER (default)
 DROP VIEW IF EXISTS public.tours_with_participants CASCADE;
 
 CREATE VIEW public.tours_with_participants AS
