@@ -147,10 +147,11 @@ export default function DashboardPage() {
             <CardDescription>Angemeldete oder geleitete Touren</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col flex-1">
-            <div className="flex-1">
-              <div className="text-3xl font-bold text-primary-600 mb-2">{myTours.length}</div>
+            <div className="flex items-baseline gap-2 mb-4">
+              <span className="text-3xl font-bold text-primary-600">{myTours.length}</span>
+              <span className="text-sm text-muted-foreground">Touren</span>
             </div>
-            <div className="mt-auto pt-4">
+            <div className="mt-auto">
               <Link href="/tours?my=true">
                 <Button variant="outline" size="sm" className="w-full">
                   Meine Touren öffnen
@@ -169,10 +170,11 @@ export default function DashboardPage() {
             <CardDescription>Freigegebene Touren</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col flex-1">
-            <div className="flex-1">
-              <div className="text-3xl font-bold text-primary-600 mb-2">{tours.length}</div>
+            <div className="flex items-baseline gap-2 mb-4">
+              <span className="text-3xl font-bold text-primary-600">{tours.length}</span>
+              <span className="text-sm text-muted-foreground">Touren</span>
             </div>
-            <div className="mt-auto pt-4">
+            <div className="mt-auto">
               <Link href="/tours">
                 <Button variant="outline" size="sm" className="w-full">
                   Alle Touren durchsuchen
@@ -191,10 +193,11 @@ export default function DashboardPage() {
             <CardDescription>Vergangene Touren</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col flex-1">
-            <div className="flex-1">
-              <div className="text-3xl font-bold text-primary-600 mb-2">{archivedTours.length}</div>
+            <div className="flex items-baseline gap-2 mb-4">
+              <span className="text-3xl font-bold text-primary-600">{archivedTours.length}</span>
+              <span className="text-sm text-muted-foreground">Touren</span>
             </div>
-            <div className="mt-auto pt-4">
+            <div className="mt-auto">
               <Link href="/tours/archive">
                 <Button variant="outline" size="sm" className="w-full">
                   Archiv öffnen
@@ -214,8 +217,7 @@ export default function DashboardPage() {
               <CardDescription>Erstelle eine neue Tour</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col flex-1">
-              <div className="flex-1"></div>
-              <div className="mt-auto pt-4">
+              <div className="mt-auto">
                 <Link href="/tours/create">
                   <Button variant="default" size="sm" className="w-full">
                     Neue Tour
@@ -235,8 +237,7 @@ export default function DashboardPage() {
             <CardDescription>Benötigst du Hilfe bei der Nutzung der App?</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col flex-1">
-            <div className="flex-1"></div>
-            <div className="mt-auto pt-4">
+            <div className="mt-auto">
               <Link href="/help">
                 <Button variant="outline" size="sm" className="w-full">
                   Hilfe öffnen
