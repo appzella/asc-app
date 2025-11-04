@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Separator } from '@/components/ui/separator'
 import { Archive, Filter } from 'lucide-react'
 
 export default function ToursPage() {
@@ -290,7 +291,9 @@ export default function ToursPage() {
             
             {/* Ausklappbare Filter auf Mobile */}
             {showFilters && (
-              <div className="space-y-4 pt-2 border-t">
+              <div className="space-y-4">
+                <Separator />
+                <div className="space-y-4 pt-2">
                 {user.role === 'admin' && (
                   <div className="space-y-2">
                     <Label>Status</Label>
@@ -369,6 +372,8 @@ export default function ToursPage() {
                   </Select>
                 </div>
 
+                <Separator />
+
                 <div className="flex items-center space-x-3 pt-2">
                   <Switch
                     id="my-tours-mobile"
@@ -378,6 +383,7 @@ export default function ToursPage() {
                   <Label htmlFor="my-tours-mobile" className="text-sm font-medium cursor-pointer">
                     Nur meine Touren
                   </Label>
+                </div>
                 </div>
               </div>
             )}
