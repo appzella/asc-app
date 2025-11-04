@@ -134,12 +134,12 @@ export default function ProfilePage() {
     setSuccess('')
 
     if (file.size > 5 * 1024 * 1024) {
-      setError('Die Datei ist zu groß. Bitte wählen Sie eine Datei unter 5MB.')
+      setError('Die Datei ist zu groß. Bitte wähle eine Datei unter 5MB.')
       return
     }
 
     if (!file.type.startsWith('image/')) {
-      setError('Bitte wählen Sie ein Bild aus.')
+      setError('Bitte wähle ein Bild aus.')
       return
     }
 
@@ -428,7 +428,7 @@ export default function ProfilePage() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Profil</h1>
-            <p className="text-base text-gray-600">Verwalten Sie Ihre persönlichen Informationen und E-Mail-Einstellungen</p>
+            <p className="text-base text-gray-600">Verwalte deine persönlichen Informationen und E-Mail-Einstellungen</p>
           </div>
           <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2">
             <LogOut className="w-4 h-4" />
@@ -671,7 +671,7 @@ export default function ProfilePage() {
                         <div className="space-y-4">
                           <div>
                             <h3 className="text-sm font-semibold text-gray-900 mb-1">Adresse</h3>
-                            <p className="text-xs text-gray-500">Ihre Kontaktadresse</p>
+                            <p className="text-xs text-gray-500">Deine Kontaktadresse</p>
                           </div>
                           <FormField
                             control={profileForm.control}

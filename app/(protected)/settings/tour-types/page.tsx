@@ -63,7 +63,7 @@ export default function TourTypesSettingsPage() {
 
   const handleAdd = async () => {
     if (!newType.trim()) {
-      setError('Bitte geben Sie einen Tourentyp ein')
+      setError('Bitte gib einen Tourentyp ein')
       return
     }
 
@@ -225,7 +225,7 @@ export default function TourTypesSettingsPage() {
           </Button>
         </div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Tourentypen</h1>
-        <CardDescription className="text-base">Verwalten Sie die verfügbaren Tourentypen</CardDescription>
+        <CardDescription className="text-base">Verwalte die verfügbaren Tourentypen</CardDescription>
       </div>
 
       {error && (
@@ -269,7 +269,7 @@ export default function TourTypesSettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Tourentypen ({tourTypes.length})</CardTitle>
-          <CardDescription>Ziehen Sie die Einträge, um die Reihenfolge zu ändern</CardDescription>
+          <CardDescription>Ziehe die Einträge, um die Reihenfolge zu ändern</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">

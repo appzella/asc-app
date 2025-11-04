@@ -205,7 +205,7 @@ export default function ToursArchivePage() {
 
       <Alert>
         <AlertDescription>
-          Hier finden Sie alle vergangenen Touren. Das Archiv enthält automatisch alle Touren, deren Datum in der Vergangenheit liegt.
+          Hier findest du alle vergangenen Touren. Das Archiv enthält automatisch alle Touren, deren Datum in der Vergangenheit liegt.
         </AlertDescription>
       </Alert>
 
@@ -227,7 +227,7 @@ export default function ToursArchivePage() {
             <SheetHeader>
               <SheetTitle>Filter</SheetTitle>
               <SheetDescription>
-                Filtern Sie die Touren nach Ihren Wünschen
+                Filtere die Touren nach deinen Wünschen
               </SheetDescription>
             </SheetHeader>
             <div className="mt-6 space-y-6">
@@ -461,7 +461,7 @@ export default function ToursArchivePage() {
           <CardContent className="text-center py-12">
             <p className="text-gray-600 text-base">Keine vergangenen Touren gefunden.</p>
             <CardDescription className="mt-2">
-              Alle zukünftigen Touren finden Sie in der{' '}
+              Alle zukünftigen Touren findest du in der{' '}
               <Link href="/tours" className="text-primary-600 hover:text-primary-700 underline">
                 Tourenübersicht
               </Link>

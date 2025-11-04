@@ -85,9 +85,6 @@ export default function ProtectedLayout({
     router.push('/login')
   }
 
-
-
-
   // Desktop Navigation Items mit 2-Ebenen-Struktur
   const desktopNavItems = useMemo(() => {
     if (!user) return []

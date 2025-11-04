@@ -100,7 +100,7 @@ export default function UsersPage() {
           </Button>
         </div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Benutzerverwaltung</h1>
-        <CardDescription className="text-base">Verwalten Sie Benutzer und deren Rollen</CardDescription>
+        <CardDescription className="text-base">Verwalte Benutzer und deren Rollen</CardDescription>
       </div>
 
       <Card>

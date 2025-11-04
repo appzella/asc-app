@@ -67,31 +67,31 @@ export default function SettingsPage() {
   }> = [
     {
       title: 'Tourentypen',
-      description: 'Verwalten Sie die verfügbaren Tourentypen',
+      description: 'Verwalte die verfügbaren Tourentypen',
       href: '/settings/tour-types',
       iconType: 'tour-types',
     },
     {
       title: 'Tourlängen',
-      description: 'Verwalten Sie die verfügbaren Tourlängen',
+      description: 'Verwalte die verfügbaren Tourlängen',
       href: '/settings/tour-lengths',
       iconType: 'tour-lengths',
     },
     {
       title: 'Schwierigkeitsgrade',
-      description: 'Verwalten Sie die Schwierigkeitsgrade für jede Tourenart',
+      description: 'Verwalte die Schwierigkeitsgrade für jede Tourenart',
       href: '/settings/difficulties',
       iconType: 'difficulties',
     },
     {
       title: 'Benutzerverwaltung',
-      description: 'Verwalten Sie Benutzer, Rollen und Zugriffsrechte',
+      description: 'Verwalte Benutzer, Rollen und Zugriffsrechte',
       href: '/users',
       iconType: 'users',
     },
     {
       title: 'Einladungen',
-      description: 'Verwalten Sie Einladungen für neue Benutzer',
+      description: 'Verwalte Einladungen für neue Benutzer',
       href: '/invitations',
       iconType: 'invitations',
     },
@@ -101,7 +101,7 @@ export default function SettingsPage() {
     <div className="max-w-6xl mx-auto space-y-6 animate-fade-in px-4 sm:px-0">
       <div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Einstellungen</h1>
-        <CardDescription className="text-base">Verwalten Sie die Optionen für Touren</CardDescription>
+        <CardDescription className="text-base">Verwalte die Optionen für Touren</CardDescription>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

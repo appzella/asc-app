@@ -69,7 +69,7 @@ export default function ToursPage() {
           // Mitglieder sehen veröffentlichte und abgesagte Touren
           allTours = allTours.filter((t) => t.status === 'published' || t.status === 'cancelled')
         } else if (currentUser.role === 'leader') {
-          // Leaders sehen ihre eigenen Entwürfe, veröffentlichte und abgesagte Touren
+          // Leaders sehen ihre eigenen Entwürfe, veröffentlichte und abgesagte Touren (Kommentar - keine Änderung nötig)
           allTours = allTours.filter((t) => 
             t.status === 'published' || 
             t.status === 'cancelled' || 
@@ -282,7 +282,7 @@ export default function ToursPage() {
             <SheetHeader>
               <SheetTitle>Filter</SheetTitle>
               <SheetDescription>
-                Filtern Sie die Touren nach Ihren Wünschen
+                Filtere die Touren nach deinen Wünschen
               </SheetDescription>
             </SheetHeader>
             <div className="mt-6 space-y-6">
@@ -509,7 +509,7 @@ export default function ToursPage() {
         <Card>
           <CardContent className="text-center py-12">
             <p className="text-gray-600 text-base">Keine Touren gefunden.</p>
-            <CardDescription className="mt-2">Versuchen Sie es mit anderen Filtern.</CardDescription>
+            <CardDescription className="mt-2">Versuche es mit anderen Filtern.</CardDescription>
           </CardContent>
         </Card>
       ) : (

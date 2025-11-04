@@ -1,59 +1,10 @@
 import { getSupabaseAdmin } from '../supabase/client'
-import { User, Tour } from '../types'
 
 /**
  * Seed-Daten für Supabase
  * Erstellt Demo-Accounts und Beispiel-Touren
  */
 export async function seedSupabaseData() {
-  console.log('Starting Supabase seed...')
-
-  // Zuerst müssen wir User über Supabase Auth erstellen
-  // Da wir noch kein Auth haben, erstellen wir die User direkt in der users Tabelle
-  // Später wird das über Supabase Auth gemacht
-
-  // Admin User
-  const adminUser = {
-    email: 'admin@asc.ch',
-    name: 'Admin User',
-    role: 'admin',
-    registered: true,
-  }
-
-  // Leader Users
-  const leader1 = {
-    email: 'leader@asc.ch',
-    name: 'Max Mustermann',
-    role: 'leader',
-    registered: true,
-  }
-
-  const leader2 = {
-    email: 'leader2@asc.ch',
-    name: 'Anna Schmidt',
-    role: 'leader',
-    registered: true,
-  }
-
-  // Member Users
-  const member1 = {
-    email: 'member@asc.ch',
-    name: 'Peter Müller',
-    role: 'member',
-    registered: true,
-  }
-
-  const member2 = {
-    email: 'member2@asc.ch',
-    name: 'Lisa Weber',
-    role: 'member',
-    registered: true,
-  }
-
-  console.log('Note: Users müssen zuerst über Supabase Auth erstellt werden.')
-  console.log('Für jetzt werden wir nur die Tour Settings seeden.')
-  console.log('User werden später über Supabase Auth migriert.')
-
   // Seed Tour Settings
   const settings = [
     // Tour Types
@@ -101,7 +52,6 @@ export async function seedSupabaseData() {
       .limit(1)
 
     if (existingSettings && existingSettings.length > 0) {
-      console.log('Tour settings already exist, skipping seed.')
       return
     }
 
@@ -113,8 +63,6 @@ export async function seedSupabaseData() {
       console.error('Error seeding tour settings:', error)
       throw error
     }
-
-    console.log('✅ Tour settings seeded successfully!')
 
     // Seed Demo Tours (if leader users exist)
     await seedDemoTours(adminClient)
@@ -137,7 +85,6 @@ async function seedDemoTours(adminClient: ReturnType<typeof getSupabaseAdmin>) {
       .limit(1)
 
     if (existingTours && existingTours.length > 0) {
-      console.log('Tours already exist, skipping tour seed.')
       return
     }
 
@@ -149,8 +96,6 @@ async function seedDemoTours(adminClient: ReturnType<typeof getSupabaseAdmin>) {
       .limit(2)
 
     if (!leaders || leaders.length === 0) {
-      console.log('⚠️ No leader users found. Skipping tour seed.')
-      console.log('💡 Create a leader user via Supabase Auth first, then run seed again.')
       return
     }
 
@@ -196,12 +141,8 @@ async function seedDemoTours(adminClient: ReturnType<typeof getSupabaseAdmin>) {
     if (tourError) {
       console.error('Error seeding tours:', tourError)
       // Nicht werfen, da Settings bereits erfolgreich waren
-      console.log('⚠️ Tour seeding failed, but settings were seeded successfully.')
       return
     }
-
-    console.log('✅ Demo tours seeded successfully!')
-    console.log('💡 You can now test the chat by opening one of these tours.')
   } catch (error) {
     console.error('Error seeding demo tours:', error)
     // Nicht werfen, da Settings bereits erfolgreich waren

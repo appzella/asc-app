@@ -129,10 +129,10 @@ export default function DashboardPage() {
         <Alert className="border-blue-300 bg-blue-50/50">
           <AlertCircle className="h-4 w-4 text-blue-600" />
           <AlertTitle className="text-blue-800">
-            {pendingTours.length} Ihrer Tour{pendingTours.length !== 1 ? 'en' : ''} wartet{pendingTours.length === 1 ? '' : ''} auf Freigabe
+            {pendingTours.length} deiner Tour{pendingTours.length !== 1 ? 'en' : ''} wartet{pendingTours.length === 1 ? '' : ''} auf Freigabe
           </AlertTitle>
           <AlertDescription className="mt-2 text-blue-700">
-            Ein Admin wird Ihre Tour{pendingTours.length !== 1 ? 'en' : ''} in Kürze prüfen und veröffentlichen.
+            Ein Admin wird deine Tour{pendingTours.length !== 1 ? 'en' : ''} in Kürze prüfen und veröffentlichen.
           </AlertDescription>
         </Alert>
       )}
@@ -211,7 +211,7 @@ export default function DashboardPage() {
                 <PlusCircle className="w-5 h-5 text-primary-600" strokeWidth={2} />
                 <span className="text-lg">Tour erstellen</span>
               </CardTitle>
-              <CardDescription>Erstellen Sie eine neue Tour</CardDescription>
+              <CardDescription>Erstelle eine neue Tour</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col flex-1">
               <div className="flex-1"></div>
@@ -232,7 +232,7 @@ export default function DashboardPage() {
               <BookOpen className="w-5 h-5 text-primary-600" strokeWidth={2} />
               <span className="text-lg">Hilfe</span>
             </CardTitle>
-            <CardDescription>Benötigen Sie Hilfe bei der Nutzung der App?</CardDescription>
+            <CardDescription>Benötigst du Hilfe bei der Nutzung der App?</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col flex-1">
             <div className="flex-1"></div>

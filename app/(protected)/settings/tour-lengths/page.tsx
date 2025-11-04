@@ -58,7 +58,7 @@ export default function TourLengthsSettingsPage() {
 
   const handleAdd = async () => {
     if (!newLength.trim()) {
-      setError('Bitte geben Sie eine Tourlänge ein')
+      setError('Bitte gib eine Tourlänge ein')
       return
     }
 
@@ -181,7 +181,7 @@ export default function TourLengthsSettingsPage() {
           </Button>
         </div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Tourlängen</h1>
-        <CardDescription className="text-base">Verwalten Sie die verfügbaren Tourlängen</CardDescription>
+        <CardDescription className="text-base">Verwalte die verfügbaren Tourlängen</CardDescription>
       </div>
 
       {error && (
@@ -225,7 +225,7 @@ export default function TourLengthsSettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Tourlängen ({tourLengths.length})</CardTitle>
-          <CardDescription>Ziehen Sie die Einträge, um die Reihenfolge zu ändern</CardDescription>
+          <CardDescription>Ziehe die Einträge, um die Reihenfolge zu ändern</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">

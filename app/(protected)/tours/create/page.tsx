@@ -422,7 +422,7 @@ export default function CreateTourPage() {
                     <FormControl>
                       <Textarea
                         rows={4}
-                        placeholder="Beschreiben Sie die Tour..."
+                        placeholder="Beschreibe die Tour..."
                         {...field}
                       />
                     </FormControl>

@@ -98,7 +98,7 @@ export default function RegisterPage() {
         <CardHeader>
           <CardTitle className="text-2xl text-center">Registrierung</CardTitle>
           <p className="text-center text-gray-600 mt-2 text-sm">
-            Erstellen Sie Ihr Konto für {invitation?.email}
+            Erstelle dein Konto für {invitation?.email}
           </p>
         </CardHeader>
         <CardContent>
@@ -118,7 +118,7 @@ export default function RegisterPage() {
                       <FormControl>
               <Input
                 type="text"
-                placeholder="Ihr Name"
+                placeholder="Dein Name"
                           {...field}
               />
                       </FormControl>

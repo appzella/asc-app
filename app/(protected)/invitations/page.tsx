@@ -200,7 +200,7 @@ export default function InvitationsPage() {
           </Button>
         </div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Einladungen</h1>
-        <CardDescription className="text-base">Erstellen Sie Einladungen für neue Clubmitglieder</CardDescription>
+        <CardDescription className="text-base">Erstelle Einladungen für neue Clubmitglieder</CardDescription>
       </div>
 
       <Card>

@@ -76,7 +76,7 @@ export default function ForgotPasswordPage() {
               <Alert>
                 <AlertTitle>E-Mail gesendet!</AlertTitle>
                 <AlertDescription>
-                  Falls ein Konto mit dieser E-Mail-Adresse existiert, haben wir Ihnen einen Link zum Zurücksetzen des Passworts gesendet.
+                  Falls ein Konto mit dieser E-Mail-Adresse existiert, haben wir dir einen Link zum Zurücksetzen des Passworts gesendet.
                 </AlertDescription>
               </Alert>
               <Button
@@ -90,7 +90,7 @@ export default function ForgotPasswordPage() {
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <p className="text-sm text-gray-600 mb-4">
-                Geben Sie Ihre E-Mail-Adresse ein. Wir senden Ihnen einen Link zum Zurücksetzen Ihres Passworts.
+                Gib deine E-Mail-Adresse ein. Wir senden dir einen Link zum Zurücksetzen deines Passworts.
               </p>
                 <FormField
                   control={form.control}
@@ -101,7 +101,7 @@ export default function ForgotPasswordPage() {
                       <FormControl>
               <Input
                 type="email"
-                placeholder="ihre.email@example.com"
+                placeholder="deine.email@example.com"
                           {...field}
                         />
                       </FormControl>

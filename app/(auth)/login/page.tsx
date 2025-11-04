@@ -80,7 +80,7 @@ export default function LoginPage() {
                     <FormControl>
               <Input
                 type="email"
-                placeholder="ihre.email@example.com"
+                placeholder="deine.email@example.com"
                         {...field}
               />
                     </FormControl>

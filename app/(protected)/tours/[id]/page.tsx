@@ -171,7 +171,7 @@ export default function TourDetailPage() {
 
   const handleCancel = async () => {
     if (!user || !tour) return
-    if (!confirm('Möchten Sie diese Tour wirklich absagen?')) return
+    if (!confirm('Möchtest du diese Tour wirklich absagen?')) return
 
     try {
       const updatedTour = await dataRepository.cancelTour(tourId)
@@ -186,7 +186,7 @@ export default function TourDetailPage() {
 
   const handleDelete = async () => {
     if (!user || !tour) return
-    if (!confirm('Möchten Sie diese Tour wirklich löschen?')) return
+    if (!confirm('Möchtest du diese Tour wirklich löschen?')) return
 
     try {
       const success = await dataRepository.deleteTour(tourId)
@@ -445,7 +445,7 @@ export default function TourDetailPage() {
               <CardHeader>
                 <CardTitle className="text-blue-800 text-base">Tour einreichen</CardTitle>
                 <CardDescription className="text-xs">
-                  Reichen Sie diese Tour zur Veröffentlichung ein. Ein Admin wird sie prüfen und veröffentlichen.
+                  Reiche diese Tour zur Veröffentlichung ein. Ein Admin wird sie prüfen und veröffentlichen.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -556,7 +556,7 @@ export default function TourDetailPage() {
 
                 {isRegistered ? (
                   <div className="space-y-2">
-                    <p className="text-xs text-green-600 font-medium">Sie sind angemeldet</p>
+                    <p className="text-xs text-green-600 font-medium">Du bist angemeldet</p>
                     <Button variant="destructive" onClick={handleUnregister} className="w-full" size="sm">
                       Abmelden
                     </Button>
@@ -568,7 +568,7 @@ export default function TourDetailPage() {
                     ) : !canRegister ? (
                       <p className="text-xs text-gray-600 font-medium">
                         {isLeader 
-                          ? 'Sie sind der Tourenleiter' 
+                          ? 'Du bist der Tourenleiter' 
                           : isArchived 
                           ? 'Diese Tour liegt in der Vergangenheit'
                           : 'Anmeldung nicht möglich'}
@@ -625,7 +625,7 @@ export default function TourDetailPage() {
           <DialogHeader>
             <DialogTitle>Tour ablehnen</DialogTitle>
             <DialogDescription>
-              Möchten Sie diese Tour wirklich ablehnen? Sie können optional einen Kommentar hinzufügen.
+              Möchtest du diese Tour wirklich ablehnen? Du kannst optional einen Kommentar hinzufügen.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">

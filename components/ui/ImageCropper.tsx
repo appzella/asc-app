@@ -137,7 +137,7 @@ export function ImageCropper({
             Bild zuschneiden
           </h2>
           <p className="text-sm text-gray-600 mt-1">
-            Verschieben und zoomen Sie das Bild, um den gewünschten Ausschnitt
+            Verschiebe und zoome das Bild, um den gewünschten Ausschnitt
             zu wählen
           </p>
         </div>

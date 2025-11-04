@@ -16,10 +16,8 @@ export function getDataRepository(): IDataRepository {
 
   // Use Supabase if configured, otherwise fall back to mock data
   if (isSupabaseConfigured) {
-    console.log('✅ Using Supabase Data Repository')
     repositoryInstance = new SupabaseDataRepository()
   } else {
-    console.log('⚠️ Using Mock Data Repository (Supabase not configured)')
     repositoryInstance = new MockDataRepository()
   }
 

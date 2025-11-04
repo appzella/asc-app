@@ -137,17 +137,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ tourId, userId }) => {
             <>
               {messages.map((message) => {
                 const isOwnMessage = message.userId === userId
-                // Debug logging
-                if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-                  console.log('Rendering message:', {
-                    id: message.id,
-                    userId: message.userId,
-                    currentUserId: userId,
-                    isOwnMessage,
-                    messageText: message.message,
-                    hasUser: !!message.user,
-                  })
-                }
                 return (
                   <div
                     key={message.id}

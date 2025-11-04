@@ -75,12 +75,12 @@ export default function DifficultiesSettingsPage() {
 
   const handleAdd = async () => {
     if (!newDifficulty.trim()) {
-      setError('Bitte geben Sie einen Schwierigkeitsgrad ein')
+      setError('Bitte gib einen Schwierigkeitsgrad ein')
       return
     }
 
     if (!selectedTourType) {
-      setError('Bitte wählen Sie zuerst eine Tourenart')
+      setError('Bitte wähle zuerst eine Tourenart')
       return
     }
 
