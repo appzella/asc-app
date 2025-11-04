@@ -39,7 +39,7 @@ export function AddressAutocomplete({
   }, [value])
 
   // Debounce für API-Aufrufe
-  const debounceTimer = React.useRef<NodeJS.Timeout>()
+  const debounceTimer = React.useRef<NodeJS.Timeout | undefined>(undefined)
 
   const fetchSuggestions = async (query: string) => {
     if (!query || query.length < 3) {
