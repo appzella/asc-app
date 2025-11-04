@@ -11,6 +11,7 @@ import { User, TourType, TourLength, Difficulty, TourSettings, Tour } from '@/li
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { NumberInput } from '@/components/ui/number-input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -545,10 +546,11 @@ export default function CreateTourPage() {
                   <FormItem>
                     <FormLabel>Höhenmeter</FormLabel>
                     <FormControl>
-                      <Input
-                        type="number"
-                        min="0"
-                        {...field}
+                      <NumberInput
+                        min={0}
+                        value={field.value || ""}
+                        onChange={(value) => field.onChange(value.toString())}
+                        onBlur={field.onBlur}
                       />
                     </FormControl>
                     <FormMessage />
@@ -563,10 +565,11 @@ export default function CreateTourPage() {
                   <FormItem>
                     <FormLabel>Dauer (Stunden)</FormLabel>
                     <FormControl>
-                      <Input
-                        type="number"
-                        min="1"
-                        {...field}
+                      <NumberInput
+                        min={1}
+                        value={field.value || ""}
+                        onChange={(value) => field.onChange(value.toString())}
+                        onBlur={field.onBlur}
                       />
                     </FormControl>
                     <FormMessage />
@@ -581,10 +584,11 @@ export default function CreateTourPage() {
                   <FormItem>
                     <FormLabel>Max. Teilnehmer</FormLabel>
                     <FormControl>
-                      <Input
-                        type="number"
-                        min="1"
-                        {...field}
+                      <NumberInput
+                        min={1}
+                        value={field.value || ""}
+                        onChange={(value) => field.onChange(value.toString())}
+                        onBlur={field.onBlur}
                       />
                     </FormControl>
                     <FormMessage />
@@ -611,7 +615,7 @@ export default function CreateTourPage() {
                         <SelectContent>
                           {users.map((u) => (
                             <SelectItem key={u.id} value={u.id}>
-                              {u.name} ({u.role})
+                              {u.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -634,7 +638,7 @@ export default function CreateTourPage() {
                 {isLoading ? 'Wird erstellt...' : 'Tour erstellen'}
               </Button>
               <Link href="/tours" className="flex-1 sm:flex-initial">
-                <Button type="button" variant="outline" size="sm" className="w-full sm:w-auto">
+                <Button type="button" variant="outline" className="w-full sm:w-auto">
                   Abbrechen
                 </Button>
               </Link>

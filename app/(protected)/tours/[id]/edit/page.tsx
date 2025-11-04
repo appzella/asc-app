@@ -11,6 +11,7 @@ import { User, Tour, TourType, TourLength, Difficulty, TourSettings } from '@/li
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { NumberInput } from '@/components/ui/number-input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -369,7 +370,12 @@ export default function EditTourPage() {
                   <FormItem>
                     <FormLabel>Höhenmeter</FormLabel>
                     <FormControl>
-                      <Input type="number" min="0" {...field} />
+                      <NumberInput
+                        min={0}
+                        value={field.value || ""}
+                        onChange={(value) => field.onChange(value.toString())}
+                        onBlur={field.onBlur}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -383,7 +389,12 @@ export default function EditTourPage() {
                   <FormItem>
                     <FormLabel>Dauer (Stunden)</FormLabel>
                     <FormControl>
-                      <Input type="number" min="1" {...field} />
+                      <NumberInput
+                        min={1}
+                        value={field.value || ""}
+                        onChange={(value) => field.onChange(value.toString())}
+                        onBlur={field.onBlur}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -397,7 +408,12 @@ export default function EditTourPage() {
                   <FormItem>
                     <FormLabel>Max. Teilnehmer</FormLabel>
                     <FormControl>
-                      <Input type="number" min="1" {...field} />
+                      <NumberInput
+                        min={1}
+                        value={field.value || ""}
+                        onChange={(value) => field.onChange(value.toString())}
+                        onBlur={field.onBlur}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -423,7 +439,7 @@ export default function EditTourPage() {
                         <SelectContent>
                           {users.map((u) => (
                             <SelectItem key={u.id} value={u.id}>
-                              {u.name} ({u.role})
+                              {u.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
