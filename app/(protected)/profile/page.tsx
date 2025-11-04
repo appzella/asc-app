@@ -28,6 +28,7 @@ import { ImageCropper } from '@/components/ui/ImageCropper'
 import { UserCircle, Lock, LogOut, Upload, X, Camera, ImageIcon, Trash2 } from 'lucide-react'
 import PhoneInput from 'react-phone-number-input'
 import 'react-phone-number-input/style.css'
+import { AddressAutocomplete } from '@/components/ui/address-autocomplete'
 
 const profileSchema = z.object({
   name: z.string().min(1, 'Name ist erforderlich'),
@@ -635,7 +636,15 @@ export default function ProfilePage() {
                                     international
                                     defaultCountry="CH"
                                     value={field.value}
-                                    onChange={field.onChange}
+                                    onChange={(value) => {
+                                      // Wenn der Wert nur aus dem Ländercode besteht (z.B. "+670" oder "+41"), setze undefined
+                                      // Ländercodes sind normalerweise 1-3 Ziffern nach dem "+"
+                                      if (value && /^\+[0-9]{1,3}$/.test(value)) {
+                                        field.onChange(undefined)
+                                      } else {
+                                        field.onChange(value || undefined)
+                                      }
+                                    }}
                                     placeholder="+41 XX XXX XX XX"
                                     className="w-full"
                                   />
@@ -656,7 +665,15 @@ export default function ProfilePage() {
                                     international
                                     defaultCountry="CH"
                                     value={field.value}
-                                    onChange={field.onChange}
+                                    onChange={(value) => {
+                                      // Wenn der Wert nur aus dem Ländercode besteht (z.B. "+670" oder "+41"), setze undefined
+                                      // Ländercodes sind normalerweise 1-3 Ziffern nach dem "+"
+                                      if (value && /^\+[0-9]{1,3}$/.test(value)) {
+                                        field.onChange(undefined)
+                                      } else {
+                                        field.onChange(value || undefined)
+                                      }
+                                    }}
                                     placeholder="+41 XX XXX XX XX"
                                     className="w-full"
                                   />
@@ -678,42 +695,58 @@ export default function ProfilePage() {
                             name="street"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Strasse</FormLabel>
+                                <FormLabel>Adresse</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="Musterstrasse 123" {...field} />
+                                  <AddressAutocomplete
+                                    value={profileForm.watch('street') || ''}
+                                    onChange={(value) => {
+                                      field.onChange(value)
+                                    }}
+                                    onAddressSelect={(address) => {
+                                      profileForm.setValue('street', address.street)
+                                      profileForm.setValue('zip', address.zip)
+                                      profileForm.setValue('city', address.city)
+                                    }}
+                                    placeholder="Adresse eingeben (z.B. Musterstrasse 123, 9000 St. Gallen)"
+                                    apiKey={process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY}
+                                  />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
                             )}
                           />
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <FormField
-                              control={profileForm.control}
-                              name="zip"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>PLZ</FormLabel>
-                                  <FormControl>
-                                    <Input placeholder="9000" {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
+                          <div className="flex flex-col md:flex-row gap-4">
+                            <div className="w-full md:w-1/4">
+                              <FormField
+                                control={profileForm.control}
+                                name="zip"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>PLZ</FormLabel>
+                                    <FormControl>
+                                      <Input placeholder="9000" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
 
-                            <FormField
-                              control={profileForm.control}
-                              name="city"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Ort</FormLabel>
-                                  <FormControl>
-                                    <Input placeholder="St. Gallen" {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
+                            <div className="w-full md:flex-1">
+                              <FormField
+                                control={profileForm.control}
+                                name="city"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Ort</FormLabel>
+                                    <FormControl>
+                                      <Input placeholder="St. Gallen" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
                           </div>
                         </div>
 
