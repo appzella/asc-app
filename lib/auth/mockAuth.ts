@@ -39,6 +39,18 @@ class MockAuthService {
     }
   }
 
+  /**
+   * Refresh the current user from the database
+   * This is useful after profile updates to sync the user state across components
+   */
+  async refreshCurrentUser(): Promise<void> {
+    // In mock mode, the user is already in sync with the dataStore
+    const currentUser = this.getCurrentUser()
+    if (currentUser) {
+      this.notifyListeners(currentUser)
+    }
+  }
+
   private notifyListeners(user: User | null): void {
     this.listeners.forEach((listener) => listener(user))
   }

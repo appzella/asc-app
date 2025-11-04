@@ -41,6 +41,10 @@ class AuthService {
     return this.authImpl.subscribe(listener)
   }
 
+  async refreshCurrentUser(): Promise<void> {
+    return this.authImpl.refreshCurrentUser()
+  }
+
   async register(email: string, password: string, name: string, token?: string): Promise<User | null> {
     return this.authImpl.register(email, password, name, token)
   }

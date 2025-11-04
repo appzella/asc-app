@@ -85,22 +85,34 @@ export default function ProfilePage() {
   })
 
   useEffect(() => {
-    const currentUser = authService.getCurrentUser()
-    setUser(currentUser)
+    let isMounted = true
 
-    if (currentUser) {
-      profileForm.reset({
-        name: currentUser.name,
-        email: currentUser.email,
-        phone: currentUser.phone || '',
-        mobile: currentUser.mobile || '',
-        street: currentUser.street || '',
-        zip: currentUser.zip || '',
-        city: currentUser.city || '',
-      })
+    const initializeProfile = async () => {
+      // Use async method to get the most recent user data
+      const currentUser = await authService.getCurrentUserAsync()
+      
+      if (!isMounted) return
+      
+      setUser(currentUser)
+
+      if (currentUser) {
+        profileForm.reset({
+          name: currentUser.name,
+          email: currentUser.email,
+          phone: currentUser.phone || '',
+          mobile: currentUser.mobile || '',
+          street: currentUser.street || '',
+          zip: currentUser.zip || '',
+          city: currentUser.city || '',
+        })
+      }
     }
 
+    initializeProfile()
+
     const unsubscribe = authService.subscribe((updatedUser) => {
+      if (!isMounted) return
+      
       setUser(updatedUser)
       if (updatedUser) {
         // Nur resetten wenn sich die Werte wirklich geändert haben und Form nicht gerade bearbeitet wird
@@ -120,6 +132,7 @@ export default function ProfilePage() {
     })
 
     return () => {
+      isMounted = false
       unsubscribe()
     }
     // eslint-disable-next-line react-hook-form/exhaustive-deps
@@ -227,6 +240,8 @@ export default function ProfilePage() {
         
         if (updatedUser) {
           setUser(updatedUser)
+          // Refresh authService to update navbar and other components
+          await authService.refreshCurrentUser()
           toast.success('Profilfoto erfolgreich aktualisiert!')
         }
       } else {
@@ -239,6 +254,8 @@ export default function ProfilePage() {
           })
           if (updatedUser) {
             setUser(updatedUser)
+            // Refresh authService to update navbar and other components
+            await authService.refreshCurrentUser()
             toast.success('Profilfoto erfolgreich aktualisiert!')
           }
         }
@@ -277,6 +294,8 @@ export default function ProfilePage() {
 
       if (updatedUser) {
         setUser(updatedUser)
+        // Refresh authService to update navbar and other components
+        await authService.refreshCurrentUser()
         toast.success('Profil erfolgreich aktualisiert!')
       }
     } catch (err) {
@@ -311,6 +330,8 @@ export default function ProfilePage() {
 
       if (updatedUser) {
         setUser(updatedUser)
+        // Refresh authService to update navbar and other components
+        await authService.refreshCurrentUser()
         toast.success('Profilfoto entfernt!')
       }
     } catch (err) {
@@ -509,6 +530,7 @@ export default function ProfilePage() {
                               src={user.profilePhoto || undefined}
                               alt={user.name}
                               className="object-cover"
+                              key={user.profilePhoto || user.id}
                             />
                             <AvatarFallback>
                               {user.name.charAt(0).toUpperCase()}

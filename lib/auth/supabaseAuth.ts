@@ -455,6 +455,26 @@ class SupabaseAuthService {
     }
   }
 
+  /**
+   * Refresh the current user from the database
+   * This is useful after profile updates to sync the user state across components
+   */
+  async refreshCurrentUser(): Promise<void> {
+    if (!this.currentUser) return
+
+    try {
+      // Force reload by temporarily clearing the current user
+      // This ensures we get fresh data from the database
+      const userId = this.currentUser.id
+      this.currentUser = null
+      
+      // Now load the user fresh from the database
+      await this.loadUserProfile(userId)
+    } catch (error) {
+      console.error('Error refreshing current user:', error)
+    }
+  }
+
   private notifyListeners(user: User | null): void {
     this.listeners.forEach((listener) => listener(user))
   }

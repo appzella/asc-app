@@ -273,6 +273,7 @@ export default function ProtectedLayout({
                         src={user.profilePhoto || undefined}
                         alt={user.name}
                         className="object-cover"
+                        key={user.profilePhoto || user.id}
                       />
                       <AvatarFallback>
                         {user.name.charAt(0).toUpperCase()}
