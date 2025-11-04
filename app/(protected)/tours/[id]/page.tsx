@@ -271,7 +271,7 @@ export default function TourDetailPage() {
     return (
       <Card>
         <CardContent className="text-center py-12">
-          <p className="text-gray-600 text-base">Tour nicht gefunden</p>
+          <p className="text-muted-foreground text-base">Tour nicht gefunden</p>
         </CardContent>
       </Card>
     )
@@ -321,9 +321,9 @@ export default function TourDetailPage() {
           <div className="flex items-center gap-2">
             {(() => {
               const IconComponent = getTourIcon(tour.tourType, settings?.tourTypeIcons)
-              return <IconComponent className="w-6 h-6 text-gray-900 flex-shrink-0" strokeWidth={2} />
+              return <IconComponent className="w-6 h-6 text-foreground flex-shrink-0" strokeWidth={2} />
             })()}
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{tour.title}</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{tour.title}</h1>
           </div>
         </div>
         {canEdit && (
@@ -342,12 +342,12 @@ export default function TourDetailPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h3 className="font-semibold text-gray-900 mb-2 text-sm">Beschreibung</h3>
-                <p className="text-gray-600 whitespace-pre-wrap text-sm leading-relaxed">{tour.description}</p>
+                <h3 className="font-semibold text-foreground mb-2 text-sm">Beschreibung</h3>
+                <p className="text-muted-foreground whitespace-pre-wrap text-sm leading-relaxed">{tour.description}</p>
               </div>
 
               <Separator />
-              <div className="grid grid-cols-2 gap-3 text-sm text-gray-600">
+              <div className="grid grid-cols-2 gap-3 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-primary-600 flex-shrink-0" strokeWidth={2} />
                   <span className="text-xs">{formatDate(tour.date)}</span>
@@ -404,7 +404,7 @@ export default function TourDetailPage() {
                 <>
                   <Separator />
                   <div>
-                    <span className="text-xs font-medium text-gray-600 block mb-2">Tourenleiter:</span>
+                    <span className="text-xs font-medium text-muted-foreground block mb-2">Tourenleiter:</span>
                     <div className="flex items-center gap-2">
                       <Avatar className="w-8 h-8 flex-shrink-0">
                         <AvatarImage
@@ -416,7 +416,7 @@ export default function TourDetailPage() {
                           {tour.leader.name.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <p className="text-gray-900 text-sm font-medium">{tour.leader.name}</p>
+                      <p className="text-foreground text-sm font-medium">{tour.leader.name}</p>
                     </div>
                   </div>
                 </>
@@ -477,16 +477,16 @@ export default function TourDetailPage() {
 
           {/* Admin Actions - Tour im Entwurf (nicht eingereicht) */}
           {canPublish && tour.status === 'draft' && !tour.submittedForPublishing && (
-            <Card className="border-gray-300 bg-gray-50/50">
+            <Card className="border-border bg-muted/50">
               <CardHeader>
-                <CardTitle className="text-gray-800 text-base">Admin-Aktionen</CardTitle>
+                <CardTitle className="text-foreground text-base">Admin-Aktionen</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 <Button variant="default" onClick={handleApprove} className="w-full" size="sm" disabled={isArchived}>
                   Tour veröffentlichen
                 </Button>
                 {isArchived && (
-                  <p className="text-xs text-gray-600 mt-2">
+                  <p className="text-xs text-muted-foreground mt-2">
                     Archivierte Touren können nicht mehr veröffentlicht werden.
                   </p>
                 )}
@@ -495,9 +495,9 @@ export default function TourDetailPage() {
           )}
 
           {canPublish && tour.status === 'published' && (
-            <Card className="border-gray-300 bg-gray-50/50">
+            <Card className="border-border bg-muted/50">
               <CardHeader>
-                <CardTitle className="text-gray-800 text-base">Verwaltung</CardTitle>
+                <CardTitle className="text-foreground text-base">Verwaltung</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 {!isArchived && (
@@ -548,7 +548,7 @@ export default function TourDetailPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <p className="text-xs text-gray-600 mb-2">
+                  <p className="text-xs text-muted-foreground mb-2">
                     {tour.participants.length} von {tour.maxParticipants} Plätzen belegt
                   </p>
                   <Progress value={(tour.participants.length / tour.maxParticipants) * 100} className="h-2" />
@@ -566,7 +566,7 @@ export default function TourDetailPage() {
                     {isFull ? (
                       <p className="text-xs text-red-600 font-medium">Tour ist ausgebucht</p>
                     ) : !canRegister ? (
-                      <p className="text-xs text-gray-600 font-medium">
+                      <p className="text-xs text-muted-foreground font-medium">
                         {isLeader 
                           ? 'Du bist der Tourenleiter' 
                           : isArchived 
@@ -609,7 +609,7 @@ export default function TourDetailPage() {
                           {participant.name.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-sm font-medium text-gray-900">{participant.name}</span>
+                      <span className="text-sm font-medium text-foreground">{participant.name}</span>
                     </li>
                   ))}
                 </ul>

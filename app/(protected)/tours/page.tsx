@@ -249,7 +249,7 @@ export default function ToursPage() {
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-4">
-          <h1 className="text-3xl font-bold text-gray-900">Touren</h1>
+          <h1 className="text-3xl font-bold text-foreground">Touren</h1>
           <Link href="/tours/archive">
             <Button variant="outline" size="sm" className="flex items-center gap-2">
               <Archive className="w-4 h-4" strokeWidth={2} />
@@ -508,7 +508,7 @@ export default function ToursPage() {
       {filteredTours.length === 0 ? (
         <Card>
           <CardContent className="text-center py-12">
-            <p className="text-gray-600 text-base">Keine Touren gefunden.</p>
+            <p className="text-muted-foreground text-base">Keine Touren gefunden.</p>
             <CardDescription className="mt-2">Versuche es mit anderen Filtern.</CardDescription>
           </CardContent>
         </Card>

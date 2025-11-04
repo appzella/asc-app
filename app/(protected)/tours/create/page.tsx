@@ -238,7 +238,7 @@ export default function CreateTourPage() {
   if (!user) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-gray-600">Lädt...</div>
+        <div className="text-muted-foreground">Lädt...</div>
       </div>
     )
   }
@@ -259,7 +259,7 @@ export default function CreateTourPage() {
             </Link>
           </Button>
         </div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Neue Tour erstellen</h1>
+        <h1 className="text-3xl font-bold text-foreground mb-2">Neue Tour erstellen</h1>
       </div>
 
       <Card className="relative" style={{ overflow: 'visible', zIndex: 200 }}>
@@ -309,7 +309,7 @@ export default function CreateTourPage() {
           {creationMode === 'duplicate' && (
             <div className="space-y-3">
               <div className="w-full flex flex-col relative" style={{ zIndex: 300 }}>
-                <label className="block text-sm font-medium text-gray-900 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Tour suchen
                 </label>
                 <input
@@ -326,7 +326,7 @@ export default function CreateTourPage() {
                     setTimeout(() => setShowResults(false), 200)
                   }}
                   placeholder="Titel der Tour eingeben..."
-                  className="w-full px-4 py-2.5 border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 border-gray-300 hover:border-gray-400 min-h-[44px]"
+                  className="w-full px-4 py-2.5 border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 border-border hover:border-border min-h-[44px]"
                 />
               </div>
               {selectedTourId && (
@@ -342,7 +342,7 @@ export default function CreateTourPage() {
       {/* Trefferliste außerhalb der Cards mit fixed positioning */}
       {showResults && searchQuery && resultsPosition && (
         <div
-          className="fixed bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto z-[9999]"
+          className="fixed bg-background border border-border rounded-md shadow-lg max-h-60 overflow-y-auto z-[9999]"
           style={{
             top: `${resultsPosition.top}px`,
             left: `${resultsPosition.left}px`,
@@ -366,15 +366,15 @@ export default function CreateTourPage() {
                   setShowResults(false)
                   handleDuplicateTour(tour.id)
                 }}
-                className="w-full text-left px-4 py-3 hover:bg-primary-50 transition-colors border-b border-gray-200 last:border-b-0 focus:outline-none focus:bg-primary-50 flex items-center gap-3 touch-target"
+                className="w-full text-left px-4 py-3 hover:bg-primary-50 transition-colors border-b border-border last:border-b-0 focus:outline-none focus:bg-primary-50 flex items-center gap-3 touch-target"
               >
                 {(() => {
                   const IconComponent = getTourIcon(tour.tourType, settings.tourTypeIcons)
-                  return <IconComponent className="w-4 h-4 text-gray-600 flex-shrink-0" strokeWidth={2} />
+                  return <IconComponent className="w-4 h-4 text-muted-foreground flex-shrink-0" strokeWidth={2} />
                 })()}
                 <div className="flex-1 min-w-0">
-                  <div className="font-medium text-gray-900 text-sm">{tour.title}</div>
-                  <div className="text-xs text-gray-600">
+                  <div className="font-medium text-foreground text-sm">{tour.title}</div>
+                  <div className="text-xs text-muted-foreground">
                     {new Date(tour.date).toLocaleDateString('de-CH')} · {tour.tourType}
                   </div>
                 </div>
@@ -383,7 +383,7 @@ export default function CreateTourPage() {
           {tours.filter((tour) => 
             tour.title.toLowerCase().includes(searchQuery.toLowerCase())
           ).length === 0 && (
-            <div className="px-4 py-3 text-sm text-gray-500 text-center">
+            <div className="px-4 py-3 text-sm text-muted-foreground text-center">
               Keine Touren gefunden, die "{searchQuery}" enthalten.
             </div>
           )}
@@ -432,7 +432,7 @@ export default function CreateTourPage() {
                 )}
               />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-gray-200">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-border">
               <FormField
                 control={form.control}
                 name="date"

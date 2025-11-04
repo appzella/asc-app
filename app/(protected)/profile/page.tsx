@@ -427,8 +427,8 @@ export default function ProfilePage() {
       <div className="max-w-7xl mx-auto space-y-6 animate-fade-in">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Profil</h1>
-            <p className="text-base text-gray-600">Verwalte deine persönlichen Informationen und E-Mail-Einstellungen</p>
+            <h1 className="text-3xl font-bold text-foreground mb-2">Profil</h1>
+            <p className="text-base text-muted-foreground">Verwalte deine persönlichen Informationen und E-Mail-Einstellungen</p>
           </div>
           <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2">
             <LogOut className="w-4 h-4" />
@@ -448,7 +448,7 @@ export default function ProfilePage() {
                       "w-full flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors",
                       activeTab === 'profile'
                         ? "bg-primary-50 text-primary-600"
-                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
                     )}
                   >
                     <UserCircle className="w-4 h-4" />
@@ -460,7 +460,7 @@ export default function ProfilePage() {
                       "w-full flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors",
                       activeTab === 'password'
                         ? "bg-primary-50 text-primary-600"
-                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
                     )}
                   >
                     <Lock className="w-4 h-4" />
@@ -473,14 +473,14 @@ export default function ProfilePage() {
 
           {/* Mobile Navigation */}
           <div className="lg:hidden">
-            <div className="grid grid-cols-2 gap-2 p-1 bg-gray-100 rounded-lg">
+            <div className="grid grid-cols-2 gap-2 p-1 bg-muted rounded-lg">
               <button
                 onClick={() => setActiveTab('profile')}
                 className={cn(
                   "flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors",
                   activeTab === 'profile'
-                    ? "bg-white text-primary-600 shadow-sm"
-                    : "text-gray-600"
+                    ? "bg-background text-primary-600 shadow-sm"
+                    : "text-muted-foreground"
                 )}
               >
                 <UserCircle className="w-4 h-4" />
@@ -491,8 +491,8 @@ export default function ProfilePage() {
                 className={cn(
                   "flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors",
                   activeTab === 'password'
-                    ? "bg-white text-primary-600 shadow-sm"
-                    : "text-gray-600"
+                    ? "bg-background text-primary-600 shadow-sm"
+                    : "text-muted-foreground"
                 )}
               >
                 <Lock className="w-4 h-4" />
@@ -572,7 +572,7 @@ export default function ProfilePage() {
                           onDrop={handleDrop}
                           className="fixed inset-0 z-50 bg-primary-50/95 backdrop-blur-sm flex items-center justify-center"
                         >
-                          <div className="flex flex-col items-center gap-4 p-8 rounded-lg border-2 border-dashed border-primary-500 bg-white shadow-xl">
+                          <div className="flex flex-col items-center gap-4 p-8 rounded-lg border-2 border-dashed border-primary-500 bg-background shadow-xl">
                             <Upload className="w-12 h-12 text-primary-600 animate-bounce" />
                             <p className="text-lg font-medium text-primary-600">Loslassen zum Hochladen</p>
                           </div>
@@ -582,13 +582,13 @@ export default function ProfilePage() {
                       {/* Upload Progress */}
                       {uploadProgress > 0 && uploadProgress < 100 && (
                         <div className="w-full">
-                          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                          <div className="h-2 bg-muted rounded-full overflow-hidden">
                             <div
                               className="h-full bg-primary-600 transition-all duration-300"
                               style={{ width: `${uploadProgress}%` }}
                             />
                           </div>
-                          <p className="text-xs text-gray-500 text-center mt-1">
+                          <p className="text-xs text-muted-foreground text-center mt-1">
                             {uploadProgress}% hochgeladen
                           </p>
                         </div>
@@ -615,7 +615,7 @@ export default function ProfilePage() {
                               <FormItem>
                                 <FormLabel>E-Mail</FormLabel>
                                 <FormControl>
-                                  <Input type="email" disabled className="bg-gray-50" {...field} />
+                                  <Input type="email" disabled className="bg-muted" {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -670,8 +670,8 @@ export default function ProfilePage() {
                         <Separator />
                         <div className="space-y-4">
                           <div>
-                            <h3 className="text-sm font-semibold text-gray-900 mb-1">Adresse</h3>
-                            <p className="text-xs text-gray-500">Deine Kontaktadresse</p>
+                            <h3 className="text-sm font-semibold text-foreground mb-1">Adresse</h3>
+                            <p className="text-xs text-muted-foreground">Deine Kontaktadresse</p>
                           </div>
                           <FormField
                             control={profileForm.control}

@@ -132,7 +132,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ tourId, userId }) => {
               ))}
             </div>
           ) : messages.length === 0 ? (
-            <p className="text-center text-gray-500 text-sm py-8">Noch keine Nachrichten</p>
+            <p className="text-center text-muted-foreground text-sm py-8">Noch keine Nachrichten</p>
           ) : (
             <>
               {messages.map((message) => {
@@ -157,12 +157,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ tourId, userId }) => {
                     <div
                       className={`max-w-[75%] sm:max-w-xs lg:max-w-md px-4 py-2 rounded-lg break-words ${
                         isOwnMessage
-                          ? 'bg-primary-600'
-                          : 'bg-gray-200'
+                          ? 'bg-primary-600 text-white'
+                          : 'bg-muted text-foreground'
                       }`}
-                      style={{
-                        color: isOwnMessage ? '#ffffff' : '#111827',
-                      }}
                     >
                       {message.user && !isOwnMessage && (
                         <p className="text-xs font-semibold mb-1 text-primary-600">

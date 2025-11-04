@@ -99,7 +99,7 @@ export default function UsersPage() {
             </Link>
           </Button>
         </div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Benutzerverwaltung</h1>
+        <h1 className="text-3xl font-bold text-foreground mb-2">Benutzerverwaltung</h1>
         <CardDescription className="text-base">Verwalte Benutzer und deren Rollen</CardDescription>
       </div>
 
@@ -109,7 +109,7 @@ export default function UsersPage() {
         </CardHeader>
         <CardContent>
           {users.length === 0 ? (
-            <p className="text-gray-500 text-center py-8 text-sm">Keine Benutzer vorhanden</p>
+            <p className="text-muted-foreground text-center py-8 text-sm">Keine Benutzer vorhanden</p>
           ) : (
             <div className="overflow-x-auto">
               <Table>
@@ -163,7 +163,7 @@ export default function UsersPage() {
                           </Badge>
                         )}
                       </TableCell>
-                      <TableCell className="text-gray-600">
+                      <TableCell className="text-muted-foreground">
                         {new Date(u.createdAt).toLocaleDateString('de-CH')}
                       </TableCell>
                     </TableRow>

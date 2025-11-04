@@ -63,14 +63,14 @@ export const TourCard: React.FC<TourCardProps> = ({ tour, tourTypeIcons, userRol
             <div className="flex items-center gap-2 flex-1 min-w-0">
               {(() => {
                 const IconComponent = getTourIcon(tour.tourType, tourTypeIcons)
-                return <IconComponent className="w-4 h-4 text-gray-900 flex-shrink-0" strokeWidth={2} />
+                return <IconComponent className="w-4 h-4 text-foreground flex-shrink-0" strokeWidth={2} />
               })()}
-              <h3 className="text-lg font-semibold text-gray-900 truncate">{tour.title}</h3>
+              <h3 className="text-lg font-semibold text-foreground truncate">{tour.title}</h3>
             </div>
             {getStatusBadge()}
           </div>
           
-          <p className="text-gray-600 mb-3 line-clamp-2 text-sm">{tour.description}</p>
+          <p className="text-muted-foreground mb-3 line-clamp-2 text-sm">{tour.description}</p>
           
           <Separator className="mb-3" />
           
@@ -79,7 +79,7 @@ export const TourCard: React.FC<TourCardProps> = ({ tour, tourTypeIcons, userRol
             <Badge variant="outline">{tour.tourLength}</Badge>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 text-sm text-gray-600 mb-3">
+          <div className="grid grid-cols-2 gap-3 text-sm text-muted-foreground mb-3">
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-primary-600 flex-shrink-0" strokeWidth={2} />
               <span className="text-xs">{formatDate(tour.date)}</span>
@@ -105,7 +105,7 @@ export const TourCard: React.FC<TourCardProps> = ({ tour, tourTypeIcons, userRol
           <div className="flex-1"></div>
 
           {tour.leader && (
-            <div className="flex items-center justify-end gap-2 text-sm text-gray-600">
+            <div className="flex items-center justify-end gap-2 text-sm text-muted-foreground">
               {tour.leader.profilePhoto ? (
                 <Image
                   src={tour.leader.profilePhoto}
@@ -113,10 +113,10 @@ export const TourCard: React.FC<TourCardProps> = ({ tour, tourTypeIcons, userRol
                   width={20}
                   height={20}
                   unoptimized
-                  className="w-5 h-5 rounded-full object-cover border border-gray-300 flex-shrink-0"
+                  className="w-5 h-5 rounded-full object-cover border border-border flex-shrink-0"
                 />
               ) : (
-                <div className="w-5 h-5 rounded-full bg-primary-100 flex items-center justify-center border border-gray-300 flex-shrink-0">
+                <div className="w-5 h-5 rounded-full bg-primary-100 flex items-center justify-center border border-border flex-shrink-0">
                   <span className="text-[10px] font-semibold text-primary-600">
                     {tour.leader.name.charAt(0).toUpperCase()}
                   </span>

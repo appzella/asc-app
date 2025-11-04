@@ -60,12 +60,12 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-12">
       <Card className="w-full max-w-md animate-scale-in">
         <CardHeader>
           <div className="text-center">
             <h1 className="text-2xl font-bold gradient-text mb-2">ASC Skitouren App</h1>
-            <p className="text-gray-600 text-sm">Anmelden</p>
+            <p className="text-muted-foreground text-sm">Anmelden</p>
           </div>
         </CardHeader>
         <CardContent>

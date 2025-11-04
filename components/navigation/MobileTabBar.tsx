@@ -42,7 +42,7 @@ export function MobileTabBar() {
       aria-label="Mobile Tab Bar"
     >
       <div className="w-full">
-        <div className="bg-white rounded-t-lg border-t border-gray-200 shadow-lg">
+        <div className="bg-background rounded-t-lg border-t border-border shadow-lg">
           <ul className="grid grid-cols-3">
             {tabs.map((tab) => {
               const active = isActive(tab.href)
@@ -65,13 +65,13 @@ export function MobileTabBar() {
                     <IconComponent
                         className={cn(
                           "w-5 h-5",
-                          active ? "text-primary-600" : "text-gray-500"
+                          active ? "text-primary-600" : "text-muted-foreground"
                         )}
                       strokeWidth={2}
                     />
                       <span className={cn(
                         "text-xs font-medium",
-                        active ? "text-primary-600" : "text-gray-600"
+                        active ? "text-primary-600" : "text-muted-foreground"
                       )}>
                       {tab.label}
                     </span>

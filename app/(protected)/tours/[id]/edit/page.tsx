@@ -207,7 +207,7 @@ export default function EditTourPage() {
             </Link>
           </Button>
         </div>
-        <h1 className="text-3xl font-bold text-gray-900">Tour bearbeiten</h1>
+        <h1 className="text-3xl font-bold text-foreground">Tour bearbeiten</h1>
       </div>
 
       {hasPendingChanges && (

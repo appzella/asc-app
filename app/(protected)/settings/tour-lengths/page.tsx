@@ -180,7 +180,7 @@ export default function TourLengthsSettingsPage() {
             </Link>
           </Button>
         </div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Tourlängen</h1>
+        <h1 className="text-3xl font-bold text-foreground mb-2">Tourlängen</h1>
         <CardDescription className="text-base">Verwalte die verfügbaren Tourlängen</CardDescription>
       </div>
 
@@ -230,7 +230,7 @@ export default function TourLengthsSettingsPage() {
         <CardContent>
           <div className="space-y-2">
             {tourLengths.length === 0 ? (
-              <p className="text-gray-500 text-sm text-center py-4">Keine Tourlängen vorhanden</p>
+              <p className="text-muted-foreground text-sm text-center py-4">Keine Tourlängen vorhanden</p>
             ) : (
               tourLengths.map((length, index) => {
                 const isDragOver = dragOverIndex === index
@@ -252,11 +252,11 @@ export default function TourLengthsSettingsPage() {
                       onDragOver={(e) => handleDragOver(e, index)}
                       onDragLeave={handleDragLeave}
                       onDrop={(e) => handleDrop(e, index)}
-                      className="flex items-center justify-between p-3 bg-gray-50 rounded-md border border-gray-200 cursor-move hover:bg-gray-100 transition-all group relative"
+                      className="flex items-center justify-between p-3 bg-muted rounded-md border border-border cursor-move hover:bg-muted transition-all group relative"
                     >
                   <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <span className="text-gray-400 group-hover:text-gray-600 flex-shrink-0 text-sm">☰</span>
-                    <span className="font-medium text-gray-900 truncate text-sm">{length}</span>
+                    <span className="text-muted-foreground group-hover:text-muted-foreground flex-shrink-0 text-sm">☰</span>
+                    <span className="font-medium text-foreground truncate text-sm">{length}</span>
                   </div>
                   <Button
                     type="button"

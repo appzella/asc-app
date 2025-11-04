@@ -199,7 +199,7 @@ export default function InvitationsPage() {
             </Link>
           </Button>
         </div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Einladungen</h1>
+        <h1 className="text-3xl font-bold text-foreground mb-2">Einladungen</h1>
         <CardDescription className="text-base">Erstelle Einladungen für neue Clubmitglieder</CardDescription>
       </div>
 
@@ -246,7 +246,7 @@ export default function InvitationsPage() {
         </CardHeader>
         <CardContent>
           {invitations.length === 0 ? (
-            <p className="text-gray-500 text-center py-8 text-sm">Noch keine Einladungen erstellt</p>
+            <p className="text-muted-foreground text-center py-8 text-sm">Noch keine Einladungen erstellt</p>
           ) : (
             <div className="overflow-x-auto">
               <Table>
@@ -271,7 +271,7 @@ export default function InvitationsPage() {
                             <Badge variant="secondary">Ausstehend</Badge>
                           )}
                         </TableCell>
-                        <TableCell className="text-gray-600">
+                        <TableCell className="text-muted-foreground">
                           {new Date(invitation.createdAt).toLocaleDateString('de-CH')}
                         </TableCell>
                         <TableCell>
@@ -293,7 +293,7 @@ export default function InvitationsPage() {
                               </Button>
                             </div>
                           ) : (
-                            <span className="text-sm text-gray-500">-</span>
+                            <span className="text-sm text-muted-foreground">-</span>
                           )}
                         </TableCell>
                       </TableRow>

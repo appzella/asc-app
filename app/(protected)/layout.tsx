@@ -126,8 +126,8 @@ export default function ProtectedLayout({
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      <nav className="bg-white/95 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-200 flex-shrink-0 shadow-sm">
+    <div className="min-h-screen bg-background flex flex-col">
+      <nav className="bg-background/95 backdrop-blur-sm sticky top-0 z-50 border-b border-border flex-shrink-0 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20 relative">
             {/* Links: Logo/ Zurück-Button */}
@@ -172,7 +172,7 @@ export default function ProtectedLayout({
                             className={`inline-flex items-center gap-1 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
                               isParentActive
                                 ? 'bg-primary-50 text-primary-600'
-                                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                                : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                             }`}
                           >
                             {item.label}
@@ -216,7 +216,7 @@ export default function ProtectedLayout({
                       className={`inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
                         isActive
                           ? 'bg-primary-50 text-primary-600'
-                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                       }`}
                     >
                       {item.label}
@@ -246,7 +246,7 @@ export default function ProtectedLayout({
                 >
                   <Link href="/settings">
                     <Settings 
-                      className="w-5 h-5 text-gray-700" 
+                      className="w-5 h-5 text-foreground" 
                       strokeWidth={2} 
                     />
                   </Link>

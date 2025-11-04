@@ -131,17 +131,17 @@ export function ImageCropper({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+      <div className="bg-background rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
         <div className="p-6 border-b">
-          <h2 className="text-xl font-semibold text-gray-900">
+          <h2 className="text-xl font-semibold text-foreground">
             Bild zuschneiden
           </h2>
-          <p className="text-sm text-gray-600 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             Verschiebe und zoome das Bild, um den gewünschten Ausschnitt
             zu wählen
           </p>
         </div>
-        <div className="relative flex-1 min-h-[400px] bg-gray-900">
+        <div className="relative flex-1 min-h-[400px] bg-foreground">
           <Cropper
             image={image}
             crop={crop}
@@ -161,7 +161,7 @@ export function ImageCropper({
         </div>
         <div className="p-6 border-t flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex-1 w-full sm:w-auto">
-            <label className="text-sm font-medium text-gray-700 block mb-2">
+            <label className="text-sm font-medium text-foreground block mb-2">
               Zoom: {zoom.toFixed(1)}x
             </label>
             <input
@@ -171,7 +171,7 @@ export function ImageCropper({
               max={3}
               step={0.1}
               onChange={(e) => setZoom(parseFloat(e.target.value))}
-              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-600"
+              className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary-600"
             />
           </div>
           <div className="flex gap-3 w-full sm:w-auto">

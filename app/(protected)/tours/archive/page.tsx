@@ -199,7 +199,7 @@ export default function ToursArchivePage() {
               </Link>
             </Button>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">Tourenarchiv</h1>
+          <h1 className="text-3xl font-bold text-foreground">Tourenarchiv</h1>
         </div>
       </div>
 
@@ -459,7 +459,7 @@ export default function ToursArchivePage() {
       {filteredTours.length === 0 ? (
         <Card>
           <CardContent className="text-center py-12">
-            <p className="text-gray-600 text-base">Keine vergangenen Touren gefunden.</p>
+            <p className="text-muted-foreground text-base">Keine vergangenen Touren gefunden.</p>
             <CardDescription className="mt-2">
               Alle zukünftigen Touren findest du in der{' '}
               <Link href="/tours" className="text-primary-600 hover:text-primary-700 underline">

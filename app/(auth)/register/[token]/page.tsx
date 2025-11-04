@@ -86,18 +86,18 @@ export default function RegisterPage() {
 
   if (!invitation && !error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="text-center text-gray-600">Lädt...</div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center text-muted-foreground">Lädt...</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-12">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl text-center">Registrierung</CardTitle>
-          <p className="text-center text-gray-600 mt-2 text-sm">
+          <p className="text-center text-muted-foreground mt-2 text-sm">
             Erstelle dein Konto für {invitation?.email}
           </p>
         </CardHeader>

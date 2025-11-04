@@ -67,7 +67,7 @@ export default function ForgotPasswordPage() {
         <CardHeader>
           <div className="text-center mb-6">
             <h1 className="text-3xl font-bold gradient-text mb-2">ASC Skitouren App</h1>
-            <p className="text-gray-600">Passwort zurücksetzen</p>
+            <p className="text-muted-foreground">Passwort zurücksetzen</p>
           </div>
         </CardHeader>
         <CardContent>
@@ -89,7 +89,7 @@ export default function ForgotPasswordPage() {
           ) : (
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <p className="text-sm text-gray-600 mb-4">
+              <p className="text-sm text-muted-foreground mb-4">
                 Gib deine E-Mail-Adresse ein. Wir senden dir einen Link zum Zurücksetzen deines Passworts.
               </p>
                 <FormField

@@ -56,7 +56,7 @@ export function getTourIconColor(tourType: TourType): string {
     case 'Bike':
       return 'text-orange-600'
     default:
-      return 'text-gray-600'
+      return 'text-muted-foreground'
   }
 }
 
