@@ -50,6 +50,19 @@ Die App verwendet Supabase Auth für die Authentifizierung. Der Auth Service (`l
 3. **User Profile**: Die App lädt das User-Profile aus `public.users` nach erfolgreicher Authentifizierung
 4. **Session Management**: Supabase Auth verwaltet Sessions automatisch (refresh, expiry, etc.)
 
+### Session-Lebensdauer erhöhen:
+
+Die App verwendet einen proaktiven Token-Refresh-Mechanismus, um Sessions aktiv zu halten. Um die Session-Lebensdauer zu erhöhen:
+
+1. Gehe zu deinem **Supabase Dashboard** → **Authentication** → **Settings**
+2. Im Abschnitt **JWT Settings** findest du:
+   - **JWT expiry**: Standard ist 3600 Sekunden (1 Stunde)
+   - Erhöhe diesen Wert auf z.B. 86400 (24 Stunden) oder 604800 (7 Tage)
+3. **Refresh Token Rotation**: Stelle sicher, dass "Auto Refresh" aktiviert ist
+4. **Inactivity Timeout** (Pro Plan): Optional - kannst du deaktivieren oder erhöhen
+
+**Hinweis**: Die App refresht automatisch Tokens, bevor sie ablaufen (5 Minuten vor Ablauf). Die maximale Session-Dauer wird durch die JWT Expiry-Einstellung im Dashboard begrenzt.
+
 ### Migration von Mock zu Supabase:
 
 Wenn `NEXT_PUBLIC_SUPABASE_URL` gesetzt ist, verwendet die App automatisch Supabase Auth. Ansonsten fällt sie auf Mock Auth zurück (für Entwicklung ohne Supabase).

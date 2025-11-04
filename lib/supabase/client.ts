@@ -20,6 +20,10 @@ export const supabase = isSupabaseConfigured && supabaseUrl && supabaseAnonKey
         autoRefreshToken: true,
         persistSession: true,
         detectSessionInUrl: true,
+        storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+        storageKey: 'supabase.auth.token',
+        // Flow type: 'pkce' is more secure and recommended for browser apps
+        flowType: 'pkce',
       },
     })
   : null as any // Type assertion, will be checked before use

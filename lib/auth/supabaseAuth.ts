@@ -3,6 +3,13 @@ import { supabase, isSupabaseConfigured } from '../supabase/client'
 import { dataRepository } from '../data'
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js'
 
+export class LoginTimeoutError extends Error {
+  constructor(message: string = 'Login timeout') {
+    super(message)
+    this.name = 'LoginTimeoutError'
+  }
+}
+
 /**
  * Supabase Auth Service
  * Verwaltet Authentifizierung über Supabase Auth
@@ -14,6 +21,9 @@ class SupabaseAuthService {
   private isLoadingProfile: boolean = false
   private isInitializing: boolean = false
   private initializationPromise: Promise<void> | null = null
+  private loadingProfilePromise: Promise<User | null> | null = null
+  private readonly LOGIN_TIMEOUT = 30000 // 30 seconds
+  private readonly PROFILE_LOAD_TIMEOUT = 10000 // 10 seconds
 
   constructor() {
     // Listen to auth state changes
@@ -26,14 +36,70 @@ class SupabaseAuthService {
           // Load profile on initial session (page reload) or token refresh
           // INITIAL_SESSION is fired when Supabase restores the session from localStorage
           // SIGNED_IN is handled by login() function to avoid race conditions
-          if (session?.user && !this.currentUser) {
-            await this.loadUserProfile(session.user.id)
+          if (session?.user) {
+            // Always update if user changed or if we don't have a current user
+            if (!this.currentUser || this.currentUser.id !== session.user.id) {
+              await this.loadUserProfile(session.user.id)
+            }
           }
         }
       })
 
       // Load initial session (fallback, in case onAuthStateChange doesn't fire)
       this.initializeSession()
+
+      // Set up proactive session refresh to prevent expiration
+      if (typeof window !== 'undefined') {
+        this.setupSessionRefresh()
+      }
+    }
+  }
+
+  private setupSessionRefresh() {
+    if (!isSupabaseConfigured || !supabase) return
+
+    // Check and refresh session every 5 minutes to prevent expiration
+    const refreshInterval = setInterval(async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
+        
+        if (error) {
+          // If session is invalid, don't try to refresh
+          if (error.message?.includes('Invalid') || error.message?.includes('expired')) {
+            return
+          }
+        }
+
+        if (session) {
+          // Check if token is close to expiring (within 5 minutes)
+          const expiresAt = session.expires_at
+          if (expiresAt) {
+            const now = Math.floor(Date.now() / 1000)
+            const timeUntilExpiry = expiresAt - now
+            
+            // If token expires in less than 5 minutes, refresh it proactively
+            if (timeUntilExpiry < 300) {
+              try {
+                const { data: { session: refreshedSession }, error: refreshError } = await supabase.auth.refreshSession()
+                if (!refreshError && refreshedSession) {
+                  console.log('Session refreshed proactively')
+                }
+              } catch (refreshError) {
+                console.warn('Failed to refresh session:', refreshError)
+              }
+            }
+          }
+        }
+      } catch (error) {
+        // Silently fail - session might be invalid
+      }
+    }, 5 * 60 * 1000) // Check every 5 minutes
+
+    // Cleanup on page unload
+    if (typeof window !== 'undefined') {
+      window.addEventListener('beforeunload', () => {
+        clearInterval(refreshInterval)
+      })
     }
   }
 
@@ -73,35 +139,67 @@ class SupabaseAuthService {
   private async loadUserProfile(userId: string): Promise<User | null> {
     if (!isSupabaseConfigured) return null
 
-    // Prevent concurrent loads
-    if (this.isLoadingProfile) {
-      // Wait a bit and retry
-      await new Promise((resolve) => setTimeout(resolve, 100))
-      if (this.currentUser?.id === userId) {
-        return this.currentUser
+    // Prevent concurrent loads for the same user - reuse existing promise
+    if (this.isLoadingProfile && this.loadingProfilePromise) {
+      // If we're already loading the same user, return the existing promise
+      try {
+        const result = await Promise.race([
+          this.loadingProfilePromise,
+          new Promise<User | null>((resolve) => 
+            setTimeout(() => resolve(null), this.PROFILE_LOAD_TIMEOUT)
+          )
+        ])
+        if (result?.id === userId) {
+          return result
+        }
+      } catch (error) {
+        // Continue with new load attempt
       }
+    }
+
+    // If we already have the correct user loaded, return it immediately
+    if (this.currentUser?.id === userId) {
+      return this.currentUser
     }
 
     this.isLoadingProfile = true
 
-    try {
-      const user = await dataRepository.getUserById(userId)
-      
-      if (user) {
-        this.currentUser = user
-        this.notifyListeners(user)
-        return user
-      } else {
-        // Fallback: Create user profile from auth user if it doesn't exist
-        await this.createUserProfileFromAuth(userId)
-        return this.currentUser
+    // Create a promise that will be reused if concurrent loads happen
+    this.loadingProfilePromise = (async (): Promise<User | null> => {
+      try {
+        // Add timeout to prevent hanging
+        const loadPromise = (async () => {
+          const user = await dataRepository.getUserById(userId)
+          
+          if (user) {
+            this.currentUser = user
+            this.notifyListeners(user)
+            return user
+          } else {
+            // Fallback: Create user profile from auth user if it doesn't exist
+            await this.createUserProfileFromAuth(userId)
+            return this.currentUser
+          }
+        })()
+
+        const timeoutPromise = new Promise<User | null>((resolve) => {
+          setTimeout(() => {
+            console.warn('Timeout loading user profile')
+            resolve(null)
+          }, this.PROFILE_LOAD_TIMEOUT)
+        })
+
+        return await Promise.race([loadPromise, timeoutPromise])
+      } catch (error) {
+        console.error('Error loading user profile:', error)
+        return null
+      } finally {
+        this.isLoadingProfile = false
+        this.loadingProfilePromise = null
       }
-    } catch (error) {
-      console.error('Error loading user profile:', error)
-      return null
-    } finally {
-      this.isLoadingProfile = false
-    }
+    })()
+
+    return await this.loadingProfilePromise
   }
 
   private async createUserProfileFromAuth(userId: string): Promise<void> {
@@ -171,11 +269,19 @@ class SupabaseAuthService {
     }
 
     try {
-      // Sign in with password
-      const { data, error } = await supabase.auth.signInWithPassword({
+      // Sign in with password with timeout
+      const signInPromise = supabase.auth.signInWithPassword({
         email,
         password,
       })
+
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => {
+          reject(new LoginTimeoutError('Login timeout: Sign-in request took too long'))
+        }, this.LOGIN_TIMEOUT)
+      })
+
+      const { data, error } = await Promise.race([signInPromise, timeoutPromise])
 
       if (error) {
         // Don't log 400 errors for invalid credentials - these are expected
@@ -192,10 +298,27 @@ class SupabaseAuthService {
 
       // Wait for session to be established and load user profile
       // We load it directly here to avoid race conditions with authStateChange listener
-      const user = await this.loadUserProfile(data.user.id)
+      // Add timeout to prevent hanging
+      const profileLoadPromise = this.loadUserProfile(data.user.id)
+      const profileTimeoutPromise = new Promise<User | null>((resolve) => {
+        setTimeout(() => {
+          console.warn('Timeout loading user profile after login')
+          resolve(null)
+        }, this.PROFILE_LOAD_TIMEOUT)
+      })
+
+      const user = await Promise.race([profileLoadPromise, profileTimeoutPromise])
 
       return user
     } catch (error: any) {
+      // Re-throw timeout errors so they can be handled by the caller
+      if (error instanceof LoginTimeoutError) {
+        throw error
+      }
+      // Handle timeout errors specifically
+      if (error?.message?.includes('timeout')) {
+        throw new LoginTimeoutError(error.message)
+      }
       // Don't log expected errors (400 Bad Request for invalid credentials)
       if (error?.status !== 400 && error?.response?.status !== 400) {
         console.error('Login error:', error)
@@ -233,6 +356,37 @@ class SupabaseAuthService {
     }
 
     if (this.currentUser) {
+      // Check if session is still valid, refresh if needed
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
+        if (error || !session) {
+          // Session is invalid, clear user
+          this.currentUser = null
+          this.notifyListeners(null)
+          return null
+        }
+        
+        // Check if session is close to expiring and refresh proactively
+        const expiresAt = session.expires_at
+        if (expiresAt) {
+          const now = Math.floor(Date.now() / 1000)
+          const timeUntilExpiry = expiresAt - now
+          
+          // If token expires in less than 5 minutes, refresh it
+          if (timeUntilExpiry < 300 && timeUntilExpiry > 0) {
+            try {
+              await supabase.auth.refreshSession()
+            } catch (refreshError) {
+              // If refresh fails, session might be invalid
+              console.warn('Failed to refresh session:', refreshError)
+            }
+          }
+        }
+      } catch (error) {
+        // Session check failed, but user is still loaded
+        // Don't clear user unless we're sure session is invalid
+      }
+      
       return this.currentUser
     }
 
