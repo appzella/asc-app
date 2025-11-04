@@ -39,7 +39,7 @@ class SupabaseAuthService {
           if (session?.user) {
             // Always update if user changed or if we don't have a current user
             if (!this.currentUser || this.currentUser.id !== session.user.id) {
-              await this.loadUserProfile(session.user.id)
+            await this.loadUserProfile(session.user.id)
             }
           }
         }
@@ -186,27 +186,27 @@ class SupabaseAuthService {
 
     // If we already have the correct user loaded, return it immediately
     if (this.currentUser?.id === userId) {
-      return this.currentUser
+        return this.currentUser
     }
 
     this.isLoadingProfile = true
 
     // Create a promise that will be reused if concurrent loads happen
     this.loadingProfilePromise = (async (): Promise<User | null> => {
-      try {
+    try {
         // Add timeout to prevent hanging
         const loadPromise = (async () => {
-          const user = await dataRepository.getUserById(userId)
-          
-          if (user) {
-            this.currentUser = user
-            this.notifyListeners(user)
-            return user
-          } else {
-            // Fallback: Create user profile from auth user if it doesn't exist
-            await this.createUserProfileFromAuth(userId)
-            return this.currentUser
-          }
+      const user = await dataRepository.getUserById(userId)
+      
+      if (user) {
+        this.currentUser = user
+        this.notifyListeners(user)
+        return user
+      } else {
+        // Fallback: Create user profile from auth user if it doesn't exist
+        await this.createUserProfileFromAuth(userId)
+        return this.currentUser
+      }
         })()
 
         const timeoutPromise = new Promise<User | null>((resolve) => {
@@ -217,13 +217,13 @@ class SupabaseAuthService {
         })
 
         return await Promise.race([loadPromise, timeoutPromise])
-      } catch (error) {
-        console.error('Error loading user profile:', error)
-        return null
-      } finally {
-        this.isLoadingProfile = false
+    } catch (error) {
+      console.error('Error loading user profile:', error)
+      return null
+    } finally {
+      this.isLoadingProfile = false
         this.loadingProfilePromise = null
-      }
+    }
     })()
 
     return await this.loadingProfilePromise
