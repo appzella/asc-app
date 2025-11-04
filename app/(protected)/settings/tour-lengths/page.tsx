@@ -13,6 +13,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { canManageUsers } from '@/lib/roles'
 import Link from 'next/link'
 import { Trash2, ChevronLeft } from 'lucide-react'
+import { toast } from 'sonner'
 
 export default function TourLengthsSettingsPage() {
   const router = useRouter()
@@ -20,7 +21,6 @@ export default function TourLengthsSettingsPage() {
   const [tourLengths, setTourLengths] = useState<string[]>([])
   const [newLength, setNewLength] = useState('')
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
 
   useEffect(() => {
@@ -58,7 +58,7 @@ export default function TourLengthsSettingsPage() {
 
   const handleAdd = async () => {
     if (!newLength.trim()) {
-      setError('Bitte gib eine Tourlänge ein')
+      toast.error('Bitte gib eine Tourlänge ein')
       return
     }
 
@@ -67,11 +67,10 @@ export default function TourLengthsSettingsPage() {
       const settings = await dataRepository.getSettings()
       setTourLengths(settings.tourLengths)
       setNewLength('')
-      setSuccess('Tourlänge hinzugefügt!')
-      setTimeout(() => setSuccess(''), 3000)
+      toast.success('Tourlänge hinzugefügt!')
       setError('')
     } else {
-      setError('Diese Tourlänge existiert bereits')
+      toast.error('Diese Tourlänge existiert bereits')
     }
   }
 
@@ -80,8 +79,7 @@ export default function TourLengthsSettingsPage() {
     if (success) {
       const settings = await dataRepository.getSettings()
       setTourLengths(settings.tourLengths)
-      setSuccess('Tourlänge entfernt!')
-      setTimeout(() => setSuccess(''), 3000)
+      toast.success('Tourlänge entfernt!')
     }
   }
 
@@ -128,8 +126,7 @@ export default function TourLengthsSettingsPage() {
 
     await dataRepository.updateTourLengthsOrder(newOrder)
     setTourLengths(newOrder)
-    setSuccess('Reihenfolge aktualisiert!')
-    setTimeout(() => setSuccess(''), 3000)
+    toast.success('Reihenfolge aktualisiert!')
   }
 
   if (!user) {
@@ -180,19 +177,13 @@ export default function TourLengthsSettingsPage() {
             </Link>
           </Button>
         </div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">Tourlängen</h1>
-        <CardDescription className="text-base">Verwalte die verfügbaren Tourlängen</CardDescription>
+        <h1>Tourlängen</h1>
+        <CardDescription>Verwalte die verfügbaren Tourlängen</CardDescription>
       </div>
 
       {error && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
-      {success && (
-        <Alert>
-          <AlertDescription>{success}</AlertDescription>
         </Alert>
       )}
 

@@ -107,8 +107,8 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">Dashboard</h1>
-        <p className="text-base text-muted-foreground">Willkommen zurück, <span className="font-semibold text-foreground">{user.name}</span>!</p>
+        <h1>Dashboard</h1>
+        <p className="text-muted-foreground">Willkommen zurück, <span className="font-semibold text-foreground">{user.name}</span>!</p>
       </div>
 
       {user.role === 'admin' && pendingTours.length > 0 && (

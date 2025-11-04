@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { GeistSans } from 'geist/font/sans'
 import { GeistMono } from 'geist/font/mono'
 import './globals.css'
+import { Toaster } from '@/components/ui/sonner'
 
 export const metadata: Metadata = {
   title: 'ASC Skitouren App',
@@ -29,7 +30,10 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
       </head>
-      <body className={`${GeistSans.variable} ${GeistMono.variable} font-sans`}>{children}</body>
+      <body className={`${GeistSans.variable} ${GeistMono.variable} font-sans`}>
+        {children}
+        <Toaster />
+      </body>
     </html>
   )
 }

@@ -249,7 +249,7 @@ export default function ToursPage() {
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-4">
-          <h1 className="text-3xl font-bold text-foreground">Touren</h1>
+          <h1>Touren</h1>
           <Link href="/tours/archive">
             <Button variant="outline" size="sm" className="flex items-center gap-2">
               <Archive className="w-4 h-4" strokeWidth={2} />

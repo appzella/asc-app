@@ -100,8 +100,8 @@ export default function SettingsPage() {
   return (
     <div className="max-w-6xl mx-auto space-y-6 animate-fade-in px-4 sm:px-0">
       <div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">Einstellungen</h1>
-        <CardDescription className="text-base">Verwalte die Optionen für Touren</CardDescription>
+        <h1>Einstellungen</h1>
+        <CardDescription>Verwalte die Optionen für Touren</CardDescription>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -121,7 +121,7 @@ export default function SettingsPage() {
                         ) : (
                           <SettingsIcon type={category.iconType as 'tour-types' | 'tour-lengths' | 'difficulties'} className="w-5 h-5 text-primary-600 flex-shrink-0" strokeWidth={2} />
                         )}
-                        <h3 className="text-lg font-bold text-foreground group-hover:text-primary-600 transition-colors">
+                        <h3 className="group-hover:text-primary-600 transition-colors">
                         {category.title}
                       </h3>
                       </div>

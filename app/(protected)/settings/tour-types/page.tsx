@@ -14,6 +14,7 @@ import { canManageUsers } from '@/lib/roles'
 import Link from 'next/link'
 import { getIconByName, getTourIcon } from '@/lib/tourIcons'
 import { Trash2, ChevronDown, ChevronLeft } from 'lucide-react'
+import { toast } from 'sonner'
 
 export default function TourTypesSettingsPage() {
   const router = useRouter()
@@ -22,7 +23,6 @@ export default function TourTypesSettingsPage() {
   const [tourTypeIcons, setTourTypeIcons] = useState<{ [key: string]: string }>({})
   const [newType, setNewType] = useState('')
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
   const [openIconPicker, setOpenIconPicker] = useState<string | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
 
@@ -63,7 +63,7 @@ export default function TourTypesSettingsPage() {
 
   const handleAdd = async () => {
     if (!newType.trim()) {
-      setError('Bitte gib einen Tourentyp ein')
+      toast.error('Bitte gib einen Tourentyp ein')
       return
     }
 
@@ -73,11 +73,10 @@ export default function TourTypesSettingsPage() {
       setTourTypes(settings.tourTypes)
       setTourTypeIcons(settings.tourTypeIcons || {})
       setNewType('')
-      setSuccess('Tourentyp hinzugefügt!')
-      setTimeout(() => setSuccess(''), 3000)
+      toast.success('Tourentyp hinzugefügt!')
       setError('')
     } else {
-      setError('Dieser Tourentyp existiert bereits')
+      toast.error('Dieser Tourentyp existiert bereits')
     }
   }
 
@@ -87,8 +86,7 @@ export default function TourTypesSettingsPage() {
       const settings = await dataRepository.getSettings()
       setTourTypes(settings.tourTypes)
       setTourTypeIcons(settings.tourTypeIcons || {})
-      setSuccess('Tourentyp entfernt!')
-      setTimeout(() => setSuccess(''), 3000)
+      toast.success('Tourentyp entfernt!')
     }
   }
 
@@ -96,10 +94,9 @@ export default function TourTypesSettingsPage() {
     const success = await dataRepository.updateTourTypeIcon(tourType, iconName)
     if (success) {
       setTourTypeIcons({ ...tourTypeIcons, [tourType]: iconName })
-      setSuccess(`Icon für ${tourType} aktualisiert!`)
-      setTimeout(() => setSuccess(''), 3000)
+      toast.success(`Icon für ${tourType} aktualisiert!`)
     } else {
-      setError('Fehler beim Aktualisieren des Icons')
+      toast.error('Fehler beim Aktualisieren des Icons')
     }
   }
 
@@ -149,8 +146,7 @@ export default function TourTypesSettingsPage() {
 
     await dataRepository.updateTourTypesOrder(newOrder)
     setTourTypes(newOrder)
-    setSuccess('Reihenfolge aktualisiert!')
-    setTimeout(() => setSuccess(''), 3000)
+    toast.success('Reihenfolge aktualisiert!')
   }
 
   // Beliebte Icons für Tourenarten (nur existierende lucide-react Icons)
@@ -224,19 +220,13 @@ export default function TourTypesSettingsPage() {
             </Link>
           </Button>
         </div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">Tourentypen</h1>
-        <CardDescription className="text-base">Verwalte die verfügbaren Tourentypen</CardDescription>
+        <h1>Tourentypen</h1>
+        <CardDescription>Verwalte die verfügbaren Tourentypen</CardDescription>
       </div>
 
       {error && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
-      {success && (
-        <Alert>
-          <AlertDescription>{success}</AlertDescription>
         </Alert>
       )}
 

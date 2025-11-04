@@ -323,7 +323,7 @@ export default function TourDetailPage() {
               const IconComponent = getTourIcon(tour.tourType, settings?.tourTypeIcons)
               return <IconComponent className="w-6 h-6 text-foreground flex-shrink-0" strokeWidth={2} />
             })()}
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{tour.title}</h1>
+            <h1>{tour.title}</h1>
           </div>
         </div>
         {canEdit && (
@@ -342,8 +342,8 @@ export default function TourDetailPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h3 className="font-semibold text-foreground mb-2 text-sm">Beschreibung</h3>
-                <p className="text-muted-foreground whitespace-pre-wrap text-sm leading-relaxed">{tour.description}</p>
+                <h4 className="mb-2">Beschreibung</h4>
+                <p className="text-muted-foreground whitespace-pre-wrap">{tour.description}</p>
               </div>
 
               <Separator />

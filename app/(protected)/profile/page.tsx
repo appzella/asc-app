@@ -11,7 +11,6 @@ import { User } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
   Form,
   FormControl,
@@ -28,6 +27,7 @@ import { ImageCropper } from '@/components/ui/ImageCropper'
 import { UserCircle, Lock, LogOut, Upload, X, Camera, ImageIcon, Trash2 } from 'lucide-react'
 import { PhoneInput } from '@/components/ui/phone-input'
 import { AddressAutocomplete } from '@/components/ui/address-autocomplete'
+import { toast } from 'sonner'
 
 const profileSchema = z.object({
   name: z.string().min(1, 'Name ist erforderlich'),
@@ -55,8 +55,6 @@ export default function ProfilePage() {
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
   const [showCropper, setShowCropper] = useState(false)
   const [imageToCrop, setImageToCrop] = useState<string | null>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -130,16 +128,13 @@ export default function ProfilePage() {
   const processFile = (file: File) => {
     if (!user) return
 
-    setError('')
-    setSuccess('')
-
     if (file.size > 5 * 1024 * 1024) {
-      setError('Die Datei ist zu groß. Bitte wähle eine Datei unter 5MB.')
+      toast.error('Die Datei ist zu groß. Bitte wähle eine Datei unter 5MB.')
       return
     }
 
     if (!file.type.startsWith('image/')) {
-      setError('Bitte wähle ein Bild aus.')
+      toast.error('Bitte wähle ein Bild aus.')
       return
     }
 
@@ -156,7 +151,7 @@ export default function ProfilePage() {
       setShowCropper(true)
     }
     reader.onerror = () => {
-      setError('Fehler beim Lesen der Datei')
+      toast.error('Fehler beim Lesen der Datei')
     }
     reader.readAsDataURL(file)
   }
@@ -198,7 +193,6 @@ export default function ProfilePage() {
     setShowCropper(false)
     setImageToCrop(null)
     setIsLoading(true)
-    setError('')
 
     try {
       // Convert blob to File
@@ -233,8 +227,7 @@ export default function ProfilePage() {
         
         if (updatedUser) {
           setUser(updatedUser)
-          setSuccess('Profilfoto erfolgreich aktualisiert!')
-          setTimeout(() => setSuccess(''), 3000)
+          toast.success('Profilfoto erfolgreich aktualisiert!')
         }
       } else {
         // Fallback: Base64 if storage not available
@@ -246,18 +239,17 @@ export default function ProfilePage() {
           })
           if (updatedUser) {
             setUser(updatedUser)
-            setSuccess('Profilfoto erfolgreich aktualisiert!')
-            setTimeout(() => setSuccess(''), 3000)
+            toast.success('Profilfoto erfolgreich aktualisiert!')
           }
         }
         reader.onerror = () => {
-          setError('Fehler beim Lesen der Datei')
+          toast.error('Fehler beim Lesen der Datei')
         }
         reader.readAsDataURL(croppedFile)
       }
     } catch (err) {
       console.error('Upload error:', err)
-      setError('Fehler beim Hochladen des Profilfotos')
+      toast.error('Fehler beim Hochladen des Profilfotos')
     } finally {
       setIsLoading(false)
     }
@@ -272,8 +264,6 @@ export default function ProfilePage() {
     if (!user) return
 
     setIsLoading(true)
-    setError('')
-    setSuccess('')
 
     try {
       const updatedUser = await dataRepository.updateUser(user.id, {
@@ -287,11 +277,10 @@ export default function ProfilePage() {
 
       if (updatedUser) {
         setUser(updatedUser)
-        setSuccess('Profil erfolgreich aktualisiert!')
-        setTimeout(() => setSuccess(''), 3000)
+        toast.success('Profil erfolgreich aktualisiert!')
       }
     } catch (err) {
-      setError('Fehler beim Aktualisieren des Profils')
+      toast.error('Fehler beim Aktualisieren des Profils')
     } finally {
       setIsLoading(false)
     }
@@ -322,11 +311,10 @@ export default function ProfilePage() {
 
       if (updatedUser) {
         setUser(updatedUser)
-        setSuccess('Profilfoto entfernt!')
-        setTimeout(() => setSuccess(''), 3000)
+        toast.success('Profilfoto entfernt!')
       }
     } catch (err) {
-      setError('Fehler beim Entfernen des Profilfotos')
+      toast.error('Fehler beim Entfernen des Profilfotos')
     } finally {
       setIsLoading(false)
     }
@@ -336,8 +324,6 @@ export default function ProfilePage() {
     if (!user) return
 
     setIsLoading(true)
-    setError('')
-    setSuccess('')
 
     try {
       // Verify current password by trying to login
@@ -352,15 +338,14 @@ export default function ProfilePage() {
       const success = await authService.changePassword(values.newPassword)
 
       if (success) {
-        setSuccess('Passwort erfolgreich geändert!')
+        toast.success('Passwort erfolgreich geändert!')
         passwordForm.reset()
-        setTimeout(() => setSuccess(''), 3000)
       } else {
-        setError('Fehler beim Ändern des Passworts')
+        toast.error('Fehler beim Ändern des Passworts')
       }
     } catch (err) {
       console.error('Password change error:', err)
-      setError('Ein Fehler ist aufgetreten')
+      toast.error('Ein Fehler ist aufgetreten')
     } finally {
       setIsLoading(false)
     }
@@ -427,8 +412,8 @@ export default function ProfilePage() {
       <div className="max-w-7xl mx-auto space-y-6 animate-fade-in">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">Profil</h1>
-            <p className="text-base text-muted-foreground">Verwalte deine persönlichen Informationen und E-Mail-Einstellungen</p>
+            <h1>Profil</h1>
+            <p className="text-muted-foreground">Verwalte deine persönlichen Informationen und E-Mail-Einstellungen</p>
           </div>
           <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2">
             <LogOut className="w-4 h-4" />
@@ -686,7 +671,7 @@ export default function ProfilePage() {
                         <Separator />
                         <div className="space-y-4">
                           <div>
-                            <h3 className="text-sm font-semibold text-foreground mb-1">Adresse</h3>
+                            <h4 className="mb-1">Adresse</h4>
                             <p className="text-xs text-muted-foreground">Deine Kontaktadresse</p>
                           </div>
                           <FormField
@@ -748,18 +733,6 @@ export default function ProfilePage() {
                             </div>
                           </div>
                         </div>
-
-                        {error && (
-                          <Alert variant="destructive">
-                            <AlertDescription>{error}</AlertDescription>
-                          </Alert>
-                        )}
-
-                        {success && (
-                          <Alert>
-                            <AlertDescription>{success}</AlertDescription>
-                          </Alert>
-                        )}
 
                         <div className="pt-2">
                           <Button type="submit" variant="default" disabled={isLoading} className="w-full sm:w-auto">
@@ -831,18 +804,6 @@ export default function ProfilePage() {
                             </FormItem>
                           )}
                         />
-
-                        {error && (
-                          <Alert variant="destructive">
-                            <AlertDescription>{error}</AlertDescription>
-                          </Alert>
-                        )}
-
-                        {success && (
-                          <Alert>
-                            <AlertDescription>{success}</AlertDescription>
-                          </Alert>
-                        )}
 
                         <div className="pt-2">
                           <Button type="submit" variant="default" disabled={isLoading} className="w-full sm:w-auto">

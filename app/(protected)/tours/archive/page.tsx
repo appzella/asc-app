@@ -199,7 +199,7 @@ export default function ToursArchivePage() {
               </Link>
             </Button>
           </div>
-          <h1 className="text-3xl font-bold text-foreground">Tourenarchiv</h1>
+          <h1>Tourenarchiv</h1>
         </div>
       </div>
 

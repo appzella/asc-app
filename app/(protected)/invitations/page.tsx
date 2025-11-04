@@ -27,6 +27,7 @@ import {
 import { canManageUsers } from '@/lib/roles'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
+import { toast } from 'sonner'
 
 const invitationSchema = z.object({
   email: z.string().email('Ungültige E-Mail-Adresse').min(1, 'E-Mail ist erforderlich'),
@@ -39,7 +40,6 @@ export default function InvitationsPage() {
   const [user, setUser] = useState<User | null>(null)
   const [invitations, setInvitations] = useState<Invitation[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   const form = useForm<InvitationFormValues>({
     resolver: zodResolver(invitationSchema),
@@ -82,8 +82,6 @@ export default function InvitationsPage() {
   }, [router])
 
   const onSubmit = async (values: InvitationFormValues) => {
-    setMessage(null)
-
     if (!user) return
 
     setIsLoading(true)
@@ -92,7 +90,7 @@ export default function InvitationsPage() {
       // Prüfen ob E-Mail bereits existiert
       const existingUser = await dataRepository.getUserByEmail(values.email)
       if (existingUser && existingUser.registered) {
-        setMessage({ type: 'error', text: 'Diese E-Mail ist bereits registriert' })
+        toast.error('Diese E-Mail ist bereits registriert')
         setIsLoading(false)
         return
       }
@@ -108,19 +106,13 @@ export default function InvitationsPage() {
         })
 
         if (emailResponse.ok) {
-          setMessage({
-            type: 'success',
-            text: `Einladung erstellt und E-Mail an ${values.email} gesendet!`,
-          })
+          toast.success(`Einladung erstellt und E-Mail an ${values.email} gesendet!`)
         } else {
           // Fallback: Show link if email fails
           const registrationLink = `${window.location.origin}/register/${invitation.token}`
           const errorData = await emailResponse.json().catch(() => ({}))
           
-          setMessage({
-            type: 'success',
-            text: `Einladung erstellt! E-Mail konnte nicht automatisch gesendet werden. Link: ${registrationLink}`,
-          })
+          toast.success(`Einladung erstellt! E-Mail konnte nicht automatisch gesendet werden. Link: ${registrationLink}`)
           
           console.warn('Email sending failed:', errorData)
         }
@@ -128,10 +120,7 @@ export default function InvitationsPage() {
         // Fallback: Show link if email request fails completely
         const registrationLink = `${window.location.origin}/register/${invitation.token}`
         
-        setMessage({
-          type: 'success',
-          text: `Einladung erstellt! E-Mail konnte nicht gesendet werden. Link: ${registrationLink}`,
-        })
+        toast.success(`Einladung erstellt! E-Mail konnte nicht gesendet werden. Link: ${registrationLink}`)
         
         console.warn('Email sending error:', emailError)
       }
@@ -140,7 +129,7 @@ export default function InvitationsPage() {
       const allInvitations = await dataRepository.getInvitations()
       setInvitations(allInvitations)
     } catch (err) {
-      setMessage({ type: 'error', text: 'Fehler beim Erstellen der Einladung' })
+      toast.error('Fehler beim Erstellen der Einladung')
     } finally {
       setIsLoading(false)
     }
@@ -148,7 +137,7 @@ export default function InvitationsPage() {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
-    setMessage({ type: 'success', text: 'Link in Zwischenablage kopiert!' })
+    toast.success('Link in Zwischenablage kopiert!')
   }
 
   if (!user) {
@@ -199,8 +188,8 @@ export default function InvitationsPage() {
             </Link>
           </Button>
         </div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">Einladungen</h1>
-        <CardDescription className="text-base">Erstelle Einladungen für neue Clubmitglieder</CardDescription>
+        <h1>Einladungen</h1>
+        <CardDescription>Erstelle Einladungen für neue Clubmitglieder</CardDescription>
       </div>
 
       <Card>
@@ -227,11 +216,6 @@ export default function InvitationsPage() {
                   </FormItem>
                 )}
               />
-              {message && (
-                <Alert variant={message.type === 'success' ? 'default' : 'destructive'}>
-                  <AlertDescription>{message.text}</AlertDescription>
-                </Alert>
-              )}
               <Button type="submit" variant="default" disabled={isLoading} size="sm">
                 {isLoading ? 'Wird erstellt...' : 'Einladung erstellen'}
               </Button>

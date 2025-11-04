@@ -28,6 +28,7 @@ import { canEditTour } from '@/lib/roles'
 import { getDifficultyOptions } from '@/lib/difficulty'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
+import { toast } from 'sonner'
 
 const editTourSchema = z.object({
   title: z.string().min(1, 'Titel ist erforderlich'),
@@ -176,10 +177,11 @@ export default function EditTourPage() {
       const submitForApproval = false // Nicht mehr benötigt mit neuer Status-Logik
       await dataRepository.updateTour(tourId, updates, submitForApproval)
 
+      toast.success('Tour erfolgreich aktualisiert!')
       router.push(`/tours/${tourId}`)
     } catch (err) {
       console.error('Error updating tour:', err)
-      setError('Fehler beim Aktualisieren der Tour')
+      toast.error('Fehler beim Aktualisieren der Tour')
     } finally {
       setIsLoading(false)
     }
@@ -207,7 +209,7 @@ export default function EditTourPage() {
             </Link>
           </Button>
         </div>
-        <h1 className="text-3xl font-bold text-foreground">Tour bearbeiten</h1>
+        <h1>Tour bearbeiten</h1>
       </div>
 
       {hasPendingChanges && (

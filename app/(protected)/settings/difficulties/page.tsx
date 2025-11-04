@@ -15,6 +15,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { canManageUsers } from '@/lib/roles'
 import Link from 'next/link'
 import { Trash2, ChevronLeft } from 'lucide-react'
+import { toast } from 'sonner'
 
 export default function DifficultiesSettingsPage() {
   const router = useRouter()
@@ -24,7 +25,6 @@ export default function DifficultiesSettingsPage() {
   const [difficulties, setDifficulties] = useState<string[]>([])
   const [newDifficulty, setNewDifficulty] = useState('')
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
 
   useEffect(() => {
@@ -75,12 +75,12 @@ export default function DifficultiesSettingsPage() {
 
   const handleAdd = async () => {
     if (!newDifficulty.trim()) {
-      setError('Bitte gib einen Schwierigkeitsgrad ein')
+      toast.error('Bitte gib einen Schwierigkeitsgrad ein')
       return
     }
 
     if (!selectedTourType) {
-      setError('Bitte wähle zuerst eine Tourenart')
+      toast.error('Bitte wähle zuerst eine Tourenart')
       return
     }
 
@@ -89,11 +89,10 @@ export default function DifficultiesSettingsPage() {
       const diffs = await dataRepository.getDifficultiesForTourType(selectedTourType)
       setDifficulties(diffs)
       setNewDifficulty('')
-      setSuccess('Schwierigkeitsgrad hinzugefügt!')
-      setTimeout(() => setSuccess(''), 3000)
+      toast.success('Schwierigkeitsgrad hinzugefügt!')
       setError('')
     } else {
-      setError('Dieser Schwierigkeitsgrad existiert bereits')
+      toast.error('Dieser Schwierigkeitsgrad existiert bereits')
     }
   }
 
@@ -104,8 +103,7 @@ export default function DifficultiesSettingsPage() {
     if (success) {
       const diffs = await dataRepository.getDifficultiesForTourType(selectedTourType)
       setDifficulties(diffs)
-      setSuccess('Schwierigkeitsgrad entfernt!')
-      setTimeout(() => setSuccess(''), 3000)
+      toast.success('Schwierigkeitsgrad entfernt!')
     }
   }
 
@@ -153,8 +151,7 @@ export default function DifficultiesSettingsPage() {
 
     await dataRepository.updateDifficultiesOrder(selectedTourType, newOrder)
     setDifficulties(newOrder)
-    setSuccess('Reihenfolge aktualisiert!')
-    setTimeout(() => setSuccess(''), 3000)
+    toast.success('Reihenfolge aktualisiert!')
   }
 
   if (!user) {
@@ -200,19 +197,13 @@ export default function DifficultiesSettingsPage() {
             </Link>
           </Button>
         </div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">Schwierigkeitsgrade</h1>
-        <CardDescription className="text-base">Verwalten Sie die Schwierigkeitsgrade für jede Tourenart</CardDescription>
+        <h1>Schwierigkeitsgrade</h1>
+        <CardDescription>Verwalten Sie die Schwierigkeitsgrade für jede Tourenart</CardDescription>
       </div>
 
       {error && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
-      {success && (
-        <Alert>
-          <AlertDescription>{success}</AlertDescription>
         </Alert>
       )}
 

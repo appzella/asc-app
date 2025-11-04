@@ -29,6 +29,7 @@ import { getDifficultyOptions } from '@/lib/difficulty'
 import { getTourIcon } from '@/lib/tourIcons'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
+import { toast } from 'sonner'
 
 const createTourSchema = z.object({
   title: z.string().min(1, 'Titel ist erforderlich'),
@@ -226,10 +227,11 @@ export default function CreateTourPage() {
         createdBy: user.id,
       })
 
+      toast.success('Tour erfolgreich erstellt!')
       router.push(`/tours/${tour.id}`)
     } catch (err) {
       console.error('Error creating tour:', err)
-      setError('Fehler beim Erstellen der Tour')
+      toast.error('Fehler beim Erstellen der Tour')
     } finally {
       setIsLoading(false)
     }
@@ -259,7 +261,7 @@ export default function CreateTourPage() {
             </Link>
           </Button>
         </div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">Neue Tour erstellen</h1>
+        <h1>Neue Tour erstellen</h1>
       </div>
 
       <Card className="relative" style={{ overflow: 'visible', zIndex: 200 }}>

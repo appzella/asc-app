@@ -99,8 +99,8 @@ export default function UsersPage() {
             </Link>
           </Button>
         </div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">Benutzerverwaltung</h1>
-        <CardDescription className="text-base">Verwalte Benutzer und deren Rollen</CardDescription>
+        <h1>Benutzerverwaltung</h1>
+        <CardDescription>Verwalte Benutzer und deren Rollen</CardDescription>
       </div>
 
       <Card>
