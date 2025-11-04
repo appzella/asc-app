@@ -133,8 +133,9 @@ export default function ProtectedLayout({
       <nav className="bg-white/95 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-200 flex-shrink-0 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20 relative">
-            {/* Links: Zurück-Button (nur Mobile, wenn nicht auf Dashboard) */}
+            {/* Links: Logo/ Zurück-Button */}
             <div className="flex items-center gap-2 flex-1">
+              {/* Mobile: Zurück-Button auf anderen Seiten (nur Mobile) */}
               {pathname !== '/dashboard' && (
                 <Button
                   variant="default"
@@ -146,8 +147,16 @@ export default function ProtectedLayout({
                   <ArrowLeft className="w-5 h-5" strokeWidth={2} />
                 </Button>
               )}
+              
+              {/* Logo: Desktop immer links, Mobile nur auf Dashboard links */}
+              <span className={`text-2xl font-bold gradient-text tracking-tight ${
+                pathname === '/dashboard' ? '' : 'hidden sm:inline'
+              }`}>
+                ASC
+              </span>
+              
               {/* Desktop Navigation Links */}
-              <div className="hidden sm:flex sm:space-x-1">
+              <div className="hidden sm:flex sm:space-x-1 ml-4">
                 {desktopNavItems.map((item) => {
                   const itemKey = item.href || item.label
                   const hasChildren = item.children && item.children.length > 0
@@ -220,10 +229,12 @@ export default function ProtectedLayout({
               </div>
             </div>
             
-            {/* Mitte: ASC Logo (immer mittig) */}
-            <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center">
-              <span className="text-2xl font-bold gradient-text tracking-tight">ASC</span>
-            </div>
+            {/* Mitte: ASC Logo (Mobile, nur auf anderen Seiten) */}
+            {pathname !== '/dashboard' && (
+              <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center sm:hidden">
+                <span className="text-2xl font-bold gradient-text tracking-tight">ASC</span>
+              </div>
+            )}
             
             {/* Rechts: Settings und Profil */}
             <div className="flex items-center space-x-3 flex-1 justify-end">

@@ -116,11 +116,11 @@ export default function RegisterPage() {
                     <FormItem>
                       <FormLabel>Name</FormLabel>
                       <FormControl>
-                        <Input
-                          type="text"
-                          placeholder="Ihr Name"
+              <Input
+                type="text"
+                placeholder="Ihr Name"
                           {...field}
-                        />
+              />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -151,16 +151,16 @@ export default function RegisterPage() {
                       <FormMessage />
                     </FormItem>
                   )}
-                />
-                {error && (
+              />
+              {error && (
                   <Alert variant="destructive">
                     <AlertDescription>{error}</AlertDescription>
                   </Alert>
-                )}
-                <Button type="submit" className="w-full mt-6" disabled={isLoading}>
-                  {isLoading ? 'Wird registriert...' : 'Registrieren'}
-                </Button>
-              </form>
+              )}
+              <Button type="submit" className="w-full mt-6" disabled={isLoading}>
+                {isLoading ? 'Wird registriert...' : 'Registrieren'}
+              </Button>
+            </form>
             </Form>
           )}
         </CardContent>

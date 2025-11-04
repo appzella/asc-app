@@ -16,6 +16,7 @@ export default function DashboardPage() {
   const [tours, setTours] = useState<Tour[]>([])
   const [pendingTours, setPendingTours] = useState<Tour[]>([])
   const [archivedTours, setArchivedTours] = useState<Tour[]>([])
+  const [isLoading, setIsLoading] = useState<boolean>(true)
 
   useEffect(() => {
     const currentUser = authService.getCurrentUser()
@@ -23,6 +24,7 @@ export default function DashboardPage() {
 
     if (currentUser) {
       const loadTours = async () => {
+        setIsLoading(true)
         const allTours = await dataRepository.getTours()
         const today = new Date()
         today.setHours(0, 0, 0, 0)
@@ -51,9 +53,13 @@ export default function DashboardPage() {
           const submitted = allTours.filter((t) => t.leaderId === currentUser.id && t.status === 'draft' && t.submittedForPublishing === true)
           setPendingTours(submitted)
         }
+        
+        setIsLoading(false)
       }
       
       loadTours()
+    } else {
+      setIsLoading(false)
     }
 
     const unsubscribe = authService.subscribe((updatedUser) => {
@@ -65,7 +71,7 @@ export default function DashboardPage() {
     }
   }, [])
 
-  if (!user) {
+  if (!user || isLoading) {
     return (
       <div className="space-y-6 animate-fade-in">
         <div>

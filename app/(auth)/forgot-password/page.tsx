@@ -89,9 +89,9 @@ export default function ForgotPasswordPage() {
           ) : (
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <p className="text-sm text-gray-600 mb-4">
-                  Geben Sie Ihre E-Mail-Adresse ein. Wir senden Ihnen einen Link zum Zurücksetzen Ihres Passworts.
-                </p>
+              <p className="text-sm text-gray-600 mb-4">
+                Geben Sie Ihre E-Mail-Adresse ein. Wir senden Ihnen einen Link zum Zurücksetzen Ihres Passworts.
+              </p>
                 <FormField
                   control={form.control}
                   name="email"
@@ -99,35 +99,35 @@ export default function ForgotPasswordPage() {
                     <FormItem>
                       <FormLabel>E-Mail</FormLabel>
                       <FormControl>
-                        <Input
-                          type="email"
-                          placeholder="ihre.email@example.com"
+              <Input
+                type="email"
+                placeholder="ihre.email@example.com"
                           {...field}
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
-                />
-                {error && (
+              />
+              {error && (
                   <Alert variant="destructive">
                     <AlertDescription>{error}</AlertDescription>
                   </Alert>
-                )}
-                <div className="flex gap-3">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => router.push('/login')}
-                    className="flex-1"
-                  >
-                    Abbrechen
-                  </Button>
-                  <Button type="submit" className="flex-1" disabled={isLoading}>
-                    {isLoading ? 'Wird gesendet...' : 'Link senden'}
-                  </Button>
-                </div>
-              </form>
+              )}
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => router.push('/login')}
+                  className="flex-1"
+                >
+                  Abbrechen
+                </Button>
+                <Button type="submit" className="flex-1" disabled={isLoading}>
+                  {isLoading ? 'Wird gesendet...' : 'Link senden'}
+                </Button>
+              </div>
+            </form>
             </Form>
           )}
         </CardContent>

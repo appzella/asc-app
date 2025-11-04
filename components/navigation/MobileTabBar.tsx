@@ -57,25 +57,25 @@ export function MobileTabBar() {
                       active && "bg-primary-50 text-primary-600"
                     )}
                   >
-                    <Link
-                      href={tab.href}
+                  <Link
+                    href={tab.href}
                       className="flex flex-col items-center justify-center gap-1 w-full"
-                      aria-current={active ? 'page' : undefined}
-                    >
-                      <IconComponent
+                    aria-current={active ? 'page' : undefined}
+                  >
+                    <IconComponent
                         className={cn(
                           "w-5 h-5",
                           active ? "text-primary-600" : "text-gray-500"
                         )}
-                        strokeWidth={2}
-                      />
+                      strokeWidth={2}
+                    />
                       <span className={cn(
                         "text-xs font-medium",
                         active ? "text-primary-600" : "text-gray-600"
                       )}>
-                        {tab.label}
-                      </span>
-                    </Link>
+                      {tab.label}
+                    </span>
+                  </Link>
                   </Button>
                 </li>
               )

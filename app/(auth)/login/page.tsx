@@ -78,11 +78,11 @@ export default function LoginPage() {
                   <FormItem>
                     <FormLabel>E-Mail</FormLabel>
                     <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="ihre.email@example.com"
+              <Input
+                type="email"
+                placeholder="ihre.email@example.com"
                         {...field}
-                      />
+              />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -95,13 +95,13 @@ export default function LoginPage() {
                   <FormItem>
                     <div className="flex items-center justify-between">
                       <FormLabel>Passwort</FormLabel>
-                      <a
-                        href="/forgot-password"
-                        className="text-sm text-primary-600 hover:text-primary-700 hover:underline transition-colors"
-                      >
-                        Passwort vergessen?
-                      </a>
-                    </div>
+                <a
+                  href="/forgot-password"
+                  className="text-sm text-primary-600 hover:text-primary-700 hover:underline transition-colors"
+                >
+                  Passwort vergessen?
+                </a>
+              </div>
                     <FormControl>
                       <Input type="password" {...field} />
                     </FormControl>
@@ -109,15 +109,15 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
-              {error && (
+            {error && (
                 <Alert variant="destructive">
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
-              )}
-              <Button type="submit" className="w-full mt-6" disabled={isLoading}>
-                {isLoading ? 'Wird angemeldet...' : 'Anmelden'}
-              </Button>
-            </form>
+            )}
+            <Button type="submit" className="w-full mt-6" disabled={isLoading}>
+              {isLoading ? 'Wird angemeldet...' : 'Anmelden'}
+            </Button>
+          </form>
           </Form>
         </CardContent>
       </Card>

@@ -122,8 +122,8 @@ export default function SettingsPage() {
                           <SettingsIcon type={category.iconType as 'tour-types' | 'tour-lengths' | 'difficulties'} className="w-5 h-5 text-primary-600 flex-shrink-0" strokeWidth={2} />
                         )}
                         <h3 className="text-lg font-bold text-gray-900 group-hover:text-primary-600 transition-colors">
-                          {category.title}
-                        </h3>
+                        {category.title}
+                      </h3>
                       </div>
                       <CardDescription className="hidden sm:block line-clamp-2">{category.description}</CardDescription>
                     </div>
