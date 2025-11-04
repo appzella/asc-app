@@ -63,7 +63,7 @@ export const TourCard: React.FC<TourCardProps> = ({ tour, tourTypeIcons, userRol
             <div className="flex items-center gap-2 flex-1 min-w-0">
               {(() => {
                 const IconComponent = getTourIcon(tour.tourType, tourTypeIcons)
-                return <IconComponent className="w-4 h-4 text-gray-600 flex-shrink-0" strokeWidth={2} />
+                return <IconComponent className="w-4 h-4 text-gray-900 flex-shrink-0" strokeWidth={2} />
               })()}
               <h3 className="text-lg font-semibold text-gray-900 truncate">{tour.title}</h3>
             </div>

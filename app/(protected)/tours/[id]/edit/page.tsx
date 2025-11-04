@@ -205,17 +205,6 @@ export default function EditTourPage() {
               Zurück zur Tour
             </Link>
           </Button>
-          <Button
-            variant="secondary"
-            size="icon"
-            asChild
-            className="sm:hidden"
-            aria-label="Zurück zur Tour"
-          >
-            <Link href={`/tours/${tourId}`}>
-              <ChevronLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
-            </Link>
-          </Button>
         </div>
         <h1 className="text-3xl font-bold text-gray-900">Tour bearbeiten</h1>
       </div>

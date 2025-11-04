@@ -525,8 +525,8 @@ export default function ProfilePage() {
                               alt={user.name}
                               className="object-cover"
                             />
-                            <AvatarFallback className="bg-gray-100 text-gray-400">
-                              <UserCircle className="w-8 h-8" />
+                            <AvatarFallback>
+                              {user.name.charAt(0).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
                         </div>

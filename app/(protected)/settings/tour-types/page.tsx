@@ -223,17 +223,6 @@ export default function TourTypesSettingsPage() {
               Zurück zur Übersicht
             </Link>
           </Button>
-          <Button
-            variant="secondary"
-            size="icon"
-            asChild
-            className="sm:hidden"
-            aria-label="Zurück zur Übersicht"
-          >
-            <Link href="/settings">
-              <ChevronLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
-            </Link>
-          </Button>
         </div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Tourentypen</h1>
         <CardDescription className="text-base">Verwalten Sie die verfügbaren Tourentypen</CardDescription>
@@ -384,12 +373,12 @@ export default function TourTypesSettingsPage() {
                     <span className="font-medium text-gray-900 flex-1 min-w-0 truncate text-sm">{type}</span>
                     <Button
                       type="button"
-                      variant="ghost"
+                      variant="destructive"
                       size="sm"
                       draggable={false}
                       onClick={() => handleRemove(type)}
                       onDragStart={(e) => e.stopPropagation()}
-                      className="flex-shrink-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                      className="flex-shrink-0"
                       aria-label="Entfernen"
                     >
                       <Trash2 className="w-4 h-4" strokeWidth={2} />

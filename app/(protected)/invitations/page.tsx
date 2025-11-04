@@ -198,17 +198,6 @@ export default function InvitationsPage() {
               Zurück zur Übersicht
             </Link>
           </Button>
-          <Button
-            variant="secondary"
-            size="icon"
-            asChild
-            className="sm:hidden"
-            aria-label="Zurück zur Übersicht"
-          >
-            <Link href="/settings">
-              <ChevronLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
-            </Link>
-          </Button>
         </div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Einladungen</h1>
         <CardDescription className="text-base">Erstellen Sie Einladungen für neue Clubmitglieder</CardDescription>

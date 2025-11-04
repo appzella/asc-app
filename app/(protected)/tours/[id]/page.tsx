@@ -317,22 +317,11 @@ export default function TourDetailPage() {
                 Zurück zur Übersicht
               </Link>
             </Button>
-            <Button
-              variant="secondary"
-              size="icon"
-              asChild
-              className="sm:hidden"
-              aria-label="Zurück zur Übersicht"
-            >
-              <Link href="/tours">
-                <ChevronLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
-              </Link>
-            </Button>
           </div>
           <div className="flex items-center gap-2">
             {(() => {
               const IconComponent = getTourIcon(tour.tourType, settings?.tourTypeIcons)
-              return <IconComponent className="w-6 h-6 text-gray-600 flex-shrink-0" strokeWidth={2} />
+              return <IconComponent className="w-6 h-6 text-gray-900 flex-shrink-0" strokeWidth={2} />
             })()}
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{tour.title}</h1>
           </div>
@@ -423,7 +412,7 @@ export default function TourDetailPage() {
                           alt={tour.leader.name}
                           className="object-cover"
                         />
-                        <AvatarFallback className="bg-primary-100 text-primary-600 text-xs font-semibold">
+                        <AvatarFallback>
                           {tour.leader.name.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
@@ -616,7 +605,7 @@ export default function TourDetailPage() {
                           alt={participant.name}
                           className="object-cover"
                         />
-                        <AvatarFallback className="bg-primary-100 text-primary-600 text-xs font-semibold">
+                        <AvatarFallback>
                           {participant.name.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>

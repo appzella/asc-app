@@ -98,17 +98,6 @@ export default function UsersPage() {
               Zurück zur Übersicht
             </Link>
           </Button>
-          <Button
-            variant="secondary"
-            size="icon"
-            asChild
-            className="sm:hidden"
-            aria-label="Zurück zur Übersicht"
-          >
-            <Link href="/settings">
-              <ChevronLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
-            </Link>
-          </Button>
         </div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Benutzerverwaltung</h1>
         <CardDescription className="text-base">Verwalten Sie Benutzer und deren Rollen</CardDescription>
@@ -140,7 +129,7 @@ export default function UsersPage() {
                         <div className="flex items-center gap-3">
                           <Avatar className="w-8 h-8">
                             <AvatarImage src={u.profilePhoto || undefined} alt={u.name || 'Unbekannt'} className="object-cover" />
-                            <AvatarFallback className="bg-primary-100 text-primary-600 text-xs font-semibold">
+                            <AvatarFallback>
                               {u.name ? u.name.charAt(0).toUpperCase() : '?'}
                             </AvatarFallback>
                           </Avatar>

@@ -161,7 +161,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ tourId, userId }) => {
                         alt={message.user?.name || 'Benutzer'}
                         className="object-cover"
                       />
-                      <AvatarFallback className="bg-primary-100 text-primary-600 text-xs font-semibold">
+                      <AvatarFallback>
                         {message.user?.name?.charAt(0).toUpperCase() || '?'}
                       </AvatarFallback>
                     </Avatar>

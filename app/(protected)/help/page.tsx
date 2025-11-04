@@ -61,17 +61,6 @@ export default function HelpPage() {
               Zurück zum Dashboard
             </Link>
           </Button>
-          <Button
-            variant="secondary"
-            size="icon"
-            asChild
-            className="sm:hidden"
-            aria-label="Zurück zum Dashboard"
-          >
-            <Link href="/dashboard">
-              <ChevronLeft className="w-5 h-5 text-gray-700" strokeWidth={2} />
-            </Link>
-          </Button>
         </div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Hilfe</h1>
         <CardDescription className="text-base">Erfahren Sie, wie Sie die ASC Skitouren App verwenden</CardDescription>

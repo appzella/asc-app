@@ -15,6 +15,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Switch } from '@/components/ui/switch'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Separator } from '@/components/ui/separator'
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet'
 import { Archive, Filter } from 'lucide-react'
 
 export default function ToursPage() {
@@ -31,7 +39,7 @@ export default function ToursPage() {
   const [difficultyFilter, setDifficultyFilter] = useState<string>('')
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [showMyTours, setShowMyTours] = useState<boolean>(false)
-  const [showFilters, setShowFilters] = useState<boolean>(false)
+  const [filterSheetOpen, setFilterSheetOpen] = useState<boolean>(false)
 
   useEffect(() => {
     const currentUser = authService.getCurrentUser()
@@ -256,151 +264,28 @@ export default function ToursPage() {
         )}
       </div>
 
-      {/* Filter */}
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg">Filter</CardTitle>
-            {(statusFilter || typeFilter || lengthFilter || difficultyFilter || searchQuery || showMyTours) && (
-              <Button variant="ghost" size="sm" onClick={clearFilters} className="h-8">
-                Zurücksetzen
-              </Button>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Mobile: Kompakte Suchzeile mit Filter-Toggle */}
-          <div className="md:hidden space-y-4">
-            <div className="flex gap-2">
-              <Input
-                placeholder="Suche..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1"
-              />
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setShowFilters(!showFilters)}
-                className="flex-shrink-0"
-                aria-label={showFilters ? 'Filter schließen' : 'Filter anzeigen'}
-              >
-                <Filter className="w-4 h-4" strokeWidth={1.8} />
-              </Button>
-            </div>
-            
-            {/* Ausklappbare Filter auf Mobile */}
-            {showFilters && (
-              <div className="space-y-4">
-                <Separator />
-                <div className="space-y-4 pt-2">
-                {user.role === 'admin' && (
-                  <div className="space-y-2">
-                    <Label>Status</Label>
-                    <Select value={statusFilter || "all"} onValueChange={(value) => setStatusFilter(value === "all" ? "" : value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Alle" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Alle</SelectItem>
-                        <SelectItem value="published">Veröffentlicht</SelectItem>
-                        <SelectItem value="draft">Entwurf</SelectItem>
-                        <SelectItem value="cancelled">Abgesagt</SelectItem>
-                        <SelectItem value="submitted">Zur Veröffentlichung eingereicht</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-
-                <div className="space-y-2">
-                  <Label>Tourenart</Label>
-                  <Select value={typeFilter || "all"} onValueChange={(value) => setTypeFilter(value === "all" ? "" : value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Alle" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Alle</SelectItem>
-                      {settings.tourTypes.map((type) => (
-                        <SelectItem key={type} value={type}>{type}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Tourlänge</Label>
-                  <Select value={lengthFilter || "all"} onValueChange={(value) => setLengthFilter(value === "all" ? "" : value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Alle" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Alle</SelectItem>
-                      {settings.tourLengths.map((length) => (
-                        <SelectItem key={length} value={length}>{length}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Schwierigkeit</Label>
-                  <Select value={difficultyFilter || "all"} onValueChange={(value) => setDifficultyFilter(value === "all" ? "" : value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Alle" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Alle</SelectItem>
-                      <SelectItem value="T1">T1 - Wandern</SelectItem>
-                      <SelectItem value="T2">T2 - Bergwandern</SelectItem>
-                      <SelectItem value="T3">T3 - Anspruchsvolles Bergwandern</SelectItem>
-                      <SelectItem value="T4">T4 - Alpinwandern</SelectItem>
-                      <SelectItem value="T5">T5 - Anspruchsvolles Alpinwandern</SelectItem>
-                      <SelectItem value="T6">T6 - Schwieriges Alpinwandern</SelectItem>
-                      <SelectItem value="L">L - Leicht</SelectItem>
-                      <SelectItem value="WS">WS - Wenig schwierig</SelectItem>
-                      <SelectItem value="ZS">ZS - Ziemlich schwierig</SelectItem>
-                      <SelectItem value="S">S - Schwierig</SelectItem>
-                      <SelectItem value="SS">SS - Sehr schwierig</SelectItem>
-                      <SelectItem value="AS">AS - Äußerst schwierig</SelectItem>
-                      <SelectItem value="EX">EX - Extrem schwierig</SelectItem>
-                      <SelectItem value="B1">B1 - Leicht</SelectItem>
-                      <SelectItem value="B2">B2 - Mittel</SelectItem>
-                      <SelectItem value="B3">B3 - Schwer</SelectItem>
-                      <SelectItem value="B4">B4 - Sehr schwierig</SelectItem>
-                      <SelectItem value="B5">B5 - Extrem</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center space-x-3 pt-2">
-                  <Switch
-                    id="my-tours-mobile"
-                    checked={showMyTours}
-                    onCheckedChange={setShowMyTours}
-                  />
-                  <Label htmlFor="my-tours-mobile" className="text-sm font-medium cursor-pointer">
-                    Nur meine Touren
-                  </Label>
-                </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Desktop: Normale Ansicht */}
-          <div className="hidden md:block space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-              <div className="space-y-2">
-                <Label>Suche</Label>
-                <Input
-                  placeholder="Suche..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              
+      {/* Mobile: Suchzeile mit Filter-Drawer */}
+      <div className="md:hidden flex gap-2">
+        <Input
+          placeholder="Suche..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="flex-1"
+        />
+        <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
+          <SheetTrigger asChild>
+            <Button variant="outline" size="icon" className="flex-shrink-0">
+              <Filter className="w-4 h-4" strokeWidth={1.8} />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="right" className="w-full sm:max-w-md">
+            <SheetHeader>
+              <SheetTitle>Filter</SheetTitle>
+              <SheetDescription>
+                Filtern Sie die Touren nach Ihren Wünschen
+              </SheetDescription>
+            </SheetHeader>
+            <div className="mt-6 space-y-6">
               {user.role === 'admin' && (
                 <div className="space-y-2">
                   <Label>Status</Label>
@@ -478,18 +363,143 @@ export default function ToursPage() {
                   </SelectContent>
                 </Select>
               </div>
+
+              <Separator />
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <Switch
+                    id="my-tours-sheet"
+                    checked={showMyTours}
+                    onCheckedChange={setShowMyTours}
+                  />
+                  <Label htmlFor="my-tours-sheet" className="text-sm font-medium cursor-pointer">
+                    Nur meine Touren
+                  </Label>
+                </div>
+              </div>
+
+              {(statusFilter || typeFilter || lengthFilter || difficultyFilter || searchQuery || showMyTours) && (
+                <Button variant="outline" onClick={clearFilters} className="w-full">
+                  Filter zurücksetzen
+                </Button>
+              )}
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
+
+      {/* Desktop: Filter Card */}
+      <Card className="hidden md:block">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg">Filter</CardTitle>
+            {(statusFilter || typeFilter || lengthFilter || difficultyFilter || searchQuery || showMyTours) && (
+              <Button variant="ghost" size="sm" onClick={clearFilters} className="h-8">
+                Zurücksetzen
+              </Button>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="space-y-2">
+              <Label>Suche</Label>
+              <Input
+                placeholder="Suche..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            
+            {user.role === 'admin' && (
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select value={statusFilter || "all"} onValueChange={(value) => setStatusFilter(value === "all" ? "" : value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Alle" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Alle</SelectItem>
+                    <SelectItem value="published">Veröffentlicht</SelectItem>
+                    <SelectItem value="draft">Entwurf</SelectItem>
+                    <SelectItem value="cancelled">Abgesagt</SelectItem>
+                    <SelectItem value="submitted">Zur Veröffentlichung eingereicht</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label>Tourenart</Label>
+              <Select value={typeFilter || "all"} onValueChange={(value) => setTypeFilter(value === "all" ? "" : value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Alle" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Alle</SelectItem>
+                  {settings.tourTypes.map((type) => (
+                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
-            <div className="flex items-center space-x-3 pt-2">
-              <Switch
-                id="my-tours-desktop"
-                checked={showMyTours}
-                onCheckedChange={setShowMyTours}
-              />
-              <Label htmlFor="my-tours-desktop" className="text-sm font-medium cursor-pointer">
-                Nur meine Touren
-              </Label>
+            <div className="space-y-2">
+              <Label>Tourlänge</Label>
+              <Select value={lengthFilter || "all"} onValueChange={(value) => setLengthFilter(value === "all" ? "" : value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Alle" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Alle</SelectItem>
+                  {settings.tourLengths.map((length) => (
+                    <SelectItem key={length} value={length}>{length}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
+
+            <div className="space-y-2">
+              <Label>Schwierigkeit</Label>
+              <Select value={difficultyFilter || "all"} onValueChange={(value) => setDifficultyFilter(value === "all" ? "" : value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Alle" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Alle</SelectItem>
+                  <SelectItem value="T1">T1 - Wandern</SelectItem>
+                  <SelectItem value="T2">T2 - Bergwandern</SelectItem>
+                  <SelectItem value="T3">T3 - Anspruchsvolles Bergwandern</SelectItem>
+                  <SelectItem value="T4">T4 - Alpinwandern</SelectItem>
+                  <SelectItem value="T5">T5 - Anspruchsvolles Alpinwandern</SelectItem>
+                  <SelectItem value="T6">T6 - Schwieriges Alpinwandern</SelectItem>
+                  <SelectItem value="L">L - Leicht</SelectItem>
+                  <SelectItem value="WS">WS - Wenig schwierig</SelectItem>
+                  <SelectItem value="ZS">ZS - Ziemlich schwierig</SelectItem>
+                  <SelectItem value="S">S - Schwierig</SelectItem>
+                  <SelectItem value="SS">SS - Sehr schwierig</SelectItem>
+                  <SelectItem value="AS">AS - Äußerst schwierig</SelectItem>
+                  <SelectItem value="EX">EX - Extrem schwierig</SelectItem>
+                  <SelectItem value="B1">B1 - Leicht</SelectItem>
+                  <SelectItem value="B2">B2 - Mittel</SelectItem>
+                  <SelectItem value="B3">B3 - Schwer</SelectItem>
+                  <SelectItem value="B4">B4 - Sehr schwierig</SelectItem>
+                  <SelectItem value="B5">B5 - Extrem</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-3 pt-2">
+            <Switch
+              id="my-tours-desktop"
+              checked={showMyTours}
+              onCheckedChange={setShowMyTours}
+            />
+            <Label htmlFor="my-tours-desktop" className="text-sm font-medium cursor-pointer">
+              Nur meine Touren
+            </Label>
           </div>
         </CardContent>
       </Card>

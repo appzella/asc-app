@@ -15,7 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { ChevronDown, Settings } from 'lucide-react'
+import { ChevronDown, Settings, ArrowLeft } from 'lucide-react'
 import { UserRole } from '@/lib/types'
 
 // Helper function to translate user roles to German
@@ -132,12 +132,22 @@ export default function ProtectedLayout({
     <div className="min-h-screen bg-white flex flex-col">
       <nav className="bg-white/95 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-200 flex-shrink-0 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-20">
-            <div className="flex items-center gap-2">
-              <div className="flex-shrink-0 flex items-center">
-                <span className="text-2xl font-bold gradient-text tracking-tight">ASC</span>
-              </div>
-              <div className="hidden sm:ml-8 sm:flex sm:space-x-1">
+          <div className="flex justify-between items-center h-20 relative">
+            {/* Links: Zurück-Button (nur Mobile, wenn nicht auf Dashboard) */}
+            <div className="flex items-center gap-2 flex-1">
+              {pathname !== '/dashboard' && (
+                <Button
+                  variant="default"
+                  size="icon"
+                  onClick={() => router.back()}
+                  className="h-10 w-10 sm:hidden"
+                  aria-label="Zurück"
+                >
+                  <ArrowLeft className="w-5 h-5" strokeWidth={2} />
+                </Button>
+              )}
+              {/* Desktop Navigation Links */}
+              <div className="hidden sm:flex sm:space-x-1">
                 {desktopNavItems.map((item) => {
                   const itemKey = item.href || item.label
                   const hasChildren = item.children && item.children.length > 0
@@ -209,27 +219,26 @@ export default function ProtectedLayout({
                 })}
               </div>
             </div>
-            <div className="flex items-center space-x-3">
+            
+            {/* Mitte: ASC Logo (immer mittig) */}
+            <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center">
+              <span className="text-2xl font-bold gradient-text tracking-tight">ASC</span>
+            </div>
+            
+            {/* Rechts: Settings und Profil */}
+            <div className="flex items-center space-x-3 flex-1 justify-end">
               {/* Settings Icon für Mobile (nur Admin) */}
               {user.role === 'admin' && (
                 <Button
                   variant="secondary"
                   size="icon"
                   asChild
-                  className={`sm:hidden ${
-                    pathname === '/settings' || pathname?.startsWith('/settings/')
-                      ? 'bg-primary-50 text-primary-600'
-                      : ''
-                  }`}
+                  className="sm:hidden"
                   aria-label="Einstellungen"
                 >
                   <Link href="/settings">
                     <Settings 
-                      className={`w-5 h-5 ${
-                        pathname === '/settings' || pathname?.startsWith('/settings/')
-                          ? 'text-primary-600'
-                          : 'text-gray-700'
-                      }`} 
+                      className="w-5 h-5 text-gray-700" 
                       strokeWidth={2} 
                     />
                   </Link>
@@ -249,7 +258,7 @@ export default function ProtectedLayout({
                         alt={user.name}
                         className="object-cover"
                       />
-                      <AvatarFallback className="bg-primary-100 text-primary-600 text-xs font-semibold">
+                      <AvatarFallback>
                         {user.name.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
