@@ -26,8 +26,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { ImageCropper } from '@/components/ui/ImageCropper'
 import { UserCircle, Lock, LogOut, Upload, X, Camera, ImageIcon, Trash2 } from 'lucide-react'
-import PhoneInput from 'react-phone-number-input'
-import 'react-phone-number-input/style.css'
+import { PhoneInput } from '@/components/ui/phone-input'
 import { AddressAutocomplete } from '@/components/ui/address-autocomplete'
 
 const profileSchema = z.object({
@@ -633,9 +632,9 @@ export default function ProfilePage() {
                                 <FormLabel>Telefon (Festnetz)</FormLabel>
                                 <FormControl>
                                   <PhoneInput
-                                    international
                                     defaultCountry="CH"
-                                    value={field.value}
+                                    countries={['CH', 'DE', 'AT', 'FR', 'IT', 'LI']}
+                                    value={field.value || undefined}
                                     onChange={(value) => {
                                       // Wenn der Wert nur aus dem Ländercode besteht (z.B. "+670" oder "+41"), setze undefined
                                       // Ländercodes sind normalerweise 1-3 Ziffern nach dem "+"
@@ -645,7 +644,7 @@ export default function ProfilePage() {
                                         field.onChange(value || undefined)
                                       }
                                     }}
-                                    placeholder="+41 XX XXX XX XX"
+                                    placeholder="Telefonnummer eingeben"
                                     className="w-full"
                                   />
                                 </FormControl>
@@ -662,9 +661,9 @@ export default function ProfilePage() {
                                 <FormLabel>Mobile</FormLabel>
                                 <FormControl>
                                   <PhoneInput
-                                    international
                                     defaultCountry="CH"
-                                    value={field.value}
+                                    countries={['CH', 'DE', 'AT', 'FR', 'IT', 'LI']}
+                                    value={field.value || undefined}
                                     onChange={(value) => {
                                       // Wenn der Wert nur aus dem Ländercode besteht (z.B. "+670" oder "+41"), setze undefined
                                       // Ländercodes sind normalerweise 1-3 Ziffern nach dem "+"
@@ -674,7 +673,7 @@ export default function ProfilePage() {
                                         field.onChange(value || undefined)
                                       }
                                     }}
-                                    placeholder="+41 XX XXX XX XX"
+                                    placeholder="Handynummer eingeben"
                                     className="w-full"
                                   />
                                 </FormControl>
