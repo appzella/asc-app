@@ -58,7 +58,8 @@ class SupabaseAuthService {
   private setupSessionRefresh() {
     if (!isSupabaseConfigured || !supabase) return
 
-    // Check and refresh session every 5 minutes to prevent expiration
+    // Aggressive refresh strategy for Free Plan where JWT settings can't be changed
+    // Check more frequently and refresh earlier to prevent expiration
     const refreshInterval = setInterval(async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession()
@@ -71,18 +72,20 @@ class SupabaseAuthService {
         }
 
         if (session) {
-          // Check if token is close to expiring (within 5 minutes)
+          // Check if token is close to expiring (within 15 minutes)
+          // This is more aggressive to ensure we refresh before expiration
           const expiresAt = session.expires_at
           if (expiresAt) {
             const now = Math.floor(Date.now() / 1000)
             const timeUntilExpiry = expiresAt - now
             
-            // If token expires in less than 5 minutes, refresh it proactively
-            if (timeUntilExpiry < 300) {
+            // Refresh if token expires in less than 15 minutes (900 seconds)
+            // This gives us plenty of buffer time
+            if (timeUntilExpiry < 900 && timeUntilExpiry > 0) {
               try {
                 const { data: { session: refreshedSession }, error: refreshError } = await supabase.auth.refreshSession()
                 if (!refreshError && refreshedSession) {
-                  console.log('Session refreshed proactively')
+                  console.log('Session refreshed proactively (time until expiry:', timeUntilExpiry, 's)')
                 }
               } catch (refreshError) {
                 console.warn('Failed to refresh session:', refreshError)
@@ -93,12 +96,36 @@ class SupabaseAuthService {
       } catch (error) {
         // Silently fail - session might be invalid
       }
-    }, 5 * 60 * 1000) // Check every 5 minutes
+    }, 2 * 60 * 1000) // Check every 2 minutes (more frequent for Free Plan)
 
-    // Cleanup on page unload
+    // Also refresh on user activity (page visibility, focus, etc.)
     if (typeof window !== 'undefined') {
+      const refreshOnActivity = async () => {
+        try {
+          const { data: { session } } = await supabase.auth.getSession()
+          if (session?.expires_at) {
+            const now = Math.floor(Date.now() / 1000)
+            const timeUntilExpiry = session.expires_at - now
+            // Refresh if less than 20 minutes remaining
+            if (timeUntilExpiry < 1200 && timeUntilExpiry > 0) {
+              await supabase.auth.refreshSession()
+            }
+          }
+        } catch (error) {
+          // Ignore errors
+        }
+      }
+
+      // Refresh when page becomes visible again
+      document.addEventListener('visibilitychange', refreshOnActivity)
+      // Refresh when window regains focus
+      window.addEventListener('focus', refreshOnActivity)
+      
+      // Cleanup on page unload
       window.addEventListener('beforeunload', () => {
         clearInterval(refreshInterval)
+        document.removeEventListener('visibilitychange', refreshOnActivity)
+        window.removeEventListener('focus', refreshOnActivity)
       })
     }
   }
@@ -372,8 +399,9 @@ class SupabaseAuthService {
           const now = Math.floor(Date.now() / 1000)
           const timeUntilExpiry = expiresAt - now
           
-          // If token expires in less than 5 minutes, refresh it
-          if (timeUntilExpiry < 300 && timeUntilExpiry > 0) {
+          // Refresh if token expires in less than 15 minutes
+          // More aggressive for Free Plan where JWT settings can't be changed
+          if (timeUntilExpiry < 900 && timeUntilExpiry > 0) {
             try {
               await supabase.auth.refreshSession()
             } catch (refreshError) {

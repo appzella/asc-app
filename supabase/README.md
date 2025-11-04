@@ -52,16 +52,23 @@ Die App verwendet Supabase Auth für die Authentifizierung. Der Auth Service (`l
 
 ### Session-Lebensdauer erhöhen:
 
-Die App verwendet einen proaktiven Token-Refresh-Mechanismus, um Sessions aktiv zu halten. Um die Session-Lebensdauer zu erhöhen:
+Die App verwendet einen **aggressiven proaktiven Token-Refresh-Mechanismus**, um Sessions aktiv zu halten, auch wenn die JWT-Einstellungen im Free Plan nicht änderbar sind.
 
-1. Gehe zu deinem **Supabase Dashboard** → **Authentication** → **Settings**
-2. Im Abschnitt **JWT Settings** findest du:
-   - **JWT expiry**: Standard ist 3600 Sekunden (1 Stunde)
-   - Erhöhe diesen Wert auf z.B. 86400 (24 Stunden) oder 604800 (7 Tage)
-3. **Refresh Token Rotation**: Stelle sicher, dass "Auto Refresh" aktiviert ist
-4. **Inactivity Timeout** (Pro Plan): Optional - kannst du deaktivieren oder erhöhen
+**Automatische Refresh-Strategie:**
+- Prüft die Session alle **2 Minuten**
+- Refresht automatisch, wenn der Token in weniger als **15 Minuten** abläuft
+- Refresht auch bei Benutzeraktivität (Page Visibility, Window Focus)
+- Verhindert so häufige Abmeldungen, auch bei Standard-JWT-Einstellungen (1 Stunde)
 
-**Hinweis**: Die App refresht automatisch Tokens, bevor sie ablaufen (5 Minuten vor Ablauf). Die maximale Session-Dauer wird durch die JWT Expiry-Einstellung im Dashboard begrenzt.
+**Für Pro Plan Benutzer (optional):**
+1. Gehe zu deinem **Supabase Dashboard** → **Authentication** → **Sessions**
+2. Im Abschnitt **User Sessions** kannst du:
+   - **Time-box user sessions**: Erhöhe auf z.B. 7 Tage (604800 Sekunden)
+   - **Inactivity timeout**: Optional anpassen oder deaktivieren
+3. Unter **Advanced** → **JWT Settings**:
+   - **JWT expiry**: Erhöhe auf z.B. 86400 (24 Stunden) oder 604800 (7 Tage)
+
+**Hinweis**: Im Free Plan können die JWT-Einstellungen nicht geändert werden, aber der automatische Refresh-Mechanismus sollte dafür sorgen, dass die Sessions länger aktiv bleiben.
 
 ### Migration von Mock zu Supabase:
 
