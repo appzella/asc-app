@@ -285,11 +285,11 @@ export default function ProfilePage() {
     try {
       const updatedUser = await dataRepository.updateUser(user.id, {
         name: values.name,
-        phone: values.phone || undefined,
-        mobile: values.mobile || undefined,
-        street: values.street || undefined,
-        zip: values.zip || undefined,
-        city: values.city || undefined,
+        phone: values.phone?.trim() || '',
+        mobile: values.mobile?.trim() || '',
+        street: values.street?.trim() || '',
+        zip: values.zip?.trim() || '',
+        city: values.city?.trim() || '',
       })
 
       if (updatedUser) {

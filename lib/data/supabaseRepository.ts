@@ -150,11 +150,12 @@ export class SupabaseDataRepository implements IDataRepository {
     if (updates.profilePhoto !== undefined) {
       updateData.profile_photo = updates.profilePhoto ?? null
     }
-    if (updates.phone !== undefined) updateData.phone = updates.phone
-    if (updates.mobile !== undefined) updateData.mobile = updates.mobile
-    if (updates.street !== undefined) updateData.street = updates.street
-    if (updates.zip !== undefined) updateData.zip = updates.zip
-    if (updates.city !== undefined) updateData.city = updates.city
+    // Convert empty strings to null for optional fields
+    if (updates.phone !== undefined) updateData.phone = updates.phone === '' ? null : updates.phone
+    if (updates.mobile !== undefined) updateData.mobile = updates.mobile === '' ? null : updates.mobile
+    if (updates.street !== undefined) updateData.street = updates.street === '' ? null : updates.street
+    if (updates.zip !== undefined) updateData.zip = updates.zip === '' ? null : updates.zip
+    if (updates.city !== undefined) updateData.city = updates.city === '' ? null : updates.city
 
     const { data, error } = await supabase
       .from('users')
@@ -803,11 +804,12 @@ export class SupabaseDataRepository implements IDataRepository {
         registrationToken: row.registration_token || undefined,
         registered: row.registered ?? true,
         profilePhoto: row.profile_photo || undefined,
-        phone: row.phone || undefined,
-        mobile: row.mobile || undefined,
-        street: row.street || undefined,
-        zip: row.zip || undefined,
-        city: row.city || undefined,
+        // Convert empty strings and null to undefined for optional fields
+        phone: row.phone && row.phone.trim() !== '' ? row.phone : undefined,
+        mobile: row.mobile && row.mobile.trim() !== '' ? row.mobile : undefined,
+        street: row.street && row.street.trim() !== '' ? row.street : undefined,
+        zip: row.zip && row.zip.trim() !== '' ? row.zip : undefined,
+        city: row.city && row.city.trim() !== '' ? row.city : undefined,
       }
     } catch (error) {
       console.error('Error in mapDbUserToUser:', error)
