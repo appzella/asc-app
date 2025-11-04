@@ -33,15 +33,21 @@ export function MobileTabBar() {
     <nav
       className="fixed bottom-0 left-0 right-0 z-50 block sm:hidden"
       style={{ 
-        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         position: 'fixed',
-        transform: 'translateZ(0)', // Hardware acceleration für iOS
+        bottom: 0,
+        left: 0,
+        right: 0,
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        transform: 'translateZ(0)',
         WebkitTransform: 'translateZ(0)',
+        isolation: 'isolate',
+        backfaceVisibility: 'hidden',
+        WebkitBackfaceVisibility: 'hidden',
         willChange: 'transform'
       }}
       aria-label="Mobile Tab Bar"
     >
-      <div className="w-full">
+      <div className="w-full" style={{ position: 'relative', zIndex: 1 }}>
         <div className="bg-background rounded-t-lg border-t border-border shadow-lg">
           <ul className="grid grid-cols-3">
             {tabs.map((tab) => {

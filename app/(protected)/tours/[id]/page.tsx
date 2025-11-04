@@ -502,7 +502,7 @@ export default function TourDetailPage() {
               <CardContent className="space-y-2">
                 {!isArchived && (
                   <>
-                    <Button variant="outline" onClick={handleCancel} className="w-full" size="sm">
+                    <Button variant="destructive" onClick={handleCancel} className="w-full" size="sm">
                       Tour absagen
                     </Button>
                     <Button variant="outline" onClick={handleUnpublish} className="w-full" size="sm">
@@ -557,7 +557,7 @@ export default function TourDetailPage() {
                 {isRegistered ? (
                   <div className="space-y-2">
                     <p className="text-xs text-green-600 font-medium">Du bist angemeldet</p>
-                    <Button variant="destructive" onClick={handleUnregister} className="w-full" size="sm">
+                    <Button variant="outline" onClick={handleUnregister} className="w-full" size="sm">
                       Abmelden
                     </Button>
                   </div>
