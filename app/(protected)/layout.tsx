@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { ChevronDown, Settings, ArrowLeft } from 'lucide-react'
 import { UserRole } from '@/lib/types'
+import { ASCLogo } from '@/components/ui/ASCLogo'
 
 // Helper function to translate user roles to German
 function getRoleLabel(role: UserRole): string {
@@ -146,11 +147,15 @@ export default function ProtectedLayout({
               )}
               
               {/* Logo: Desktop immer links, Mobile nur auf Dashboard links */}
-              <span className={`text-2xl font-bold gradient-text tracking-tight ${
-                pathname === '/dashboard' ? '' : 'hidden sm:inline'
-              }`}>
-                ASC
-              </span>
+              <Link 
+                href="/dashboard"
+                className={`flex items-center gap-2 ${
+                  pathname === '/dashboard' ? '' : 'hidden sm:flex'
+                }`}
+              >
+                <ASCLogo size={32} />
+                <span className="text-2xl font-bold tracking-tight">ASC</span>
+              </Link>
               
               {/* Desktop Navigation Links */}
               <div className="hidden sm:flex sm:space-x-1 ml-4">
@@ -228,8 +233,11 @@ export default function ProtectedLayout({
             
             {/* Mitte: ASC Logo (Mobile, nur auf anderen Seiten) */}
             {pathname !== '/dashboard' && (
-              <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center sm:hidden">
-                <span className="text-2xl font-bold gradient-text tracking-tight">ASC</span>
+              <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-2 sm:hidden">
+                <Link href="/dashboard" className="flex items-center gap-2">
+                  <ASCLogo size={32} />
+                  <span className="text-2xl font-bold gradient-text tracking-tight">ASC</span>
+                </Link>
               </div>
             )}
             

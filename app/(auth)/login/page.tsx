@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/form'
 import { authService } from '@/lib/auth'
 import { LoginTimeoutError } from '@/lib/auth/supabaseAuth'
+import { ASCLogo } from '@/components/ui/ASCLogo'
 
 const loginSchema = z.object({
   email: z.string().email('Ungültige E-Mail-Adresse').min(1, 'E-Mail ist erforderlich'),
@@ -76,6 +77,9 @@ export default function LoginPage() {
       <Card className="w-full max-w-md animate-scale-in">
         <CardHeader>
           <div className="text-center">
+            <div className="flex justify-center mb-4">
+              <ASCLogo size={64} />
+            </div>
             <h1 className="text-2xl font-bold gradient-text mb-2">ASC Skitouren App</h1>
             <p className="text-muted-foreground text-sm">Anmelden</p>
           </div>

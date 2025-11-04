@@ -2,6 +2,7 @@
 
 import React, { useEffect } from 'react'
 import { X } from 'lucide-react'
+import { ASCLogo } from '@/components/ui/ASCLogo'
 
 interface DrawerProps {
   open: boolean
@@ -52,7 +53,8 @@ export function Drawer({ open, onClose, title, children }: DrawerProps) {
       >
         <div className="p-4 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-xl font-bold gradient-text tracking-tight">ASC</span>
+            <ASCLogo size={32} />
+            <span className="text-xl font-bold tracking-tight">ASC</span>
             {title && <span className="text-sm text-muted-foreground">{title}</span>}
           </div>
           <button

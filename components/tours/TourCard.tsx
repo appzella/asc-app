@@ -4,9 +4,9 @@ import { Tour, UserRole } from '@/lib/types'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { formatDifficulty } from '@/lib/difficulty'
 import { Calendar, Clock, ArrowUpRight, Users, ChartNoAxesColumnIncreasing } from 'lucide-react'
-import Image from 'next/image'
 import { getTourIcon } from '@/lib/tourIcons'
 
 interface TourCardProps {
@@ -81,23 +81,23 @@ export const TourCard: React.FC<TourCardProps> = ({ tour, tourTypeIcons, userRol
 
           <div className="grid grid-cols-2 gap-3 text-sm text-muted-foreground mb-3">
             <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-primary-600 flex-shrink-0" strokeWidth={2} />
+              <Calendar className="w-4 h-4 text-primary flex-shrink-0" strokeWidth={2} />
               <span className="text-xs">{formatDate(tour.date)}</span>
             </div>
             <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-primary-600 flex-shrink-0" strokeWidth={2} />
+              <Clock className="w-4 h-4 text-primary flex-shrink-0" strokeWidth={2} />
               <span className="text-xs">{tour.duration} h</span>
             </div>
             <div className="flex items-center gap-2">
-              <ArrowUpRight className="w-4 h-4 text-primary-600 flex-shrink-0" strokeWidth={2} />
+              <ArrowUpRight className="w-4 h-4 text-primary flex-shrink-0" strokeWidth={2} />
               <span className="text-xs">{tour.elevation} Hm</span>
             </div>
             <div className="flex items-center gap-2">
-              <Users className="w-4 h-4 text-primary-600 flex-shrink-0" strokeWidth={2} />
+              <Users className="w-4 h-4 text-primary flex-shrink-0" strokeWidth={2} />
               <span className="text-xs">{tour.participants.length}/{tour.maxParticipants}</span>
             </div>
             <div className="flex items-center gap-2">
-              <ChartNoAxesColumnIncreasing className="w-4 h-4 text-primary-600 flex-shrink-0" strokeWidth={2} />
+              <ChartNoAxesColumnIncreasing className="w-4 h-4 text-primary flex-shrink-0" strokeWidth={2} />
               <span className="text-xs">{formatDifficulty(tour.difficulty, tour.tourType)}</span>
             </div>
           </div>
@@ -106,22 +106,16 @@ export const TourCard: React.FC<TourCardProps> = ({ tour, tourTypeIcons, userRol
 
           {tour.leader && (
             <div className="flex items-center justify-end gap-2 text-sm text-muted-foreground">
-              {tour.leader.profilePhoto ? (
-                <Image
-                  src={tour.leader.profilePhoto}
+              <Avatar className="w-5 h-5 flex-shrink-0">
+                <AvatarImage
+                  src={tour.leader.profilePhoto || undefined}
                   alt={tour.leader.name}
-                  width={20}
-                  height={20}
-                  unoptimized
-                  className="w-5 h-5 rounded-full object-cover border border-border flex-shrink-0"
+                  className="object-cover"
                 />
-              ) : (
-                <div className="w-5 h-5 rounded-full bg-primary-100 flex items-center justify-center border border-border flex-shrink-0">
-                  <span className="text-[10px] font-semibold text-primary-600">
-                    {tour.leader.name.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-              )}
+                <AvatarFallback className="text-[10px]">
+                  {tour.leader.name.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
               <span className="text-xs">{tour.leader.name}</span>
             </div>
           )}

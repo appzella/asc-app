@@ -349,23 +349,23 @@ export default function TourDetailPage() {
               <Separator />
               <div className="grid grid-cols-2 gap-3 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-primary-600 flex-shrink-0" strokeWidth={2} />
+                  <Calendar className="w-4 h-4 text-primary flex-shrink-0" strokeWidth={2} />
                   <span className="text-xs">{formatDate(tour.date)}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-primary-600 flex-shrink-0" strokeWidth={2} />
+                  <Clock className="w-4 h-4 text-primary flex-shrink-0" strokeWidth={2} />
                   <span className="text-xs">{tour.duration} h</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <ArrowUpRight className="w-4 h-4 text-primary-600 flex-shrink-0" strokeWidth={2} />
+                  <ArrowUpRight className="w-4 h-4 text-primary flex-shrink-0" strokeWidth={2} />
                   <span className="text-xs">{tour.elevation} Hm</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4 text-primary-600 flex-shrink-0" strokeWidth={2} />
+                  <Users className="w-4 h-4 text-primary flex-shrink-0" strokeWidth={2} />
                   <span className="text-xs">{tour.participants.length}/{tour.maxParticipants}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <ChartNoAxesColumnIncreasing className="w-4 h-4 text-primary-600 flex-shrink-0" strokeWidth={2} />
+                  <ChartNoAxesColumnIncreasing className="w-4 h-4 text-primary flex-shrink-0" strokeWidth={2} />
                   <span className="text-xs">{formatDifficulty(tour.difficulty, tour.tourType)}</span>
                 </div>
               </div>
