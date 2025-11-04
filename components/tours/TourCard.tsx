@@ -59,18 +59,18 @@ export const TourCard: React.FC<TourCardProps> = ({ tour, tourTypeIcons, userRol
     <Link href={`/tours/${tour.id}`} className="touch-target">
       <Card className="cursor-pointer h-full group transition-all flex flex-col">
         <CardContent className="p-4 md:p-6 flex flex-col flex-1">
-          <div className="flex justify-between items-start mb-3">
+          <div className="flex justify-between items-start mb-0">
             <div className="flex items-center gap-2 flex-1 min-w-0">
               {(() => {
                 const IconComponent = getTourIcon(tour.tourType, tourTypeIcons)
                 return <IconComponent className="w-4 h-4 text-foreground flex-shrink-0" strokeWidth={2} />
               })()}
-              <h3 className="text-lg font-semibold text-foreground truncate">{tour.title}</h3>
+              <h3 className="text-xl font-semibold text-foreground truncate m-0">{tour.title}</h3>
             </div>
             {getStatusBadge()}
           </div>
           
-          <p className="text-muted-foreground mb-3 line-clamp-2 text-sm">{tour.description}</p>
+          <p className="text-muted-foreground mb-3 line-clamp-2 text-sm !mt-2">{tour.description}</p>
           
           <Separator className="mb-3" />
           

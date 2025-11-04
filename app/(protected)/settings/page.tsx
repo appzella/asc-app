@@ -101,7 +101,7 @@ export default function SettingsPage() {
     <div className="max-w-6xl mx-auto space-y-6 animate-fade-in px-4 sm:px-0">
       <div>
         <h1>Einstellungen</h1>
-        <CardDescription>Verwalte die Optionen für Touren</CardDescription>
+        <p className="text-muted-foreground mt-4">Verwalte die Optionen für Touren</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -112,24 +112,22 @@ export default function SettingsPage() {
           return (
             <Link key={category.href} href={category.href} className="touch-manipulation">
               <Card className="hover:shadow-lg transition-all cursor-pointer h-full group flex flex-col">
-                <CardContent className="p-4 md:p-6">
+                <CardHeader className="p-4 md:p-6">
                   <div className="flex items-center gap-4">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
+                      <CardTitle className="flex items-center gap-2 group-hover:text-primary-600 transition-colors">
                         {isCustomIcon && IconComponent ? (
                           <IconComponent className="w-5 h-5 text-primary-600 flex-shrink-0" strokeWidth={2} />
                         ) : (
                           <SettingsIcon type={category.iconType as 'tour-types' | 'tour-lengths' | 'difficulties'} className="w-5 h-5 text-primary-600 flex-shrink-0" strokeWidth={2} />
                         )}
-                        <h3 className="group-hover:text-primary-600 transition-colors">
                         {category.title}
-                      </h3>
-                      </div>
-                      <CardDescription className="hidden sm:block line-clamp-2">{category.description}</CardDescription>
+                      </CardTitle>
+                      <CardDescription className="hidden sm:block line-clamp-2 mt-1.5">{category.description}</CardDescription>
                     </div>
                     <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary-600 transition-colors flex-shrink-0" strokeWidth={2} />
                   </div>
-                </CardContent>
+                </CardHeader>
               </Card>
           </Link>
         )

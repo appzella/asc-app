@@ -63,7 +63,7 @@ export default function HelpPage() {
           </Button>
         </div>
         <h1>Hilfe</h1>
-        <CardDescription>Erfahre, wie du die ASC Skitouren App verwendest</CardDescription>
+        <p className="text-muted-foreground mt-4">Erfahre, wie du die ASC Skitouren App verwendest</p>
       </div>
 
       {/* Übersicht */}
@@ -75,7 +75,7 @@ export default function HelpPage() {
           <p className="text-muted-foreground">
             Die ASC Skitouren App ist eine Plattform für den Alpinen Skiclub St. Gallen zur Verwaltung
             von Touren, Anmeldungen und Kommunikation zwischen den Mitgliedern. Die App ermöglicht es dir,
-            Touren zu erstellen, dich für Touren anzumelden und mit anderen Teilnehmern zu kommunizieren.
+            Touren zu durchsuchen, dich für Touren anzumelden und mit anderen Teilnehmern zu kommunizieren.
           </p>
           <p className="text-muted-foreground">
             Je nach deiner Rolle (Mitglied, Tourenleiter oder Admin) stehen dir unterschiedliche Funktionen
@@ -91,56 +91,57 @@ export default function HelpPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <h4 className="mb-2">Touren-Übersicht</h4>
-            <p className="text-muted-foreground mb-3">
+            <h4>Touren-Übersicht</h4>
+            <p className="text-muted-foreground">
               In der Touren-Übersicht siehst du alle verfügbaren Touren des Clubs. Jede Tour-Karte zeigt
               wichtige Informationen auf einen Blick:
             </p>
             <ul className="text-muted-foreground">
               <li>Titel und Beschreibung der Tour</li>
               <li>Datum und Dauer</li>
-              <li>Tourenart (Wanderung, Skitour, Bike)</li>
-              <li>Tourlänge (Eintagestour, Mehrtagestour)</li>
+              <li>Tourenart (Wanderung, Skitour, Bike, etc.)</li>
+              <li>Tourlänge (Eintagestour, Mehrtagestour, etc.)</li>
               <li>Schwierigkeitsgrad nach SAC-Skala</li>
               <li>Höhenmeter</li>
               <li>Anzahl der angemeldeten Teilnehmer</li>
-              <li>Status (Ausstehend, Freigegeben, Abgelehnt)</li>
+              <li>Status (Entwurf, Veröffentlicht, Abgesagt)</li>
             </ul>
           </div>
 
           <div>
-            <h4 className="mb-2">Filter und Suche</h4>
-            <p className="text-muted-foreground mb-3">
+            <h4>Filter und Suche</h4>
+            <p className="text-muted-foreground">
               Verwende die Filterleiste, um Touren nach deinen Wünschen zu finden:
             </p>
             <ul className="text-muted-foreground">
               <li><strong className="font-semibold">Suche:</strong> Durchsuche Touren nach Titel oder Beschreibung</li>
-              <li><strong className="font-semibold">Status:</strong> Filtere nach Ausstehend, Freigegeben oder Abgelehnt (nur für Admins)</li>
+              <li><strong className="font-semibold">Status:</strong> Filtere nach Entwurf, Veröffentlicht oder Abgesagt (nur für Admins und Tourenleiter)</li>
               <li><strong className="font-semibold">Tourenart:</strong> Zeige nur bestimmte Tourentypen an</li>
-              <li><strong className="font-semibold">Tourlänge:</strong> Filtere nach Eintagestour oder Mehrtagestour</li>
+              <li><strong className="font-semibold">Tourlänge:</strong> Filtere nach Eintagestour, Mehrtagestour, etc.</li>
               <li><strong className="font-semibold">Schwierigkeit:</strong> Wähle eine bestimmte Schwierigkeitsstufe</li>
-              <li><strong className="font-semibold">Meine Touren:</strong> Zeige nur Touren an, für die du angemeldet bist</li>
+              <li><strong className="font-semibold">Meine Touren:</strong> Zeige nur Touren an, für die du angemeldet bist oder die du leitest</li>
             </ul>
           </div>
 
           <div>
-            <h4 className="mb-2">Tour-Details</h4>
-            <p className="text-muted-foreground mb-3">
+            <h4>Tour-Details</h4>
+            <p className="text-muted-foreground">
               Klicke auf eine Tour-Karte, um die vollständigen Details zu sehen:
             </p>
             <ul className="text-muted-foreground">
               <li>Vollständige Beschreibung der Tour</li>
               <li>Alle technischen Details (Datum, Dauer, Höhenmeter, etc.)</li>
-              <li>Teilnehmerliste</li>
+              <li>Teilnehmerliste mit Profilfotos</li>
               <li>Anmeldung/Abmeldung für die Tour</li>
               <li>Chat-Funktion für Kommunikation mit anderen Teilnehmern</li>
-              <li>Für Admins: Freigabe- oder Ablehnungsoptionen</li>
+              <li>Für Tourenleiter: Tour bearbeiten, auf Entwurf setzen oder Tour absagen</li>
+              <li>Für Admins: Tour freigeben oder ablehnen</li>
             </ul>
           </div>
 
           <div>
-            <h4 className="mb-2">Sortierung</h4>
-            <p className="text-muted-foreground mb-3">
+            <h4>Sortierung</h4>
+            <p className="text-muted-foreground">
               Die Touren werden automatisch nach Datum sortiert:
             </p>
             <ul className="text-muted-foreground">
@@ -159,8 +160,8 @@ export default function HelpPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <h4 className="mb-2">Was ist das Tourenarchiv?</h4>
-            <p className="text-muted-foreground mb-3">
+            <h4>Was ist das Tourenarchiv?</h4>
+            <p className="text-muted-foreground">
               Das Tourenarchiv enthält automatisch alle Touren, deren Datum in der Vergangenheit liegt.
               Vergangene Touren werden nicht mehr in der normalen Touren-Übersicht angezeigt, sondern
               automatisch ins Archiv verschoben.
@@ -168,8 +169,8 @@ export default function HelpPage() {
           </div>
 
           <div>
-            <h4 className="mb-2">Zugriff auf das Archiv</h4>
-            <p className="text-muted-foreground mb-3">
+            <h4>Zugriff auf das Archiv</h4>
+            <p className="text-muted-foreground">
               Du kannst das Tourenarchiv auf verschiedene Weise erreichen:
             </p>
             <ul className="text-muted-foreground">
@@ -180,8 +181,8 @@ export default function HelpPage() {
           </div>
 
           <div>
-            <h4 className="mb-2">Archiv-Funktionen</h4>
-            <p className="text-muted-foreground mb-3">
+            <h4>Archiv-Funktionen</h4>
+            <p className="text-muted-foreground">
               Im Archiv hast du die gleichen Filter- und Suchfunktionen wie in der normalen Touren-Übersicht:
             </p>
             <ul className="text-muted-foreground">
@@ -193,8 +194,8 @@ export default function HelpPage() {
           </div>
 
           <div>
-            <h4 className="mb-2">Sortierung im Archiv</h4>
-            <p className="text-muted-foreground mb-3">
+            <h4>Sortierung im Archiv</h4>
+            <p className="text-muted-foreground">
               Im Archiv sind die Touren nach Datum sortiert:
             </p>
             <ul className="text-muted-foreground">
@@ -205,8 +206,8 @@ export default function HelpPage() {
           </div>
 
           <div>
-            <h4 className="mb-2">Zweck des Archivs</h4>
-            <p className="text-muted-foreground mb-3">
+            <h4>Zweck des Archivs</h4>
+            <p className="text-muted-foreground">
               Das Archiv dient dazu:
             </p>
             <ul className="text-muted-foreground">
@@ -219,8 +220,8 @@ export default function HelpPage() {
           </div>
 
           <div>
-            <h4 className="mb-2">Dashboard-Integration</h4>
-            <p className="text-muted-foreground mb-3">
+            <h4>Dashboard-Integration</h4>
+            <p className="text-muted-foreground">
               Im Dashboard siehst du eine Card mit der Anzahl der vergangenen Touren im Archiv.
               Klicke auf <strong className="font-semibold">&quot;Archiv öffnen&quot;</strong>, um direkt zum Archiv zu gelangen.
             </p>
@@ -235,21 +236,21 @@ export default function HelpPage() {
             <CardTitle>Tour erstellen</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-muted-foreground text-sm leading-relaxed">
+            <p className="text-muted-foreground">
               Als Tourenleiter oder Admin kannst du neue Touren für den Club erstellen. Gehe folgendermaßen vor:
             </p>
 
             <div>
-              <h4 className="mb-2">Schritt 1: Neue Tour erstellen</h4>
-              <p className="text-muted-foreground mb-3">
+              <h4>Schritt 1: Neue Tour erstellen</h4>
+              <p className="text-muted-foreground">
                 Klicke auf <strong className="font-semibold">&quot;Tour erstellen&quot;</strong> in der Navigation oder auf den Button
                 in der Touren-Übersicht.
               </p>
             </div>
 
             <div>
-              <h4 className="mb-2">Schritt 2: Tour-Details eingeben</h4>
-              <p className="text-muted-foreground mb-3">Fülle alle erforderlichen Felder aus:</p>
+              <h4>Schritt 2: Tour-Details eingeben</h4>
+              <p className="text-muted-foreground">Fülle alle erforderlichen Felder aus:</p>
               <ul className="text-muted-foreground">
                 <li><strong className="font-semibold">Titel:</strong> Ein aussagekräftiger Name für die Tour</li>
                 <li><strong className="font-semibold">Beschreibung:</strong> Detaillierte Beschreibung der Route, des Schwierigkeitsgrads, der Ausrüstung, etc.</li>
@@ -264,25 +265,37 @@ export default function HelpPage() {
             </div>
 
             <div>
-              <h4 className="mb-2">Schritt 3: Tour speichern</h4>
-              <p className="text-muted-foreground mb-3">
+              <h4>Schritt 3: Tour speichern</h4>
+              <p className="text-muted-foreground">
                 Nach dem Klicken auf <strong className="font-semibold">&quot;Tour erstellen&quot;</strong> wird die Tour mit dem Status
-                <strong className="font-semibold">&quot;Ausstehend&quot;</strong> gespeichert. Ein Admin muss die Tour freigeben, bevor
-                sich Mitglieder anmelden können.
+                <strong className="font-semibold">&quot;Entwurf&quot;</strong> gespeichert. Du kannst die Tour später für die Freigabe einreichen.
+                Ein Admin muss die Tour freigeben, bevor sich Mitglieder anmelden können.
               </p>
             </div>
 
             <div>
-              <h4 className="mb-2">Tour bearbeiten</h4>
-              <p className="text-muted-foreground mb-3">
+              <h4>Tour bearbeiten</h4>
+              <p className="text-muted-foreground">
                 Du kannst deine Touren jederzeit bearbeiten, indem du auf der Tour-Detailseite auf
                 <strong className="font-semibold">&quot;Tour bearbeiten&quot;</strong> klickst. Wichtige Hinweise:
               </p>
               <ul className="text-muted-foreground">
-                <li>Für noch nicht freigegebene Touren werden Änderungen sofort übernommen</li>
-                <li>Für bereits freigegebene Touren müssen Änderungen vom Admin genehmigt werden</li>
-                <li>Ausstehende Änderungen werden als <code className="bg-muted px-1.5 py-0.5 rounded-md text-xs font-mono">&quot;pendingChanges&quot;</code> gespeichert</li>
-                <li>Der Admin sieht alle ausstehenden Änderungen bei der Freigabe</li>
+                <li>Entwürfe können jederzeit bearbeitet werden</li>
+                <li>Veröffentlichte Touren können bearbeitet werden, Änderungen müssen vom Admin genehmigt werden</li>
+                <li>Du kannst eine Tour auch &quot;Auf Entwurf setzen&quot; oder &quot;Tour absagen&quot;</li>
+                <li>Abgesagte Touren können wieder aktiviert werden</li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4>Tour zur Freigabe einreichen</h4>
+              <p className="text-muted-foreground">
+                Sobald deine Tour fertig ist, kannst du sie zur Freigabe einreichen:
+              </p>
+              <ul className="text-muted-foreground">
+                <li>Klicke auf <strong className="font-semibold">&quot;Zur Freigabe einreichen&quot;</strong></li>
+                <li>Die Tour wird im Status &quot;Zur Freigabe eingereicht&quot; angezeigt</li>
+                <li>Ein Admin kann die Tour nun freigeben oder ablehnen</li>
               </ul>
             </div>
           </CardContent>
@@ -298,22 +311,22 @@ export default function HelpPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h4 className="mb-2">Tour-Freigabe</h4>
-                <p className="text-muted-foreground mb-3">
+                <h4>Tour-Freigabe</h4>
+                <p className="text-muted-foreground">
                   Als Admin hast du die Verantwortung, neue Touren zu überprüfen und freizugeben:
                 </p>
                 <ul className="text-muted-foreground">
-                  <li>In der Tour-Detailseite siehst du eine Box <strong className="font-semibold">&quot;Freigabe erforderlich&quot;</strong></li>
-                  <li>Überprüfe alle Tour-Details sorgfältig</li>
+                  <li>In der Touren-Übersicht siehst du Touren mit Status &quot;Zur Freigabe eingereicht&quot;</li>
+                  <li>Öffne die Tour-Detailseite und überprüfe alle Tour-Details sorgfältig</li>
                   <li>Klicke auf <strong className="font-semibold">&quot;Tour freigeben&quot;</strong>, um die Tour für Anmeldungen freizugeben</li>
-                  <li>Oder klicke auf <strong className="font-semibold">&quot;Ablehnen&quot;</strong>, um die Tour abzulehnen</li>
-                  <li>Bei Ablehnung kannst du einen Kommentar hinzufügen, der dem Tourenleiter den Grund erklärt</li>
+                  <li>Oder klicke auf <strong className="font-semibold">&quot;Tour ablehnen&quot;</strong>, um die Tour abzulehnen</li>
+                  <li>Bei Ablehnung wird die Tour auf Entwurf zurückgesetzt</li>
                 </ul>
               </div>
 
               <div>
-                <h4 className="mb-2">Änderungen genehmigen</h4>
-                <p className="text-muted-foreground mb-3">
+                <h4>Änderungen genehmigen</h4>
+                <p className="text-muted-foreground">
                   Wenn eine bereits freigegebene Tour bearbeitet wird, müssen die Änderungen genehmigt werden:
                 </p>
                 <ul className="text-muted-foreground">
@@ -325,8 +338,8 @@ export default function HelpPage() {
               </div>
 
               <div>
-                <h4 className="mb-2">Benutzerverwaltung</h4>
-                <p className="text-muted-foreground mb-3">
+                <h4>Benutzerverwaltung</h4>
+                <p className="text-muted-foreground">
                   Im Bereich <strong className="font-semibold">&quot;Benutzer&quot;</strong> kannst du:
                 </p>
                 <ul className="text-muted-foreground">
@@ -338,8 +351,8 @@ export default function HelpPage() {
               </div>
 
               <div>
-                <h4 className="mb-2">Einladungen</h4>
-                <p className="text-muted-foreground mb-3">
+                <h4>Einladungen</h4>
+                <p className="text-muted-foreground">
                   Im Bereich <strong className="font-semibold">&quot;Einladungen&quot;</strong> kannst du:
                 </p>
                 <ul className="text-muted-foreground">
@@ -359,14 +372,14 @@ export default function HelpPage() {
               <CardTitle>Einstellungen</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-muted-foreground text-sm leading-relaxed">
+              <p className="text-muted-foreground">
                 Im Bereich <strong className="font-semibold">&quot;Einstellungen&quot;</strong> kannst du die grundlegenden Konfigurationen
                 der App verwalten:
               </p>
 
               <div>
-                <h4 className="mb-2">Tourentypen verwalten</h4>
-                <p className="text-muted-foreground mb-3">
+                <h4>Tourentypen verwalten</h4>
+                <p className="text-muted-foreground">
                   Füge neue Tourentypen hinzu oder entferne bestehende:
                 </p>
                 <ul className="text-muted-foreground">
@@ -378,8 +391,8 @@ export default function HelpPage() {
               </div>
 
               <div>
-                <h4 className="mb-2">Tourlängen verwalten</h4>
-                <p className="text-muted-foreground mb-3">
+                <h4>Tourlängen verwalten</h4>
+                <p className="text-muted-foreground">
                   Verwalte die verfügbaren Tourlängen:
                 </p>
                 <ul className="text-muted-foreground">
@@ -390,8 +403,8 @@ export default function HelpPage() {
               </div>
 
               <div>
-                <h4 className="mb-2">Schwierigkeitsgrade verwalten</h4>
-                <p className="text-muted-foreground mb-3">
+                <h4>Schwierigkeitsgrade verwalten</h4>
+                <p className="text-muted-foreground">
                   Für jeden Tourentyp kannst du eigene Schwierigkeitsgrade definieren:
                 </p>
                 <ul className="text-muted-foreground">
@@ -401,10 +414,10 @@ export default function HelpPage() {
                   <li>Du kannst die Reihenfolge per Drag & Drop ändern</li>
                   <li>Entferne nicht mehr benötigte Schwierigkeitsgrade</li>
                 </ul>
-                <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
+                <p className="text-muted-foreground mt-3">
                   <strong className="font-semibold">Hinweis:</strong> Verschiedene Tourentypen verwenden unterschiedliche Skalen:
                 </p>
-                <ul className="list-disc list-inside space-y-1.5 text-muted-foreground ml-4 mt-2 text-sm">
+                <ul className="list-disc list-inside space-y-1.5 text-muted-foreground ml-4 mt-2">
                   <li><strong className="font-semibold">Wanderungen:</strong> T1-T6 (T-Skala)</li>
                   <li><strong className="font-semibold">Skitouren:</strong> L, WS, ZS, S, SS, AS, EX (SAC-Skala)</li>
                   <li><strong className="font-semibold">Bike:</strong> B1-B5 (vereinfachte Skala)</li>
@@ -422,29 +435,29 @@ export default function HelpPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <h4 className="mb-2">Für eine Tour anmelden</h4>
-            <p className="text-muted-foreground mb-3">
+            <h4>Für eine Tour anmelden</h4>
+            <p className="text-muted-foreground">
               So meldest du dich für eine freigegebene Tour an:
             </p>
-            <ol className="list-decimal list-inside space-y-1.5 text-muted-foreground ml-4 text-sm">
+            <ol className="list-decimal list-inside space-y-1.5 text-muted-foreground ml-4">
               <li>Öffne die Tour-Detailseite der gewünschten Tour</li>
               <li>Überprüfe alle Details (Datum, Schwierigkeit, Teilnehmerzahl)</li>
               <li>Klicke auf den Button <strong className="font-semibold">&quot;Anmelden&quot;</strong> in der Seitenleiste</li>
               <li>Du siehst nun den Status &quot;Du bist angemeldet&quot;</li>
               <li>Die Teilnehmerzahl wird aktualisiert</li>
             </ol>
-            <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
-              <strong className="font-semibold">Hinweis:</strong> Du kannst dich nur für freigegebene Touren anmelden, die noch
-              nicht ausgebucht sind. Admins können sich nicht für Touren anmelden.
+            <p className="text-muted-foreground mt-3">
+              <strong className="font-semibold">Hinweis:</strong> Du kannst dich nur für veröffentlichte Touren anmelden, die noch
+              nicht ausgebucht sind. Tourenleiter und Admins können sich ebenfalls für Touren anmelden.
             </p>
           </div>
 
           <div>
-            <h4 className="mb-2">Von einer Tour abmelden</h4>
-            <p className="text-muted-foreground mb-3">
+            <h4>Von einer Tour abmelden</h4>
+            <p className="text-muted-foreground">
               Falls du deine Teilnahme absagen musst:
             </p>
-            <ol className="list-decimal list-inside space-y-1.5 text-muted-foreground ml-4 text-sm">
+            <ol className="list-decimal list-inside space-y-1.5 text-muted-foreground ml-4">
               <li>Öffne die Tour-Detailseite</li>
               <li>Klicke auf den Button <strong className="font-semibold">&quot;Abmelden&quot;</strong></li>
               <li>Du wirst aus der Teilnehmerliste entfernt</li>
@@ -452,8 +465,8 @@ export default function HelpPage() {
           </div>
 
           <div>
-            <h4 className="mb-2">Teilnehmerliste</h4>
-            <p className="text-muted-foreground mb-3">
+            <h4>Teilnehmerliste</h4>
+            <p className="text-muted-foreground">
               In der Seitenleiste der Tour-Detailseite siehst du:
             </p>
             <ul className="text-muted-foreground">
@@ -471,13 +484,13 @@ export default function HelpPage() {
           <CardTitle>Chat</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-muted-foreground text-sm leading-relaxed">
+              <p className="text-muted-foreground">
             Jede Tour hat einen eigenen Chat-Bereich, in dem sich alle Teilnehmer und Interessierte
             austauschen können.
           </p>
 
           <div>
-            <h4 className="mb-2">Nachrichten senden</h4>
+            <h4>Nachrichten senden</h4>
             <ul className="text-muted-foreground">
               <li>Gib deine Nachricht in das Eingabefeld ein</li>
               <li>Klicke auf <strong className="font-semibold">&quot;Senden&quot;</strong> oder drücke Enter</li>
@@ -487,7 +500,7 @@ export default function HelpPage() {
           </div>
 
           <div>
-            <h4 className="mb-2">Typische Anwendungen</h4>
+            <h4>Typische Anwendungen</h4>
             <ul className="text-muted-foreground">
               <li>Fragen zur Tour stellen</li>
               <li>Fahrgemeinschaften organisieren</li>
@@ -499,8 +512,8 @@ export default function HelpPage() {
           </div>
 
           <div>
-            <h4 className="mb-2">Nachrichten anzeigen</h4>
-            <p className="text-muted-foreground mb-3">
+            <h4>Nachrichten anzeigen</h4>
+            <p className="text-muted-foreground">
               Der Chat scrollt automatisch zur neuesten Nachricht. Ältere Nachrichten bleiben
               erhalten und können nach oben gescrollt werden.
             </p>
@@ -514,13 +527,13 @@ export default function HelpPage() {
           <CardTitle>Profil</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-muted-foreground text-sm leading-relaxed">
+              <p className="text-muted-foreground">
             In deinem Profil kannst du deine persönlichen Informationen verwalten. Klicke auf
             deinen Namen in der oberen Navigation, um zum Profil zu gelangen.
           </p>
 
           <div>
-            <h4 className="mb-2">Profilfoto</h4>
+            <h4>Profilfoto</h4>
             <ul className="text-muted-foreground">
               <li>Lade ein Profilfoto hoch (max. 5MB, JPG, PNG oder GIF)</li>
               <li>Klicke auf <strong className="font-semibold">&quot;Hochladen&quot;</strong> oder <strong className="font-semibold">&quot;Ändern&quot;</strong></li>
@@ -532,8 +545,8 @@ export default function HelpPage() {
           </div>
 
           <div>
-            <h4 className="mb-2">Persönliche Informationen</h4>
-            <p className="text-muted-foreground mb-3">Du kannst folgende Informationen bearbeiten:</p>
+            <h4>Persönliche Informationen</h4>
+            <p className="text-muted-foreground">Du kannst folgende Informationen bearbeiten:</p>
             <ul className="text-muted-foreground">
               <li><strong className="font-semibold">Name:</strong> Dein vollständiger Name</li>
               <li><strong className="font-semibold">E-Mail:</strong> Deine E-Mail-Adresse (kann nicht geändert werden)</li>
@@ -541,7 +554,7 @@ export default function HelpPage() {
               <li><strong className="font-semibold">Mobile:</strong> Deine Mobiltelefonnummer</li>
               <li><strong className="font-semibold">Adresse:</strong> Strasse, PLZ und Ort</li>
             </ul>
-            <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
+            <p className="text-muted-foreground mt-3">
               Klicke auf <strong className="font-semibold">&quot;Änderungen speichern&quot;</strong>, um deine Daten zu aktualisieren.
             </p>
           </div>
@@ -555,7 +568,7 @@ export default function HelpPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <h4 className="mb-2">Mitglied (Member)</h4>
+            <h4>Mitglied (Member)</h4>
             <ul className="text-muted-foreground">
               <li>Touren ansehen und durchsuchen</li>
               <li>Dich für freigegebene Touren anmelden</li>
@@ -565,7 +578,7 @@ export default function HelpPage() {
           </div>
 
           <div>
-            <h4 className="mb-2">Tourenleiter (Leader)</h4>
+            <h4>Tourenleiter (Leader)</h4>
             <ul className="text-muted-foreground">
               <li>Alle Funktionen eines Mitglieds</li>
               <li>Neue Touren erstellen</li>
@@ -574,7 +587,7 @@ export default function HelpPage() {
           </div>
 
           <div>
-            <h4 className="mb-2">Administrator (Admin)</h4>
+            <h4>Administrator (Admin)</h4>
             <ul className="text-muted-foreground">
               <li>Alle Funktionen eines Tourenleiters</li>
               <li>Touren freigeben oder ablehnen</li>
@@ -594,7 +607,7 @@ export default function HelpPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <h4 className="mb-2">Für Tourenleiter</h4>
+            <h4>Für Tourenleiter</h4>
             <ul className="text-muted-foreground">
               <li>Erstellen Sie Touren rechtzeitig, damit Admins Zeit zur Freigabe haben</li>
               <li>Geben Sie detaillierte Beschreibungen mit allen wichtigen Informationen</li>
@@ -605,7 +618,7 @@ export default function HelpPage() {
           </div>
 
           <div>
-            <h4 className="mb-2">Für Teilnehmer</h4>
+            <h4>Für Teilnehmer</h4>
             <ul className="text-muted-foreground">
               <li>Melden Sie sich frühzeitig für Touren an</li>
               <li>Lesen Sie die Tour-Beschreibung sorgfältig durch</li>
@@ -617,7 +630,7 @@ export default function HelpPage() {
           </div>
 
           <div>
-            <h4 className="mb-2">Für Admins</h4>
+            <h4>Für Admins</h4>
             <ul className="text-muted-foreground">
               <li>Überprüfen Sie neue Touren sorgfältig auf Vollständigkeit und Sicherheit</li>
               <li>Geben Sie bei Ablehnungen konstruktive Kommentare</li>
@@ -635,11 +648,11 @@ export default function HelpPage() {
           <CardTitle>Unterstützung</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <p className="text-muted-foreground text-sm leading-relaxed">
+              <p className="text-muted-foreground">
             Falls Sie Fragen haben oder Probleme auftreten, wenden Sie sich bitte an einen Administrator
             des Clubs. Diese können Ihnen bei technischen Problemen oder Fragen zur Verwendung der App helfen.
           </p>
-          <p className="text-muted-foreground text-sm leading-relaxed">
+              <p className="text-muted-foreground">
             Die App wird kontinuierlich weiterentwickelt. Feedback und Verbesserungsvorschläge sind
             jederzeit willkommen.
           </p>

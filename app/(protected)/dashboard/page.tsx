@@ -142,7 +142,7 @@ export default function DashboardPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <ListChecks className="w-5 h-5 text-primary-600" strokeWidth={2} />
-              <span className="text-lg">Meine Touren</span>
+              <span className="text-xl">Meine Touren</span>
             </CardTitle>
             <CardDescription>Angemeldete oder geleitete Touren</CardDescription>
           </CardHeader>
@@ -164,7 +164,7 @@ export default function DashboardPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="w-5 h-5 text-primary-600" strokeWidth={2} />
-              <span className="text-lg">Verfügbare Touren</span>
+              <span className="text-xl">Verfügbare Touren</span>
             </CardTitle>
             <CardDescription>Freigegebene Touren</CardDescription>
           </CardHeader>
@@ -186,7 +186,7 @@ export default function DashboardPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Archive className="w-5 h-5 text-primary-600" strokeWidth={2} />
-              <span className="text-lg">Tourenarchiv</span>
+              <span className="text-xl">Tourenarchiv</span>
             </CardTitle>
             <CardDescription>Vergangene Touren</CardDescription>
           </CardHeader>
@@ -209,7 +209,7 @@ export default function DashboardPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <PlusCircle className="w-5 h-5 text-primary-600" strokeWidth={2} />
-                <span className="text-lg">Tour erstellen</span>
+                <span className="text-xl">Tour erstellen</span>
               </CardTitle>
               <CardDescription>Erstelle eine neue Tour</CardDescription>
             </CardHeader>
@@ -230,7 +230,7 @@ export default function DashboardPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <BookOpen className="w-5 h-5 text-primary-600" strokeWidth={2} />
-              <span className="text-lg">Hilfe</span>
+              <span className="text-xl">Hilfe</span>
             </CardTitle>
             <CardDescription>Benötigst du Hilfe bei der Nutzung der App?</CardDescription>
           </CardHeader>
