@@ -4,7 +4,6 @@ import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Home, List, User } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 interface TabItem {
@@ -31,13 +30,12 @@ export function MobileTabBar() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 block sm:hidden"
+      className="fixed bottom-0 left-0 right-0 z-50 block sm:hidden bg-background rounded-t-lg border-t border-border shadow-lg"
       style={{ 
         position: 'fixed',
         bottom: 0,
         left: 0,
         right: 0,
-        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         transform: 'translateZ(0)',
         WebkitTransform: 'translateZ(0)',
         isolation: 'isolate',
@@ -47,48 +45,42 @@ export function MobileTabBar() {
       }}
       aria-label="Mobile Tab Bar"
     >
-      <div className="w-full" style={{ position: 'relative', zIndex: 1 }}>
-        <div className="bg-background rounded-t-lg border-t border-border shadow-lg">
-          <ul className="grid grid-cols-3">
-            {tabs.map((tab) => {
-              const active = isActive(tab.href)
-              const IconComponent = tab.icon
-              return (
-                <li key={tab.href}>
-                  <Button
-                    variant="ghost"
-                    asChild
-                    className={cn(
-                      "flex flex-col items-center justify-center h-auto py-3 gap-1 rounded-none w-full touch-manipulation min-h-[60px]",
-                      active && "bg-primary-50 text-primary-600"
-                    )}
-                  >
-                  <Link
-                    href={tab.href}
-                      className="flex flex-col items-center justify-center gap-1 w-full"
-                    aria-current={active ? 'page' : undefined}
-                  >
-                    <IconComponent
-                        className={cn(
-                          "w-5 h-5",
-                          active ? "text-primary-600" : "text-muted-foreground"
-                        )}
-                      strokeWidth={2}
-                    />
-                      <span className={cn(
-                        "text-xs font-medium",
-                        active ? "text-primary-600" : "text-muted-foreground"
-                      )}>
-                      {tab.label}
-                    </span>
-                  </Link>
-                  </Button>
-                </li>
-              )
-            })}
-          </ul>
-        </div>
-      </div>
+      <ul className="grid grid-cols-3 m-0 p-0">
+        {tabs.map((tab) => {
+          const active = isActive(tab.href)
+          const IconComponent = tab.icon
+          return (
+            <li key={tab.href} className="flex m-0 p-0">
+              <Link
+                href={tab.href}
+                className={cn(
+                  "flex flex-col items-center justify-center py-3 gap-1 rounded-none w-full touch-manipulation flex-1 transition-colors hover:bg-accent",
+                  active && "bg-primary-50 text-primary-600"
+                )}
+                style={{
+                  minHeight: 'calc(60px + max(env(safe-area-inset-bottom, 8px), 8px))',
+                  paddingBottom: 'max(env(safe-area-inset-bottom, 8px), 8px)'
+                }}
+                aria-current={active ? 'page' : undefined}
+              >
+                <IconComponent
+                  className={cn(
+                    "w-5 h-5",
+                    active ? "text-primary-600" : "text-muted-foreground"
+                  )}
+                  strokeWidth={2}
+                />
+                <span className={cn(
+                  "text-xs font-medium",
+                  active ? "text-primary-600" : "text-muted-foreground"
+                )}>
+                  {tab.label}
+                </span>
+              </Link>
+            </li>
+          )
+        })}
+      </ul>
     </nav>
   )
 }
