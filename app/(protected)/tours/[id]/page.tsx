@@ -14,6 +14,16 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Progress } from '@/components/ui/progress'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ChatWindow } from '@/components/chat/ChatWindow'
 import { canEditTour, canApproveTour, canPublishTour, canSubmitForPublishing } from '@/lib/roles'
@@ -21,6 +31,7 @@ import { formatDifficulty } from '@/lib/difficulty'
 import Link from 'next/link'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { ChevronLeft, Calendar, Clock, ArrowUpRight, Users, ChartNoAxesColumnIncreasing } from 'lucide-react'
+import { toast } from 'sonner'
 
 export default function TourDetailPage() {
   const params = useParams()
@@ -35,6 +46,8 @@ export default function TourDetailPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [showRejectModal, setShowRejectModal] = useState(false)
   const [rejectionComment, setRejectionComment] = useState('')
+  const [showCancelDialog, setShowCancelDialog] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   useEffect(() => {
     const loadTour = async () => {
@@ -171,30 +184,36 @@ export default function TourDetailPage() {
 
   const handleCancel = async () => {
     if (!user || !tour) return
-    if (!confirm('Möchtest du diese Tour wirklich absagen?')) return
 
     try {
       const updatedTour = await dataRepository.cancelTour(tourId)
       if (updatedTour) {
         setTour(updatedTour)
         router.refresh()
+        toast.success('Tour wurde abgesagt')
       }
     } catch (error) {
       console.error('Error cancelling tour:', error)
+      toast.error('Fehler beim Absagen der Tour')
+    } finally {
+      setShowCancelDialog(false)
     }
   }
 
   const handleDelete = async () => {
     if (!user || !tour) return
-    if (!confirm('Möchtest du diese Tour wirklich löschen?')) return
 
     try {
       const success = await dataRepository.deleteTour(tourId)
       if (success) {
+        toast.success('Tour wurde gelöscht')
         router.push('/tours')
       }
     } catch (error) {
       console.error('Error deleting tour:', error)
+      toast.error('Fehler beim Löschen der Tour')
+    } finally {
+      setShowDeleteDialog(false)
     }
   }
 
@@ -502,15 +521,20 @@ export default function TourDetailPage() {
               <CardContent className="space-y-2">
                 {!isArchived && (
                   <>
-                    <Button variant="destructive" onClick={handleCancel} className="w-full" size="sm">
-                      Tour absagen
-                    </Button>
                     <Button variant="outline" onClick={handleUnpublish} className="w-full" size="sm">
                       Auf Entwurf setzen
                     </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setShowCancelDialog(true)} 
+                      className="w-full border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground" 
+                      size="sm"
+                    >
+                      Tour absagen
+                    </Button>
                   </>
                 )}
-                <Button variant="destructive" onClick={handleDelete} className="w-full" size="sm">
+                <Button variant="destructive" onClick={() => setShowDeleteDialog(true)} className="w-full" size="sm">
                   Tour löschen
                 </Button>
               </CardContent>
@@ -525,15 +549,15 @@ export default function TourDetailPage() {
               <CardContent className="space-y-2">
                 {!isArchived && (
                   <>
-                    <Button variant="default" onClick={handleApprove} className="w-full" size="sm">
-                      Tour wieder aktivieren
-                    </Button>
                     <Button variant="outline" onClick={handleUnpublish} className="w-full" size="sm">
                       Auf Entwurf setzen
                     </Button>
+                    <Button variant="default" onClick={handleApprove} className="w-full" size="sm">
+                      Tour wieder aktivieren
+                    </Button>
                   </>
                 )}
-                <Button variant="destructive" onClick={handleDelete} className="w-full" size="sm">
+                <Button variant="destructive" onClick={() => setShowDeleteDialog(true)} className="w-full" size="sm">
                   Tour löschen
                 </Button>
               </CardContent>
@@ -659,6 +683,48 @@ export default function TourDetailPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Cancel Tour Alert Dialog */}
+      <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Tour absagen</AlertDialogTitle>
+            <AlertDialogDescription>
+              Möchtest du diese Tour wirklich absagen? Die Tour wird als abgesagt markiert und ist nicht mehr für Anmeldungen verfügbar.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleCancel}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Tour absagen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Tour Alert Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Tour löschen</AlertDialogTitle>
+            <AlertDialogDescription>
+              Möchtest du diese Tour wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Tour löschen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
