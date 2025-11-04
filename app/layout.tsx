@@ -1,8 +1,7 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
+import { GeistSans } from 'geist/font/sans'
+import { GeistMono } from 'geist/font/mono'
 import './globals.css'
-
-const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'ASC Skitouren App',
@@ -30,7 +29,7 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
       </head>
-      <body className={inter.className}>{children}</body>
+      <body className={`${GeistSans.variable} ${GeistMono.variable} font-sans`}>{children}</body>
     </html>
   )
 }
