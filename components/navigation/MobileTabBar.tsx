@@ -54,12 +54,14 @@ export function MobileTabBar() {
               <Link
                 href={tab.href}
                 className={cn(
-                  "flex flex-col items-center justify-center py-3 gap-1 rounded-none w-full touch-manipulation flex-1 transition-colors hover:bg-accent",
+                  "flex flex-col items-center gap-1 rounded-none w-full touch-manipulation flex-1 transition-colors hover:bg-accent",
                   active && "bg-primary-50 text-primary-600"
                 )}
                 style={{
                   minHeight: 'calc(60px + max(env(safe-area-inset-bottom, 8px), 8px))',
-                  paddingBottom: 'max(env(safe-area-inset-bottom, 8px), 8px)'
+                  paddingTop: '12px',
+                  paddingBottom: 'max(env(safe-area-inset-bottom, 8px), 8px)',
+                  justifyContent: 'flex-start'
                 }}
                 aria-current={active ? 'page' : undefined}
               >
