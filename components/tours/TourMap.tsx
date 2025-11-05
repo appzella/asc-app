@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import { MapContainer, TileLayer, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, useMap, WMSTileLayer } from 'react-leaflet'
 
 // Fix für Leaflet-Icons in Next.js
 if (typeof window !== 'undefined') {
@@ -141,6 +141,7 @@ function GPXLayer({ gpxUrl }: { gpxUrl: string }) {
 
 export default function TourMap({ gpxUrl, height = '400px' }: TourMapProps) {
   const [selectedLayer, setSelectedLayer] = useState<'karte-sw' | 'karte-farbig' | 'satellit'>('karte-sw')
+  const [showHangneigung, setShowHangneigung] = useState(false)
 
   // Standard-Zentrum: Schweiz (Bern)
   const center: [number, number] = [46.9481, 7.4474]
@@ -162,36 +163,50 @@ export default function TourMap({ gpxUrl, height = '400px' }: TourMapProps) {
   return (
     <div className="relative w-full" style={{ height }}>
       {/* Layer-Auswahl */}
-      <div className="absolute top-2 right-2 z-[1000] flex gap-1 bg-background/95 backdrop-blur-sm border rounded-md p-1 shadow-sm">
+      <div className="absolute top-2 right-2 z-[1000] flex flex-col gap-2">
+        {/* Karten-Layer */}
+        <div className="flex gap-1 bg-background/95 backdrop-blur-sm border rounded-md p-1 shadow-sm">
+          <button
+            onClick={() => setSelectedLayer('karte-sw')}
+            className={`px-2 py-1 text-xs rounded transition-colors ${
+              selectedLayer === 'karte-sw'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-background hover:bg-muted'
+            }`}
+          >
+            Karte SW
+          </button>
+          <button
+            onClick={() => setSelectedLayer('karte-farbig')}
+            className={`px-2 py-1 text-xs rounded transition-colors ${
+              selectedLayer === 'karte-farbig'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-background hover:bg-muted'
+            }`}
+          >
+            Karte farbig
+          </button>
+          <button
+            onClick={() => setSelectedLayer('satellit')}
+            className={`px-2 py-1 text-xs rounded transition-colors ${
+              selectedLayer === 'satellit'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-background hover:bg-muted'
+            }`}
+          >
+            Satellit
+          </button>
+        </div>
+        {/* Hangneigung Toggle */}
         <button
-          onClick={() => setSelectedLayer('karte-sw')}
-          className={`px-2 py-1 text-xs rounded transition-colors ${
-            selectedLayer === 'karte-sw'
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-background hover:bg-muted'
+          onClick={() => setShowHangneigung(!showHangneigung)}
+          className={`px-2 py-1 text-xs rounded transition-colors bg-background/95 backdrop-blur-sm border shadow-sm ${
+            showHangneigung
+              ? 'bg-primary text-primary-foreground border-primary'
+              : 'bg-background hover:bg-muted border-border'
           }`}
         >
-          Karte SW
-        </button>
-        <button
-          onClick={() => setSelectedLayer('karte-farbig')}
-          className={`px-2 py-1 text-xs rounded transition-colors ${
-            selectedLayer === 'karte-farbig'
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-background hover:bg-muted'
-          }`}
-        >
-          Karte farbig
-        </button>
-        <button
-          onClick={() => setSelectedLayer('satellit')}
-          className={`px-2 py-1 text-xs rounded transition-colors ${
-            selectedLayer === 'satellit'
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-background hover:bg-muted'
-          }`}
-        >
-          Satellit
+          Hangneigung ≥30°
         </button>
       </div>
 
@@ -210,6 +225,18 @@ export default function TourMap({ gpxUrl, height = '400px' }: TourMapProps) {
           tileSize={256}
           zoomOffset={0}
         />
+        {showHangneigung && (
+          <WMSTileLayer
+            url="https://wms.geo.admin.ch/"
+            params={{
+              layers: 'ch.swisstopo.hangneigung-ueber_30',
+              format: 'image/png',
+              transparent: true,
+              version: '1.3.0',
+            }}
+            opacity={0.6}
+          />
+        )}
         <GPXLayer gpxUrl={gpxUrl} />
       </MapContainer>
     </div>
