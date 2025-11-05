@@ -26,23 +26,23 @@ interface TourMapProps {
 const SWISSTOPO_WMTS_BASE = 'https://wmts.geo.admin.ch/1.0.0/{layer}/default/current/3857/{z}/{x}/{y}.{format}'
 
 // Verschiedene Swisstopo Layer:
-// - ch.swisstopo.pixelkarte-farbe (Standard Karte)
+// - ch.swisstopo.pixelkarte-grau (Schwarz-Weiß Karte)
+// - ch.swisstopo.pixelkarte-farbe (Farbige Karte)
 // - ch.swisstopo.swissimage (Satellitenbilder)
-// - ch.swisstopo.landeskarte (Topografische Karte)
 const SWISSTOPO_LAYERS = {
-  pixelkarte: {
+  'karte-sw': {
+    layer: 'ch.swisstopo.pixelkarte-grau',
+    format: 'jpeg',
+    attribution: '© <a href="https://www.swisstopo.admin.ch/" target="_blank">swisstopo</a>',
+  },
+  'karte-farbig': {
     layer: 'ch.swisstopo.pixelkarte-farbe',
     format: 'jpeg',
     attribution: '© <a href="https://www.swisstopo.admin.ch/" target="_blank">swisstopo</a>',
   },
-  swissimage: {
+  'satellit': {
     layer: 'ch.swisstopo.swissimage',
     format: 'jpeg',
-    attribution: '© <a href="https://www.swisstopo.admin.ch/" target="_blank">swisstopo</a>',
-  },
-  landeskarte: {
-    layer: 'ch.swisstopo.landeskarte',
-    format: 'png',
     attribution: '© <a href="https://www.swisstopo.admin.ch/" target="_blank">swisstopo</a>',
   },
 }
@@ -140,7 +140,7 @@ function GPXLayer({ gpxUrl }: { gpxUrl: string }) {
 }
 
 export default function TourMap({ gpxUrl, height = '400px' }: TourMapProps) {
-  const [selectedLayer, setSelectedLayer] = useState<'pixelkarte' | 'swissimage' | 'landeskarte'>('pixelkarte')
+  const [selectedLayer, setSelectedLayer] = useState<'karte-sw' | 'karte-farbig' | 'satellit'>('karte-sw')
 
   // Standard-Zentrum: Schweiz (Bern)
   const center: [number, number] = [46.9481, 7.4474]
@@ -164,34 +164,34 @@ export default function TourMap({ gpxUrl, height = '400px' }: TourMapProps) {
       {/* Layer-Auswahl */}
       <div className="absolute top-2 right-2 z-[1000] flex gap-1 bg-background/95 backdrop-blur-sm border rounded-md p-1 shadow-sm">
         <button
-          onClick={() => setSelectedLayer('pixelkarte')}
+          onClick={() => setSelectedLayer('karte-sw')}
           className={`px-2 py-1 text-xs rounded transition-colors ${
-            selectedLayer === 'pixelkarte'
+            selectedLayer === 'karte-sw'
               ? 'bg-primary text-primary-foreground'
               : 'bg-background hover:bg-muted'
           }`}
         >
-          Karte
+          Karte SW
         </button>
         <button
-          onClick={() => setSelectedLayer('swissimage')}
+          onClick={() => setSelectedLayer('karte-farbig')}
           className={`px-2 py-1 text-xs rounded transition-colors ${
-            selectedLayer === 'swissimage'
+            selectedLayer === 'karte-farbig'
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-background hover:bg-muted'
+          }`}
+        >
+          Karte farbig
+        </button>
+        <button
+          onClick={() => setSelectedLayer('satellit')}
+          className={`px-2 py-1 text-xs rounded transition-colors ${
+            selectedLayer === 'satellit'
               ? 'bg-primary text-primary-foreground'
               : 'bg-background hover:bg-muted'
           }`}
         >
           Satellit
-        </button>
-        <button
-          onClick={() => setSelectedLayer('landeskarte')}
-          className={`px-2 py-1 text-xs rounded transition-colors ${
-            selectedLayer === 'landeskarte'
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-background hover:bg-muted'
-          }`}
-        >
-          Topo
         </button>
       </div>
 
