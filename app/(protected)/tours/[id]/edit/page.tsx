@@ -359,12 +359,16 @@ export default function EditTourPage() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {tourType ? getDifficultyOptions(tourType as TourType, settings).map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </SelectItem>
-                        )) : (
-                          <SelectItem value="" disabled>Bitte zuerst Tourenart wählen</SelectItem>
+                        {tourType ? (
+                          getDifficultyOptions(tourType as TourType, settings).map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                            Bitte zuerst Tourenart wählen
+                          </div>
                         )}
                       </SelectContent>
                     </Select>
