@@ -25,12 +25,11 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Skeleton } from '@/components/ui/skeleton'
-import { ChatWindow } from '@/components/chat/ChatWindow'
 import { canEditTour, canApproveTour, canPublishTour, canSubmitForPublishing } from '@/lib/roles'
 import { formatDifficulty } from '@/lib/difficulty'
 import Link from 'next/link'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import { ChevronLeft, Calendar, Clock, ArrowUpRight, Users, ChartNoAxesColumnIncreasing, X, UserPlus, Map } from 'lucide-react'
+import { ChevronLeft, Calendar, Clock, ArrowUpRight, Users, ChartNoAxesColumnIncreasing, X, UserPlus, Map, MessageSquare } from 'lucide-react'
 import TourMap from '@/components/tours/TourMap'
 import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { toast } from 'sonner'
@@ -653,17 +652,6 @@ export default function TourDetailPage() {
             </CardContent>
           </Card>
 
-          {/* Chat - nur bei veröffentlichten Touren */}
-          {tour.status === 'published' && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Chat</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ChatWindow tourId={tourId} userId={user.id} />
-              </CardContent>
-            </Card>
-          )}
         </div>
 
         {/* Sidebar */}
@@ -872,6 +860,20 @@ export default function TourDetailPage() {
                     )}
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Chat - nur bei veröffentlichten Touren */}
+          {tour.status === 'published' && (
+            <Card>
+              <CardContent className="p-4">
+                <Button variant="outline" className="w-full" size="sm" asChild>
+                  <Link href={`/chat/${tourId}`}>
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    Zum Chat
+                  </Link>
+                </Button>
               </CardContent>
             </Card>
           )}

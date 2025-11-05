@@ -15,9 +15,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { ChevronDown, Settings, ArrowLeft } from 'lucide-react'
+import { ChevronDown, Settings, ArrowLeft, MessageSquare } from 'lucide-react'
 import { UserRole } from '@/lib/types'
 import { ASCLogo } from '@/components/ui/ASCLogo'
+import { useTotalUnreadCount } from '@/lib/chat/useUnreadMessages'
 
 // Helper function to translate user roles to German
 function getRoleLabel(role: UserRole): string {
@@ -38,6 +39,7 @@ export default function ProtectedLayout({
   const pathname = usePathname()
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const totalUnreadCount = useTotalUnreadCount(user?.id || null)
 
   useEffect(() => {
     let isMounted = true
@@ -229,6 +231,27 @@ export default function ProtectedLayout({
                   )
                 })}
               </div>
+              
+              {/* Chat Button - Desktop */}
+              <Link
+                href="/chat"
+                className={`hidden sm:flex items-center relative px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                  pathname?.startsWith('/chat')
+                    ? 'bg-primary-50 text-primary-600'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                }`}
+              >
+                <MessageSquare className="w-4 h-4 mr-1.5" strokeWidth={2} />
+                Chat
+                {totalUnreadCount > 0 && (
+                  <Badge 
+                    variant="default" 
+                    className="ml-1.5 h-5 min-w-5 px-1.5 text-xs flex items-center justify-center"
+                  >
+                    {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
+                  </Badge>
+                )}
+              </Link>
             </div>
             
             {/* Mitte: ASC Logo (Mobile, nur auf anderen Seiten) */}
@@ -241,8 +264,29 @@ export default function ProtectedLayout({
               </div>
             )}
             
-            {/* Rechts: Settings und Profil */}
+            {/* Rechts: Chat (Mobile), Settings und Profil */}
             <div className="flex items-center space-x-3 flex-1 justify-end">
+              {/* Chat Button - Mobile */}
+              <Button
+                variant="ghost"
+                size="icon"
+                asChild
+                className="sm:hidden relative"
+                aria-label="Chat"
+              >
+                <Link href="/chat">
+                  <MessageSquare className="w-5 h-5" strokeWidth={2} />
+                  {totalUnreadCount > 0 && (
+                    <Badge 
+                      variant="default" 
+                      className="absolute -top-1 -right-1 h-5 min-w-5 px-1.5 text-xs flex items-center justify-center"
+                    >
+                      {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
+                    </Badge>
+                  )}
+                </Link>
+              </Button>
+              
               {/* Settings Icon für Mobile (nur Admin) */}
               {user.role === 'admin' && (
                 <Button

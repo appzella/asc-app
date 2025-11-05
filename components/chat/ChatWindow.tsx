@@ -11,13 +11,15 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { supabase, isSupabaseConfigured } from '@/lib/supabase/client'
 import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 import { Send } from 'lucide-react'
+import { markTourAsRead } from '@/lib/chat/useUnreadMessages'
 
 interface ChatWindowProps {
   tourId: string
   userId: string
+  onMessagesLoaded?: (messages: ChatMessage[]) => void
 }
 
-export const ChatWindow: React.FC<ChatWindowProps> = ({ tourId, userId }) => {
+export const ChatWindow: React.FC<ChatWindowProps> = ({ tourId, userId, onMessagesLoaded }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [newMessage, setNewMessage] = useState('')
   const [isLoading, setIsLoading] = useState(true)
@@ -32,6 +34,16 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ tourId, userId }) => {
         setIsLoading(true)
         const tourMessages = await dataRepository.getMessagesByTourId(tourId)
         setMessages(tourMessages)
+        
+        // Markiere als gelesen, wenn Nachrichten geladen sind
+        if (tourMessages.length > 0) {
+          const newestMessage = tourMessages[tourMessages.length - 1]
+          markTourAsRead(tourId, newestMessage.createdAt)
+        }
+        
+        if (onMessagesLoaded) {
+          onMessagesLoaded(tourMessages)
+        }
       } catch (error) {
         console.error('Error loading messages:', error)
       } finally {
