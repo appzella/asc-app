@@ -144,6 +144,7 @@ export default function TourMap({ gpxUrl, height = '400px' }: TourMapProps) {
   const [selectedLayer, setSelectedLayer] = useState<'karte-sw' | 'karte-farbig' | 'satellit'>('karte-sw')
   const [showHangneigung, setShowHangneigung] = useState(true)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const mapContainerRef = useRef<HTMLDivElement>(null)
 
   // Standard-Zentrum: Schweiz (Bern)
   const center: [number, number] = [46.9481, 7.4474]
@@ -164,32 +165,79 @@ export default function TourMap({ gpxUrl, height = '400px' }: TourMapProps) {
 
   // Vollbild-Funktionalität
   useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement)
+    const checkFullscreen = () => {
+      const isFullscreenActive = !!(
+        document.fullscreenElement ||
+        (document as any).webkitFullscreenElement ||
+        (document as any).mozFullScreenElement ||
+        (document as any).msFullscreenElement
+      )
+      setIsFullscreen(isFullscreenActive)
     }
 
+    const handleFullscreenChange = () => {
+      checkFullscreen()
+    }
+
+    // Unterstützung für verschiedene Browser-Präfixe
     document.addEventListener('fullscreenchange', handleFullscreenChange)
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange)
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange)
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange)
+
+    // Initial check
+    checkFullscreen()
+
     return () => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange)
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange)
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange)
+      document.removeEventListener('MSFullscreenChange', handleFullscreenChange)
     }
   }, [])
 
-  const toggleFullscreen = () => {
-    const mapContainer = document.getElementById('tour-map-container')
-    if (!mapContainer) return
+  const toggleFullscreen = async () => {
+    const mapContainer = mapContainerRef.current
+    if (!mapContainer) {
+      console.error('Map container not found')
+      return
+    }
 
-    if (!document.fullscreenElement) {
-      mapContainer.requestFullscreen().catch((err) => {
-        console.error('Error attempting to enable fullscreen:', err)
-      })
-    } else {
-      document.exitFullscreen()
+    try {
+      if (!document.fullscreenElement && 
+          !(document as any).webkitFullscreenElement && 
+          !(document as any).mozFullScreenElement && 
+          !(document as any).msFullscreenElement) {
+        // Enter fullscreen
+        if (mapContainer.requestFullscreen) {
+          await mapContainer.requestFullscreen()
+        } else if ((mapContainer as any).webkitRequestFullscreen) {
+          await (mapContainer as any).webkitRequestFullscreen()
+        } else if ((mapContainer as any).mozRequestFullScreen) {
+          await (mapContainer as any).mozRequestFullScreen()
+        } else if ((mapContainer as any).msRequestFullscreen) {
+          await (mapContainer as any).msRequestFullscreen()
+        }
+      } else {
+        // Exit fullscreen
+        if (document.exitFullscreen) {
+          await document.exitFullscreen()
+        } else if ((document as any).webkitExitFullscreen) {
+          await (document as any).webkitExitFullscreen()
+        } else if ((document as any).mozCancelFullScreen) {
+          await (document as any).mozCancelFullScreen()
+        } else if ((document as any).msExitFullscreen) {
+          await (document as any).msExitFullscreen()
+        }
+      }
+    } catch (err) {
+      console.error('Error toggling fullscreen:', err)
     }
   }
 
   return (
     <div 
-      id="tour-map-container"
+      ref={mapContainerRef}
       className="relative w-full" 
       style={{ height: isFullscreen ? '100vh' : height }}
     >
