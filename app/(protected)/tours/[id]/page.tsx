@@ -614,6 +614,21 @@ export default function TourDetailPage() {
             </CardContent>
           </Card>
 
+          {/* Karte mit GPX-Track - direkt in Tour Details integriert */}
+          {tour.gpxFile && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Tour-Verlauf</CardTitle>
+                <CardDescription>
+                  Visualisierung der Tour auf einer Karte
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-0">
+                <TourMap gpxUrl={tour.gpxFile} height="500px" />
+              </CardContent>
+            </Card>
+          )}
+
           {/* Chat - nur bei veröffentlichten Touren */}
           {tour.status === 'published' && (
             <Card>
@@ -629,20 +644,6 @@ export default function TourDetailPage() {
 
         {/* Sidebar */}
         <div className="space-y-4">
-          {/* Karte mit GPX-Track - ganz oben in der rechten Spalte */}
-          {tour.gpxFile && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Tour-Verlauf</CardTitle>
-                <CardDescription>
-                  Visualisierung der Tour auf einer Karte
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <TourMap gpxUrl={tour.gpxFile} height="500px" />
-              </CardContent>
-            </Card>
-          )}
           {/* Leader Actions */}
           {canSubmit && tour.status === 'draft' && !tour.submittedForPublishing && (
             <Card className="border-blue-300 bg-blue-50/50">
