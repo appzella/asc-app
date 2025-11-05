@@ -22,6 +22,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ tourId, userId }) => {
   const [newMessage, setNewMessage] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const scrollAreaRef = useRef<HTMLDivElement>(null)
+  const isInitialLoad = useRef(true)
 
   // Load initial messages
   useEffect(() => {
@@ -34,6 +36,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ tourId, userId }) => {
         console.error('Error loading messages:', error)
       } finally {
         setIsLoading(false)
+        // After initial load, set flag to false
+        setTimeout(() => {
+          isInitialLoad.current = false
+        }, 100)
       }
     }
 
@@ -84,11 +90,36 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ tourId, userId }) => {
   }, [tourId])
 
   useEffect(() => {
-    scrollToBottom()
+    // Only scroll on initial load or when new messages arrive (not on every message change)
+    if (!isInitialLoad.current) {
+      scrollToBottom()
+    }
   }, [messages])
 
+  useEffect(() => {
+    // Scroll to bottom after initial load completes
+    if (!isLoading && isInitialLoad.current) {
+      setTimeout(() => {
+        scrollToBottom()
+        isInitialLoad.current = false
+      }, 100)
+    }
+  }, [isLoading])
+
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    // Scroll within the ScrollArea viewport, not the entire page
+    if (scrollAreaRef.current) {
+      const viewport = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement
+      if (viewport) {
+        viewport.scrollTo({
+          top: viewport.scrollHeight,
+          behavior: 'smooth'
+        })
+      }
+    } else {
+      // Fallback: use scrollIntoView with block: 'nearest' to prevent page scrolling
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }
   }
 
   const handleSend = async (e: React.FormEvent) => {
@@ -117,7 +148,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ tourId, userId }) => {
 
   return (
     <div className="flex flex-col h-96 sm:h-96 max-h-[60vh] sm:max-h-none">
-      <ScrollArea className="flex-1 mb-4 px-2">
+      <ScrollArea ref={scrollAreaRef} className="flex-1 mb-4 px-2">
         <div className="space-y-4 pr-4">
           {isLoading ? (
             <div className="space-y-4">
