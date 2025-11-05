@@ -464,6 +464,7 @@ export class SupabaseDataRepository implements IDataRepository {
       updateData.leader_id = updates.leaderId
     }
     if (updates.maxParticipants !== undefined) updateData.max_participants = updates.maxParticipants
+    if (updates.gpxFile !== undefined) updateData.gpx_file = updates.gpxFile
 
     const { error } = await supabase
       .from('tours')
@@ -1034,6 +1035,7 @@ export class SupabaseDataRepository implements IDataRepository {
       createdBy: row.created_by,
       submittedForPublishing: row.submitted_for_publishing === true,
       pendingChanges: row.pending_changes || undefined,
+      gpxFile: row.gpx_file || null,
     }
   }
 
@@ -1049,6 +1051,7 @@ export class SupabaseDataRepository implements IDataRepository {
     if (tour.duration !== undefined) dbTour.duration = tour.duration
     if (tour.leaderId !== undefined) dbTour.leader_id = tour.leaderId
     if (tour.maxParticipants !== undefined) dbTour.max_participants = tour.maxParticipants
+    if (tour.gpxFile !== undefined) dbTour.gpx_file = tour.gpxFile
     return dbTour
   }
 
@@ -1122,6 +1125,89 @@ export class SupabaseDataRepository implements IDataRepository {
       .getPublicUrl(filePath)
 
     return urlData.publicUrl
+  }
+
+  /**
+   * Upload GPX file to Supabase Storage
+   * @param tourId Tour ID
+   * @param file GPX file to upload
+   * @returns Public URL of uploaded GPX file
+   */
+  async uploadGpxFile(tourId: string, file: File): Promise<string> {
+    if (!isSupabaseConfigured || !supabase) {
+      throw new Error('Supabase not configured')
+    }
+
+    // Validate file type
+    const validExtensions = ['gpx', 'xml']
+    const fileExt = file.name.split('.').pop()?.toLowerCase()
+    if (!fileExt || !validExtensions.includes(fileExt)) {
+      throw new Error('Ungültiger Dateityp. Nur GPX-Dateien sind erlaubt.')
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      throw new Error('Die Datei ist zu groß. Bitte wähle eine Datei unter 10MB.')
+    }
+
+    // Generate unique filename
+    const fileName = `${Date.now()}.${fileExt}`
+    const filePath = `gpx/${tourId}/${fileName}`
+
+    // Upload file to Storage
+    const { data, error } = await supabase.storage
+      .from('gpx-files')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false,
+      })
+
+    if (error) {
+      if (this.handleSupabaseError(error)) {
+        throw new Error('Session expired')
+      }
+      console.error('Error uploading GPX file:', error)
+      throw error
+    }
+
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from('gpx-files')
+      .getPublicUrl(filePath)
+
+    return urlData.publicUrl
+  }
+
+  /**
+   * Delete GPX file from Supabase Storage
+   * @param gpxUrl URL of the GPX file to delete
+   */
+  async deleteGpxFile(gpxUrl: string): Promise<void> {
+    if (!isSupabaseConfigured || !supabase) {
+      return
+    }
+
+    // Extract file path from URL
+    // URL format: https://[project].supabase.co/storage/v1/object/public/gpx-files/gpx/[tourId]/[filename]
+    try {
+      const urlParts = gpxUrl.split('/gpx-files/')
+      if (urlParts.length !== 2) {
+        console.error('Invalid GPX URL format:', gpxUrl)
+        return
+      }
+
+      const filePath = urlParts[1]
+
+      const { error } = await supabase.storage
+        .from('gpx-files')
+        .remove([filePath])
+
+      if (error && !this.handleSupabaseError(error)) {
+        console.error('Error deleting GPX file:', error)
+      }
+    } catch (error) {
+      console.error('Error parsing GPX URL:', error)
+    }
   }
 
   /**

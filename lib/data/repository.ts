@@ -60,5 +60,9 @@ export interface IDataRepository {
   removeDifficulty(tourType: string, difficulty: string): Promise<boolean>
   updateDifficultiesOrder(tourType: string, orderedDifficulties: string[]): Promise<void>
   getDifficultiesForTourType(tourType: string): Promise<string[]>
+
+  // File Upload
+  uploadGpxFile(tourId: string, file: File): Promise<string>
+  deleteGpxFile(gpxUrl: string): Promise<void>
 }
 

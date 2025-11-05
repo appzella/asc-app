@@ -31,6 +31,7 @@ import { formatDifficulty } from '@/lib/difficulty'
 import Link from 'next/link'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { ChevronLeft, Calendar, Clock, ArrowUpRight, Users, ChartNoAxesColumnIncreasing, X, UserPlus } from 'lucide-react'
+import TourMap from '@/components/tours/TourMap'
 import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { toast } from 'sonner'
 
@@ -612,6 +613,21 @@ export default function TourDetailPage() {
               )}
             </CardContent>
           </Card>
+
+          {/* Karte mit GPX-Track */}
+          {tour.gpxFile && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Tour-Verlauf</CardTitle>
+                <CardDescription>
+                  Visualisierung der Tour auf einer Karte
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <TourMap gpxUrl={tour.gpxFile} height="500px" />
+              </CardContent>
+            </Card>
+          )}
 
           {/* Chat - nur bei veröffentlichten Touren */}
           {tour.status === 'published' && (

@@ -55,6 +55,7 @@ export interface Tour {
   createdBy: string // User-ID
   submittedForPublishing?: boolean // Ob die Tour zur Veröffentlichung eingereicht wurde
   pendingChanges?: Partial<Tour> // Ausstehende Änderungen, die auf Freigabe warten
+  gpxFile?: string | null // URL zur GPX-Datei in Supabase Storage
 }
 
 export interface ChatMessage {
