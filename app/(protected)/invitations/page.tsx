@@ -250,9 +250,9 @@ export default function InvitationsPage() {
                         <TableCell className="font-medium">{invitation.email}</TableCell>
                         <TableCell>
                           {invitation.used ? (
-                            <Badge variant="default">Verwendet</Badge>
+                            <Badge variant="outline-success">Verwendet</Badge>
                           ) : (
-                            <Badge variant="secondary">Ausstehend</Badge>
+                            <Badge variant="outline-warning">Ausstehend</Badge>
                           )}
                         </TableCell>
                         <TableCell className="text-muted-foreground">

@@ -398,22 +398,22 @@ export default function TourDetailPage() {
                   {tour.tourLength}
                 </Badge>
                 {tour.status === 'draft' && (
-                  <Badge variant="outline">
+                  <Badge variant="outline-warning">
                     Entwurf
                   </Badge>
                 )}
                 {tour.status === 'published' && (
-                  <Badge variant="default">
+                  <Badge variant="outline-success">
                     Veröffentlicht
                   </Badge>
                 )}
                 {tour.status === 'draft' && tour.submittedForPublishing && (
-                  <Badge variant="secondary">
+                  <Badge variant="outline-warning">
                     Zur Veröffentlichung eingereicht
                   </Badge>
                 )}
                 {tour.status === 'cancelled' && (
-                  <Badge variant="destructive">
+                  <Badge variant="outline-destructive">
                     Abgesagt
                   </Badge>
                 )}
@@ -468,7 +468,7 @@ export default function TourDetailPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button variant="default" onClick={handleSubmitForPublishing} className="w-full" size="sm">
+                <Button variant="warning" onClick={handleSubmitForPublishing} className="w-full" size="sm">
                   Zur Veröffentlichung einreichen
                 </Button>
               </CardContent>
@@ -482,7 +482,7 @@ export default function TourDetailPage() {
                 <CardTitle className="text-yellow-800 text-base">Veröffentlichung</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Button variant="default" onClick={handleApprove} className="w-full" size="sm" disabled={isArchived}>
+                <Button variant="success" onClick={handleApprove} className="w-full" size="sm" disabled={isArchived}>
                   Tour veröffentlichen
                 </Button>
                 {!isArchived && (
@@ -501,7 +501,7 @@ export default function TourDetailPage() {
                 <CardTitle className="text-foreground text-base">Admin-Aktionen</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Button variant="default" onClick={handleApprove} className="w-full" size="sm" disabled={isArchived}>
+                <Button variant="success" onClick={handleApprove} className="w-full" size="sm" disabled={isArchived}>
                   Tour veröffentlichen
                 </Button>
                 {isArchived && (
@@ -552,7 +552,7 @@ export default function TourDetailPage() {
                     <Button variant="outline" onClick={handleUnpublish} className="w-full" size="sm">
                       Auf Entwurf setzen
                     </Button>
-                    <Button variant="default" onClick={handleApprove} className="w-full" size="sm">
+                    <Button variant="success" onClick={handleApprove} className="w-full" size="sm">
                       Tour wieder aktivieren
                     </Button>
                   </>
@@ -599,7 +599,7 @@ export default function TourDetailPage() {
                       </p>
                     ) : (
                       <Button
-                        variant="default"
+                        variant="success"
                         onClick={handleRegister}
                         className="w-full"
                         size="sm"

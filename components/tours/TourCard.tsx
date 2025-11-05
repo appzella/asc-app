@@ -33,21 +33,21 @@ export const TourCard: React.FC<TourCardProps> = ({ tour, tourTypeIcons, userRol
 
     if (tour.status === 'draft') {
       return (
-        <Badge variant="outline">
+        <Badge variant="outline-warning">
           Entwurf
         </Badge>
       )
     }
     if (tour.status === 'published') {
       return (
-        <Badge variant="default">
+        <Badge variant="outline-success">
           Veröffentlicht
         </Badge>
       )
     }
     if (tour.status === 'cancelled') {
       return (
-        <Badge variant="destructive">
+        <Badge variant="outline-destructive">
           Abgesagt
         </Badge>
       )

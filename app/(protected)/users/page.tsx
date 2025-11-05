@@ -154,11 +154,11 @@ export default function UsersPage() {
                       </TableCell>
                       <TableCell>
                         {u.registered ? (
-                          <Badge variant="default">
+                          <Badge variant="outline-success">
                             Registriert
                           </Badge>
                         ) : (
-                          <Badge variant="secondary">
+                          <Badge variant="outline-warning">
                             Ausstehend
                           </Badge>
                         )}

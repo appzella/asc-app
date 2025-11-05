@@ -114,6 +114,7 @@ export default function LoginPage() {
                 <a
                   href="/forgot-password"
                   className="text-sm text-primary-600 hover:text-primary-700 hover:underline transition-colors"
+                  tabIndex={-1}
                 >
                   Passwort vergessen?
                 </a>
