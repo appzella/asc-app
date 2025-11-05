@@ -289,11 +289,6 @@ export class SupabaseDataRepository implements IDataRepository {
     }
   }
 
-  async getApprovedTours(): Promise<Tour[]> {
-    // Alias für getPublishedTours für Rückwärtskompatibilität
-    return this.getPublishedTours()
-  }
-
   async getPublishedTours(): Promise<Tour[]> {
     const { data, error } = await supabase
       .from('tours_with_participants')

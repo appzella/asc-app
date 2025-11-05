@@ -1,5 +1,5 @@
-import { Difficulty, TourType } from './types'
-import { dataStore } from './data/mockData'
+import { Difficulty, TourType, TourSettings } from './types'
+import { dataRepository } from './data'
 
 export interface DifficultyOption {
   value: Difficulty
@@ -10,14 +10,18 @@ export interface DifficultyOption {
 /**
  * Gibt die passenden Schwierigkeitsoptionen basierend auf der Tourenart zurück
  * Verwendet jetzt die konfigurierbaren Einstellungen
+ * 
+ * @param tourType - Die Tourenart
+ * @param settings - Optional: TourSettings (um async Aufrufe zu vermeiden)
  */
-export function getDifficultyOptions(tourType: TourType | ''): DifficultyOption[] {
+export function getDifficultyOptions(tourType: TourType | '', settings?: TourSettings): DifficultyOption[] {
   if (!tourType) {
     return []
   }
 
-  const settings = dataStore.getSettings()
-  const difficulties = settings.difficulties[tourType] || []
+  // Falls Settings nicht übergeben wurden, verwende leeren Array als Fallback
+  // Die Komponenten sollten die Settings bereits geladen haben
+  const difficulties = settings?.difficulties[tourType] || []
 
   // Fallback-Beschreibungen für bekannte Schwierigkeitsgrade
   const descriptions: Record<string, string> = {

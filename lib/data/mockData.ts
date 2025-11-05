@@ -1,4 +1,4 @@
-import { User, Tour, ChatMessage, Invitation, UserRole, TourStatus, TourSettings } from '../types'
+import { User, Tour, ChatMessage, Invitation, TourSettings } from '../types'
 
 // In-Memory Datenspeicher
 class DataStore {
@@ -90,14 +90,6 @@ class DataStore {
     }
   }
 
-  getApprovedTours(): Tour[] {
-    return this.getTours().filter((t) => t.status === 'published')
-  }
-
-  getPendingTours(): Tour[] {
-    return this.getTours().filter((t) => t.status === 'draft' && t.submittedForPublishing === true)
-  }
-
   createTour(tour: Omit<Tour, 'id' | 'createdAt' | 'updatedAt' | 'participants' | 'status' | 'waitlist'>): Tour {
     const newTour: Tour = {
       ...tour,
@@ -130,11 +122,6 @@ class DataStore {
     return this.getTourById(id)!
   }
 
-  approveTour(id: string): Tour | null {
-    // Alias für publishTour für Rückwärtskompatibilität
-    return this.publishTour(id)
-  }
-
   publishTour(id: string): Tour | null {
     const tour = this.getTourById(id)
     if (!tour) return null
@@ -148,11 +135,6 @@ class DataStore {
     }
 
     return this.getTourById(id)!
-  }
-
-  rejectTour(id: string, comment?: string): Tour | null {
-    // Alias für unpublishTour für Rückwärtskompatibilität
-    return this.unpublishTour(id)
   }
 
   unpublishTour(id: string): Tour | null {
@@ -754,23 +736,23 @@ export function seedData() {
     createdBy: leader1.id,
   })
 
-  // Tour 1 genehmigen
-  dataStore.approveTour(tour1.id)
-  dataStore.approveTour(tour3.id)
-  dataStore.approveTour(tour4.id)
-  dataStore.approveTour(tour5.id)
-  dataStore.approveTour(tour6.id)
-  dataStore.approveTour(tour8.id)
-  dataStore.approveTour(tour9.id)
-  dataStore.approveTour(tour11.id)
-  dataStore.approveTour(tour12.id)
-  dataStore.approveTour(tour13.id)
-  dataStore.approveTour(tour14.id)
-  dataStore.approveTour(tour15.id)
-  dataStore.approveTour(tour16.id)
-  dataStore.approveTour(tour17.id)
-  dataStore.approveTour(tour18.id)
-  dataStore.approveTour(tour19.id)
+  // Touren veröffentlichen
+  dataStore.publishTour(tour1.id)
+  dataStore.publishTour(tour3.id)
+  dataStore.publishTour(tour4.id)
+  dataStore.publishTour(tour5.id)
+  dataStore.publishTour(tour6.id)
+  dataStore.publishTour(tour8.id)
+  dataStore.publishTour(tour9.id)
+  dataStore.publishTour(tour11.id)
+  dataStore.publishTour(tour12.id)
+  dataStore.publishTour(tour13.id)
+  dataStore.publishTour(tour14.id)
+  dataStore.publishTour(tour15.id)
+  dataStore.publishTour(tour16.id)
+  dataStore.publishTour(tour17.id)
+  dataStore.publishTour(tour18.id)
+  dataStore.publishTour(tour19.id)
 
   // Mitglieder für verschiedene Touren anmelden
   dataStore.registerForTour(tour1.id, member1.id)

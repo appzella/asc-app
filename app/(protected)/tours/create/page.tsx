@@ -501,7 +501,7 @@ export default function CreateTourPage() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {getDifficultyOptions(tourType as TourType).map((opt) => (
+                        {getDifficultyOptions(tourType as TourType, settings).map((opt) => (
                           <SelectItem key={opt.value} value={opt.value}>
                             {opt.label}
                           </SelectItem>

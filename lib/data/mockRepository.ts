@@ -38,10 +38,6 @@ export class MockDataRepository implements IDataRepository {
     return dataStore.getTourById(id) || null
   }
 
-  async getApprovedTours(): Promise<Tour[]> {
-    return dataStore.getApprovedTours()
-  }
-
   async getPublishedTours(): Promise<Tour[]> {
     return dataStore.getTours().filter(t => t.status === 'published')
   }
@@ -52,11 +48,6 @@ export class MockDataRepository implements IDataRepository {
 
   async getToursSubmittedForPublishing(): Promise<Tour[]> {
     return dataStore.getTours().filter(t => t.status === 'draft' && t.submittedForPublishing === true)
-  }
-
-  async getPendingTours(): Promise<Tour[]> {
-    // Alias für getToursSubmittedForPublishing für Rückwärtskompatibilität
-    return this.getToursSubmittedForPublishing()
   }
 
   async createTour(tour: Omit<Tour, 'id' | 'createdAt' | 'updatedAt' | 'participants' | 'status' | 'waitlist'>): Promise<Tour> {
@@ -103,16 +94,6 @@ export class MockDataRepository implements IDataRepository {
     if (index === -1) return false
     dataStore['tours'].splice(index, 1)
     return true
-  }
-
-  async approveTour(id: string): Promise<Tour | null> {
-    // Alias für publishTour für Rückwärtskompatibilität
-    return this.publishTour(id)
-  }
-
-  async rejectTour(id: string, comment?: string): Promise<Tour | null> {
-    // Alias für unpublishTour für Rückwärtskompatibilität
-    return this.unpublishTour(id)
   }
 
   async registerForTour(tourId: string, userId: string): Promise<boolean> {
