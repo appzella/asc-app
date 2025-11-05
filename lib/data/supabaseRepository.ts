@@ -1056,6 +1056,7 @@ export class SupabaseDataRepository implements IDataRepository {
         role: 'member' as const,
         createdAt: new Date(),
         registered: true,
+        active: row.user_active !== undefined ? row.user_active : true,
         profilePhoto: row.user_profile_photo || undefined,
       } : undefined,
     }
