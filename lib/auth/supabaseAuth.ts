@@ -10,13 +10,6 @@ export class LoginTimeoutError extends Error {
   }
 }
 
-export class EmailNotConfirmedError extends Error {
-  constructor(message: string = 'Email not confirmed') {
-    super(message)
-    this.name = 'EmailNotConfirmedError'
-  }
-}
-
 /**
  * Supabase Auth Service
  * Verwaltet Authentifizierung über Supabase Auth
@@ -355,10 +348,11 @@ class SupabaseAuthService {
       }
 
       // Check if email is confirmed
+      // If not confirmed, sign out and return null to prevent email enumeration
+      // This shows the same generic error as wrong credentials
       if (!data.user.email_confirmed_at) {
-        // Sign out the user since they can't log in without email confirmation
         await supabase.auth.signOut()
-        throw new EmailNotConfirmedError('E-Mail-Adresse wurde noch nicht bestätigt')
+        return null
       }
 
       // Wait for session to be established and load user profile
@@ -406,7 +400,7 @@ class SupabaseAuthService {
       return user
     } catch (error: any) {
       // Re-throw specific errors so they can be handled by the caller
-      if (error instanceof LoginTimeoutError || error instanceof EmailNotConfirmedError) {
+      if (error instanceof LoginTimeoutError) {
         throw error
       }
       // Handle timeout errors specifically

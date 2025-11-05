@@ -18,7 +18,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { authService } from '@/lib/auth'
-import { LoginTimeoutError, EmailNotConfirmedError } from '@/lib/auth/supabaseAuth'
+import { LoginTimeoutError } from '@/lib/auth/supabaseAuth'
 import { ASCLogo } from '@/components/ui/ASCLogo'
 
 const loginSchema = z.object({
@@ -58,9 +58,7 @@ export default function LoginPage() {
       if (process.env.NODE_ENV === 'development') {
         console.error('Login error:', err)
       }
-      if (err instanceof EmailNotConfirmedError) {
-        setError('Bitte bestätige zuerst deine E-Mail-Adresse. Prüfe dein Postfach und klicke auf den Bestätigungslink.')
-      } else if (err instanceof LoginTimeoutError || err?.message?.includes('timeout')) {
+      if (err instanceof LoginTimeoutError || err?.message?.includes('timeout')) {
         setError('Die Anmeldung dauerte zu lange. Bitte prüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.')
       } else {
         setError('Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.')
