@@ -128,7 +128,7 @@ export default function ProtectedLayout({
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <nav className="bg-background/95 backdrop-blur-sm sticky top-0 z-50 border-b border-border flex-shrink-0 shadow-sm">
+      <nav className="bg-background/95 backdrop-blur-sm sticky top-0 z-[100] border-b border-border flex-shrink-0 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20 relative">
             {/* Links: Logo/ Zurück-Button */}

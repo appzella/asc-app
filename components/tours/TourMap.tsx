@@ -1,11 +1,24 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
+import React, { useEffect, useRef, useState, useCallback } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { MapContainer, TileLayer, useMap, WMSTileLayer } from 'react-leaflet'
-import { Maximize2, Minimize2 } from 'lucide-react'
+import { Maximize2, Minimize2, Layers } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import {
+  Tooltip,
+  TooltipArrow,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { Switch } from '@/components/ui/switch'
 
 // Fix für Leaflet-Icons in Next.js
 if (typeof window !== 'undefined') {
@@ -102,20 +115,17 @@ function GPXLayer({ gpxUrl }: { gpxUrl: string }) {
           try {
             map.fitBounds(e.target.getBounds(), { padding: [20, 20] })
           } catch (err) {
-            console.error('Error fitting bounds:', err)
             setError('Fehler beim Anpassen der Kartenansicht')
           }
         })
 
         gpxLayer.on('error', function (e: any) {
-          console.error('GPX loading error:', e)
           setError('Fehler beim Laden der GPX-Datei')
         })
 
         gpxLayer.addTo(map)
         gpxLayerRef.current = gpxLayer
       } catch (err) {
-        console.error('Error loading GPX library:', err)
         setError('Fehler beim Laden der GPX-Bibliothek')
       }
     }
@@ -141,11 +151,72 @@ function GPXLayer({ gpxUrl }: { gpxUrl: string }) {
   return null
 }
 
+// Hook für CSS-basiertes Fullscreen (innerhalb des Browsers)
+function useFullscreenControl() {
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const mapRef = useRef<L.Map | null>(null)
+
+  const setMap = useCallback((map: L.Map) => {
+    mapRef.current = map
+  }, [])
+
+  const toggleFullscreen = useCallback(() => {
+    setIsFullscreen((prev) => {
+      const newState = !prev
+      // Map-Größe aktualisieren, wenn sich Fullscreen-Status ändert
+      if (mapRef.current) {
+        setTimeout(() => {
+          mapRef.current?.invalidateSize()
+        }, 100)
+      }
+      return newState
+    })
+  }, [])
+
+  // ESC-Taste zum Schließen des Vollbilds
+  useEffect(() => {
+    if (!isFullscreen) return
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsFullscreen(false)
+        if (mapRef.current) {
+          setTimeout(() => {
+            mapRef.current?.invalidateSize()
+          }, 100)
+        }
+      }
+    }
+
+    document.addEventListener('keydown', handleEscape)
+    return () => {
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [isFullscreen])
+
+  return { isFullscreen, toggleFullscreen, setMap }
+}
+
+function MapInitializer({ onMapReady }: { onMapReady: (map: L.Map) => void }) {
+  const map = useMap()
+  
+  useEffect(() => {
+    if (map) {
+      onMapReady(map)
+    }
+  }, [map, onMapReady])
+  
+  return null
+}
+
 export default function TourMap({ gpxUrl, height = '400px' }: TourMapProps) {
   const [selectedLayer, setSelectedLayer] = useState<'karte-sw' | 'karte-farbig' | 'satellit'>('karte-sw')
+  const [isLayerPanelOpen, setIsLayerPanelOpen] = useState(false)
   const [showHangneigung, setShowHangneigung] = useState(false)
-  const [isFullscreen, setIsFullscreen] = useState(false)
-  const mapContainerRef = useRef<HTMLDivElement>(null)
+  const [showWanderwege, setShowWanderwege] = useState(false)
+  const [showJagdbanngebiete, setShowJagdbanngebiete] = useState(false)
+  const [showWildruhezonen, setShowWildruhezonen] = useState(false)
+  const { isFullscreen, toggleFullscreen, setMap } = useFullscreenControl()
 
   // Standard-Zentrum: Schweiz (Bern)
   const center: [number, number] = [46.9481, 7.4474]
@@ -164,243 +235,154 @@ export default function TourMap({ gpxUrl, height = '400px' }: TourMapProps) {
     .replace('{layer}', layerConfig.layer)
     .replace('{format}', layerConfig.format)
 
-  // Vollbild-Funktionalität
-  useEffect(() => {
-    const checkFullscreen = () => {
-      const isFullscreenActive = !!(
-        document.fullscreenElement ||
-        (document as any).webkitFullscreenElement ||
-        (document as any).mozFullScreenElement ||
-        (document as any).msFullscreenElement
-      )
-      setIsFullscreen(isFullscreenActive)
-    }
-
-    const handleFullscreenChange = () => {
-      checkFullscreen()
-    }
-
-    // Unterstützung für verschiedene Browser-Präfixe
-    document.addEventListener('fullscreenchange', handleFullscreenChange)
-    document.addEventListener('webkitfullscreenchange', handleFullscreenChange)
-    document.addEventListener('mozfullscreenchange', handleFullscreenChange)
-    document.addEventListener('MSFullscreenChange', handleFullscreenChange)
-
-    // Initial check
-    checkFullscreen()
-
-    return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange)
-      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange)
-      document.removeEventListener('mozfullscreenchange', handleFullscreenChange)
-      document.removeEventListener('MSFullscreenChange', handleFullscreenChange)
-    }
-  }, [])
-
-  const toggleFullscreen = async (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    
-    const mapContainer = mapContainerRef.current
-    if (!mapContainer) {
-      console.error('Map container not found')
-      return
-    }
-
-    // Prüfe ob Fullscreen aktiv ist
-    const isCurrentlyFullscreen = !!(
-      document.fullscreenElement ||
-      (document as any).webkitFullscreenElement ||
-      (document as any).mozFullScreenElement ||
-      (document as any).msFullscreenElement
-    )
-
-    try {
-      if (!isCurrentlyFullscreen) {
-        // Enter fullscreen - versuche verschiedene Container
-        let elementToFullscreen: HTMLElement | null = null
-        
-        // Versuche zuerst die Card zu finden (durchsuche nach div mit card-ähnlichen Klassen)
-        const cardElement = mapContainer.closest('div[class*="rounded-xl"], div[class*="border"], div[class*="bg-card"]')
-        
-        // Oder finde die CardContent und dann die Card
-        const cardContent = mapContainer.closest('[class*="CardContent"], [class*="card-content"]')
-        const cardFromContent = cardContent?.parentElement
-        
-        // Oder finde einfach das nächste div mit border
-        const parentWithBorder = mapContainer.parentElement?.closest('div[class*="border"]')
-        
-        // Wähle das beste Element
-        if (cardElement) {
-          elementToFullscreen = cardElement as HTMLElement
-        } else if (cardFromContent) {
-          elementToFullscreen = cardFromContent as HTMLElement
-        } else if (parentWithBorder) {
-          elementToFullscreen = parentWithBorder as HTMLElement
-        } else {
-          // Fallback: verwende den Container selbst
-          elementToFullscreen = mapContainer
-        }
-
-        console.log('Entering fullscreen with element:', elementToFullscreen, 'tag:', elementToFullscreen.tagName, 'classes:', elementToFullscreen.className)
-
-        try {
-          if (elementToFullscreen.requestFullscreen) {
-            await elementToFullscreen.requestFullscreen()
-          } else if ((elementToFullscreen as any).webkitRequestFullscreen) {
-            await (elementToFullscreen as any).webkitRequestFullscreen()
-          } else if ((elementToFullscreen as any).mozRequestFullScreen) {
-            await (elementToFullscreen as any).mozRequestFullScreen()
-          } else if ((elementToFullscreen as any).msRequestFullscreen) {
-            await (elementToFullscreen as any).msRequestFullscreen()
-          } else {
-            console.error('Fullscreen API not supported')
-            alert('Vollbild wird von Ihrem Browser nicht unterstützt.')
-          }
-        } catch (fullscreenError) {
-          console.error('Fullscreen request failed:', fullscreenError)
-          // Fallback: versuche es mit dem Container selbst
-          if (elementToFullscreen !== mapContainer) {
-            console.log('Retrying with map container...')
-            if (mapContainer.requestFullscreen) {
-              await mapContainer.requestFullscreen()
-            } else if ((mapContainer as any).webkitRequestFullscreen) {
-              await (mapContainer as any).webkitRequestFullscreen()
-            }
-          } else {
-            throw fullscreenError
-          }
-        }
-      } else {
-        // Exit fullscreen
-        console.log('Exiting fullscreen...')
-        if (document.exitFullscreen) {
-          await document.exitFullscreen()
-        } else if ((document as any).webkitExitFullscreen) {
-          await (document as any).webkitExitFullscreen()
-        } else if ((document as any).mozCancelFullScreen) {
-          await (document as any).mozCancelFullScreen()
-        } else if ((document as any).msExitFullscreen) {
-          await (document as any).msExitFullscreen()
-        }
-      }
-    } catch (err) {
-      console.error('Error toggling fullscreen:', err)
-      // Zeige dem Benutzer eine Fehlermeldung
-      alert(`Vollbild konnte nicht aktiviert werden: ${err instanceof Error ? err.message : 'Unbekannter Fehler'}`)
-    }
-  }
-
-  const [mounted, setMounted] = useState(false)
-  const [controlsPosition, setControlsPosition] = useState({ top: 0, right: 0 })
-
-  useEffect(() => {
-    setMounted(true)
-    
-    // Berechne Position relativ zur Karte
-    const updatePosition = () => {
-      if (mapContainerRef.current) {
-        const rect = mapContainerRef.current.getBoundingClientRect()
-        setControlsPosition({
-          top: rect.top + 8, // 8px = 0.5rem (top-2)
-          right: window.innerWidth - rect.right + 8 // 8px = 0.5rem (right-2)
-        })
-      }
-    }
-    
-    updatePosition()
-    window.addEventListener('scroll', updatePosition, true)
-    window.addEventListener('resize', updatePosition)
-    
-    return () => {
-      window.removeEventListener('scroll', updatePosition, true)
-      window.removeEventListener('resize', updatePosition)
-    }
-  }, [])
-
-  const controlsElement = (
+  // Render-Funktion für die Karte (wird sowohl normal als auch im Fullscreen verwendet)
+  const renderMap = (mapHeight: string) => (
     <div 
-      className="fixed flex flex-col gap-2" 
-      style={{ 
-        top: `${controlsPosition.top}px`,
-        right: `${controlsPosition.right}px`,
-        zIndex: 99999,
-        isolation: 'isolate',
-        pointerEvents: 'auto'
-      }}
+      className="relative w-full" 
+      style={{ height: mapHeight }}
+      data-map-wrapper
     >
-        {/* Karten-Layer */}
+      {/* Kartensteuerung - rechtsbündig ausgerichtet */}
+      <div 
+        className="absolute top-2 right-2 flex flex-col gap-2 items-end" 
+        style={{ 
+          zIndex: 40
+        }}
+      >
+        {/* Karten-Layer Auswahl */}
         <div className="flex gap-1 bg-background/95 backdrop-blur-sm border rounded-md p-1 shadow-sm">
-          <button
+          <Button
+            variant={selectedLayer === 'karte-sw' ? 'default' : 'outline'}
+            size="sm"
             onClick={() => setSelectedLayer('karte-sw')}
-            className={`px-2 py-1 text-xs rounded transition-colors ${
-              selectedLayer === 'karte-sw'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-background hover:bg-muted'
-            }`}
+            className="text-xs"
           >
-            Karte SW
-          </button>
-          <button
+            SW
+          </Button>
+          <Button
+            variant={selectedLayer === 'karte-farbig' ? 'default' : 'outline'}
+            size="sm"
             onClick={() => setSelectedLayer('karte-farbig')}
-            className={`px-2 py-1 text-xs rounded transition-colors ${
-              selectedLayer === 'karte-farbig'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-background hover:bg-muted'
-            }`}
+            className="text-xs"
           >
-            Karte farbig
-          </button>
-          <button
+            Farbig
+          </Button>
+          <Button
+            variant={selectedLayer === 'satellit' ? 'default' : 'outline'}
+            size="sm"
             onClick={() => setSelectedLayer('satellit')}
-            className={`px-2 py-1 text-xs rounded transition-colors ${
-              selectedLayer === 'satellit'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-background hover:bg-muted'
-            }`}
+            className="text-xs"
           >
             Satellit
-          </button>
+          </Button>
         </div>
-        {/* Hangneigung Toggle */}
-        <button
-          onClick={() => setShowHangneigung(!showHangneigung)}
-          className={`px-2 py-1 text-xs rounded transition-colors bg-background/95 backdrop-blur-sm border shadow-sm ${
-            showHangneigung
-              ? 'bg-primary text-primary-foreground border-primary'
-              : 'bg-background hover:bg-muted border-border'
-          }`}
-        >
-          Hangneigung ≥30°
-        </button>
-        {/* Vollbild Toggle */}
-        <button
-          type="button"
-          onClick={toggleFullscreen}
-          onMouseDown={(e) => e.stopPropagation()}
-          className="px-2 py-1 text-xs rounded transition-colors bg-background/95 backdrop-blur-sm border shadow-sm hover:bg-muted border-border flex items-center justify-center"
-          title={isFullscreen ? 'Vollbild beenden' : 'Vollbild'}
-        >
-          {isFullscreen ? (
-            <Minimize2 className="w-3 h-3" />
-          ) : (
-            <Maximize2 className="w-3 h-3" />
-          )}
-        </button>
-    </div>
-  )
+        
+        {/* Layer-Button mit Popover und Tooltip - quadratisch */}
+        <TooltipProvider>
+          <Popover open={isLayerPanelOpen} onOpenChange={setIsLayerPanelOpen}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="bg-background/95 backdrop-blur-sm border shadow-sm"
+                  >
+                    <Layers className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+              </TooltipTrigger>
+              <TooltipContent side="left">
+                <p>Kartenebenen</p>
+                <TooltipArrow />
+              </TooltipContent>
+            </Tooltip>
+            <PopoverContent side="left" align="start" className="w-80 z-[10000]">
+              <div className="space-y-4">
+                <h4 className="font-medium text-sm mb-4">Zusätzliche Kartenebenen</h4>
+                {/* Hangneigung */}
+                <div className="flex items-center justify-between">
+                  <label htmlFor="hangneigung" className="text-xs font-medium cursor-pointer">
+                    Hangneigung ≥30°
+                  </label>
+                  <Switch
+                    id="hangneigung"
+                    checked={showHangneigung}
+                    onCheckedChange={setShowHangneigung}
+                  />
+                </div>
+                
+                {/* Wanderwege */}
+                <div className="flex items-center justify-between">
+                  <label htmlFor="wanderwege" className="text-xs font-medium cursor-pointer">
+                    Wanderwege
+                  </label>
+                  <Switch
+                    id="wanderwege"
+                    checked={showWanderwege}
+                    onCheckedChange={setShowWanderwege}
+                  />
+                </div>
+                
+                {/* Jagdbanngebiete */}
+                <div className="flex items-center justify-between">
+                  <label htmlFor="jagdbanngebiete" className="text-xs font-medium cursor-pointer">
+                    Jagdbanngebiete
+                  </label>
+                  <Switch
+                    id="jagdbanngebiete"
+                    checked={showJagdbanngebiete}
+                    onCheckedChange={setShowJagdbanngebiete}
+                  />
+                </div>
+                
+                {/* Wildruhezonen */}
+                <div className="flex items-center justify-between">
+                  <label htmlFor="wildruhezonen" className="text-xs font-medium cursor-pointer">
+                    Wildruhezonen
+                  </label>
+                  <Switch
+                    id="wildruhezonen"
+                    checked={showWildruhezonen}
+                    onCheckedChange={setShowWildruhezonen}
+                  />
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+          
+          {/* Vollbild-Button mit Tooltip - quadratisch */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  toggleFullscreen()
+                }}
+                onMouseDown={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                }}
+                className="bg-background/95 backdrop-blur-sm border shadow-sm"
+              >
+                {isFullscreen ? (
+                  <Minimize2 className="h-4 w-4" />
+                ) : (
+                  <Maximize2 className="h-4 w-4" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="left">
+              <p>{isFullscreen ? 'Vollbild beenden' : 'Vollbild'}</p>
+              <TooltipArrow />
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
 
-  return (
-    <>
-      {mounted && typeof window !== 'undefined' && createPortal(
-        controlsElement,
-        document.body
-      )}
-      <div 
-        ref={mapContainerRef}
-        className="relative w-full" 
-        style={{ height: isFullscreen ? '100vh' : height }}
-      >
       <MapContainer
         center={center}
         zoom={zoom}
@@ -428,10 +410,67 @@ export default function TourMap({ gpxUrl, height = '400px' }: TourMapProps) {
             opacity={0.6}
           />
         )}
+        {showWanderwege && (
+          <WMSTileLayer
+            url="https://wms.geo.admin.ch/"
+            params={{
+              layers: 'ch.swisstopo.swisstlm3d-wanderwege',
+              format: 'image/png',
+              transparent: true,
+              version: '1.3.0',
+            }}
+            opacity={0.7}
+          />
+        )}
+        {showJagdbanngebiete && (
+          <WMSTileLayer
+            url="https://wms.geo.admin.ch/"
+            params={{
+              layers: 'ch.bafu.jagdbanngebiete',
+              format: 'image/png',
+              transparent: true,
+              version: '1.3.0',
+            }}
+            opacity={0.7}
+          />
+        )}
+        {showWildruhezonen && (
+          <WMSTileLayer
+            url="https://wms.geo.admin.ch/"
+            params={{
+              layers: 'ch.bafu.wildruhezonen',
+              format: 'image/png',
+              transparent: true,
+              version: '1.3.0',
+            }}
+            opacity={0.7}
+          />
+        )}
         <GPXLayer gpxUrl={gpxUrl} />
+        <MapInitializer onMapReady={setMap} />
       </MapContainer>
     </div>
+  )
+
+  return (
+    <>
+      {/* Fullscreen Overlay - ähnlich wie auf SAC-Website */}
+      {isFullscreen && (
+        <div 
+          className="fixed inset-0 z-[9999] bg-background"
+          onClick={() => toggleFullscreen()}
+        >
+          <div 
+            className="relative w-full h-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {renderMap('100vh')}
+          </div>
+        </div>
+      )}
+      
+      {/* Normale Kartenansicht */}
+      {!isFullscreen && renderMap(height)}
     </>
   )
 }
-
