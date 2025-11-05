@@ -528,6 +528,13 @@ export default function TourDetailPage() {
               <CardTitle>Tour-Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Karte mit GPX-Track - oberhalb der Beschreibung */}
+              {tour.gpxFile && (
+                <div className="rounded-md overflow-hidden border">
+                  <TourMap gpxUrl={tour.gpxFile} height="500px" />
+                </div>
+              )}
+
               <div>
                 <h4 className="mb-2">Beschreibung</h4>
                 <p className="text-muted-foreground whitespace-pre-wrap">{tour.description}</p>
@@ -607,22 +614,6 @@ export default function TourDetailPage() {
                         </AvatarFallback>
                       </Avatar>
                       <span className="text-foreground text-sm font-medium leading-none">{tour.leader.name}</span>
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* Karte mit GPX-Track - direkt in Tour Details integriert */}
-              {tour.gpxFile && (
-                <>
-                  <Separator />
-                  <div>
-                    <h4 className="mb-2">Tour-Verlauf</h4>
-                    <p className="text-xs text-muted-foreground mb-3">
-                      Visualisierung der Tour auf einer Karte
-                    </p>
-                    <div className="rounded-md overflow-hidden border">
-                      <TourMap gpxUrl={tour.gpxFile} height="500px" />
                     </div>
                   </div>
                 </>
