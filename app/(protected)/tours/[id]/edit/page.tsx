@@ -117,17 +117,23 @@ export default function EditTourPage() {
         
         // Formular mit aktuellen Tour-Daten füllen
         const displayTour = tourData.pendingChanges ? { ...tourData, ...tourData.pendingChanges } : tourData
+        
+        // Ensure leaderId is set - for leaders, use their own ID; for admins, use tour's leaderId
+        const formLeaderId = currentUser.role === 'admin' 
+          ? displayTour.leaderId 
+          : (displayTour.leaderId || currentUser.id)
+        
         form.reset({
           title: displayTour.title,
           description: displayTour.description,
           date: new Date(displayTour.date).toISOString().split('T')[0],
-          difficulty: displayTour.difficulty,
+          difficulty: displayTour.difficulty || '',
           tourType: displayTour.tourType,
           tourLength: displayTour.tourLength,
           elevation: displayTour.elevation.toString(),
           duration: displayTour.duration.toString(),
           maxParticipants: displayTour.maxParticipants.toString(),
-          leaderId: displayTour.leaderId,
+          leaderId: formLeaderId,
         })
       }
     }
@@ -141,7 +147,7 @@ export default function EditTourPage() {
     return () => {
       unsubscribe()
     }
-  }, [tourId, router])
+  }, [tourId, router, form])
 
   const onSubmit = async (values: EditTourFormValues) => {
     setError('')
@@ -158,7 +164,17 @@ export default function EditTourPage() {
 
     try {
       // For leaders, always use their own ID as leaderId (cannot be changed)
-      const finalLeaderId = user.role === 'admin' ? values.leaderId! : user.id
+      // If leaderId is not set for admin, use the current tour's leaderId
+      const finalLeaderId = user.role === 'admin' 
+        ? (values.leaderId || tour.leaderId) 
+        : user.id
+      
+      // Ensure difficulty is set (should not be empty)
+      if (!values.difficulty || values.difficulty === '') {
+        form.setError('difficulty', { message: 'Schwierigkeit ist erforderlich' })
+        setIsLoading(false)
+        return
+      }
       
       const updates = {
         title: values.title,
