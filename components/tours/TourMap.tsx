@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { MapContainer, TileLayer, useMap, WMSTileLayer } from 'react-leaflet'
+import { Maximize2, Minimize2 } from 'lucide-react'
 
 // Fix für Leaflet-Icons in Next.js
 if (typeof window !== 'undefined') {
@@ -141,7 +142,8 @@ function GPXLayer({ gpxUrl }: { gpxUrl: string }) {
 
 export default function TourMap({ gpxUrl, height = '400px' }: TourMapProps) {
   const [selectedLayer, setSelectedLayer] = useState<'karte-sw' | 'karte-farbig' | 'satellit'>('karte-sw')
-  const [showHangneigung, setShowHangneigung] = useState(false)
+  const [showHangneigung, setShowHangneigung] = useState(true)
+  const [isFullscreen, setIsFullscreen] = useState(false)
 
   // Standard-Zentrum: Schweiz (Bern)
   const center: [number, number] = [46.9481, 7.4474]
@@ -160,8 +162,37 @@ export default function TourMap({ gpxUrl, height = '400px' }: TourMapProps) {
     .replace('{layer}', layerConfig.layer)
     .replace('{format}', layerConfig.format)
 
+  // Vollbild-Funktionalität
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement)
+    }
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange)
+    }
+  }, [])
+
+  const toggleFullscreen = () => {
+    const mapContainer = document.getElementById('tour-map-container')
+    if (!mapContainer) return
+
+    if (!document.fullscreenElement) {
+      mapContainer.requestFullscreen().catch((err) => {
+        console.error('Error attempting to enable fullscreen:', err)
+      })
+    } else {
+      document.exitFullscreen()
+    }
+  }
+
   return (
-    <div className="relative w-full" style={{ height }}>
+    <div 
+      id="tour-map-container"
+      className="relative w-full" 
+      style={{ height: isFullscreen ? '100vh' : height }}
+    >
       {/* Layer-Auswahl */}
       <div className="absolute top-2 right-2 z-[1000] flex flex-col gap-2">
         {/* Karten-Layer */}
@@ -207,6 +238,18 @@ export default function TourMap({ gpxUrl, height = '400px' }: TourMapProps) {
           }`}
         >
           Hangneigung ≥30°
+        </button>
+        {/* Vollbild Toggle */}
+        <button
+          onClick={toggleFullscreen}
+          className="px-2 py-1 text-xs rounded transition-colors bg-background/95 backdrop-blur-sm border shadow-sm hover:bg-muted border-border flex items-center justify-center"
+          title={isFullscreen ? 'Vollbild beenden' : 'Vollbild'}
+        >
+          {isFullscreen ? (
+            <Minimize2 className="w-3 h-3" />
+          ) : (
+            <Maximize2 className="w-3 h-3" />
+          )}
         </button>
       </div>
 
