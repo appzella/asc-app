@@ -520,6 +520,17 @@ export default function TourDetailPage() {
         </div>
       </div>
 
+      {/* Karte mit GPX-Track - oberhalb der Tour-Details in voller Breite */}
+      {tour.gpxFile && (
+        <div className="mb-4">
+          <Card>
+            <CardContent className="p-0">
+              <TourMap gpxUrl={tour.gpxFile} height="500px" />
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 space-y-4">
           {/* Tour Details */}
@@ -528,13 +539,6 @@ export default function TourDetailPage() {
               <CardTitle>Tour-Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Karte mit GPX-Track - oberhalb der Beschreibung */}
-              {tour.gpxFile && (
-                <div className="rounded-md overflow-hidden border">
-                  <TourMap gpxUrl={tour.gpxFile} height="500px" />
-                </div>
-              )}
-
               <div>
                 <h4 className="mb-2">Beschreibung</h4>
                 <p className="text-muted-foreground whitespace-pre-wrap">{tour.description}</p>
