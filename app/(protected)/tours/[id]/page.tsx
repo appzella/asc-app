@@ -869,7 +869,7 @@ export default function TourDetailPage() {
             <Card>
               <CardContent className="p-4">
                 <Button variant="outline" className="w-full" size="sm" asChild>
-                  <Link href={`/chat/${tourId}`}>
+                  <Link href={`/chat?tourId=${tourId}`}>
                     <MessageSquare className="w-4 h-4 mr-2" />
                     Zum Chat
                   </Link>

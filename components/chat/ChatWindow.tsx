@@ -159,7 +159,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ tourId, userId, onMessag
   }
 
   return (
-    <div className="flex flex-col h-96 sm:h-96 max-h-[60vh] sm:max-h-none">
+    <div className="flex flex-col h-full">
       <ScrollArea ref={scrollAreaRef} className="flex-1 mb-4 px-2">
         <div className="space-y-4 pr-4">
           {isLoading ? (
