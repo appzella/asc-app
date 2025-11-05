@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { CheckCircle2 } from 'lucide-react'
 import {
   Form,
   FormControl,
@@ -38,6 +39,7 @@ export default function RegisterPage() {
 
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isSuccess, setIsSuccess] = useState(false)
   const [invitation, setInvitation] = useState<any>(null)
 
   const form = useForm<RegisterFormValues>({
@@ -67,20 +69,24 @@ export default function RegisterPage() {
 
   const onSubmit = async (values: RegisterFormValues) => {
     setError('')
+    setIsSuccess(false)
     setIsLoading(true)
 
     try {
       const user = await authService.register(invitation.email, values.password, values.name, token)
       if (user) {
+        // User is logged in (email confirmation disabled)
         router.push('/dashboard')
         router.refresh()
       } else {
-        // Check if user needs to confirm email
-        // The registration might have succeeded but email confirmation is required
-        setError('Registrierung erfolgreich. Bitte bestätige deine E-Mail-Adresse, um dich anzumelden.')
+        // Registration succeeded but email confirmation is required
+        setIsSuccess(true)
+        setError('')
       }
     } catch (err) {
-      console.error('Registration error:', err)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Registration error:', err)
+      }
       setError('Ein Fehler ist aufgetreten. Bitte versuche es erneut.')
     } finally {
       setIsLoading(false)
@@ -105,7 +111,19 @@ export default function RegisterPage() {
           </p>
         </CardHeader>
         <CardContent>
-          {error && !invitation ? (
+          {isSuccess ? (
+            <Alert className="border-green-500 bg-green-50">
+              <CheckCircle2 className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-800">
+                <div className="font-semibold mb-2">Registrierung erfolgreich!</div>
+                <div className="text-sm">
+                  Wir haben eine Bestätigungs-E-Mail an <strong>{invitation?.email}</strong> gesendet.
+                  Bitte öffne dein Postfach und klicke auf den Bestätigungslink, um dein Konto zu aktivieren.
+                  Danach kannst du dich mit deinen Zugangsdaten anmelden.
+                </div>
+              </AlertDescription>
+            </Alert>
+          ) : error && !invitation ? (
             <Alert variant="destructive">
               <AlertDescription>{error}</AlertDescription>
             </Alert>

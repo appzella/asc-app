@@ -383,6 +383,26 @@ class SupabaseAuthService {
         return null
       }
 
+      // If user has a registration_token, this is their first login after email confirmation
+      // Mark the invitation as used
+      if (user && user.registrationToken) {
+        try {
+          const invitation = await dataRepository.getInvitationByToken(user.registrationToken)
+          if (invitation && !invitation.used) {
+            // Mark invitation as used
+            await dataRepository.useInvitation(user.registrationToken, user.name, password)
+            // Reload user to get updated profile (registrationToken should be cleared)
+            await this.loadUserProfile(user.id)
+            return this.currentUser
+          }
+        } catch (error) {
+          // If invitation handling fails, continue with login anyway
+          if (process.env.NODE_ENV === 'development') {
+            console.error('Error handling invitation on login:', error)
+          }
+        }
+      }
+
       return user
     } catch (error: any) {
       // Re-throw specific errors so they can be handled by the caller
@@ -649,30 +669,6 @@ class SupabaseAuthService {
     return userProfile
   }
 
-  /**
-   * Handle auto-confirmation for invited users
-   */
-  private async handleAutoConfirm(
-    userId: string,
-    email: string,
-    password: string
-  ): Promise<Session | null> {
-    if (!isSupabaseConfigured || !supabase) return null
-
-    // Wait briefly for trigger to run
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-    
-    // Check if email was auto-confirmed
-    const { data: { user } } = await supabase.auth.getUser(userId)
-    if (user?.email_confirmed_at) {
-      // Sign in to get session
-      const { data: signInData } = await supabase.auth.signInWithPassword({ email, password })
-      return signInData?.session || null
-    }
-    
-    return null
-  }
-
   async register(email: string, password: string, name: string, token?: string): Promise<User | null> {
     if (!isSupabaseConfigured || !supabase) {
       throw new Error('Supabase not configured')
@@ -722,53 +718,44 @@ class SupabaseAuthService {
         return null
       }
 
-      // Get or create session (handle auto-confirmation for invited users)
-      let session = authData.session
-      if (token && !session) {
-        session = await this.handleAutoConfirm(authData.user.id, email, password) || null
-      }
+      // Check if we have a session (only if email confirmation is disabled)
+      // If email confirmation is enabled, we won't have a session until user confirms email
+      const session = authData.session
 
-      // Wait for trigger to create profile, then load it
-      let userProfile = await this.waitForProfile(authData.user.id)
-      
-      // If profile still doesn't exist and we have a session, create it manually
-      if (!userProfile && session) {
-        userProfile = await this.createProfileManually(
-          authData.user.id,
-          authData.user.email || email,
-          name,
-          invitation,
-          token
-        )
-      }
-
-      // If still no profile and no session, user needs to confirm email first
-      if (!userProfile && !session) {
-        return null
-      }
-
-      if (!userProfile) {
-        if (process.env.NODE_ENV === 'development') {
-          console.error('Failed to create or load user profile after registration', {
-            userId: authData.user.id,
-            email
-          })
-        }
-        return null
-      }
-
-      // Update profile with additional details if we have a session
+      // If we have a session (email confirmation disabled), create/update profile immediately
       if (session) {
-        userProfile = await this.updateProfileIfNeeded(userProfile, name, invitation, token)
+        // Wait for trigger to create profile, then load it
+        let userProfile = await this.waitForProfile(authData.user.id)
+        
+        // If profile still doesn't exist, create it manually
+        if (!userProfile) {
+          userProfile = await this.createProfileManually(
+            authData.user.id,
+            authData.user.email || email,
+            name,
+            invitation,
+            token
+          )
+        }
+
+        if (userProfile) {
+          // Update profile with additional details
+          userProfile = await this.updateProfileIfNeeded(userProfile, name, invitation, token)
+          
+          // Load profile and mark invitation as used
+          await this.loadUserProfile(authData.user.id)
+          if (token && invitation) {
+            await dataRepository.useInvitation(token, name, password)
+          }
+          
+          return this.currentUser
+        }
       }
 
-      // Load profile and mark invitation as used
-      await this.loadUserProfile(authData.user.id)
-      if (token && invitation && userProfile) {
-        await dataRepository.useInvitation(token, name, password)
-      }
-
-      return this.currentUser
+      // If no session (email confirmation required), return null
+      // The user profile will be created by the trigger, but user needs to confirm email first
+      // After email confirmation, user will need to log in, and we'll handle invitation then
+      return null
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
         console.error('Registration error:', error)
