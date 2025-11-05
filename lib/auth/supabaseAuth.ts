@@ -199,6 +199,17 @@ class SupabaseAuthService {
       const user = await dataRepository.getUserById(userId)
       
       if (user) {
+        // Check if user is active
+        if (!user.active) {
+          // User is deactivated, sign them out
+          if (isSupabaseConfigured && supabase) {
+            await supabase.auth.signOut()
+          }
+          this.currentUser = null
+          this.notifyListeners(null)
+          return null
+        }
+        
         this.currentUser = user
         this.notifyListeners(user)
         return user
@@ -250,15 +261,20 @@ class SupabaseAuthService {
 
       // Create user profile in public.users using direct Supabase call
       // because we need to set the id explicitly
+      // Note: active field might not exist yet if migration hasn't been run
+      const insertData: any = {
+        id: authUser.id,
+        email: authUser.email || '',
+        name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User',
+        role: authUser.user_metadata?.role || 'member',
+        registered: true,
+      }
+      
+      // Only include active if we can check if column exists
+      // For now, try with it and let error handling deal with it
       const { data, error } = await supabase
         .from('users')
-        .insert({
-          id: authUser.id,
-          email: authUser.email || '',
-          name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User',
-          role: authUser.user_metadata?.role || 'member',
-          registered: true,
-        })
+        .insert(insertData)
         .select()
         .single()
 
@@ -335,6 +351,13 @@ class SupabaseAuthService {
       })
 
       const user = await Promise.race([profileLoadPromise, profileTimeoutPromise])
+
+      // Check if user is active
+      if (user && !user.active) {
+        // User is deactivated, sign them out
+        await this.logout()
+        return null
+      }
 
       return user
     } catch (error: any) {
@@ -503,18 +526,26 @@ class SupabaseAuthService {
         : `${typeof window !== 'undefined' ? window.location.origin : 'https://asc-app.vercel.app'}/dashboard`
 
       // Sign up user in Supabase Auth
+      // Include registration_token in metadata if invitation exists
+      // This allows the trigger to set it immediately and auto-confirm the email
+      const signUpOptions: any = {
+        data: {
+          name,
+          role: 'member', // Default role, can be updated later by admin
+        },
+        emailRedirectTo: redirectUrl,
+      }
+      
+      // If invitation exists, add registration_token to metadata
+      // This allows the trigger to set it and auto-confirm the email
+      if (token) {
+        signUpOptions.data.registration_token = token
+      }
+
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          data: {
-            name,
-            role: 'member', // Default role, can be updated later by admin
-          },
-          emailRedirectTo: redirectUrl,
-          // For invitations, we can skip email confirmation if configured in Supabase
-          // The invitation system already validates the email
-        },
+        options: signUpOptions,
       })
 
       if (authError || !authData.user) {
@@ -522,41 +553,281 @@ class SupabaseAuthService {
         return null
       }
 
-      // Wait a bit for the trigger to create the user profile
-      await new Promise((resolve) => setTimeout(resolve, 500))
+      console.log('User created in auth.users:', {
+        userId: authData.user.id,
+        email: authData.user.email,
+        emailConfirmed: authData.user.email_confirmed_at,
+        hasSession: !!authData.session
+      })
 
-      // Update user profile with additional details
-      const updates: Partial<User> = {
-        name,
-      }
-
-      if (invitation) {
-        updates.invitedBy = invitation.createdBy
-        updates.registrationToken = token
-        // Role stays as 'member' by default, can be changed by admin later
-      }
-
-      const updatedUser = await dataRepository.updateUser(authData.user.id, updates)
+      // Check if we have a session after signUp
+      // If email confirmation is disabled, we should have a session
+      // If email confirmation is enabled and we have a token, the trigger should confirm
+      let session = authData.session
       
-      // Auto-confirm email for invited users (trigger handles this, but we wait a bit)
-      if (invitation && updatedUser) {
-        // Wait for the auto-confirm trigger to run
-        await new Promise((resolve) => setTimeout(resolve, 300))
+      // If we have a registration token, wait for auto-confirm trigger
+      if (token && !session) {
+        // Wait for triggers to run
+        await new Promise((resolve) => setTimeout(resolve, 2000))
+        
+        // Check if email was auto-confirmed
+        const { data: { user: currentUser } } = await supabase.auth.getUser(authData.user.id)
+        if (currentUser?.email_confirmed_at) {
+          // Email was confirmed, try to sign in to get session
+          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          })
+          if (signInData?.session) {
+            session = signInData.session
+            console.log('Signed in after auto-confirm')
+          } else {
+            console.warn('Could not sign in after auto-confirm:', signInError)
+          }
+        }
+      }
+      
+      // Wait a bit more for the trigger to create the user profile
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
+      // Try to get the user profile
+      // First check if we have a session - if not, we might not be able to read it
+      if (!session) {
+        const { data: { session: currentSession } } = await supabase.auth.getSession()
+        session = currentSession
+      }
+      
+      console.log('Trying to load user profile:', {
+        userId: authData.user.id,
+        hasSession: !!session
+      })
+      
+      let userProfile = await dataRepository.getUserById(authData.user.id)
+      
+      console.log('Profile load result:', {
+        hasProfile: !!userProfile,
+        userId: authData.user.id
+      })
+      
+      // If profile doesn't exist yet, wait a bit more and try again
+      if (!userProfile) {
+        await new Promise((resolve) => setTimeout(resolve, 2000))
+        userProfile = await dataRepository.getUserById(authData.user.id)
+        console.log('Profile load after wait:', { hasProfile: !!userProfile })
       }
 
-      if (!updatedUser) {
-        console.error('Failed to update user profile')
+      // If profile still doesn't exist, try to create it manually
+      // This is a fallback if the trigger didn't work
+      if (!userProfile) {
+        console.log('Profile still not found, trying to create manually...')
+        
+        // Wait a bit longer for trigger
+        await new Promise((resolve) => setTimeout(resolve, 2000))
+        userProfile = await dataRepository.getUserById(authData.user.id)
+        
+        // If still doesn't exist and we have a session, create it manually
+        if (!userProfile && session) {
+          console.log('Creating profile manually with session')
+          try {
+            const { data: insertData, error: insertError } = await supabase
+              .from('users')
+              .insert({
+                id: authData.user.id,
+                email: authData.user.email || email,
+                name,
+                role: 'member',
+                registered: true,
+                invited_by: invitation?.createdBy || null,
+                registration_token: token || null,
+              })
+              .select()
+              .single()
+
+            if (insertError) {
+              // If error is about duplicate, try to load it
+              if (insertError.code === '23505' || insertError.message?.includes('duplicate')) {
+                console.log('Profile already exists (duplicate), loading...')
+                await new Promise((resolve) => setTimeout(resolve, 500))
+                userProfile = await dataRepository.getUserById(authData.user.id)
+              } else {
+                console.error('Error creating user profile manually:', JSON.stringify(insertError, null, 2))
+              }
+            } else if (insertData) {
+              console.log('Profile created manually successfully')
+              userProfile = await dataRepository.getUserById(authData.user.id)
+              
+              // If we have a registration token, trigger auto-confirm
+              if (token && userProfile) {
+                console.log('Updating profile with invitation details and triggering auto-confirm')
+                await dataRepository.updateUser(authData.user.id, {
+                  registrationToken: token,
+                  invitedBy: invitation?.createdBy,
+                })
+                await new Promise((resolve) => setTimeout(resolve, 500))
+              }
+            }
+          } catch (createError) {
+            console.error('Error in manual profile creation:', createError)
+          }
+        } else if (!userProfile && !session) {
+          console.warn('Cannot create profile manually - no session. User may need to confirm email first.', {
+            userId: authData.user.id,
+            email: authData.user.email
+          })
+        }
+      }
+
+      // If profile exists, try to update it with additional details
+      // Note: If email confirmation is required, the user might not be logged in,
+      // so updateUser might fail. That's okay - the trigger has set the basic data.
+      if (userProfile) {
+        // Check if we have a session (user is logged in)
+        const { data: { session } } = await supabase.auth.getSession()
+        
+        if (session) {
+          // User is logged in, we can update
+          const updates: Partial<User> = {}
+          
+          // Only update if values are different
+          if (userProfile.name !== name) {
+            updates.name = name
+          }
+          if (!userProfile.registered) {
+            updates.registered = true
+          }
+          
+          // Only set active if user profile has the field
+          if ('active' in userProfile && userProfile.active !== true) {
+            updates.active = true
+          }
+
+          if (invitation) {
+            if (userProfile.invitedBy !== invitation.createdBy) {
+              updates.invitedBy = invitation.createdBy
+            }
+            if (userProfile.registrationToken !== token) {
+              updates.registrationToken = token
+            }
+          }
+
+          // Only try to update if we have updates to make
+          if (Object.keys(updates).length > 0) {
+            const updatedUser = await dataRepository.updateUser(authData.user.id, updates)
+            
+            if (updatedUser) {
+              userProfile = updatedUser
+            } else {
+              // Update failed, but profile exists - that's okay
+              console.warn('Failed to update user profile, but profile exists', {
+                userId: authData.user.id
+              })
+            }
+          }
+        } else {
+          // User is not logged in (email confirmation required)
+          // That's okay - the trigger has created the profile with basic data
+          // The user will need to confirm email and login, then we can update
+          console.log('User profile created by trigger, but user not logged in (email confirmation required)')
+        }
+      }
+
+      // If we still don't have a profile, try one more time to load it
+      if (!userProfile) {
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+        userProfile = await dataRepository.getUserById(authData.user.id)
+      }
+
+      // If we have a profile, load it and return
+      if (userProfile) {
+        await this.loadUserProfile(authData.user.id)
+        // Mark invitation as used if token provided
+        if (token && invitation && userProfile) {
+          await dataRepository.useInvitation(token, name, password)
+        }
+        return this.currentUser
+      }
+
+      // If we still don't have a profile, try to create it manually
+      // This is a fallback if the trigger didn't work
+      if (!userProfile) {
+        const { data: { session } } = await supabase.auth.getSession()
+        const { data: { user: authUser } } = await supabase.auth.getUser()
+        
+        // Only try manual creation if we have a session or user is confirmed
+        if (session || authUser?.email_confirmed_at) {
+          try {
+            // Try to create profile using direct Supabase call with session
+            const { data: insertData, error: insertError } = await supabase
+              .from('users')
+              .insert({
+                id: authData.user.id,
+                email: authData.user.email || email,
+                name,
+                role: 'member',
+                registered: true,
+                invited_by: invitation?.createdBy || null,
+                registration_token: token || null,
+              })
+              .select()
+              .single()
+
+            if (insertError) {
+              // If error is about duplicate, try to load it
+              if (insertError.code === '23505' || insertError.message?.includes('duplicate')) {
+                await new Promise((resolve) => setTimeout(resolve, 500))
+                userProfile = await dataRepository.getUserById(authData.user.id)
+              } else {
+                console.error('Error creating user profile manually:', JSON.stringify(insertError, null, 2))
+              }
+            } else if (insertData) {
+              userProfile = await dataRepository.getUserById(authData.user.id)
+              
+              // If we have a registration token, trigger auto-confirm
+              if (token && userProfile) {
+                // Update registration_token if not set
+                await dataRepository.updateUser(authData.user.id, {
+                  registrationToken: token,
+                  invitedBy: invitation?.createdBy,
+                })
+                
+                // The auto-confirm trigger should run on UPDATE
+                // But we can also manually confirm via the trigger function
+                await new Promise((resolve) => setTimeout(resolve, 500))
+              }
+            }
+          } catch (createError) {
+            console.error('Error in manual profile creation:', createError)
+          }
+        } else {
+          // User is not confirmed yet - this is expected if email confirmation is enabled
+          console.log('User registered but email not confirmed yet. Profile will be created after email confirmation.')
+          return null
+        }
+      }
+
+      // Final check - if we still don't have a profile, something went wrong
+      if (!userProfile) {
+        const { data: { user: authUser } } = await supabase.auth.getUser()
+        console.error('Failed to create or load user profile after registration', {
+          userId: authData.user.id,
+          email,
+          emailConfirmed: authUser?.email_confirmed_at || false,
+          hasSession: !!(await supabase.auth.getSession()).data.session
+        })
         return null
       }
 
-      // Mark invitation as used if token provided
-      if (token && invitation) {
-        // The useInvitation method will handle marking it as used
-        await dataRepository.useInvitation(token, name, password)
+      // If we have a profile, load it and return
+      if (userProfile) {
+        await this.loadUserProfile(authData.user.id)
+        // Mark invitation as used if token provided
+        if (token && invitation && userProfile) {
+          await dataRepository.useInvitation(token, name, password)
+        }
+        return this.currentUser
       }
 
-      await this.loadUserProfile(authData.user.id)
-      return this.currentUser
+      return null
     } catch (error) {
       console.error('Registration error:', error)
       return null

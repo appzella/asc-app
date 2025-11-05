@@ -37,6 +37,7 @@ class DataStore {
     const newUser: User = {
       ...user,
       id: `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      active: user.active !== undefined ? user.active : true,
       createdAt: new Date(),
     }
     this.users.push(newUser)
@@ -54,7 +55,7 @@ class DataStore {
   // Auth
   login(email: string, password: string): User | null {
     const user = this.users.find((u) => u.email === email && u.password === password)
-    if (user && user.registered) {
+    if (user && user.registered && user.active) {
       this.currentUser = user
       const { password, ...userWithoutPassword } = user
       return userWithoutPassword

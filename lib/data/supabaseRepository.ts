@@ -119,6 +119,7 @@ export class SupabaseDataRepository implements IDataRepository {
         invited_by: user.invitedBy || null,
         registration_token: user.registrationToken || null,
         registered: user.registered,
+        active: user.active !== undefined ? user.active : true,
         profile_photo: user.profilePhoto || null,
         phone: user.phone || null,
         mobile: user.mobile || null,
@@ -146,6 +147,10 @@ export class SupabaseDataRepository implements IDataRepository {
     if (updates.invitedBy !== undefined) updateData.invited_by = updates.invitedBy
     if (updates.registrationToken !== undefined) updateData.registration_token = updates.registrationToken
     if (updates.registered !== undefined) updateData.registered = updates.registered
+    // Only include active field if it's defined (might not exist in DB yet)
+    if (updates.active !== undefined) {
+      updateData.active = updates.active
+    }
     // Handle profilePhoto: null or undefined both set to null (to remove photo)
     if (updates.profilePhoto !== undefined) {
       updateData.profile_photo = updates.profilePhoto ?? null
@@ -162,16 +167,40 @@ export class SupabaseDataRepository implements IDataRepository {
       .update(updateData)
       .eq('id', id)
       .select()
-      .single()
 
     if (error) {
       if (this.handleSupabaseError(error)) {
         return null
       }
+      // Log full error object to see what's wrong
+      console.error('Error updating user:', JSON.stringify(error, null, 2))
+      console.error('Error updating user - details:', {
+        userId: id,
+        updates: updateData,
+        errorMessage: error.message,
+        errorCode: error.code,
+        errorDetails: error.details,
+        errorHint: error.hint,
+        fullError: error
+      })
       return null
     }
-    if (!data) return null
-    return this.mapDbUserToUser(data)
+    
+    // Check if we got data back
+    if (!data || data.length === 0) {
+      // Update might have succeeded but RLS prevented us from reading it back
+      // Try to load the user separately to verify
+      console.warn('Update returned no data, trying to reload user:', id)
+      const reloadedUser = await this.getUserById(id)
+      if (reloadedUser) {
+        return reloadedUser
+      }
+      console.error('Update succeeded but cannot read updated user (possible RLS issue):', id)
+      return null
+    }
+    
+    // Use first result if multiple (shouldn't happen, but be safe)
+    return this.mapDbUserToUser(data[0])
   }
 
   // Tours
@@ -953,6 +982,7 @@ export class SupabaseDataRepository implements IDataRepository {
         invitedBy: row.invited_by || undefined,
         registrationToken: row.registration_token || undefined,
         registered: row.registered ?? true,
+        active: row.active ?? true, // Default to true if not set (for backward compatibility)
         profilePhoto: row.profile_photo || undefined,
         // Convert empty strings and null to undefined for optional fields
         phone: row.phone && row.phone.trim() !== '' ? row.phone : undefined,

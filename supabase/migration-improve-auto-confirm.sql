@@ -1,6 +1,8 @@
--- Database Function: Automatically create user profile when auth user is created
--- This function is triggered by a database trigger
+-- Migration: Improve auto-confirm for invited users
+-- This makes the auto-confirm trigger work immediately after signUp
+-- Run this in Supabase SQL Editor
 
+-- Improve the handle_new_user function to set registration_token from metadata if available
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER 
 SECURITY DEFINER
@@ -9,11 +11,13 @@ AS $$
 DECLARE
   user_role TEXT := 'member';
   user_name TEXT := '';
+  registration_token TEXT := NULL;
 BEGIN
-  -- Extract role and name from metadata if available
+  -- Extract role, name, and registration_token from metadata if available
   IF NEW.raw_user_meta_data IS NOT NULL THEN
     user_role := COALESCE(NEW.raw_user_meta_data->>'role', 'member');
     user_name := COALESCE(NEW.raw_user_meta_data->>'name', '');
+    registration_token := NEW.raw_user_meta_data->>'registration_token';
   END IF;
 
   -- Insert user profile into public.users
@@ -21,7 +25,7 @@ BEGIN
   -- If it doesn't exist, the trigger will still work without it
   BEGIN
     -- Try to insert with active field (if column exists)
-    INSERT INTO public.users (id, email, name, role, registered, active, created_at)
+    INSERT INTO public.users (id, email, name, role, registered, active, registration_token, created_at)
     VALUES (
       NEW.id,
       COALESCE(NEW.email, ''),
@@ -29,28 +33,32 @@ BEGIN
       user_role::text,
       true,
       true,
+      registration_token,
       NOW()
     )
     ON CONFLICT (id) DO UPDATE
       SET name = COALESCE(EXCLUDED.name, public.users.name),
           role = COALESCE(EXCLUDED.role, public.users.role),
           email = COALESCE(EXCLUDED.email, public.users.email),
+          registration_token = COALESCE(EXCLUDED.registration_token, public.users.registration_token),
           updated_at = NOW();
   EXCEPTION WHEN undefined_column THEN
     -- If active column doesn't exist, insert without it
-    INSERT INTO public.users (id, email, name, role, registered, created_at)
+    INSERT INTO public.users (id, email, name, role, registered, registration_token, created_at)
     VALUES (
       NEW.id,
       COALESCE(NEW.email, ''),
       COALESCE(user_name, COALESCE(NEW.email, ''), 'User'),
       user_role::text,
       true,
+      registration_token,
       NOW()
     )
     ON CONFLICT (id) DO UPDATE
       SET name = COALESCE(EXCLUDED.name, public.users.name),
           role = COALESCE(EXCLUDED.role, public.users.role),
           email = COALESCE(EXCLUDED.email, public.users.email),
+          registration_token = COALESCE(EXCLUDED.registration_token, public.users.registration_token),
           updated_at = NOW();
   END;
 
@@ -58,12 +66,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Drop existing trigger if it exists
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-
--- Create trigger: Call function when new auth user is created
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW
-  EXECUTE FUNCTION public.handle_new_user();
+-- Note: The auto_confirm_invited_user trigger will now run immediately
+-- after the profile is created with registration_token, confirming the email
 

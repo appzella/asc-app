@@ -75,10 +75,13 @@ export default function RegisterPage() {
         router.push('/dashboard')
         router.refresh()
       } else {
-        setError('Registrierung fehlgeschlagen')
+        // Check if user needs to confirm email
+        // The registration might have succeeded but email confirmation is required
+        setError('Registrierung erfolgreich. Bitte bestätige deine E-Mail-Adresse, um dich anzumelden.')
       }
     } catch (err) {
-      setError('Ein Fehler ist aufgetreten')
+      console.error('Registration error:', err)
+      setError('Ein Fehler ist aufgetreten. Bitte versuche es erneut.')
     } finally {
       setIsLoading(false)
     }
