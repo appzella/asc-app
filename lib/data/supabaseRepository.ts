@@ -1154,12 +1154,18 @@ export class SupabaseDataRepository implements IDataRepository {
     const fileName = `${Date.now()}.${fileExt}`
     const filePath = `gpx/${tourId}/${fileName}`
 
+    // Determine correct MIME type
+    const mimeType = fileExt === 'gpx' 
+      ? 'application/gpx+xml' 
+      : 'application/xml'
+
     // Upload file to Storage
     const { data, error } = await supabase.storage
       .from('gpx-files')
       .upload(filePath, file, {
         cacheControl: '3600',
         upsert: false,
+        contentType: mimeType,
       })
 
     if (error) {
