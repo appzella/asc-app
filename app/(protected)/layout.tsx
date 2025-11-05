@@ -267,8 +267,8 @@ export default function ProtectedLayout({
                     pathname === '/profile' ? 'bg-primary-50 text-primary-600' : ''
                   }`}
                 >
-                  <Link href="/profile">
-                    <Avatar className="w-8 h-8">
+                  <Link href="/profile" className="flex items-center gap-2">
+                    <Avatar className="w-8 h-8 flex-shrink-0">
                       <AvatarImage
                         src={user.profilePhoto || undefined}
                         alt={user.name}
@@ -279,7 +279,7 @@ export default function ProtectedLayout({
                         {user.name.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="text-sm font-medium">{user.name}</span>
+                    <span className="text-sm font-medium leading-none">{user.name}</span>
                     <Badge variant="secondary" className="text-xs">
                       {getRoleLabel(user.role)}
                     </Badge>

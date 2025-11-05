@@ -516,7 +516,7 @@ export default function TourDetailPage() {
                           {tour.leader.name.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <p className="text-foreground text-sm font-medium">{tour.leader.name}</p>
+                      <span className="text-foreground text-sm font-medium leading-none">{tour.leader.name}</span>
                     </div>
                   </div>
                 </>
