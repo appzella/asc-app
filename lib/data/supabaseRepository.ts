@@ -172,17 +172,19 @@ export class SupabaseDataRepository implements IDataRepository {
       if (this.handleSupabaseError(error)) {
         return null
       }
-      // Log full error object to see what's wrong
-      console.error('Error updating user:', JSON.stringify(error, null, 2))
-      console.error('Error updating user - details:', {
-        userId: id,
-        updates: updateData,
-        errorMessage: error.message,
-        errorCode: error.code,
-        errorDetails: error.details,
-        errorHint: error.hint,
-        fullError: error
-      })
+      // Log full error object to see what's wrong (only in development)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error updating user:', JSON.stringify(error, null, 2))
+        console.error('Error updating user - details:', {
+          userId: id,
+          updates: updateData,
+          errorMessage: error.message,
+          errorCode: error.code,
+          errorDetails: error.details,
+          errorHint: error.hint,
+          fullError: error
+        })
+      }
       return null
     }
     
@@ -190,12 +192,16 @@ export class SupabaseDataRepository implements IDataRepository {
     if (!data || data.length === 0) {
       // Update might have succeeded but RLS prevented us from reading it back
       // Try to load the user separately to verify
-      console.warn('Update returned no data, trying to reload user:', id)
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Update returned no data, trying to reload user:', id)
+      }
       const reloadedUser = await this.getUserById(id)
       if (reloadedUser) {
         return reloadedUser
       }
-      console.error('Update succeeded but cannot read updated user (possible RLS issue):', id)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Update succeeded but cannot read updated user (possible RLS issue):', id)
+      }
       return null
     }
     

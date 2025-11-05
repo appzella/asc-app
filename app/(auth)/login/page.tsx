@@ -18,7 +18,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { authService } from '@/lib/auth'
-import { LoginTimeoutError } from '@/lib/auth/supabaseAuth'
+import { LoginTimeoutError, EmailNotConfirmedError } from '@/lib/auth/supabaseAuth'
 import { ASCLogo } from '@/components/ui/ASCLogo'
 
 const loginSchema = z.object({
@@ -46,13 +46,7 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      // Add client-side timeout as additional safety net
-      const loginPromise = authService.login(values.email, values.password)
-      const timeoutPromise = new Promise<null>((resolve) => {
-        setTimeout(() => resolve(null), 35000) // 35 seconds (slightly longer than server timeout)
-      })
-
-      const user = await Promise.race([loginPromise, timeoutPromise])
+      const user = await authService.login(values.email, values.password)
       
       if (user) {
         router.push('/dashboard')
@@ -61,8 +55,12 @@ export default function LoginPage() {
         setError('Ungültige E-Mail oder Passwort')
       }
     } catch (err: any) {
-      console.error('Login error:', err)
-      if (err instanceof LoginTimeoutError || err?.message?.includes('timeout')) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Login error:', err)
+      }
+      if (err instanceof EmailNotConfirmedError) {
+        setError('Bitte bestätige zuerst deine E-Mail-Adresse. Prüfe dein Postfach und klicke auf den Bestätigungslink.')
+      } else if (err instanceof LoginTimeoutError || err?.message?.includes('timeout')) {
         setError('Die Anmeldung dauerte zu lange. Bitte prüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.')
       } else {
         setError('Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.')
