@@ -57,7 +57,7 @@ function GPXLayer({ gpxUrl }: { gpxUrl: string }) {
 
     // Entferne vorherige GPX-Layer
     if (gpxLayerRef.current) {
-      map.removeLayer(gpxLayerRef.current)
+      map.removeLayer(gpxLayerRef.current as unknown as L.Layer)
       gpxLayerRef.current = null
     }
 
@@ -88,7 +88,7 @@ function GPXLayer({ gpxUrl }: { gpxUrl: string }) {
 
     return () => {
       if (gpxLayerRef.current) {
-        map.removeLayer(gpxLayerRef.current)
+        map.removeLayer(gpxLayerRef.current as unknown as L.Layer)
         gpxLayerRef.current = null
       }
     }

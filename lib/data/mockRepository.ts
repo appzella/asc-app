@@ -220,5 +220,16 @@ export class MockDataRepository implements IDataRepository {
   async addParticipantManually(tourId: string, userId: string): Promise<boolean> {
     return dataStore.addParticipantManually(tourId, userId)
   }
+
+  // File Upload
+  async uploadGpxFile(tourId: string, file: File): Promise<string> {
+    // Mock implementation - returns a mock URL
+    return `https://example.com/gpx/${tourId}/${file.name}`
+  }
+
+  async deleteGpxFile(gpxUrl: string): Promise<void> {
+    // Mock implementation - no-op
+    return
+  }
 }
 
