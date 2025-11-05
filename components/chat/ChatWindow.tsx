@@ -157,29 +157,23 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ tourId, userId }) => {
                     <div
                       className={`max-w-[75%] sm:max-w-xs lg:max-w-md px-4 py-2 rounded-lg break-words ${
                         isOwnMessage
-                          ? 'bg-primary-600 text-white'
+                          ? 'bg-primary text-primary-foreground'
                           : 'bg-muted text-foreground'
                       }`}
                     >
                       {message.user && !isOwnMessage && (
-                        <p className="text-xs font-semibold mb-1 text-primary-600">
+                        <p className="text-xs font-semibold mb-0.5 text-primary">
                           {message.user.name}
                         </p>
                       )}
-                      <p 
-                        className="text-sm"
-                        style={{
-                          color: isOwnMessage ? '#ffffff' : '#111827',
-                          whiteSpace: 'pre-wrap',
-                        }}
-                      >
+                      <p className="text-sm whitespace-pre-wrap" style={{ margin: 0 }}>
                         {message.message || '(Keine Nachricht)'}
                       </p>
                       <p
-                        className="text-xs mt-1 text-right"
-                        style={{
-                          color: isOwnMessage ? 'rgba(255, 255, 255, 0.8)' : '#6b7280',
-                        }}
+                        className={`text-xs text-right ${
+                          isOwnMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'
+                        }`}
+                        style={{ marginTop: '1px', marginBottom: 0 }}
                       >
                         {formatTime(message.createdAt)}
                       </p>
