@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { MapContainer, TileLayer, useMap, WMSTileLayer } from 'react-leaflet'
@@ -290,20 +291,44 @@ export default function TourMap({ gpxUrl, height = '400px' }: TourMapProps) {
     }
   }
 
-  return (
+  const [mounted, setMounted] = useState(false)
+  const [controlsPosition, setControlsPosition] = useState({ top: 0, right: 0 })
+
+  useEffect(() => {
+    setMounted(true)
+    
+    // Berechne Position relativ zur Karte
+    const updatePosition = () => {
+      if (mapContainerRef.current) {
+        const rect = mapContainerRef.current.getBoundingClientRect()
+        setControlsPosition({
+          top: rect.top + 8, // 8px = 0.5rem (top-2)
+          right: window.innerWidth - rect.right + 8 // 8px = 0.5rem (right-2)
+        })
+      }
+    }
+    
+    updatePosition()
+    window.addEventListener('scroll', updatePosition, true)
+    window.addEventListener('resize', updatePosition)
+    
+    return () => {
+      window.removeEventListener('scroll', updatePosition, true)
+      window.removeEventListener('resize', updatePosition)
+    }
+  }, [])
+
+  const controlsElement = (
     <div 
-      ref={mapContainerRef}
-      className="relative w-full" 
-      style={{ height: isFullscreen ? '100vh' : height }}
+      className="fixed flex flex-col gap-2" 
+      style={{ 
+        top: `${controlsPosition.top}px`,
+        right: `${controlsPosition.right}px`,
+        zIndex: 99999,
+        isolation: 'isolate',
+        pointerEvents: 'auto'
+      }}
     >
-      {/* Layer-Auswahl */}
-      <div 
-        className="absolute top-2 right-2 flex flex-col gap-2" 
-        style={{ 
-          zIndex: 99999,
-          isolation: 'isolate'
-        }}
-      >
         {/* Karten-Layer */}
         <div className="flex gap-1 bg-background/95 backdrop-blur-sm border rounded-md p-1 shadow-sm">
           <button
@@ -362,8 +387,20 @@ export default function TourMap({ gpxUrl, height = '400px' }: TourMapProps) {
             <Maximize2 className="w-3 h-3" />
           )}
         </button>
-      </div>
+    </div>
+  )
 
+  return (
+    <>
+      {mounted && typeof window !== 'undefined' && createPortal(
+        controlsElement,
+        document.body
+      )}
+      <div 
+        ref={mapContainerRef}
+        className="relative w-full" 
+        style={{ height: isFullscreen ? '100vh' : height }}
+      >
       <MapContainer
         center={center}
         zoom={zoom}
@@ -394,6 +431,7 @@ export default function TourMap({ gpxUrl, height = '400px' }: TourMapProps) {
         <GPXLayer gpxUrl={gpxUrl} />
       </MapContainer>
     </div>
+    </>
   )
 }
 
