@@ -454,8 +454,11 @@ export class SupabaseDataRepository implements IDataRepository {
     if (updates.description !== undefined) updateData.description = updates.description
     if (updates.date !== undefined) updateData.date = updates.date instanceof Date ? updates.date.toISOString() : updates.date
     // Only update difficulty if it's defined and not empty
-    if (updates.difficulty !== undefined && updates.difficulty !== '' && updates.difficulty !== null) {
-      updateData.difficulty = updates.difficulty
+    if (updates.difficulty !== undefined && updates.difficulty !== null) {
+      const difficultyValue = updates.difficulty as unknown as string
+      if (difficultyValue && difficultyValue.trim() !== '') {
+        updateData.difficulty = updates.difficulty
+      }
     }
     if (updates.tourType !== undefined) updateData.tour_type = updates.tourType
     if (updates.tourLength !== undefined) updateData.tour_length = updates.tourLength
