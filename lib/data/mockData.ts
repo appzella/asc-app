@@ -306,6 +306,7 @@ class DataStore {
       name: '', // Wird bei Registrierung ausgefüllt
       role: 'member',
       registered: false,
+      active: true,
       registrationToken: token,
     })
 
@@ -425,6 +426,7 @@ export function seedData() {
     role: 'admin',
     password: 'admin123',
     registered: true,
+    active: true,
   })
 
   // Leader User
@@ -434,6 +436,7 @@ export function seedData() {
     role: 'leader',
     password: 'leader123',
     registered: true,
+    active: true,
   })
 
   const leader2 = dataStore.createUser({
@@ -442,6 +445,7 @@ export function seedData() {
     role: 'leader',
     password: 'leader123',
     registered: true,
+    active: true,
   })
 
   // Member Users
@@ -451,6 +455,7 @@ export function seedData() {
     role: 'member',
     password: 'member123',
     registered: true,
+    active: true,
   })
 
   const member2 = dataStore.createUser({
@@ -459,6 +464,7 @@ export function seedData() {
     role: 'member',
     password: 'member123',
     registered: true,
+    active: true,
   })
 
   // Sample Tours
