@@ -42,7 +42,9 @@ export default function TourDetailPage() {
   const [tour, setTour] = useState<Tour | null>(null)
   const [settings, setSettings] = useState<TourSettings | null>(null)
   const [participants, setParticipants] = useState<User[]>([])
+  const [waitlist, setWaitlist] = useState<User[]>([])
   const [isRegistered, setIsRegistered] = useState(false)
+  const [isOnWaitlist, setIsOnWaitlist] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [showRejectModal, setShowRejectModal] = useState(false)
   const [rejectionComment, setRejectionComment] = useState('')
@@ -68,12 +70,17 @@ export default function TourDetailPage() {
           setTour(tourData)
           setSettings(tourSettings)
           setIsRegistered(tourData.participants.includes(currentUser.id))
+          setIsOnWaitlist(tourData.waitlist?.includes(currentUser.id) || false)
 
           // Load participant details
           const participantUsers = await Promise.all(
             tourData.participants.map((id) => dataRepository.getUserById(id))
           )
           setParticipants(participantUsers.filter((u): u is User => u !== null))
+
+          // Load waitlist details
+          const waitlistUsers = await dataRepository.getWaitlistByTourId(tourId)
+          setWaitlist(waitlistUsers)
         } catch (error) {
           console.error('Error loading tour:', error)
           const errorMessage = error instanceof Error ? error.message : String(error)
@@ -105,12 +112,16 @@ export default function TourDetailPage() {
         const updatedTour = await dataRepository.getTourById(tourId)
         if (updatedTour) {
           setTour(updatedTour)
-          setIsRegistered(true)
+          setIsRegistered(updatedTour.participants.includes(user.id))
+          setIsOnWaitlist(updatedTour.waitlist?.includes(user.id) || false)
           // Reload participants
           const participantUsers = await Promise.all(
             updatedTour.participants.map((id) => dataRepository.getUserById(id))
           )
           setParticipants(participantUsers.filter((u): u is User => u !== null))
+          // Reload waitlist
+          const waitlistUsers = await dataRepository.getWaitlistByTourId(tourId)
+          setWaitlist(waitlistUsers)
         }
       }
     } catch (error) {
@@ -128,15 +139,85 @@ export default function TourDetailPage() {
         if (updatedTour) {
           setTour(updatedTour)
           setIsRegistered(false)
+          setIsOnWaitlist(false)
           // Reload participants
           const participantUsers = await Promise.all(
             updatedTour.participants.map((id) => dataRepository.getUserById(id))
           )
           setParticipants(participantUsers.filter((u): u is User => u !== null))
+          // Reload waitlist
+          const waitlistUsers = await dataRepository.getWaitlistByTourId(tourId)
+          setWaitlist(waitlistUsers)
         }
       }
     } catch (error) {
       console.error('Error unregistering from tour:', error)
+    }
+  }
+
+  const handleAddToWaitlist = async () => {
+    if (!user || !tour) return
+
+    try {
+      const success = await dataRepository.addToWaitlist(tourId, user.id)
+      if (success) {
+        const updatedTour = await dataRepository.getTourById(tourId)
+        if (updatedTour) {
+          setTour(updatedTour)
+          setIsOnWaitlist(true)
+          // Reload waitlist
+          const waitlistUsers = await dataRepository.getWaitlistByTourId(tourId)
+          setWaitlist(waitlistUsers)
+        }
+      }
+    } catch (error) {
+      console.error('Error adding to waitlist:', error)
+    }
+  }
+
+  const handleRemoveFromWaitlist = async () => {
+    if (!user || !tour) return
+
+    try {
+      const success = await dataRepository.removeFromWaitlist(tourId, user.id)
+      if (success) {
+        const updatedTour = await dataRepository.getTourById(tourId)
+        if (updatedTour) {
+          setTour(updatedTour)
+          setIsOnWaitlist(false)
+          // Reload waitlist
+          const waitlistUsers = await dataRepository.getWaitlistByTourId(tourId)
+          setWaitlist(waitlistUsers)
+        }
+      }
+    } catch (error) {
+      console.error('Error removing from waitlist:', error)
+    }
+  }
+
+  const handlePromoteFromWaitlist = async (userId: string) => {
+    if (!user || !tour) return
+
+    try {
+      const success = await dataRepository.promoteFromWaitlist(tourId, userId)
+      if (success) {
+        const updatedTour = await dataRepository.getTourById(tourId)
+        if (updatedTour) {
+          setTour(updatedTour)
+          // Reload participants
+          const participantUsers = await Promise.all(
+            updatedTour.participants.map((id) => dataRepository.getUserById(id))
+          )
+          setParticipants(participantUsers.filter((u): u is User => u !== null))
+          // Reload waitlist
+          const waitlistUsers = await dataRepository.getWaitlistByTourId(tourId)
+          setWaitlist(waitlistUsers)
+          toast.success('Person wurde von der Warteliste hinzugefügt')
+        }
+      }
+    } catch (error) {
+      console.error('Error promoting from waitlist:', error)
+      toast.error('Fehler beim Hinzufügen von der Warteliste')
     }
   }
 
@@ -310,6 +391,8 @@ export default function TourDetailPage() {
   const canSubmit = canSubmitForPublishing(user.role, tour.leaderId, user.id, tour.status)
   const isFull = tour.participants.length >= tour.maxParticipants
   const isLeader = tour.leaderId === user.id
+  const canManageWaitlist = isLeader || user.role === 'admin'
+  const manuallyAdded = Math.max(0, tour.participants.length - tour.maxParticipants)
   
   // Prüfe ob Tour archiviert ist (Datum in der Vergangenheit)
   const today = new Date()
@@ -345,11 +428,6 @@ export default function TourDetailPage() {
             <h1>{tour.title}</h1>
           </div>
         </div>
-        {canEdit && (
-          <Link href={`/tours/${tourId}/edit`}>
-            <Button variant="outline" size="sm">Tour bearbeiten</Button>
-          </Link>
-        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -381,7 +459,10 @@ export default function TourDetailPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4 text-primary flex-shrink-0" strokeWidth={2} />
-                  <span className="text-xs">{tour.participants.length}/{tour.maxParticipants}</span>
+                  <span className="text-xs">
+                    {tour.participants.length}/{tour.maxParticipants}
+                    {manuallyAdded > 0 && `+${manuallyAdded}`}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <ChartNoAxesColumnIncreasing className="w-4 h-4 text-primary flex-shrink-0" strokeWidth={2} />
@@ -467,7 +548,12 @@ export default function TourDetailPage() {
                   Reiche diese Tour zur Veröffentlichung ein. Ein Admin wird sie prüfen und veröffentlichen.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-2">
+                {canEdit && (
+                  <Button variant="outline" asChild className="w-full" size="sm">
+                    <Link href={`/tours/${tourId}/edit`}>Tour bearbeiten</Link>
+                  </Button>
+                )}
                 <Button variant="warning" onClick={handleSubmitForPublishing} className="w-full" size="sm">
                   Zur Veröffentlichung einreichen
                 </Button>
@@ -482,6 +568,11 @@ export default function TourDetailPage() {
                 <CardTitle className="text-yellow-800 text-base">Veröffentlichung</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
+                {canEdit && (
+                  <Button variant="outline" asChild className="w-full" size="sm">
+                    <Link href={`/tours/${tourId}/edit`}>Tour bearbeiten</Link>
+                  </Button>
+                )}
                 <Button variant="success" onClick={handleApprove} className="w-full" size="sm" disabled={isArchived}>
                   Tour veröffentlichen
                 </Button>
@@ -501,6 +592,11 @@ export default function TourDetailPage() {
                 <CardTitle className="text-foreground text-base">Admin-Aktionen</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
+                {canEdit && (
+                  <Button variant="outline" asChild className="w-full" size="sm">
+                    <Link href={`/tours/${tourId}/edit`}>Tour bearbeiten</Link>
+                  </Button>
+                )}
                 <Button variant="success" onClick={handleApprove} className="w-full" size="sm" disabled={isArchived}>
                   Tour veröffentlichen
                 </Button>
@@ -519,6 +615,11 @@ export default function TourDetailPage() {
                 <CardTitle className="text-foreground text-base">Verwaltung</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
+                {canEdit && (
+                  <Button variant="outline" asChild className="w-full" size="sm">
+                    <Link href={`/tours/${tourId}/edit`}>Tour bearbeiten</Link>
+                  </Button>
+                )}
                 {!isArchived && (
                   <>
                     <Button variant="outline" onClick={handleUnpublish} className="w-full" size="sm">
@@ -547,6 +648,11 @@ export default function TourDetailPage() {
                 <CardTitle className="text-red-800 text-base">Verwaltung</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
+                {canEdit && (
+                  <Button variant="outline" asChild className="w-full" size="sm">
+                    <Link href={`/tours/${tourId}/edit`}>Tour bearbeiten</Link>
+                  </Button>
+                )}
                 {!isArchived && (
                   <>
                     <Button variant="outline" onClick={handleUnpublish} className="w-full" size="sm">
@@ -574,8 +680,9 @@ export default function TourDetailPage() {
                 <div>
                   <p className="text-xs text-muted-foreground mb-2">
                     {tour.participants.length} von {tour.maxParticipants} Plätzen belegt
+                    {manuallyAdded > 0 && ` (+${manuallyAdded} manuell hinzugefügt)`}
                   </p>
-                  <Progress value={(tour.participants.length / tour.maxParticipants) * 100} className="h-2" />
+                  <Progress value={(Math.min(tour.participants.length, tour.maxParticipants) / tour.maxParticipants) * 100} className="h-2" />
                 </div>
 
                 {isRegistered ? (
@@ -585,10 +692,29 @@ export default function TourDetailPage() {
                       Abmelden
                     </Button>
                   </div>
+                ) : isOnWaitlist ? (
+                  <div className="space-y-2">
+                    <p className="text-xs text-yellow-600 font-medium">Du bist auf der Warteliste</p>
+                    <Button variant="outline" onClick={handleRemoveFromWaitlist} className="w-full" size="sm">
+                      Von Warteliste entfernen
+                    </Button>
+                  </div>
                 ) : (
                   <div className="space-y-2">
                     {isFull ? (
-                      <p className="text-xs text-red-600 font-medium">Tour ist ausgebucht</p>
+                      <>
+                        <p className="text-xs text-red-600 font-medium mb-2">Tour ist ausgebucht</p>
+                        {canRegister && (
+                          <Button
+                            variant="outline"
+                            onClick={handleAddToWaitlist}
+                            className="w-full"
+                            size="sm"
+                          >
+                            Auf Warteliste setzen
+                          </Button>
+                        )}
+                      </>
                     ) : !canRegister ? (
                       <p className="text-xs text-muted-foreground font-medium">
                         {isLeader 
@@ -634,6 +760,45 @@ export default function TourDetailPage() {
                         </AvatarFallback>
                       </Avatar>
                       <span className="text-sm font-medium text-foreground">{participant.name}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Warteliste */}
+          {tour.status === 'published' && waitlist.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Warteliste ({waitlist.length})</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3">
+                  {waitlist.map((waitlistUser) => (
+                    <li key={waitlistUser.id} className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 flex-1">
+                        <Avatar className="w-8 h-8 flex-shrink-0">
+                          <AvatarImage
+                            src={waitlistUser.profilePhoto || undefined}
+                            alt={waitlistUser.name}
+                            className="object-cover"
+                          />
+                          <AvatarFallback>
+                            {waitlistUser.name.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-sm font-medium text-foreground">{waitlistUser.name}</span>
+                      </div>
+                      {canManageWaitlist && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handlePromoteFromWaitlist(waitlistUser.id)}
+                        >
+                          Hinzufügen
+                        </Button>
+                      )}
                     </li>
                   ))}
                 </ul>

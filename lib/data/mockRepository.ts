@@ -59,7 +59,7 @@ export class MockDataRepository implements IDataRepository {
     return this.getToursSubmittedForPublishing()
   }
 
-  async createTour(tour: Omit<Tour, 'id' | 'createdAt' | 'updatedAt' | 'participants' | 'status'>): Promise<Tour> {
+  async createTour(tour: Omit<Tour, 'id' | 'createdAt' | 'updatedAt' | 'participants' | 'status' | 'waitlist'>): Promise<Tour> {
     return dataStore.createTour(tour)
   }
 
@@ -217,6 +217,23 @@ export class MockDataRepository implements IDataRepository {
 
   async getDifficultiesForTourType(tourType: string): Promise<string[]> {
     return dataStore.getDifficultiesForTourType(tourType)
+  }
+
+  // Waitlist Management
+  async addToWaitlist(tourId: string, userId: string): Promise<boolean> {
+    return dataStore.addToWaitlist(tourId, userId)
+  }
+
+  async removeFromWaitlist(tourId: string, userId: string): Promise<boolean> {
+    return dataStore.removeFromWaitlist(tourId, userId)
+  }
+
+  async getWaitlistByTourId(tourId: string): Promise<User[]> {
+    return dataStore.getWaitlistByTourId(tourId)
+  }
+
+  async promoteFromWaitlist(tourId: string, userId: string): Promise<boolean> {
+    return dataStore.promoteFromWaitlist(tourId, userId)
   }
 }
 

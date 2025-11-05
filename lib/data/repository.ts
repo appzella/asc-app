@@ -19,7 +19,7 @@ export interface IDataRepository {
   getPublishedTours(): Promise<Tour[]>
   getDraftTours(): Promise<Tour[]>
   getToursSubmittedForPublishing(): Promise<Tour[]>
-  createTour(tour: Omit<Tour, 'id' | 'createdAt' | 'updatedAt' | 'participants' | 'status'>): Promise<Tour>
+  createTour(tour: Omit<Tour, 'id' | 'createdAt' | 'updatedAt' | 'participants' | 'status' | 'waitlist'>): Promise<Tour>
   updateTour(id: string, updates: Partial<Tour>, submitForApproval?: boolean): Promise<Tour | null>
   publishTour(id: string): Promise<Tour | null>
   unpublishTour(id: string): Promise<Tour | null>
@@ -28,6 +28,12 @@ export interface IDataRepository {
   registerForTour(tourId: string, userId: string): Promise<boolean>
   unregisterFromTour(tourId: string, userId: string): Promise<boolean>
   deleteTour(id: string): Promise<boolean>
+
+  // Waitlist Management
+  addToWaitlist(tourId: string, userId: string): Promise<boolean>
+  removeFromWaitlist(tourId: string, userId: string): Promise<boolean>
+  getWaitlistByTourId(tourId: string): Promise<User[]>
+  promoteFromWaitlist(tourId: string, userId: string): Promise<boolean> // Manuelles Hinzufügen durch Leader/Admin
 
   // Chat Messages
   getMessagesByTourId(tourId: string): Promise<ChatMessage[]>

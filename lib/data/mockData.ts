@@ -97,12 +97,13 @@ class DataStore {
     return this.getTours().filter((t) => t.status === 'draft' && t.submittedForPublishing === true)
   }
 
-  createTour(tour: Omit<Tour, 'id' | 'createdAt' | 'updatedAt' | 'participants' | 'status'>): Tour {
+  createTour(tour: Omit<Tour, 'id' | 'createdAt' | 'updatedAt' | 'participants' | 'status' | 'waitlist'>): Tour {
     const newTour: Tour = {
       ...tour,
       id: `tour_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       status: 'draft',
       participants: [],
+      waitlist: [],
       createdAt: new Date(),
       updatedAt: new Date(),
       submittedForPublishing: false,
@@ -187,8 +188,13 @@ class DataStore {
     const tour = this.tours.find((t) => t.id === tourId)
     // Only allow registration for published tours (not draft, cancelled, etc.)
     if (!tour || tour.status !== 'published') return false
-    if (tour.participants.includes(userId)) return false
-    if (tour.participants.length >= tour.maxParticipants) return false
+    if (tour.participants.includes(userId) || tour.waitlist.includes(userId)) return false
+    
+    // Wenn Tour voll ist, zur Warteliste hinzufügen
+    if (tour.participants.length >= tour.maxParticipants) {
+      tour.waitlist.push(userId)
+      return true
+    }
 
     tour.participants.push(userId)
     return true
@@ -202,6 +208,57 @@ class DataStore {
     if (index === -1) return false
 
     tour.participants.splice(index, 1)
+    
+    // Automatisches Nachrücken: Wenn noch Platz unter maxParticipants und Warteliste vorhanden
+    if (tour.participants.length < tour.maxParticipants && tour.waitlist.length > 0) {
+      const firstWaitlistUserId = tour.waitlist.shift()!
+      tour.participants.push(firstWaitlistUserId)
+    }
+    
+    return true
+  }
+
+  addToWaitlist(tourId: string, userId: string): boolean {
+    const tour = this.tours.find((t) => t.id === tourId)
+    if (!tour) return false
+    if (tour.waitlist.includes(userId) || tour.participants.includes(userId)) return false
+    
+    tour.waitlist.push(userId)
+    return true
+  }
+
+  removeFromWaitlist(tourId: string, userId: string): boolean {
+    const tour = this.tours.find((t) => t.id === tourId)
+    if (!tour) return false
+
+    const index = tour.waitlist.indexOf(userId)
+    if (index === -1) return false
+
+    tour.waitlist.splice(index, 1)
+    return true
+  }
+
+  getWaitlistByTourId(tourId: string): User[] {
+    const tour = this.tours.find((t) => t.id === tourId)
+    if (!tour) return []
+    
+    return tour.waitlist
+      .map((userId) => this.getUserById(userId))
+      .filter((user): user is User => user !== undefined)
+  }
+
+  promoteFromWaitlist(tourId: string, userId: string): boolean {
+    const tour = this.tours.find((t) => t.id === tourId)
+    if (!tour) return false
+
+    const waitlistIndex = tour.waitlist.indexOf(userId)
+    if (waitlistIndex === -1) return false
+
+    // Entferne von Warteliste
+    tour.waitlist.splice(waitlistIndex, 1)
+    
+    // Füge als Teilnehmer hinzu (auch wenn Tour bereits voll ist)
+    tour.participants.push(userId)
     return true
   }
 

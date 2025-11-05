@@ -190,7 +190,27 @@ export class SupabaseDataRepository implements IDataRepository {
       }
       return []
     }
-    return (data || []).map((row: any) => this.mapDbTourToTour(row))
+    
+    // Load waitlists for all tours
+    const tourIds = (data || []).map((row: any) => row.id)
+    const { data: waitlistData } = await supabase
+      .from('tour_waitlist')
+      .select('tour_id, user_id')
+      .in('tour_id', tourIds)
+      .order('created_at', { ascending: true })
+
+    // Group waitlist by tour_id
+    const waitlistByTour: { [key: string]: string[] } = {}
+    if (waitlistData) {
+      for (const row of waitlistData) {
+        if (!waitlistByTour[row.tour_id]) {
+          waitlistByTour[row.tour_id] = []
+        }
+        waitlistByTour[row.tour_id].push(row.user_id)
+      }
+    }
+    
+    return (data || []).map((row: any) => this.mapDbTourToTour(row, waitlistByTour[row.id] || []))
   }
 
   async getTourById(id: string): Promise<Tour | null> {
@@ -214,7 +234,20 @@ export class SupabaseDataRepository implements IDataRepository {
       
       if (!data) return null
       
-      return this.mapDbTourToTour(data)
+      // Load waitlist separately
+      const { data: waitlistData, error: waitlistError } = await supabase
+        .from('tour_waitlist')
+        .select('user_id')
+        .eq('tour_id', id)
+        .order('created_at', { ascending: true })
+
+      if (waitlistError && !this.handleSupabaseError(waitlistError)) {
+        console.error('Error fetching waitlist:', waitlistError)
+      }
+
+      const waitlist = (waitlistData || []).map((row: any) => row.user_id)
+      
+      return this.mapDbTourToTour(data, waitlist)
     } catch (error) {
       console.error('Error in getTourById:', error)
       return null
@@ -242,7 +275,27 @@ export class SupabaseDataRepository implements IDataRepository {
       }
       return []
     }
-    return (data || []).map((row: any) => this.mapDbTourToTour(row))
+    
+    // Load waitlists for all tours
+    const tourIds = (data || []).map((row: any) => row.id)
+    const { data: waitlistData } = await supabase
+      .from('tour_waitlist')
+      .select('tour_id, user_id')
+      .in('tour_id', tourIds)
+      .order('created_at', { ascending: true })
+
+    // Group waitlist by tour_id
+    const waitlistByTour: { [key: string]: string[] } = {}
+    if (waitlistData) {
+      for (const row of waitlistData) {
+        if (!waitlistByTour[row.tour_id]) {
+          waitlistByTour[row.tour_id] = []
+        }
+        waitlistByTour[row.tour_id].push(row.user_id)
+      }
+    }
+    
+    return (data || []).map((row: any) => this.mapDbTourToTour(row, waitlistByTour[row.id] || []))
   }
 
   async getDraftTours(): Promise<Tour[]> {
@@ -261,7 +314,27 @@ export class SupabaseDataRepository implements IDataRepository {
       }
       return []
     }
-    return (data || []).map((row: any) => this.mapDbTourToTour(row))
+    
+    // Load waitlists for all tours
+    const tourIds = (data || []).map((row: any) => row.id)
+    const { data: waitlistData } = await supabase
+      .from('tour_waitlist')
+      .select('tour_id, user_id')
+      .in('tour_id', tourIds)
+      .order('created_at', { ascending: true })
+
+    // Group waitlist by tour_id
+    const waitlistByTour: { [key: string]: string[] } = {}
+    if (waitlistData) {
+      for (const row of waitlistData) {
+        if (!waitlistByTour[row.tour_id]) {
+          waitlistByTour[row.tour_id] = []
+        }
+        waitlistByTour[row.tour_id].push(row.user_id)
+      }
+    }
+    
+    return (data || []).map((row: any) => this.mapDbTourToTour(row, waitlistByTour[row.id] || []))
   }
 
   async getToursSubmittedForPublishing(): Promise<Tour[]> {
@@ -281,10 +354,30 @@ export class SupabaseDataRepository implements IDataRepository {
       }
       return []
     }
-    return (data || []).map((row: any) => this.mapDbTourToTour(row))
+    
+    // Load waitlists for all tours
+    const tourIds = (data || []).map((row: any) => row.id)
+    const { data: waitlistData } = await supabase
+      .from('tour_waitlist')
+      .select('tour_id, user_id')
+      .in('tour_id', tourIds)
+      .order('created_at', { ascending: true })
+
+    // Group waitlist by tour_id
+    const waitlistByTour: { [key: string]: string[] } = {}
+    if (waitlistData) {
+      for (const row of waitlistData) {
+        if (!waitlistByTour[row.tour_id]) {
+          waitlistByTour[row.tour_id] = []
+        }
+        waitlistByTour[row.tour_id].push(row.user_id)
+      }
+    }
+    
+    return (data || []).map((row: any) => this.mapDbTourToTour(row, waitlistByTour[row.id] || []))
   }
 
-  async createTour(tourData: Omit<Tour, 'id' | 'createdAt' | 'updatedAt' | 'participants' | 'status'>): Promise<Tour> {
+  async createTour(tourData: Omit<Tour, 'id' | 'createdAt' | 'updatedAt' | 'participants' | 'status' | 'waitlist'>): Promise<Tour> {
     const { data, error } = await supabase
       .from('tours')
       .insert({
@@ -441,6 +534,23 @@ export class SupabaseDataRepository implements IDataRepository {
       return false
     }
     
+    // Prüfe ob bereits Teilnehmer oder auf Warteliste
+    if (tour.participants.includes(userId) || tour.waitlist.includes(userId)) {
+      return false
+    }
+    
+    // Wenn Tour voll ist, zur Warteliste hinzufügen
+    if (tour.participants.length >= tour.maxParticipants) {
+      const { error } = await supabase
+        .from('tour_waitlist')
+        .insert({
+          tour_id: tourId,
+          user_id: userId,
+        })
+      return !error
+    }
+    
+    // Sonst als Teilnehmer hinzufügen
     const { error } = await supabase
       .from('tour_participants')
       .insert({
@@ -452,13 +562,53 @@ export class SupabaseDataRepository implements IDataRepository {
   }
 
   async unregisterFromTour(tourId: string, userId: string): Promise<boolean> {
-    const { error } = await supabase
+    // Hole aktuelle Tour-Daten
+    const tour = await this.getTourById(tourId)
+    if (!tour) {
+      return false
+    }
+    
+    // Entferne Teilnehmer
+    const { error: deleteError } = await supabase
       .from('tour_participants')
       .delete()
       .eq('tour_id', tourId)
       .eq('user_id', userId)
 
-    return !error
+    if (deleteError) {
+      return false
+    }
+    
+    // Automatisches Nachrücken: Wenn noch Platz unter maxParticipants und Warteliste vorhanden
+    if (tour.participants.length - 1 < tour.maxParticipants && tour.waitlist.length > 0) {
+      // Hole ersten Eintrag von der Warteliste (ältestes created_at)
+      const { data: firstWaitlistEntry, error: waitlistError } = await supabase
+        .from('tour_waitlist')
+        .select('user_id')
+        .eq('tour_id', tourId)
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .single()
+
+      if (!waitlistError && firstWaitlistEntry) {
+        // Entferne von Warteliste
+        await supabase
+          .from('tour_waitlist')
+          .delete()
+          .eq('tour_id', tourId)
+          .eq('user_id', firstWaitlistEntry.user_id)
+
+        // Füge als Teilnehmer hinzu
+        await supabase
+          .from('tour_participants')
+          .insert({
+            tour_id: tourId,
+            user_id: firstWaitlistEntry.user_id,
+          })
+      }
+    }
+
+    return true
   }
 
   // Chat Messages
@@ -817,7 +967,7 @@ export class SupabaseDataRepository implements IDataRepository {
     }
   }
 
-  private mapDbTourToTour(row: any): Tour {
+  private mapDbTourToTour(row: any, waitlist: string[] = []): Tour {
     // Ensure status is valid (fallback to 'draft' if invalid)
     const validStatus = ['draft', 'published', 'cancelled'].includes(row.status) 
       ? row.status 
@@ -838,6 +988,7 @@ export class SupabaseDataRepository implements IDataRepository {
       maxParticipants: row.max_participants,
       status: validStatus,
       participants: row.participant_ids || [],
+      waitlist: waitlist,
       createdAt: new Date(row.created_at),
       updatedAt: new Date(row.updated_at),
       createdBy: row.created_by,
@@ -961,6 +1112,85 @@ export class SupabaseDataRepository implements IDataRepository {
       this.handleSupabaseError(error)
       // Don't throw - deletion is not critical
     }
+  }
+
+  // Waitlist Management
+  async addToWaitlist(tourId: string, userId: string): Promise<boolean> {
+    const { error } = await supabase
+      .from('tour_waitlist')
+      .insert({
+        tour_id: tourId,
+        user_id: userId,
+      })
+
+    return !error
+  }
+
+  async removeFromWaitlist(tourId: string, userId: string): Promise<boolean> {
+    const { error } = await supabase
+      .from('tour_waitlist')
+      .delete()
+      .eq('tour_id', tourId)
+      .eq('user_id', userId)
+
+    return !error
+  }
+
+  async getWaitlistByTourId(tourId: string): Promise<User[]> {
+    const { data, error } = await supabase
+      .from('tour_waitlist')
+      .select(`
+        user_id,
+        users(*)
+      `)
+      .eq('tour_id', tourId)
+      .order('created_at', { ascending: true })
+
+    if (error) {
+      if (!this.handleSupabaseError(error)) {
+        throw error
+      }
+      return []
+    }
+
+    return (data || [])
+      .map((row: any) => row.users ? this.mapDbUserToUser(row.users) : null)
+      .filter((user: User | null): user is User => user !== null)
+  }
+
+  async promoteFromWaitlist(tourId: string, userId: string): Promise<boolean> {
+    // Prüfe ob User auf Warteliste ist
+    const { data: waitlistEntry, error: checkError } = await supabase
+      .from('tour_waitlist')
+      .select('*')
+      .eq('tour_id', tourId)
+      .eq('user_id', userId)
+      .single()
+
+    if (checkError || !waitlistEntry) {
+      return false
+    }
+
+    // Entferne von Warteliste
+    const { error: deleteError } = await supabase
+      .from('tour_waitlist')
+      .delete()
+      .eq('tour_id', tourId)
+      .eq('user_id', userId)
+
+    if (deleteError) {
+      return false
+    }
+
+    // Füge als Teilnehmer hinzu (auch wenn Tour bereits voll ist)
+    const { error: insertError } = await supabase
+      .from('tour_participants')
+      .insert({
+        tour_id: tourId,
+        user_id: userId,
+      })
+
+    return !insertError
   }
 }
 

@@ -48,6 +48,7 @@ export interface Tour {
   maxParticipants: number
   status: TourStatus
   participants: string[] // Array von User-IDs
+  waitlist: string[] // Array von User-IDs auf der Warteliste
   createdAt: Date
   updatedAt: Date
   createdBy: string // User-ID
