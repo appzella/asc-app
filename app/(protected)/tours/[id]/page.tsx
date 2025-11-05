@@ -633,7 +633,7 @@ export default function TourDetailPage() {
                 <>
                   <Separator />
                   <div>
-                    <span className="text-xs font-medium text-muted-foreground block mb-2">Tourenleiter:</span>
+                    <span className="text-xs font-medium text-muted-foreground block mb-2">Tourenleiter</span>
                     <div className="flex items-center gap-2">
                       <Avatar className="w-8 h-8 flex-shrink-0">
                         <AvatarImage
