@@ -51,6 +51,7 @@ const SWISSTOPO_LAYERS = {
 function GPXLayer({ gpxUrl }: { gpxUrl: string }) {
   const map = useMap()
   const gpxLayerRef = useRef<GPX | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!gpxUrl || !map) return
@@ -60,6 +61,8 @@ function GPXLayer({ gpxUrl }: { gpxUrl: string }) {
       map.removeLayer(gpxLayerRef.current as unknown as L.Layer)
       gpxLayerRef.current = null
     }
+
+    setError(null)
 
     // Lade GPX-Datei
     const gpxLayer = new GPX(gpxUrl, {
@@ -80,7 +83,17 @@ function GPXLayer({ gpxUrl }: { gpxUrl: string }) {
     })
 
     gpxLayer.on('loaded', function (e: any) {
-      map.fitBounds(e.target.getBounds(), { padding: [20, 20] })
+      try {
+        map.fitBounds(e.target.getBounds(), { padding: [20, 20] })
+      } catch (err) {
+        console.error('Error fitting bounds:', err)
+        setError('Fehler beim Anpassen der Kartenansicht')
+      }
+    })
+
+    gpxLayer.on('error', function (e: any) {
+      console.error('GPX loading error:', e)
+      setError('Fehler beim Laden der GPX-Datei')
     })
 
     gpxLayer.addTo(map)
@@ -93,6 +106,14 @@ function GPXLayer({ gpxUrl }: { gpxUrl: string }) {
       }
     }
   }, [gpxUrl, map])
+
+  if (error) {
+    return (
+      <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-[1000]">
+        <p className="text-sm text-destructive">{error}</p>
+      </div>
+    )
+  }
 
   return null
 }
