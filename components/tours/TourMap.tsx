@@ -206,15 +206,6 @@ export default function TourMap({ gpxUrl, height = '400px' }: TourMapProps) {
       return
     }
 
-    // Versuche die Card zu finden, die die Karte enthält
-    let elementToFullscreen: HTMLElement | null = mapContainer
-    const cardElement = mapContainer.closest('[class*="card"], [class*="Card"], .card')
-    if (cardElement) {
-      elementToFullscreen = cardElement as HTMLElement
-    }
-
-    console.log('Toggle fullscreen clicked, element:', elementToFullscreen)
-
     // Prüfe ob Fullscreen aktiv ist
     const isCurrentlyFullscreen = !!(
       document.fullscreenElement ||
@@ -223,31 +214,65 @@ export default function TourMap({ gpxUrl, height = '400px' }: TourMapProps) {
       (document as any).msFullscreenElement
     )
 
-    console.log('Currently fullscreen:', isCurrentlyFullscreen)
-
     try {
-      if (!isCurrentlyFullscreen && elementToFullscreen) {
-        // Enter fullscreen
-        console.log('Attempting to enter fullscreen...')
-        if (elementToFullscreen.requestFullscreen) {
-          console.log('Using standard requestFullscreen')
-          await elementToFullscreen.requestFullscreen()
-        } else if ((elementToFullscreen as any).webkitRequestFullscreen) {
-          console.log('Using webkitRequestFullscreen')
-          await (elementToFullscreen as any).webkitRequestFullscreen()
-        } else if ((elementToFullscreen as any).mozRequestFullScreen) {
-          console.log('Using mozRequestFullScreen')
-          await (elementToFullscreen as any).mozRequestFullScreen()
-        } else if ((elementToFullscreen as any).msRequestFullscreen) {
-          console.log('Using msRequestFullscreen')
-          await (elementToFullscreen as any).msRequestFullscreen()
+      if (!isCurrentlyFullscreen) {
+        // Enter fullscreen - versuche verschiedene Container
+        let elementToFullscreen: HTMLElement | null = null
+        
+        // Versuche zuerst die Card zu finden (durchsuche nach div mit card-ähnlichen Klassen)
+        const cardElement = mapContainer.closest('div[class*="rounded-xl"], div[class*="border"], div[class*="bg-card"]')
+        
+        // Oder finde die CardContent und dann die Card
+        const cardContent = mapContainer.closest('[class*="CardContent"], [class*="card-content"]')
+        const cardFromContent = cardContent?.parentElement
+        
+        // Oder finde einfach das nächste div mit border
+        const parentWithBorder = mapContainer.parentElement?.closest('div[class*="border"]')
+        
+        // Wähle das beste Element
+        if (cardElement) {
+          elementToFullscreen = cardElement as HTMLElement
+        } else if (cardFromContent) {
+          elementToFullscreen = cardFromContent as HTMLElement
+        } else if (parentWithBorder) {
+          elementToFullscreen = parentWithBorder as HTMLElement
         } else {
-          console.error('Fullscreen API not supported')
-          alert('Vollbild wird von Ihrem Browser nicht unterstützt.')
+          // Fallback: verwende den Container selbst
+          elementToFullscreen = mapContainer
+        }
+
+        console.log('Entering fullscreen with element:', elementToFullscreen, 'tag:', elementToFullscreen.tagName, 'classes:', elementToFullscreen.className)
+
+        try {
+          if (elementToFullscreen.requestFullscreen) {
+            await elementToFullscreen.requestFullscreen()
+          } else if ((elementToFullscreen as any).webkitRequestFullscreen) {
+            await (elementToFullscreen as any).webkitRequestFullscreen()
+          } else if ((elementToFullscreen as any).mozRequestFullScreen) {
+            await (elementToFullscreen as any).mozRequestFullScreen()
+          } else if ((elementToFullscreen as any).msRequestFullscreen) {
+            await (elementToFullscreen as any).msRequestFullscreen()
+          } else {
+            console.error('Fullscreen API not supported')
+            alert('Vollbild wird von Ihrem Browser nicht unterstützt.')
+          }
+        } catch (fullscreenError) {
+          console.error('Fullscreen request failed:', fullscreenError)
+          // Fallback: versuche es mit dem Container selbst
+          if (elementToFullscreen !== mapContainer) {
+            console.log('Retrying with map container...')
+            if (mapContainer.requestFullscreen) {
+              await mapContainer.requestFullscreen()
+            } else if ((mapContainer as any).webkitRequestFullscreen) {
+              await (mapContainer as any).webkitRequestFullscreen()
+            }
+          } else {
+            throw fullscreenError
+          }
         }
       } else {
         // Exit fullscreen
-        console.log('Attempting to exit fullscreen...')
+        console.log('Exiting fullscreen...')
         if (document.exitFullscreen) {
           await document.exitFullscreen()
         } else if ((document as any).webkitExitFullscreen) {
@@ -256,8 +281,6 @@ export default function TourMap({ gpxUrl, height = '400px' }: TourMapProps) {
           await (document as any).mozCancelFullScreen()
         } else if ((document as any).msExitFullscreen) {
           await (document as any).msExitFullscreen()
-        } else {
-          console.error('Exit fullscreen API not supported')
         }
       }
     } catch (err) {
@@ -274,7 +297,7 @@ export default function TourMap({ gpxUrl, height = '400px' }: TourMapProps) {
       style={{ height: isFullscreen ? '100vh' : height }}
     >
       {/* Layer-Auswahl */}
-      <div className="absolute top-2 right-2 z-[1000] flex flex-col gap-2">
+      <div className="absolute top-2 right-2 z-[9999] flex flex-col gap-2" style={{ isolation: 'isolate' }}>
         {/* Karten-Layer */}
         <div className="flex gap-1 bg-background/95 backdrop-blur-sm border rounded-md p-1 shadow-sm">
           <button
