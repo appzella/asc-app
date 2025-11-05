@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Separator } from '@/components/ui/separator'
 import { Label } from '@/components/ui/label'
+import { Dropzone, DropzoneContent, DropzoneEmptyState } from '@/components/ui/shadcn-io/dropzone'
 import {
   Form,
   FormControl,
@@ -74,8 +75,7 @@ export default function CreateTourPage() {
   const [showResults, setShowResults] = useState<boolean>(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const [resultsPosition, setResultsPosition] = useState<{ top: number; left: number; width: number } | null>(null)
-  const [gpxFile, setGpxFile] = useState<File | null>(null)
-  const gpxFileInputRef = useRef<HTMLInputElement>(null)
+  const [gpxFile, setGpxFile] = useState<File[]>([])
   
   // Update position when showing results
   useEffect(() => {
@@ -232,9 +232,9 @@ export default function CreateTourPage() {
       })
 
       // Upload GPX file if provided
-      if (gpxFile) {
+      if (gpxFile && gpxFile.length > 0) {
         try {
-          const gpxUrl = await dataRepository.uploadGpxFile(tour.id, gpxFile)
+          const gpxUrl = await dataRepository.uploadGpxFile(tour.id, gpxFile[0])
           await dataRepository.updateTour(tour.id, { gpxFile: gpxUrl })
         } catch (gpxError) {
           console.error('Error uploading GPX file:', gpxError)
@@ -647,42 +647,29 @@ export default function CreateTourPage() {
             <Separator />
 
             <div className="space-y-2">
-              <Label htmlFor="gpx-file">GPX-Datei (optional)</Label>
-              <div className="space-y-2">
-                <input
-                  ref={gpxFileInputRef}
-                  id="gpx-file"
-                  type="file"
-                  accept=".gpx,.xml"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0]
-                    if (file) {
-                      // Validate file type
-                      const validExtensions = ['gpx', 'xml']
-                      const fileExt = file.name.split('.').pop()?.toLowerCase()
-                      if (!fileExt || !validExtensions.includes(fileExt)) {
-                        toast.error('Ungültiger Dateityp. Nur GPX-Dateien sind erlaubt.')
-                        return
-                      }
-                      // Validate file size (max 10MB)
-                      if (file.size > 10 * 1024 * 1024) {
-                        toast.error('Die Datei ist zu groß. Bitte wähle eine Datei unter 10MB.')
-                        return
-                      }
-                      setGpxFile(file)
-                    }
-                  }}
-                  className="w-full px-4 py-2.5 border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 border-border hover:border-border file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
-                />
-                {gpxFile && (
-                  <p className="text-xs text-muted-foreground">
-                    Ausgewählt: {gpxFile.name} ({(gpxFile.size / 1024).toFixed(2)} KB)
-                  </p>
-                )}
-                <p className="text-xs text-muted-foreground">
-                  Lade eine GPX-Datei hoch, um die Tour auf einer Karte zu visualisieren.
-                </p>
-              </div>
+              <Label>GPX-Datei (optional)</Label>
+              <Dropzone
+                accept={{
+                  'application/gpx+xml': ['.gpx'],
+                  'application/xml': ['.gpx', '.xml'],
+                  'text/xml': ['.gpx', '.xml'],
+                }}
+                maxFiles={1}
+                maxSize={10 * 1024 * 1024} // 10MB
+                onDrop={(acceptedFiles) => {
+                  setGpxFile(acceptedFiles)
+                }}
+                onError={(error) => {
+                  toast.error(error.message || 'Fehler beim Hochladen der Datei')
+                }}
+                src={gpxFile}
+              >
+                <DropzoneEmptyState />
+                <DropzoneContent />
+              </Dropzone>
+              <p className="text-xs text-muted-foreground">
+                Lade eine GPX-Datei hoch, um die Tour auf einer Karte zu visualisieren.
+              </p>
             </div>
 
             {error && (
