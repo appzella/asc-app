@@ -297,7 +297,13 @@ export default function TourMap({ gpxUrl, height = '400px' }: TourMapProps) {
       style={{ height: isFullscreen ? '100vh' : height }}
     >
       {/* Layer-Auswahl */}
-      <div className="absolute top-2 right-2 z-[9999] flex flex-col gap-2" style={{ isolation: 'isolate' }}>
+      <div 
+        className="absolute top-2 right-2 flex flex-col gap-2" 
+        style={{ 
+          zIndex: 99999,
+          isolation: 'isolate'
+        }}
+      >
         {/* Karten-Layer */}
         <div className="flex gap-1 bg-background/95 backdrop-blur-sm border rounded-md p-1 shadow-sm">
           <button
