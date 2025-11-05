@@ -30,7 +30,7 @@ import { canEditTour, canApproveTour, canPublishTour, canSubmitForPublishing } f
 import { formatDifficulty } from '@/lib/difficulty'
 import Link from 'next/link'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import { ChevronLeft, Calendar, Clock, ArrowUpRight, Users, ChartNoAxesColumnIncreasing, X, UserPlus } from 'lucide-react'
+import { ChevronLeft, Calendar, Clock, ArrowUpRight, Users, ChartNoAxesColumnIncreasing, X, UserPlus, Map } from 'lucide-react'
 import TourMap from '@/components/tours/TourMap'
 import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { toast } from 'sonner'
@@ -56,6 +56,7 @@ export default function TourDetailPage() {
   const [participantToRemove, setParticipantToRemove] = useState<User | null>(null)
   const [showAddParticipantDialog, setShowAddParticipantDialog] = useState(false)
   const [allUsers, setAllUsers] = useState<User[]>([])
+  const [showMapOnMobile, setShowMapOnMobile] = useState(false)
 
   useEffect(() => {
     const loadTour = async () => {
@@ -523,11 +524,39 @@ export default function TourDetailPage() {
       {/* Karte mit GPX-Track - oberhalb der Tour-Details in voller Breite */}
       {tour.gpxFile && (
         <div className="mb-4">
-          <Card>
-            <CardContent className="p-0">
-              <TourMap gpxUrl={tour.gpxFile} height="500px" />
-            </CardContent>
-          </Card>
+          {/* Mobile: Button zum Anzeigen der Karte */}
+          <div className="sm:hidden">
+            {!showMapOnMobile ? (
+              <Button
+                onClick={() => setShowMapOnMobile(true)}
+                className="w-full"
+                variant="outline"
+              >
+                <Map className="w-4 h-4 mr-2" />
+                Karte anzeigen
+              </Button>
+            ) : (
+              <TourMap 
+                gpxUrl={tour.gpxFile} 
+                height="400px" 
+                initialFullscreen={true}
+                onFullscreenChange={(isFullscreen) => {
+                  if (!isFullscreen) {
+                    setShowMapOnMobile(false)
+                  }
+                }}
+              />
+            )}
+          </div>
+          
+          {/* Desktop: Karte immer anzeigen */}
+          <div className="hidden sm:block">
+            <Card>
+              <CardContent className="p-0">
+                <TourMap gpxUrl={tour.gpxFile} height="500px" />
+              </CardContent>
+            </Card>
+          </div>
         </div>
       )}
 

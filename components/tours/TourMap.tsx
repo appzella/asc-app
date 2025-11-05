@@ -33,6 +33,8 @@ if (typeof window !== 'undefined') {
 interface TourMapProps {
   gpxUrl: string
   height?: string
+  initialFullscreen?: boolean
+  onFullscreenChange?: (isFullscreen: boolean) => void
 }
 
 // Swisstopo WMTS Layer für die Karte
@@ -152,8 +154,8 @@ function GPXLayer({ gpxUrl }: { gpxUrl: string }) {
 }
 
 // Hook für CSS-basiertes Fullscreen (innerhalb des Browsers)
-function useFullscreenControl() {
-  const [isFullscreen, setIsFullscreen] = useState(false)
+function useFullscreenControl(initialFullscreen = false, onFullscreenChange?: (isFullscreen: boolean) => void) {
+  const [isFullscreen, setIsFullscreen] = useState(initialFullscreen)
   const mapRef = useRef<L.Map | null>(null)
 
   const setMap = useCallback((map: L.Map) => {
@@ -169,9 +171,13 @@ function useFullscreenControl() {
           mapRef.current?.invalidateSize()
         }, 100)
       }
+      // Callback aufrufen
+      if (onFullscreenChange) {
+        onFullscreenChange(newState)
+      }
       return newState
     })
-  }, [])
+  }, [onFullscreenChange])
 
   // ESC-Taste zum Schließen des Vollbilds
   useEffect(() => {
@@ -185,6 +191,10 @@ function useFullscreenControl() {
             mapRef.current?.invalidateSize()
           }, 100)
         }
+        // Callback aufrufen
+        if (onFullscreenChange) {
+          onFullscreenChange(false)
+        }
       }
     }
 
@@ -192,7 +202,7 @@ function useFullscreenControl() {
     return () => {
       document.removeEventListener('keydown', handleEscape)
     }
-  }, [isFullscreen])
+  }, [isFullscreen, onFullscreenChange])
 
   return { isFullscreen, toggleFullscreen, setMap }
 }
@@ -209,14 +219,14 @@ function MapInitializer({ onMapReady }: { onMapReady: (map: L.Map) => void }) {
   return null
 }
 
-export default function TourMap({ gpxUrl, height = '400px' }: TourMapProps) {
+export default function TourMap({ gpxUrl, height = '400px', initialFullscreen = false, onFullscreenChange }: TourMapProps) {
   const [selectedLayer, setSelectedLayer] = useState<'karte-sw' | 'karte-farbig' | 'satellit'>('karte-sw')
   const [isLayerPanelOpen, setIsLayerPanelOpen] = useState(false)
   const [showHangneigung, setShowHangneigung] = useState(false)
   const [showWanderwege, setShowWanderwege] = useState(false)
   const [showJagdbanngebiete, setShowJagdbanngebiete] = useState(false)
   const [showWildruhezonen, setShowWildruhezonen] = useState(false)
-  const { isFullscreen, toggleFullscreen, setMap } = useFullscreenControl()
+  const { isFullscreen, toggleFullscreen, setMap } = useFullscreenControl(initialFullscreen, onFullscreenChange)
 
   // Standard-Zentrum: Schweiz (Bern)
   const center: [number, number] = [46.9481, 7.4474]
