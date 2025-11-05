@@ -611,23 +611,24 @@ export default function TourDetailPage() {
                   </div>
                 </>
               )}
+
+              {/* Karte mit GPX-Track - direkt in Tour Details integriert */}
+              {tour.gpxFile && (
+                <>
+                  <Separator />
+                  <div>
+                    <h4 className="mb-2">Tour-Verlauf</h4>
+                    <p className="text-xs text-muted-foreground mb-3">
+                      Visualisierung der Tour auf einer Karte
+                    </p>
+                    <div className="rounded-md overflow-hidden border">
+                      <TourMap gpxUrl={tour.gpxFile} height="500px" />
+                    </div>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
-
-          {/* Karte mit GPX-Track - direkt in Tour Details integriert */}
-          {tour.gpxFile && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Tour-Verlauf</CardTitle>
-                <CardDescription>
-                  Visualisierung der Tour auf einer Karte
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-0">
-                <TourMap gpxUrl={tour.gpxFile} height="500px" />
-              </CardContent>
-            </Card>
-          )}
 
           {/* Chat - nur bei veröffentlichten Touren */}
           {tour.status === 'published' && (
