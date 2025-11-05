@@ -391,6 +391,7 @@ SELECT
   t.created_by,
   t.created_at,
   t.updated_at,
+  t.gpx_file,
   COUNT(tp.user_id) as participant_count,
   array_agg(tp.user_id) FILTER (WHERE tp.user_id IS NOT NULL) as participant_ids
 FROM public.tours t
