@@ -4,7 +4,6 @@ import React, { useEffect, useRef, useState } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { MapContainer, TileLayer, useMap } from 'react-leaflet'
-import GPX from 'leaflet-gpx'
 
 // Fix für Leaflet-Icons in Next.js
 if (typeof window !== 'undefined') {
@@ -50,54 +49,76 @@ const SWISSTOPO_LAYERS = {
 
 function GPXLayer({ gpxUrl }: { gpxUrl: string }) {
   const map = useMap()
-  const gpxLayerRef = useRef<GPX | null>(null)
+  const gpxLayerRef = useRef<any>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!gpxUrl || !map) return
+    if (!gpxUrl || !map || typeof window === 'undefined') return
 
-    // Entferne vorherige GPX-Layer
-    if (gpxLayerRef.current) {
-      map.removeLayer(gpxLayerRef.current as unknown as L.Layer)
-      gpxLayerRef.current = null
+    // Dynamischer Import von leaflet-gpx (client-side only)
+    const loadGPX = async () => {
+      try {
+        // Importiere leaflet-gpx - es fügt L.GPX hinzu
+        await import('leaflet-gpx')
+        
+        // Warte kurz, damit L.GPX verfügbar ist
+        await new Promise(resolve => setTimeout(resolve, 100))
+        
+        // Greife auf L.GPX zu
+        const GPX = (L as any).GPX
+        if (!GPX || typeof GPX !== 'function') {
+          throw new Error('GPX constructor not found on L object')
+        }
+
+        // Entferne vorherige GPX-Layer
+        if (gpxLayerRef.current) {
+          map.removeLayer(gpxLayerRef.current as unknown as L.Layer)
+          gpxLayerRef.current = null
+        }
+
+        setError(null)
+
+        // Lade GPX-Datei
+        const gpxLayer = new GPX(gpxUrl, {
+          async: true,
+          marker_options: {
+            startIconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+            endIconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+          },
+          polyline_options: {
+            color: '#ff0000',
+            weight: 4,
+            opacity: 0.8,
+          },
+        })
+
+        gpxLayer.on('loaded', function (e: any) {
+          try {
+            map.fitBounds(e.target.getBounds(), { padding: [20, 20] })
+          } catch (err) {
+            console.error('Error fitting bounds:', err)
+            setError('Fehler beim Anpassen der Kartenansicht')
+          }
+        })
+
+        gpxLayer.on('error', function (e: any) {
+          console.error('GPX loading error:', e)
+          setError('Fehler beim Laden der GPX-Datei')
+        })
+
+        gpxLayer.addTo(map)
+        gpxLayerRef.current = gpxLayer
+      } catch (err) {
+        console.error('Error loading GPX library:', err)
+        setError('Fehler beim Laden der GPX-Bibliothek')
+      }
     }
 
-    setError(null)
-
-    // Lade GPX-Datei
-    const gpxLayer = new GPX(gpxUrl, {
-      async: true,
-      marker_options: {
-        startIconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-        endIconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-      },
-      polyline_options: {
-        color: '#ff0000',
-        weight: 4,
-        opacity: 0.8,
-      },
-    })
-
-    gpxLayer.on('loaded', function (e: any) {
-      try {
-        map.fitBounds(e.target.getBounds(), { padding: [20, 20] })
-      } catch (err) {
-        console.error('Error fitting bounds:', err)
-        setError('Fehler beim Anpassen der Kartenansicht')
-      }
-    })
-
-    gpxLayer.on('error', function (e: any) {
-      console.error('GPX loading error:', e)
-      setError('Fehler beim Laden der GPX-Datei')
-    })
-
-    gpxLayer.addTo(map)
-    gpxLayerRef.current = gpxLayer
+    loadGPX()
 
     return () => {
       if (gpxLayerRef.current) {
