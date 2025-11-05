@@ -521,43 +521,42 @@ export default function TourDetailPage() {
         </div>
       </div>
 
-      {/* Karte mit GPX-Track - oberhalb der Tour-Details in voller Breite */}
+      {/* Desktop: Karte immer anzeigen */}
       {tour.gpxFile && (
-        <div className="mb-4">
-          {/* Mobile: Button zum Anzeigen der Karte */}
-          <div className="sm:hidden">
-            {!showMapOnMobile ? (
-              <Button
-                onClick={() => setShowMapOnMobile(true)}
-                className="w-full"
-                variant="outline"
-              >
-                <Map className="w-4 h-4 mr-2" />
-                Karte anzeigen
-              </Button>
-            ) : (
-              <TourMap 
-                gpxUrl={tour.gpxFile} 
-                height="400px" 
-                initialFullscreen={true}
-                onFullscreenChange={(isFullscreen) => {
-                  if (!isFullscreen) {
-                    setShowMapOnMobile(false)
-                  }
-                }}
-              />
-            )}
-          </div>
-          
-          {/* Desktop: Karte immer anzeigen */}
-          <div className="hidden sm:block">
-            <Card>
-              <CardContent className="p-0">
-                <TourMap gpxUrl={tour.gpxFile} height="500px" />
-              </CardContent>
-            </Card>
-          </div>
+        <div className="mb-4 hidden sm:block">
+          <Card>
+            <CardContent className="p-0">
+              <TourMap gpxUrl={tour.gpxFile} height="500px" />
+            </CardContent>
+          </Card>
         </div>
+      )}
+
+      {/* Mobile: Karte im Vollbildmodus anzeigen */}
+      {tour.gpxFile && showMapOnMobile && (
+        <div className="sm:hidden">
+          <TourMap 
+            gpxUrl={tour.gpxFile} 
+            height="400px" 
+            initialFullscreen={true}
+            onFullscreenChange={(isFullscreen) => {
+              if (!isFullscreen) {
+                setShowMapOnMobile(false)
+              }
+            }}
+          />
+        </div>
+      )}
+
+      {/* Mobile: Fixed Karte-Button rechts oben */}
+      {tour.gpxFile && (
+        <Button
+          onClick={() => setShowMapOnMobile(true)}
+          className="fixed bottom-[calc(60px+max(env(safe-area-inset-bottom,8px),8px)+100px)] right-4 sm:hidden z-40 inline-flex items-center gap-1 h-10 py-2"
+        >
+          <Map className="w-4 h-4" strokeWidth={2} />
+          Karte
+        </Button>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
