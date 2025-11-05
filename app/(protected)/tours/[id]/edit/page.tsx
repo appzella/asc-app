@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -29,6 +29,8 @@ import { getDifficultyOptions } from '@/lib/difficulty'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 import { toast } from 'sonner'
+import { Separator } from '@/components/ui/separator'
+import { Label } from '@/components/ui/label'
 
 const editTourSchema = z.object({
   title: z.string().min(1, 'Titel ist erforderlich'),
@@ -67,6 +69,8 @@ export default function EditTourPage() {
   const [users, setUsers] = useState<User[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [gpxFile, setGpxFile] = useState<File | null>(null)
+  const gpxFileInputRef = useRef<HTMLInputElement>(null)
 
   const form = useForm<EditTourFormValues>({
     resolver: zodResolver(editTourSchema),
@@ -128,12 +132,12 @@ export default function EditTourPage() {
           description: displayTour.description,
           date: new Date(displayTour.date).toISOString().split('T')[0],
           difficulty: displayTour.difficulty || '',
-          tourType: displayTour.tourType,
-          tourLength: displayTour.tourLength,
+          tourType: displayTour.tourType || '',
+          tourLength: displayTour.tourLength || '',
           elevation: displayTour.elevation.toString(),
           duration: displayTour.duration.toString(),
           maxParticipants: displayTour.maxParticipants.toString(),
-          leaderId: formLeaderId,
+          leaderId: formLeaderId || '',
         })
       }
     }
@@ -192,6 +196,17 @@ export default function EditTourPage() {
       // Wenn Tour bereits approved ist, werden Änderungen als pendingChanges gespeichert
       const submitForApproval = false // Nicht mehr benötigt mit neuer Status-Logik
       await dataRepository.updateTour(tourId, updates, submitForApproval)
+
+      // Upload GPX file if provided
+      if (gpxFile) {
+        try {
+          const gpxUrl = await dataRepository.uploadGpxFile(tourId, gpxFile)
+          await dataRepository.updateTour(tourId, { gpxFile: gpxUrl })
+        } catch (gpxError) {
+          console.error('Error uploading GPX file:', gpxError)
+          toast.error('Tour wurde aktualisiert, aber GPX-Datei konnte nicht hochgeladen werden')
+        }
+      }
 
       toast.success('Tour erfolgreich aktualisiert!')
       router.push(`/tours/${tourId}`)
@@ -301,10 +316,13 @@ export default function EditTourPage() {
                   <FormItem className="md:col-start-2 md:row-start-1">
                     <FormLabel>Tourenart</FormLabel>
                     <Select
-                      value={field.value}
+                      value={field.value || ''}
                       onValueChange={(value) => {
                         field.onChange(value)
-                        form.setValue('difficulty', '')
+                        // Nur difficulty zurücksetzen, wenn tourType wirklich geändert wurde
+                        if (tour && value !== tour.tourType) {
+                          form.setValue('difficulty', '')
+                        }
                       }}
                     >
                       <FormControl>
@@ -341,11 +359,13 @@ export default function EditTourPage() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {getDifficultyOptions(tourType as TourType, settings).map((opt) => (
+                        {tourType ? getDifficultyOptions(tourType as TourType, settings).map((opt) => (
                           <SelectItem key={opt.value} value={opt.value}>
                             {opt.label}
                           </SelectItem>
-                        ))}
+                        )) : (
+                          <SelectItem value="" disabled>Bitte zuerst Tourenart wählen</SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -446,7 +466,7 @@ export default function EditTourPage() {
                     <FormItem>
                       <FormLabel>Tourenleiter</FormLabel>
                       <Select
-                        value={field.value}
+                        value={field.value || ''}
                         onValueChange={field.onChange}
                       >
                         <FormControl>
@@ -467,6 +487,52 @@ export default function EditTourPage() {
                   )}
                 />
               )}
+            </div>
+
+            <Separator />
+
+            <div className="space-y-2">
+              <Label htmlFor="gpx-file-edit">GPX-Datei (optional)</Label>
+              <div className="space-y-2">
+                {tour.gpxFile && (
+                  <p className="text-xs text-muted-foreground">
+                    Aktuelle GPX-Datei vorhanden. Neue Datei überschreibt die bestehende.
+                  </p>
+                )}
+                <input
+                  ref={gpxFileInputRef}
+                  id="gpx-file-edit"
+                  type="file"
+                  accept=".gpx,.xml"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      // Validate file type
+                      const validExtensions = ['gpx', 'xml']
+                      const fileExt = file.name.split('.').pop()?.toLowerCase()
+                      if (!fileExt || !validExtensions.includes(fileExt)) {
+                        toast.error('Ungültiger Dateityp. Nur GPX-Dateien sind erlaubt.')
+                        return
+                      }
+                      // Validate file size (max 10MB)
+                      if (file.size > 10 * 1024 * 1024) {
+                        toast.error('Die Datei ist zu groß. Bitte wähle eine Datei unter 10MB.')
+                        return
+                      }
+                      setGpxFile(file)
+                    }
+                  }}
+                  className="w-full px-4 py-2.5 border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 border-border hover:border-border file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
+                />
+                {gpxFile && (
+                  <p className="text-xs text-muted-foreground">
+                    Ausgewählt: {gpxFile.name} ({(gpxFile.size / 1024).toFixed(2)} KB)
+                  </p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Lade eine GPX-Datei hoch, um die Tour auf einer Karte zu visualisieren.
+                </p>
+              </div>
             </div>
 
             {error && (
