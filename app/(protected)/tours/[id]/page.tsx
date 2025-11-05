@@ -401,7 +401,10 @@ export default function TourDetailPage() {
   tourDate.setHours(0, 0, 0, 0)
   const isArchived = tourDate < today
   
-  const canRegister = tour.status === 'published' && !isRegistered && !isFull && !isLeader && !isArchived
+  // Kann sich normal anmelden (nur wenn Tour nicht voll ist)
+  const canRegister = tour.status === 'published' && !isRegistered && !isFull && !isLeader && !isArchived && !isOnWaitlist
+  // Kann sich auf Warteliste setzen (wenn Tour voll ist oder wenn Tour nicht voll aber User möchte explizit auf Warteliste)
+  const canAddToWaitlist = tour.status === 'published' && !isRegistered && !isLeader && !isArchived && !isOnWaitlist
 
   return (
     <div className="space-y-4">
@@ -704,7 +707,7 @@ export default function TourDetailPage() {
                     {isFull ? (
                       <>
                         <p className="text-xs text-red-600 font-medium mb-2">Tour ist ausgebucht</p>
-                        {canRegister && (
+                        {canAddToWaitlist ? (
                           <Button
                             variant="outline"
                             onClick={handleAddToWaitlist}
@@ -713,6 +716,14 @@ export default function TourDetailPage() {
                           >
                             Auf Warteliste setzen
                           </Button>
+                        ) : (
+                          <p className="text-xs text-muted-foreground font-medium">
+                            {isLeader 
+                              ? 'Du bist der Tourenleiter' 
+                              : isArchived 
+                              ? 'Diese Tour liegt in der Vergangenheit'
+                              : 'Anmeldung nicht möglich'}
+                          </p>
                         )}
                       </>
                     ) : !canRegister ? (
