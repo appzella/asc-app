@@ -142,7 +142,7 @@ function GPXLayer({ gpxUrl }: { gpxUrl: string }) {
 
 export default function TourMap({ gpxUrl, height = '400px' }: TourMapProps) {
   const [selectedLayer, setSelectedLayer] = useState<'karte-sw' | 'karte-farbig' | 'satellit'>('karte-sw')
-  const [showHangneigung, setShowHangneigung] = useState(true)
+  const [showHangneigung, setShowHangneigung] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const mapContainerRef = useRef<HTMLDivElement>(null)
 
@@ -196,30 +196,51 @@ export default function TourMap({ gpxUrl, height = '400px' }: TourMapProps) {
     }
   }, [])
 
-  const toggleFullscreen = async () => {
+  const toggleFullscreen = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
     const mapContainer = mapContainerRef.current
     if (!mapContainer) {
       console.error('Map container not found')
       return
     }
 
+    console.log('Toggle fullscreen clicked, container:', mapContainer)
+
+    // Prüfe ob Fullscreen aktiv ist
+    const isCurrentlyFullscreen = !!(
+      document.fullscreenElement ||
+      (document as any).webkitFullscreenElement ||
+      (document as any).mozFullScreenElement ||
+      (document as any).msFullscreenElement
+    )
+
+    console.log('Currently fullscreen:', isCurrentlyFullscreen)
+
     try {
-      if (!document.fullscreenElement && 
-          !(document as any).webkitFullscreenElement && 
-          !(document as any).mozFullScreenElement && 
-          !(document as any).msFullscreenElement) {
+      if (!isCurrentlyFullscreen) {
         // Enter fullscreen
+        console.log('Attempting to enter fullscreen...')
         if (mapContainer.requestFullscreen) {
+          console.log('Using standard requestFullscreen')
           await mapContainer.requestFullscreen()
         } else if ((mapContainer as any).webkitRequestFullscreen) {
+          console.log('Using webkitRequestFullscreen')
           await (mapContainer as any).webkitRequestFullscreen()
         } else if ((mapContainer as any).mozRequestFullScreen) {
+          console.log('Using mozRequestFullScreen')
           await (mapContainer as any).mozRequestFullScreen()
         } else if ((mapContainer as any).msRequestFullscreen) {
+          console.log('Using msRequestFullscreen')
           await (mapContainer as any).msRequestFullscreen()
+        } else {
+          console.error('Fullscreen API not supported')
+          alert('Vollbild wird von Ihrem Browser nicht unterstützt.')
         }
       } else {
         // Exit fullscreen
+        console.log('Attempting to exit fullscreen...')
         if (document.exitFullscreen) {
           await document.exitFullscreen()
         } else if ((document as any).webkitExitFullscreen) {
@@ -228,10 +249,14 @@ export default function TourMap({ gpxUrl, height = '400px' }: TourMapProps) {
           await (document as any).mozCancelFullScreen()
         } else if ((document as any).msExitFullscreen) {
           await (document as any).msExitFullscreen()
+        } else {
+          console.error('Exit fullscreen API not supported')
         }
       }
     } catch (err) {
       console.error('Error toggling fullscreen:', err)
+      // Zeige dem Benutzer eine Fehlermeldung
+      alert(`Vollbild konnte nicht aktiviert werden: ${err instanceof Error ? err.message : 'Unbekannter Fehler'}`)
     }
   }
 
@@ -289,7 +314,9 @@ export default function TourMap({ gpxUrl, height = '400px' }: TourMapProps) {
         </button>
         {/* Vollbild Toggle */}
         <button
+          type="button"
           onClick={toggleFullscreen}
+          onMouseDown={(e) => e.stopPropagation()}
           className="px-2 py-1 text-xs rounded transition-colors bg-background/95 backdrop-blur-sm border shadow-sm hover:bg-muted border-border flex items-center justify-center"
           title={isFullscreen ? 'Vollbild beenden' : 'Vollbild'}
         >
