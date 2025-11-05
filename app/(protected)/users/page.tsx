@@ -187,6 +187,7 @@ export default function UsersPage() {
                     <TableHead>E-Mail</TableHead>
                     <TableHead>Rolle</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Aktiv</TableHead>
                     <TableHead>Erstellt am</TableHead>
                     <TableHead className="text-right">Aktionen</TableHead>
                   </TableRow>
@@ -222,26 +223,26 @@ export default function UsersPage() {
                         </Select>
                       </TableCell>
                       <TableCell>
-                        <div className="flex flex-col gap-1">
-                          {u.registered ? (
-                            <Badge variant="outline-success">
-                              Registriert
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline-warning">
-                              Ausstehend
-                            </Badge>
-                          )}
-                          <div className="flex items-center gap-2">
-                            <Switch
-                              checked={u.active}
-                              onCheckedChange={() => handleToggleActive(u.id, u.active)}
-                              disabled={u.id === user?.id && !u.active}
-                            />
-                            <span className="text-xs text-muted-foreground">
-                              {u.active ? 'Aktiv' : 'Deaktiviert'}
-                            </span>
-                          </div>
+                        {u.registered ? (
+                          <Badge variant="outline-success">
+                            Registriert
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline-warning">
+                            Ausstehend
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Switch
+                            checked={u.active}
+                            onCheckedChange={() => handleToggleActive(u.id, u.active)}
+                            disabled={u.id === user?.id && !u.active}
+                          />
+                          <span className="text-xs text-muted-foreground">
+                            {u.active ? 'Aktiv' : 'Deaktiviert'}
+                          </span>
                         </div>
                       </TableCell>
                       <TableCell className="text-muted-foreground">
