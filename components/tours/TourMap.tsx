@@ -206,7 +206,14 @@ export default function TourMap({ gpxUrl, height = '400px' }: TourMapProps) {
       return
     }
 
-    console.log('Toggle fullscreen clicked, container:', mapContainer)
+    // Versuche die Card zu finden, die die Karte enthält
+    let elementToFullscreen: HTMLElement | null = mapContainer
+    const cardElement = mapContainer.closest('[class*="card"], [class*="Card"], .card')
+    if (cardElement) {
+      elementToFullscreen = cardElement as HTMLElement
+    }
+
+    console.log('Toggle fullscreen clicked, element:', elementToFullscreen)
 
     // Prüfe ob Fullscreen aktiv ist
     const isCurrentlyFullscreen = !!(
@@ -219,21 +226,21 @@ export default function TourMap({ gpxUrl, height = '400px' }: TourMapProps) {
     console.log('Currently fullscreen:', isCurrentlyFullscreen)
 
     try {
-      if (!isCurrentlyFullscreen) {
+      if (!isCurrentlyFullscreen && elementToFullscreen) {
         // Enter fullscreen
         console.log('Attempting to enter fullscreen...')
-        if (mapContainer.requestFullscreen) {
+        if (elementToFullscreen.requestFullscreen) {
           console.log('Using standard requestFullscreen')
-          await mapContainer.requestFullscreen()
-        } else if ((mapContainer as any).webkitRequestFullscreen) {
+          await elementToFullscreen.requestFullscreen()
+        } else if ((elementToFullscreen as any).webkitRequestFullscreen) {
           console.log('Using webkitRequestFullscreen')
-          await (mapContainer as any).webkitRequestFullscreen()
-        } else if ((mapContainer as any).mozRequestFullScreen) {
+          await (elementToFullscreen as any).webkitRequestFullscreen()
+        } else if ((elementToFullscreen as any).mozRequestFullScreen) {
           console.log('Using mozRequestFullScreen')
-          await (mapContainer as any).mozRequestFullScreen()
-        } else if ((mapContainer as any).msRequestFullscreen) {
+          await (elementToFullscreen as any).mozRequestFullScreen()
+        } else if ((elementToFullscreen as any).msRequestFullscreen) {
           console.log('Using msRequestFullscreen')
-          await (mapContainer as any).msRequestFullscreen()
+          await (elementToFullscreen as any).msRequestFullscreen()
         } else {
           console.error('Fullscreen API not supported')
           alert('Vollbild wird von Ihrem Browser nicht unterstützt.')
