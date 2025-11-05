@@ -27,6 +27,7 @@ export interface IDataRepository {
   submitTourForPublishing(id: string): Promise<Tour | null>
   registerForTour(tourId: string, userId: string): Promise<boolean>
   unregisterFromTour(tourId: string, userId: string): Promise<boolean>
+  addParticipantManually(tourId: string, userId: string): Promise<boolean> // Manuelles Hinzufügen durch Leader/Admin
   deleteTour(id: string): Promise<boolean>
 
   // Waitlist Management

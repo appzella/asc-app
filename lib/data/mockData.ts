@@ -263,6 +263,24 @@ class DataStore {
     return true
   }
 
+  addParticipantManually(tourId: string, userId: string): boolean {
+    const tour = this.tours.find((t) => t.id === tourId)
+    if (!tour || tour.status !== 'published') return false
+
+    // Prüfe ob bereits Teilnehmer
+    if (tour.participants.includes(userId)) return false
+
+    // Prüfe ob auf Warteliste - wenn ja, entferne von dort
+    const waitlistIndex = tour.waitlist.indexOf(userId)
+    if (waitlistIndex !== -1) {
+      tour.waitlist.splice(waitlistIndex, 1)
+    }
+
+    // Füge als Teilnehmer hinzu (auch wenn Tour bereits voll ist)
+    tour.participants.push(userId)
+    return true
+  }
+
   // Chat Messages
   getMessagesByTourId(tourId: string): ChatMessage[] {
     return this.messages

@@ -1229,5 +1229,41 @@ export class SupabaseDataRepository implements IDataRepository {
 
     return !insertError
   }
+
+  async addParticipantManually(tourId: string, userId: string): Promise<boolean> {
+    // Prüfe ob Tour existiert
+    const tour = await this.getTourById(tourId)
+    if (!tour || tour.status !== 'published') {
+      return false
+    }
+
+    // Prüfe ob bereits Teilnehmer
+    if (tour.participants.includes(userId)) {
+      return false
+    }
+
+    // Prüfe ob auf Warteliste - wenn ja, entferne von dort
+    if (tour.waitlist.includes(userId)) {
+      const { error: deleteError } = await supabase
+        .from('tour_waitlist')
+        .delete()
+        .eq('tour_id', tourId)
+        .eq('user_id', userId)
+
+      if (deleteError) {
+        return false
+      }
+    }
+
+    // Füge als Teilnehmer hinzu (auch wenn Tour bereits voll ist)
+    const { error: insertError } = await supabase
+      .from('tour_participants')
+      .insert({
+        tour_id: tourId,
+        user_id: userId,
+      })
+
+    return !insertError
+  }
 }
 

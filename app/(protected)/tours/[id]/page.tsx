@@ -30,7 +30,8 @@ import { canEditTour, canApproveTour, canPublishTour, canSubmitForPublishing } f
 import { formatDifficulty } from '@/lib/difficulty'
 import Link from 'next/link'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import { ChevronLeft, Calendar, Clock, ArrowUpRight, Users, ChartNoAxesColumnIncreasing } from 'lucide-react'
+import { ChevronLeft, Calendar, Clock, ArrowUpRight, Users, ChartNoAxesColumnIncreasing, X, UserPlus } from 'lucide-react'
+import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { toast } from 'sonner'
 
 export default function TourDetailPage() {
@@ -50,6 +51,10 @@ export default function TourDetailPage() {
   const [rejectionComment, setRejectionComment] = useState('')
   const [showCancelDialog, setShowCancelDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showRemoveParticipantDialog, setShowRemoveParticipantDialog] = useState(false)
+  const [participantToRemove, setParticipantToRemove] = useState<User | null>(null)
+  const [showAddParticipantDialog, setShowAddParticipantDialog] = useState(false)
+  const [allUsers, setAllUsers] = useState<User[]>([])
 
   useEffect(() => {
     const loadTour = async () => {
@@ -192,6 +197,87 @@ export default function TourDetailPage() {
       }
     } catch (error) {
       console.error('Error removing from waitlist:', error)
+    }
+  }
+
+  const handleRemoveParticipantClick = (participant: User) => {
+    setParticipantToRemove(participant)
+    setShowRemoveParticipantDialog(true)
+  }
+
+  const handleConfirmRemoveParticipant = async () => {
+    if (!user || !tour || !participantToRemove) return
+
+    try {
+      const success = await dataRepository.unregisterFromTour(tourId, participantToRemove.id)
+      if (success) {
+        const updatedTour = await dataRepository.getTourById(tourId)
+        if (updatedTour) {
+          setTour(updatedTour)
+          // Reload participants
+          const participantUsers = await Promise.all(
+            updatedTour.participants.map((id) => dataRepository.getUserById(id))
+          )
+          setParticipants(participantUsers.filter((u): u is User => u !== null))
+          // Reload waitlist (in case someone was promoted)
+          const waitlistUsers = await dataRepository.getWaitlistByTourId(tourId)
+          setWaitlist(waitlistUsers)
+          toast.success('Teilnehmer wurde von der Tour entfernt')
+        }
+      }
+    } catch (error) {
+      console.error('Error removing participant:', error)
+      toast.error('Fehler beim Entfernen des Teilnehmers')
+    } finally {
+      setShowRemoveParticipantDialog(false)
+      setParticipantToRemove(null)
+    }
+  }
+
+  const handleAddParticipantClick = async () => {
+    if (!user || !tour) return
+    try {
+      const users = await dataRepository.getUsers()
+      // Filtere bereits angemeldete Teilnehmer und den aktuellen User
+      const availableUsers = users.filter(
+        (u) => u.id !== user.id && !tour.participants.includes(u.id) && u.active
+      )
+      setAllUsers(availableUsers)
+      setShowAddParticipantDialog(true)
+    } catch (error) {
+      console.error('Error loading users:', error)
+      toast.error('Fehler beim Laden der Benutzer')
+    }
+  }
+
+  const handleAddParticipant = async (userId: string) => {
+    if (!user || !tour) return
+
+    try {
+      const success = await dataRepository.addParticipantManually(tourId, userId)
+      if (success) {
+        const updatedTour = await dataRepository.getTourById(tourId)
+        if (updatedTour) {
+          setTour(updatedTour)
+          // Reload participants
+          const participantUsers = await Promise.all(
+            updatedTour.participants.map((id) => dataRepository.getUserById(id))
+          )
+          setParticipants(participantUsers.filter((u): u is User => u !== null))
+          // Reload waitlist
+          const waitlistUsers = await dataRepository.getWaitlistByTourId(tourId)
+          setWaitlist(waitlistUsers)
+          
+          const addedUser = await dataRepository.getUserById(userId)
+          toast.success(`${addedUser?.name || 'Teilnehmer'} wurde zur Tour hinzugefügt`)
+          setShowAddParticipantDialog(false)
+        }
+      } else {
+        toast.error('Fehler beim Hinzufügen des Teilnehmers')
+      }
+    } catch (error) {
+      console.error('Error adding participant:', error)
+      toast.error('Fehler beim Hinzufügen des Teilnehmers')
     }
   }
 
@@ -751,32 +837,63 @@ export default function TourDetailPage() {
           )}
 
           {/* Teilnehmerliste */}
-          {participants.length > 0 && (
-            <Card>
-              <CardHeader>
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
                 <CardTitle>Teilnehmer ({participants.length})</CardTitle>
-              </CardHeader>
+                {canManageWaitlist && tour.status === 'published' && !isArchived && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleAddParticipantClick}
+                    className="h-8"
+                  >
+                    <UserPlus className="h-4 w-4 mr-1" />
+                    Hinzufügen
+                  </Button>
+                )}
+              </div>
+            </CardHeader>
+            {participants.length > 0 ? (
               <CardContent>
                 <ul className="space-y-3">
                   {participants.map((participant) => (
-                    <li key={participant.id} className="flex items-center gap-3">
-                      <Avatar className="w-8 h-8 flex-shrink-0">
-                        <AvatarImage
-                          src={participant.profilePhoto || undefined}
-                          alt={participant.name}
-                          className="object-cover"
-                        />
-                        <AvatarFallback>
-                          {participant.name.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="text-sm font-medium text-foreground">{participant.name}</span>
+                    <li key={participant.id} className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 flex-1">
+                        <Avatar className="w-8 h-8 flex-shrink-0">
+                          <AvatarImage
+                            src={participant.profilePhoto || undefined}
+                            alt={participant.name}
+                            className="object-cover"
+                          />
+                          <AvatarFallback>
+                            {participant.name.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-sm font-medium text-foreground">{participant.name}</span>
+                      </div>
+                      {canManageWaitlist && participant.id !== user.id && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveParticipantClick(participant)}
+                          className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
                     </li>
                   ))}
                 </ul>
               </CardContent>
-            </Card>
-          )}
+            ) : (
+              <CardContent>
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  Noch keine Teilnehmer angemeldet
+                </p>
+              </CardContent>
+            )}
+          </Card>
 
           {/* Warteliste */}
           {tour.status === 'published' && waitlist.length > 0 && (
@@ -901,6 +1018,67 @@ export default function TourDetailPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Remove Participant Alert Dialog */}
+      <AlertDialog open={showRemoveParticipantDialog} onOpenChange={setShowRemoveParticipantDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Teilnehmer entfernen</AlertDialogTitle>
+            <AlertDialogDescription>
+              Möchtest du <strong>{participantToRemove?.name}</strong> wirklich von dieser Tour entfernen?
+              {tour && tour.participants.length >= tour.maxParticipants && waitlist.length > 0 && (
+                <span className="block mt-2 text-sm">
+                  Der erste Teilnehmer von der Warteliste wird automatisch nachrücken.
+                </span>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setParticipantToRemove(null)}>Abbrechen</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleConfirmRemoveParticipant}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Entfernen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Add Participant Dialog */}
+      <CommandDialog open={showAddParticipantDialog} onOpenChange={setShowAddParticipantDialog}>
+        <Command>
+          <CommandInput placeholder="Benutzer suchen..." />
+          <CommandList>
+            <CommandEmpty>Keine Benutzer gefunden.</CommandEmpty>
+            <CommandGroup heading="Benutzer">
+              {allUsers.map((user) => (
+                <CommandItem
+                  key={user.id}
+                  value={user.name}
+                  onSelect={() => handleAddParticipant(user.id)}
+                  className="flex items-center gap-3 cursor-pointer"
+                >
+                  <Avatar className="w-8 h-8 flex-shrink-0">
+                    <AvatarImage
+                      src={user.profilePhoto || undefined}
+                      alt={user.name}
+                      className="object-cover"
+                    />
+                    <AvatarFallback>
+                      {user.name.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <div className="text-sm font-medium">{user.name}</div>
+                    <div className="text-xs text-muted-foreground">{user.email}</div>
+                  </div>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </CommandDialog>
     </div>
   )
 }

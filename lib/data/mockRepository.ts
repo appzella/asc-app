@@ -235,5 +235,9 @@ export class MockDataRepository implements IDataRepository {
   async promoteFromWaitlist(tourId: string, userId: string): Promise<boolean> {
     return dataStore.promoteFromWaitlist(tourId, userId)
   }
+
+  async addParticipantManually(tourId: string, userId: string): Promise<boolean> {
+    return dataStore.addParticipantManually(tourId, userId)
+  }
 }
 
