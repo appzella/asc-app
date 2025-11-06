@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { dataRepository } from '@/lib/data'
 import { ChatMessage } from '@/lib/types'
 import { Input } from '@/components/ui/input'
@@ -19,6 +19,19 @@ interface ChatWindowProps {
   onMessagesLoaded?: (messages: ChatMessage[]) => void
 }
 
+/**
+ * Normalisiert tourId zu einem String (für Filter)
+ */
+function normalizeTourId(tourId: unknown): string | null {
+  if (Array.isArray(tourId)) {
+    return String(tourId[0])
+  }
+  if (typeof tourId === 'object' && tourId !== null) {
+    return String((tourId as { id?: string }).id || tourId)
+  }
+  return String(tourId)
+}
+
 export const ChatWindow: React.FC<ChatWindowProps> = ({ tourId, userId, onMessagesLoaded }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [newMessage, setNewMessage] = useState('')
@@ -26,71 +39,96 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ tourId, userId, onMessag
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const isInitialLoad = useRef(true)
+  const hasMarkedAsRead = useRef(false)
 
   // Load initial messages
   useEffect(() => {
+    let isMounted = true
+
     const loadMessages = async () => {
       try {
         setIsLoading(true)
         const tourMessages = await dataRepository.getMessagesByTourId(tourId)
+        
+        if (!isMounted) return
+        
         setMessages(tourMessages)
-        
-        // Markiere als gelesen, wenn Nachrichten geladen sind
-        if (tourMessages.length > 0) {
+
+        // Markiere als gelesen, wenn Nachrichten geladen sind (nur einmal beim ersten Laden)
+        if (tourMessages.length > 0 && !hasMarkedAsRead.current && userId) {
           const newestMessage = tourMessages[tourMessages.length - 1]
-          markTourAsRead(tourId, newestMessage.createdAt)
+          markTourAsRead(tourId, userId, newestMessage.createdAt).catch(() => {
+            // Silent fail - wird bei nächstem Reload korrigiert
+          })
+          hasMarkedAsRead.current = true
         }
-        
+
         if (onMessagesLoaded) {
           onMessagesLoaded(tourMessages)
         }
       } catch (error) {
-        console.error('Error loading messages:', error)
+        if (isMounted) {
+          setMessages([])
+        }
       } finally {
-        setIsLoading(false)
-        // After initial load, set flag to false
-        setTimeout(() => {
-          isInitialLoad.current = false
-        }, 100)
+        if (isMounted) {
+          setIsLoading(false)
+          setTimeout(() => {
+            isInitialLoad.current = false
+          }, 100)
+        }
       }
     }
 
     loadMessages()
-  }, [tourId])
+    hasMarkedAsRead.current = false
+
+    return () => {
+      isMounted = false
+    }
+  }, [tourId, userId, onMessagesLoaded])
 
   // Set up Supabase Realtime subscription for chat messages
   useEffect(() => {
     if (!isSupabaseConfigured || !supabase) {
-      // Fallback to polling if Supabase is not configured
       const interval = setInterval(async () => {
         try {
           const tourMessages = await dataRepository.getMessagesByTourId(tourId)
           setMessages(tourMessages)
-        } catch (error) {
-          console.error('Error loading messages:', error)
+        } catch {
+          // Silent fail - wird bei nächstem Polling versucht
         }
       }, 2000)
       return () => clearInterval(interval)
     }
 
-    // Subscribe to realtime changes for chat_messages table
+    const normalizedTourId = normalizeTourId(tourId)
+    if (!normalizedTourId) return
+
     const channel = supabase
-      .channel(`chat:${tourId}`)
+      .channel(`chat:${normalizedTourId}`)
       .on(
         'postgres_changes',
         {
-          event: '*', // Listen to INSERT, UPDATE, DELETE
+          event: '*',
           schema: 'public',
           table: 'chat_messages',
-          filter: `tour_id=eq.${tourId}`,
+          filter: `tour_id=eq.${normalizedTourId}`,
         },
         async (payload: RealtimePostgresChangesPayload<any>) => {
-          // Reload messages when changes occur
           try {
             const tourMessages = await dataRepository.getMessagesByTourId(tourId)
             setMessages(tourMessages)
-          } catch (error) {
-            console.error('Error reloading messages:', error)
+
+            // Wenn neue Nachricht kommt und Chat ist geöffnet, markiere als gelesen
+            if (payload.eventType === 'INSERT' && userId && tourMessages.length > 0) {
+              const newestMessage = tourMessages[tourMessages.length - 1]
+              markTourAsRead(tourId, userId, newestMessage.createdAt).catch(() => {
+                // Silent fail
+              })
+            }
+          } catch {
+            // Silent fail - wird bei nächstem Update versucht
           }
         }
       )
@@ -99,27 +137,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ tourId, userId, onMessag
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [tourId])
+  }, [tourId, userId])
 
-  useEffect(() => {
-    // Only scroll on initial load or when new messages arrive (not on every message change)
-    if (!isInitialLoad.current) {
-      scrollToBottom()
-    }
-  }, [messages])
-
-  useEffect(() => {
-    // Scroll to bottom after initial load completes
-    if (!isLoading && isInitialLoad.current) {
-      setTimeout(() => {
-        scrollToBottom()
-        isInitialLoad.current = false
-      }, 100)
-    }
-  }, [isLoading])
-
-  const scrollToBottom = () => {
-    // Scroll within the ScrollArea viewport, not the entire page
+  const scrollToBottom = useCallback(() => {
     if (scrollAreaRef.current) {
       const viewport = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement
       if (viewport) {
@@ -129,25 +149,39 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ tourId, userId, onMessag
         })
       }
     } else {
-      // Fallback: use scrollIntoView with block: 'nearest' to prevent page scrolling
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    if (!isInitialLoad.current) {
+      scrollToBottom()
+    }
+  }, [messages, scrollToBottom])
+
+  useEffect(() => {
+    if (!isLoading && isInitialLoad.current) {
+      setTimeout(() => {
+        scrollToBottom()
+        isInitialLoad.current = false
+      }, 100)
+    }
+  }, [isLoading, scrollToBottom])
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!newMessage.trim()) return
+    const trimmedMessage = newMessage.trim()
+    if (!trimmedMessage) return
 
     try {
       await dataRepository.addMessage({
         tourId,
         userId,
-        message: newMessage.trim(),
+        message: trimmedMessage,
       })
       setNewMessage('')
-      // Messages will be updated via Realtime subscription
-    } catch (error) {
-      console.error('Error sending message:', error)
+    } catch {
+      // Silent fail - User kann erneut versuchen
     }
   }
 
@@ -237,6 +271,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ tourId, userId, onMessag
           placeholder="Nachricht schreiben..."
           className="flex-1"
           autoComplete="off"
+          maxLength={1000}
         />
         <Button 
           type="submit" 
@@ -250,4 +285,3 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ tourId, userId, onMessag
     </div>
   )
 }
-

@@ -39,6 +39,11 @@ export interface IDataRepository {
   // Chat Messages
   getMessagesByTourId(tourId: string): Promise<ChatMessage[]>
   addMessage(message: Omit<ChatMessage, 'id' | 'createdAt'>): Promise<ChatMessage>
+  
+  // Chat Read Status
+  markTourAsRead(tourId: string, userId: string, timestamp: Date | string): Promise<boolean>
+  getLastReadTimestamp(tourId: string, userId: string): Promise<Date | null>
+  getUnreadCount(tourId: string, userId: string): Promise<number>
 
   // Invitations
   createInvitation(email: string, createdBy: string): Promise<Invitation>

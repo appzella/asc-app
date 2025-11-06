@@ -26,6 +26,7 @@ export default function ChatPage() {
   const [user, setUser] = useState<User | null>(null)
   const [chats, setChats] = useState<ChatWithLastMessage[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isInitialLoad, setIsInitialLoad] = useState(true)
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null)
 
   useEffect(() => {
@@ -33,7 +34,7 @@ export default function ChatPage() {
     setUser(currentUser)
 
     if (currentUser) {
-      loadChats()
+      loadChats(true) // true = show loading skeleton on initial load
     }
 
     const unsubscribe = authService.subscribe((updatedUser) => {
@@ -56,11 +57,13 @@ export default function ChatPage() {
     }
   }, [searchParams, chats, selectedChatId])
 
-  const loadChats = useCallback(async () => {
+  const loadChats = useCallback(async (showLoading = false) => {
     if (!user) return
 
     try {
-      setIsLoading(true)
+      if (showLoading || isInitialLoad) {
+        setIsLoading(true)
+      }
       const allTours = await dataRepository.getTours()
       
       // Filtere Touren, bei denen der User angemeldet ist oder Leader ist
@@ -75,15 +78,22 @@ export default function ChatPage() {
           try {
             const messages = await dataRepository.getMessagesByTourId(tour.id)
             const lastMessage = messages.length > 0 ? messages[messages.length - 1] : undefined
-            const unreadCount = getUnreadCount(messages, tour.id)
+            // Prüfe zuerst Cache (für optimistische Updates)
+            const cacheKey = `${tour.id}:${user.id}`
+            const globalCache = typeof globalThis !== 'undefined' ? (globalThis as any).__unreadCountCache : null
+            let unreadCount = 0
+            if (globalCache && globalCache.has && globalCache.has(cacheKey)) {
+              unreadCount = globalCache.get(cacheKey)
+            } else {
+              unreadCount = user ? await getUnreadCount(tour.id, user.id) : 0
+            }
 
             return {
               ...tour,
               lastMessage,
               unreadCount,
             }
-          } catch (error) {
-            console.error(`Error loading messages for tour ${tour.id}:`, error)
+          } catch {
             return {
               ...tour,
               lastMessage: undefined,
@@ -102,17 +112,54 @@ export default function ChatPage() {
       })
 
       setChats(chatsWithMessages)
-    } catch (error) {
-      console.error('Error loading chats:', error)
+      setIsInitialLoad(false)
+    } catch {
+      setChats([])
     } finally {
       setIsLoading(false)
     }
+  }, [user, isInitialLoad])
+
+  // Listener für sofortige Cache-Updates (optimistische Updates)
+  useEffect(() => {
+    if (!user) return
+
+    const globalCache = typeof globalThis !== 'undefined' ? (globalThis as any).__unreadCountCache : null
+    if (!globalCache) return
+
+    // Event-basierte Updates statt Polling
+    let lastUpdateTime = 0
+    const updateChatsFromCache = () => {
+      const now = Date.now()
+      // Throttle: Maximal alle 50ms aktualisieren
+      if (now - lastUpdateTime < 50) return
+      lastUpdateTime = now
+
+      setChats(prevChats => {
+        let hasChanges = false
+        const updatedChats = prevChats.map(chat => {
+          const cacheKey = `${chat.id}:${user.id}`
+          const cachedCount = globalCache.get(cacheKey)
+          if (cachedCount !== undefined && cachedCount !== chat.unreadCount) {
+            hasChanges = true
+            return { ...chat, unreadCount: cachedCount }
+          }
+          return chat
+        })
+        return hasChanges ? updatedChats : prevChats
+      })
+    }
+
+    // Polling als Fallback (reduziert auf 200ms)
+    const interval = setInterval(updateChatsFromCache, 200)
+    
+    return () => clearInterval(interval)
   }, [user])
 
   // Initial load
   useEffect(() => {
     if (user) {
-      loadChats()
+      loadChats(true) // true = show loading skeleton on initial load
     }
   }, [user, loadChats])
 
@@ -122,8 +169,11 @@ export default function ChatPage() {
 
     // Realtime subscription für Chat-Updates
     if (isSupabaseConfigured && supabase) {
-      const channel = supabase
-        .channel(`chat-overview:${user.id}`)
+      const userIdStr = String(user.id)
+      
+      // Subscribe zu Chat-Messages
+      const messagesChannel = supabase
+        .channel(`chat-overview-messages:${userIdStr}`)
         .on(
           'postgres_changes',
           {
@@ -131,23 +181,48 @@ export default function ChatPage() {
             schema: 'public',
             table: 'chat_messages',
           },
+          async (payload) => {
+            // Reload chats when new messages arrive (debounced, without loading state)
+            if (user && (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE' || payload.eventType === 'DELETE')) {
+              setTimeout(() => {
+                loadChats(false) // false = don't show loading skeleton
+              }, 300)
+            }
+          }
+        )
+        .subscribe()
+
+      // Subscribe zu Read-Status Updates
+      const readChannel = supabase
+        .channel(`chat-overview-read:${userIdStr}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'chat_read_messages',
+            filter: `user_id=eq.${userIdStr}`,
+          },
           async () => {
-            // Reload chats when new messages arrive
+            // Reload chats when read status changes (debounced, without loading state)
             if (user) {
-              await loadChats()
+              setTimeout(() => {
+                loadChats(false) // false = don't show loading skeleton
+              }, 300)
             }
           }
         )
         .subscribe()
 
       return () => {
-        supabase.removeChannel(channel)
+        supabase.removeChannel(messagesChannel)
+        supabase.removeChannel(readChannel)
       }
     } else {
       // Polling fallback
       const interval = setInterval(() => {
         if (user) {
-          loadChats()
+          loadChats(false) // false = don't show loading skeleton
         }
       }, 10000)
       return () => clearInterval(interval)

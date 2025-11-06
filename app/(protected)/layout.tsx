@@ -245,7 +245,7 @@ export default function ProtectedLayout({
                 Chat
                 {totalUnreadCount > 0 && (
                   <Badge 
-                    variant="default" 
+                    variant="destructive" 
                     className="ml-1.5 h-5 min-w-5 px-1.5 text-xs flex items-center justify-center"
                   >
                     {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
@@ -278,7 +278,7 @@ export default function ProtectedLayout({
                   <MessageSquare className="w-5 h-5" strokeWidth={2} />
                   {totalUnreadCount > 0 && (
                     <Badge 
-                      variant="default" 
+                      variant="destructive" 
                       className="absolute -top-1 -right-1 h-5 min-w-5 px-1.5 text-xs flex items-center justify-center"
                     >
                       {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
