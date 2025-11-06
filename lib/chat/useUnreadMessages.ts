@@ -142,7 +142,7 @@ export function useUnreadCount(tourId: string | null, userId: string | null) {
           table: 'chat_messages',
           filter: `tour_id=eq.${normalized.tourId}`,
         },
-        async (payload) => {
+        async (payload: RealtimePostgresChangesPayload<any>) => {
           if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE' || payload.eventType === 'DELETE') {
             await loadUnreadCount()
           }

@@ -232,9 +232,37 @@ export default function ChatPage() {
 
   const formatLastMessageTime = (date: Date) => {
     try {
-      return formatDistanceToNow(new Date(date), { 
-        addSuffix: true, 
-        locale: de 
+      const messageDate = new Date(date)
+      const now = new Date()
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      const yesterday = new Date(today)
+      yesterday.setDate(yesterday.getDate() - 1)
+      const messageDay = new Date(messageDate.getFullYear(), messageDate.getMonth(), messageDate.getDate())
+      
+      // Heute: Nur Uhrzeit
+      if (messageDay.getTime() === today.getTime()) {
+        return messageDate.toLocaleTimeString('de-CH', {
+          hour: '2-digit',
+          minute: '2-digit'
+        })
+      }
+      
+      // Gestern
+      if (messageDay.getTime() === yesterday.getTime()) {
+        return 'Gestern'
+      }
+      
+      // Diese Woche: Wochentag
+      const daysDiff = Math.floor((today.getTime() - messageDay.getTime()) / (1000 * 60 * 60 * 24))
+      if (daysDiff <= 7) {
+        return messageDate.toLocaleDateString('de-CH', { weekday: 'long' })
+      }
+      
+      // Älter als eine Woche: tt.mm.YY
+      return messageDate.toLocaleDateString('de-CH', {
+        day: '2-digit',
+        month: '2-digit',
+        year: '2-digit'
       })
     } catch {
       return ''
@@ -263,8 +291,8 @@ export default function ChatPage() {
       <div className="hidden md:flex flex-1 overflow-hidden">
         {/* Linke Spalte: Chat-Liste */}
         <div className="w-80 border-r flex flex-col">
-          <div className="p-4 border-b">
-            <h2 className="text-lg font-semibold">Chat</h2>
+          <div className="p-4">
+            <h2 className="text-lg font-semibold border-b-0 pb-0">Chat</h2>
             <p className="text-xs text-muted-foreground mt-1">
               Gruppenchats für deine Touren
             </p>
@@ -295,13 +323,13 @@ export default function ChatPage() {
                   <div
                     key={chat.id}
                     onClick={() => handleChatSelect(chat.id)}
-                    className={`p-3 rounded-lg cursor-pointer transition-colors mb-1 ${
+                    className={`py-1.5 px-2 rounded-lg cursor-pointer transition-colors mb-0.5 ${
                       selectedChatId === chat.id
                         ? 'bg-accent'
                         : 'hover:bg-accent/50'
                     }`}
                   >
-                    <div className="flex items-start gap-3">
+                    <div className="flex items-start gap-2">
                       <Avatar className="w-10 h-10 flex-shrink-0">
                         {chat.lastMessage?.user?.profilePhoto ? (
                           <AvatarImage
@@ -316,19 +344,12 @@ export default function ChatPage() {
                         </AvatarFallback>
                       </Avatar>
 
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-2 mb-1">
-                          <h3 className="font-semibold text-sm truncate">{chat.title}</h3>
-                          {chat.unreadCount > 0 && (
-                            <Badge variant="default" className="flex-shrink-0 h-5 min-w-5 px-1.5 text-xs">
-                              {chat.unreadCount}
-                            </Badge>
-                          )}
-                        </div>
-                        
-                        {chat.lastMessage ? (
-                          <>
-                            <p className="text-xs text-muted-foreground truncate">
+                      <div className="flex-1 min-w-0 flex gap-2">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-sm truncate leading-none mb-0">{chat.title}</h3>
+                          
+                          {chat.lastMessage ? (
+                            <p className="text-xs text-muted-foreground line-clamp-2 leading-tight [&]:!mt-[5px]" style={{ marginBottom: 0 }}>
                               <span className="font-medium">
                                 {chat.lastMessage.userId === user.id 
                                   ? 'Du' 
@@ -337,15 +358,25 @@ export default function ChatPage() {
                               {': '}
                               {chat.lastMessage.message}
                             </p>
-                            <p className="text-xs text-muted-foreground mt-0.5">
-                              {formatLastMessageTime(chat.lastMessage.createdAt)}
+                          ) : (
+                            <p className="text-xs text-muted-foreground leading-none [&]:!mt-[5px]" style={{ marginBottom: 0 }}>
+                              Noch keine Nachrichten
                             </p>
-                          </>
-                        ) : (
-                          <p className="text-xs text-muted-foreground">
-                            Noch keine Nachrichten
-                          </p>
-                        )}
+                          )}
+                        </div>
+                        
+                        <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                          {chat.lastMessage && (
+                            <span className="text-xs text-muted-foreground leading-none">
+                              {formatLastMessageTime(chat.lastMessage.createdAt)}
+                            </span>
+                          )}
+                          {chat.unreadCount > 0 && (
+                            <Badge variant="destructive" className="h-5 min-w-5 px-1.5 text-xs">
+                              {chat.unreadCount}
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -360,7 +391,7 @@ export default function ChatPage() {
           {selectedChat ? (
             <>
               <div className="p-4 border-b">
-                <h2 className="text-lg font-semibold">{selectedChat.title}</h2>
+                <h2 className="text-lg font-semibold border-b-0 pb-0">{selectedChat.title}</h2>
                 <p className="text-xs text-muted-foreground mt-1">
                   Gruppenchat für diese Tour
                 </p>
@@ -394,7 +425,7 @@ export default function ChatPage() {
                 <ArrowLeft className="w-5 h-5" strokeWidth={2} />
               </button>
               <div className="flex-1">
-                <h2 className="text-base font-semibold">{selectedChat.title}</h2>
+                <h2 className="text-base font-semibold border-b-0 pb-0">{selectedChat.title}</h2>
                 <p className="text-xs text-muted-foreground">
                   Gruppenchat für diese Tour
                 </p>
@@ -407,7 +438,7 @@ export default function ChatPage() {
         ) : (
           <>
             <div className="p-4 border-b">
-              <h2 className="text-lg font-semibold">Chat</h2>
+              <h2 className="text-lg font-semibold border-b-0 pb-0">Chat</h2>
               <p className="text-xs text-muted-foreground mt-1">
                 Gruppenchats für deine Touren
               </p>
@@ -437,9 +468,9 @@ export default function ChatPage() {
                     <div
                       key={chat.id}
                       onClick={() => handleChatSelect(chat.id)}
-                      className="p-3 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors mb-1"
+                      className="py-1.5 px-2 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors mb-0.5"
                     >
-                      <div className="flex items-start gap-3">
+                      <div className="flex items-start gap-2">
                         <Avatar className="w-12 h-12 flex-shrink-0">
                           {chat.lastMessage?.user?.profilePhoto ? (
                             <AvatarImage
@@ -454,19 +485,12 @@ export default function ChatPage() {
                           </AvatarFallback>
                         </Avatar>
 
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-2 mb-1">
-                            <h3 className="font-semibold text-sm truncate">{chat.title}</h3>
-                            {chat.unreadCount > 0 && (
-                              <Badge variant="default" className="flex-shrink-0">
-                                {chat.unreadCount}
-                              </Badge>
-                            )}
-                          </div>
-                          
-                          {chat.lastMessage ? (
-                            <>
-                              <p className="text-sm text-muted-foreground truncate">
+                        <div className="flex-1 min-w-0 flex gap-2">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-sm truncate leading-none mb-0">{chat.title}</h3>
+                            
+                            {chat.lastMessage ? (
+                              <p className="text-xs text-muted-foreground line-clamp-2 leading-tight [&]:!mt-[5px]" style={{ marginBottom: 0 }}>
                                 <span className="font-medium">
                                   {chat.lastMessage.userId === user.id 
                                     ? 'Du' 
@@ -475,15 +499,25 @@ export default function ChatPage() {
                                 {': '}
                                 {chat.lastMessage.message}
                               </p>
-                              <p className="text-xs text-muted-foreground mt-1">
-                                {formatLastMessageTime(chat.lastMessage.createdAt)}
+                            ) : (
+                              <p className="text-sm text-muted-foreground leading-none [&]:!mt-[5px]" style={{ marginBottom: 0 }}>
+                                Noch keine Nachrichten
                               </p>
-                            </>
-                          ) : (
-                            <p className="text-sm text-muted-foreground">
-                              Noch keine Nachrichten
-                            </p>
-                          )}
+                            )}
+                          </div>
+                          
+                          <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                            {chat.lastMessage && (
+                              <span className="text-xs text-muted-foreground leading-none">
+                                {formatLastMessageTime(chat.lastMessage.createdAt)}
+                              </span>
+                            )}
+                            {chat.unreadCount > 0 && (
+                              <Badge variant="default" className="h-5 min-w-5 px-1.5 text-xs">
+                                {chat.unreadCount}
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
