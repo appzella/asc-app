@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getUnreadCount } from '@/lib/chat/useUnreadMessages'
 import { supabase, isSupabaseConfigured } from '@/lib/supabase/client'
+import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 import { ChatWindow } from '@/components/chat/ChatWindow'
 import { ArrowLeft } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
@@ -181,7 +182,7 @@ export default function ChatPage() {
             schema: 'public',
             table: 'chat_messages',
           },
-          async (payload) => {
+          async (payload: RealtimePostgresChangesPayload<any>) => {
             // Reload chats when new messages arrive (debounced, without loading state)
             if (user && (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE' || payload.eventType === 'DELETE')) {
               setTimeout(() => {
