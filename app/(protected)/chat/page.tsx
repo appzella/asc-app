@@ -346,10 +346,14 @@ export default function ChatPage() {
 
                       <div className="flex-1 min-w-0 flex gap-2">
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-sm truncate leading-none mb-0">{chat.title}</h3>
+                          <h3 className={`font-semibold text-sm truncate leading-none mb-0 ${
+                            selectedChatId === chat.id ? 'text-white' : ''
+                          }`}>{chat.title}</h3>
                           
                           {chat.lastMessage ? (
-                            <p className="text-xs text-muted-foreground line-clamp-2 leading-tight [&]:!mt-[5px]" style={{ marginBottom: 0 }}>
+                            <p className={`text-xs line-clamp-2 leading-tight [&]:!mt-[5px] ${
+                              selectedChatId === chat.id ? 'text-white/90' : 'text-muted-foreground'
+                            }`} style={{ marginBottom: 0 }}>
                               <span className="font-medium">
                                 {chat.lastMessage.userId === user.id 
                                   ? 'Du' 
@@ -359,7 +363,9 @@ export default function ChatPage() {
                               {chat.lastMessage.message}
                             </p>
                           ) : (
-                            <p className="text-xs text-muted-foreground leading-none [&]:!mt-[5px]" style={{ marginBottom: 0 }}>
+                            <p className={`text-xs leading-none [&]:!mt-[5px] ${
+                              selectedChatId === chat.id ? 'text-white/90' : 'text-muted-foreground'
+                            }`} style={{ marginBottom: 0 }}>
                               Noch keine Nachrichten
                             </p>
                           )}
@@ -367,7 +373,9 @@ export default function ChatPage() {
                         
                         <div className="flex flex-col items-end gap-1 flex-shrink-0">
                           {chat.lastMessage && (
-                            <span className="text-xs text-muted-foreground leading-none">
+                            <span className={`text-xs leading-none ${
+                              selectedChatId === chat.id ? 'text-white/80' : 'text-muted-foreground'
+                            }`}>
                               {formatLastMessageTime(chat.lastMessage.createdAt)}
                             </span>
                           )}
