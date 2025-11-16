@@ -1,4 +1,4 @@
-import { User, Tour, Invitation, TourSettings } from '../types'
+import { User, Tour, Invitation, TourSettings, TourType, TourLength, Difficulty } from '../types'
 
 // In-Memory Datenspeicher
 class DataStore {
@@ -350,7 +350,7 @@ class DataStore {
     // Update all tours that use this tour type
     this.tours.forEach(tour => {
       if (tour.tourType === oldName) {
-        tour.tourType = newName.trim()
+        tour.tourType = newName.trim() as TourType
       }
     })
     
@@ -387,7 +387,7 @@ class DataStore {
     // Update all tours that use this tour length
     this.tours.forEach(tour => {
       if (tour.tourLength === oldName) {
-        tour.tourLength = newName.trim()
+        tour.tourLength = newName.trim() as TourLength
       }
     })
     
@@ -438,7 +438,7 @@ class DataStore {
     // Update all tours that use this difficulty for this tour type
     this.tours.forEach(tour => {
       if (tour.tourType === tourType && tour.difficulty === oldName) {
-        tour.difficulty = newName.trim()
+        tour.difficulty = newName.trim() as Difficulty
       }
     })
     
