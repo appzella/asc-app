@@ -141,11 +141,16 @@ export default function EditTourPage() {
         // Warte kurz, damit Settings geladen sind, bevor Formular zurückgesetzt wird
         await new Promise(resolve => setTimeout(resolve, 100))
         
+        // Stelle sicher, dass difficulty einen gültigen Wert hat
+        const difficultyValue = displayTour.difficulty && displayTour.difficulty.trim() !== '' 
+          ? displayTour.difficulty 
+          : ''
+        
         form.reset({
           title: displayTour.title,
           description: displayTour.description,
           date: new Date(displayTour.date).toISOString().split('T')[0],
-          difficulty: displayTour.difficulty || '',
+          difficulty: difficultyValue,
           tourType: displayTour.tourType || '',
           tourLength: displayTour.tourLength || '',
           elevation: displayTour.elevation.toString(),
@@ -154,6 +159,11 @@ export default function EditTourPage() {
           leaderId: formLeaderId || '',
           whatsappGroupLink: displayTour.whatsappGroupLink || '',
         })
+        
+        // Stelle sicher, dass difficulty explizit gesetzt wird, falls es beim Reset verloren geht
+        if (difficultyValue) {
+          form.setValue('difficulty', difficultyValue, { shouldValidate: false })
+        }
       }
     }
 
@@ -211,7 +221,11 @@ export default function EditTourPage() {
 
       // Wenn Tour bereits approved ist, werden Änderungen als pendingChanges gespeichert
       const submitForApproval = false // Nicht mehr benötigt mit neuer Status-Logik
-      await dataRepository.updateTour(tourId, updates, submitForApproval)
+      const updatedTour = await dataRepository.updateTour(tourId, updates, submitForApproval)
+      
+      if (!updatedTour) {
+        throw new Error('Tour konnte nicht aktualisiert werden')
+      }
 
       // Handle GPX file: remove if requested, or upload new one
       if (removeGpxFile && tour.gpxFile) {
@@ -238,9 +252,11 @@ export default function EditTourPage() {
 
       toast.success('Tour erfolgreich aktualisiert!')
       router.push(`/tours/${tourId}`)
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error updating tour:', err)
-      toast.error('Fehler beim Aktualisieren der Tour')
+      const errorMessage = err?.message || 'Fehler beim Aktualisieren der Tour'
+      setError(errorMessage)
+      toast.error(errorMessage)
     } finally {
       setIsLoading(false)
     }
@@ -346,10 +362,20 @@ export default function EditTourPage() {
                     <Select
                       value={field.value || ''}
                       onValueChange={(value) => {
+                        const previousValue = field.value
                         field.onChange(value)
                         // Nur difficulty zurücksetzen, wenn tourType wirklich geändert wurde
-                        if (tour && value !== tour.tourType) {
-                          form.setValue('difficulty', '')
+                        // und der neue Wert sich vom aktuellen Formularwert unterscheidet
+                        if (previousValue && value !== previousValue) {
+                          // Prüfe, ob die aktuelle difficulty für den neuen tourType noch gültig ist
+                          const currentDifficulty = form.getValues('difficulty')
+                          if (currentDifficulty) {
+                            const newOptions = getDifficultyOptions(value as TourType, settings)
+                            const isValidForNewType = newOptions.some(opt => opt.value === currentDifficulty)
+                            if (!isValidForNewType) {
+                              form.setValue('difficulty', '')
+                            }
+                          }
                         }
                       }}
                     >

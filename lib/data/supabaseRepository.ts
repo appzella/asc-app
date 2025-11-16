@@ -465,6 +465,7 @@ export class SupabaseDataRepository implements IDataRepository {
     }
     if (updates.maxParticipants !== undefined) updateData.max_participants = updates.maxParticipants
     if (updates.gpxFile !== undefined) updateData.gpx_file = updates.gpxFile
+    if (updates.whatsappGroupLink !== undefined) updateData.whatsapp_group_link = updates.whatsappGroupLink
 
     const { error } = await supabase
       .from('tours')
