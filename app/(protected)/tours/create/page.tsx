@@ -30,8 +30,9 @@ import { canCreateTour } from '@/lib/roles'
 import { getDifficultyOptions } from '@/lib/difficulty'
 import { getTourIcon } from '@/lib/tourIcons'
 import Link from 'next/link'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, HelpCircle } from 'lucide-react'
 import { toast } from 'sonner'
+import { WhatsAppGroupGuide } from '@/components/tours/WhatsAppGroupGuide'
 
 const createTourSchema = z.object({
   title: z.string().min(1, 'Titel ist erforderlich'),
@@ -50,6 +51,9 @@ const createTourSchema = z.object({
     message: 'Max. Teilnehmer muss mindestens 1 sein',
   }),
   leaderId: z.string().optional(),
+  whatsappGroupLink: z.string().optional().refine((val) => !val || val.trim() === '' || z.string().url().safeParse(val).success, {
+    message: 'Bitte gib eine gültige URL ein',
+  }),
 }).refine((data) => {
   // leaderId ist nur für Admins erforderlich
   return true // Diese Validierung wird in onSubmit gemacht
@@ -76,6 +80,7 @@ export default function CreateTourPage() {
   const [resultsPosition, setResultsPosition] = useState<{ top: number; left: number; width: number } | null>(null)
   const [gpxFile, setGpxFile] = useState<File | null>(null)
   const gpxFileInputRef = useRef<HTMLInputElement>(null)
+  const [showWhatsAppGuide, setShowWhatsAppGuide] = useState(false)
   
   // Update position when showing results
   useEffect(() => {
@@ -229,6 +234,7 @@ export default function CreateTourPage() {
         maxParticipants: parseInt(values.maxParticipants),
         leaderId: finalLeaderId,
         createdBy: user.id,
+        whatsappGroupLink: values.whatsappGroupLink && values.whatsappGroupLink.trim() !== '' ? values.whatsappGroupLink.trim() : undefined,
       })
 
       // Upload GPX file if provided
@@ -612,6 +618,35 @@ export default function CreateTourPage() {
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="whatsappGroupLink"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex items-center gap-2">
+                      <FormLabel>WhatsApp-Gruppen-Link (optional)</FormLabel>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-5 w-5"
+                        onClick={() => setShowWhatsAppGuide(true)}
+                        aria-label="Anleitung anzeigen"
+                      >
+                        <HelpCircle className="w-4 h-4 text-muted-foreground" />
+                      </Button>
+                    </div>
+                    <FormControl>
+                      <Input
+                        placeholder="https://chat.whatsapp.com/..."
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               
               {user?.role === 'admin' && (
                 <FormField
@@ -701,10 +736,16 @@ export default function CreateTourPage() {
                 </Button>
               </Link>
             </div>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
+
+    <WhatsAppGroupGuide
+      open={showWhatsAppGuide}
+      onOpenChange={setShowWhatsAppGuide}
+      tourName={form.watch('title') || 'Tour'}
+    />
     </div>
   )
 }

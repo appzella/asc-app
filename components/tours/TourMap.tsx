@@ -222,7 +222,7 @@ function MapInitializer({ onMapReady }: { onMapReady: (map: L.Map) => void }) {
 export default function TourMap({ gpxUrl, height = '400px', initialFullscreen = false, onFullscreenChange }: TourMapProps) {
   const [selectedLayer, setSelectedLayer] = useState<'karte-sw' | 'karte-farbig' | 'satellit'>('karte-sw')
   const [isLayerPanelOpen, setIsLayerPanelOpen] = useState(false)
-  const [showHangneigung, setShowHangneigung] = useState(false)
+  const [showHangneigung, setShowHangneigung] = useState(true)
   const [showWanderwege, setShowWanderwege] = useState(false)
   const [showJagdbanngebiete, setShowJagdbanngebiete] = useState(false)
   const [showWildruhezonen, setShowWildruhezonen] = useState(false)

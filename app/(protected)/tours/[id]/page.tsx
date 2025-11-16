@@ -29,10 +29,11 @@ import { canEditTour, canApproveTour, canPublishTour, canSubmitForPublishing } f
 import { formatDifficulty } from '@/lib/difficulty'
 import Link from 'next/link'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import { ChevronLeft, Calendar, Clock, ArrowUpRight, Users, ChartNoAxesColumnIncreasing, X, UserPlus, Map, MessageSquare } from 'lucide-react'
+import { ChevronLeft, Calendar, Clock, ArrowUpRight, Users, ChartNoAxesColumnIncreasing, X, UserPlus, Map, ExternalLink } from 'lucide-react'
 import TourMap from '@/components/tours/TourMap'
 import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { toast } from 'sonner'
+import { QRCode } from '@/components/ui/shadcn-io/qr-code'
 
 export default function TourDetailPage() {
   const params = useParams()
@@ -56,6 +57,7 @@ export default function TourDetailPage() {
   const [showAddParticipantDialog, setShowAddParticipantDialog] = useState(false)
   const [allUsers, setAllUsers] = useState<User[]>([])
   const [showMapOnMobile, setShowMapOnMobile] = useState(false)
+  const [showWhatsAppDialog, setShowWhatsAppDialog] = useState(false)
 
   useEffect(() => {
     const loadTour = async () => {
@@ -128,6 +130,11 @@ export default function TourDetailPage() {
           // Reload waitlist
           const waitlistUsers = await dataRepository.getWaitlistByTourId(tourId)
           setWaitlist(waitlistUsers)
+          
+          // Zeige WhatsApp-Dialog wenn Link vorhanden
+          if (updatedTour.whatsappGroupLink) {
+            setShowWhatsAppDialog(true)
+          }
         }
       }
     } catch (error) {
@@ -864,16 +871,36 @@ export default function TourDetailPage() {
             </Card>
           )}
 
-          {/* Chat - nur bei veröffentlichten Touren */}
-          {tour.status === 'published' && (
+          {/* WhatsApp-Gruppe - nur für Teilnehmer, Tourenleiter und Admins */}
+          {tour.status === 'published' && tour.whatsappGroupLink && (isRegistered || isLeader || user?.role === 'admin') && (
             <Card>
-              <CardContent className="p-4">
-                <Button variant="outline" className="w-full" size="sm" asChild>
-                  <Link href={`/chat/${tourId}`}>
-                    <MessageSquare className="w-4 h-4 mr-2" />
-                    Zum Chat
-                  </Link>
-                </Button>
+              <CardHeader>
+                <CardTitle>WhatsApp-Gruppe</CardTitle>
+                <CardDescription>
+                  Tritt der WhatsApp-Gruppe für diese Tour bei
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex flex-col items-center gap-4">
+                  <QRCode 
+                    data={tour.whatsappGroupLink} 
+                    className="w-48 h-48 rounded-lg border bg-white p-4"
+                  />
+                  <Button
+                    variant="default"
+                    className="w-full"
+                    asChild
+                  >
+                    <a 
+                      href={tour.whatsappGroupLink} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                    >
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      Zur WhatsApp-Gruppe
+                    </a>
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           )}
@@ -1121,6 +1148,42 @@ export default function TourDetailPage() {
           </CommandList>
         </Command>
       </CommandDialog>
+
+      {/* WhatsApp-Dialog nach Anmeldung */}
+      <Dialog open={showWhatsAppDialog} onOpenChange={setShowWhatsAppDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>WhatsApp-Gruppe beitreten</DialogTitle>
+            <DialogDescription>
+              Du hast dich erfolgreich für die Tour angemeldet. Tritt jetzt der WhatsApp-Gruppe bei!
+            </DialogDescription>
+          </DialogHeader>
+          {tour?.whatsappGroupLink && (
+            <div className="space-y-4 py-4">
+              <div className="flex flex-col items-center gap-4">
+                <QRCode 
+                  data={tour.whatsappGroupLink} 
+                  className="w-48 h-48 rounded-lg border bg-white p-4"
+                />
+                <Button
+                  variant="default"
+                  className="w-full"
+                  asChild
+                >
+                  <a 
+                    href={tour.whatsappGroupLink} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                  >
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    Zur WhatsApp-Gruppe
+                  </a>
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

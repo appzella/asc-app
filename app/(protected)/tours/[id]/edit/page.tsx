@@ -27,10 +27,11 @@ import { DatePicker } from '@/components/ui/date-picker'
 import { canEditTour } from '@/lib/roles'
 import { getDifficultyOptions } from '@/lib/difficulty'
 import Link from 'next/link'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, HelpCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { Separator } from '@/components/ui/separator'
 import { Label } from '@/components/ui/label'
+import { WhatsAppGroupGuide } from '@/components/tours/WhatsAppGroupGuide'
 
 const editTourSchema = z.object({
   title: z.string().min(1, 'Titel ist erforderlich'),
@@ -49,6 +50,9 @@ const editTourSchema = z.object({
     message: 'Max. Teilnehmer muss mindestens 1 sein',
   }),
   leaderId: z.string().optional(),
+  whatsappGroupLink: z.string().optional().refine((val) => !val || val.trim() === '' || z.string().url().safeParse(val).success, {
+    message: 'Bitte gib eine gültige URL ein',
+  }),
 }).refine((data) => {
   return true
 }, {
@@ -71,6 +75,7 @@ export default function EditTourPage() {
   const [error, setError] = useState('')
   const [gpxFile, setGpxFile] = useState<File | null>(null)
   const gpxFileInputRef = useRef<HTMLInputElement>(null)
+  const [showWhatsAppGuide, setShowWhatsAppGuide] = useState(false)
 
   const form = useForm<EditTourFormValues>({
     resolver: zodResolver(editTourSchema),
@@ -85,6 +90,7 @@ export default function EditTourPage() {
       duration: '',
       maxParticipants: '',
       leaderId: '',
+      whatsappGroupLink: '',
     },
   })
 
@@ -138,6 +144,7 @@ export default function EditTourPage() {
           duration: displayTour.duration.toString(),
           maxParticipants: displayTour.maxParticipants.toString(),
           leaderId: formLeaderId || '',
+          whatsappGroupLink: displayTour.whatsappGroupLink || '',
         })
       }
     }
@@ -191,6 +198,7 @@ export default function EditTourPage() {
         duration: parseInt(values.duration),
         maxParticipants: parseInt(values.maxParticipants),
         leaderId: finalLeaderId,
+        whatsappGroupLink: values.whatsappGroupLink && values.whatsappGroupLink.trim() !== '' ? values.whatsappGroupLink.trim() : null,
       }
 
       // Wenn Tour bereits approved ist, werden Änderungen als pendingChanges gespeichert
@@ -461,6 +469,35 @@ export default function EditTourPage() {
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="whatsappGroupLink"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex items-center gap-2">
+                      <FormLabel>WhatsApp-Gruppen-Link (optional)</FormLabel>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-5 w-5"
+                        onClick={() => setShowWhatsAppGuide(true)}
+                        aria-label="Anleitung anzeigen"
+                      >
+                        <HelpCircle className="w-4 h-4 text-muted-foreground" />
+                      </Button>
+                    </div>
+                    <FormControl>
+                      <Input
+                        placeholder="https://chat.whatsapp.com/..."
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               
               {user?.role === 'admin' && (
                 <FormField
@@ -555,10 +592,16 @@ export default function EditTourPage() {
                 </Button>
               </Link>
             </div>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
+
+    <WhatsAppGroupGuide
+      open={showWhatsAppGuide}
+      onOpenChange={setShowWhatsAppGuide}
+      tourName={form.watch('title') || tour?.title || 'Tour'}
+    />
     </div>
   )
 }

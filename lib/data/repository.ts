@@ -1,4 +1,4 @@
-import { User, Tour, ChatMessage, Invitation, TourSettings } from '../types'
+import { User, Tour, Invitation, TourSettings } from '../types'
 
 /**
  * Repository Interface
@@ -35,15 +35,6 @@ export interface IDataRepository {
   removeFromWaitlist(tourId: string, userId: string): Promise<boolean>
   getWaitlistByTourId(tourId: string): Promise<User[]>
   promoteFromWaitlist(tourId: string, userId: string): Promise<boolean> // Manuelles Hinzufügen durch Leader/Admin
-
-  // Chat Messages
-  getMessagesByTourId(tourId: string): Promise<ChatMessage[]>
-  addMessage(message: Omit<ChatMessage, 'id' | 'createdAt'>): Promise<ChatMessage>
-  
-  // Chat Read Status
-  markTourAsRead(tourId: string, userId: string, timestamp: Date | string): Promise<boolean>
-  getLastReadTimestamp(tourId: string, userId: string): Promise<Date | null>
-  getUnreadCount(tourId: string, userId: string): Promise<number>
 
   // Invitations
   createInvitation(email: string, createdBy: string): Promise<Invitation>

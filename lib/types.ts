@@ -56,15 +56,7 @@ export interface Tour {
   submittedForPublishing?: boolean // Ob die Tour zur Veröffentlichung eingereicht wurde
   pendingChanges?: Partial<Tour> // Ausstehende Änderungen, die auf Freigabe warten
   gpxFile?: string | null // URL zur GPX-Datei in Supabase Storage
-}
-
-export interface ChatMessage {
-  id: string
-  tourId: string
-  userId: string
-  user?: User // Referenz zum User
-  message: string
-  createdAt: Date
+  whatsappGroupLink?: string | null // Optionaler Link zur WhatsApp-Gruppe
 }
 
 export interface Invitation {

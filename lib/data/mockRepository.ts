@@ -1,5 +1,5 @@
 import { IDataRepository } from './repository'
-import { User, Tour, ChatMessage, Invitation, TourSettings } from '../types'
+import { User, Tour, Invitation, TourSettings } from '../types'
 import { dataStore } from './mockData'
 
 /**
@@ -117,42 +117,6 @@ export class MockDataRepository implements IDataRepository {
 
   async unregisterFromTour(tourId: string, userId: string): Promise<boolean> {
     return dataStore.unregisterFromTour(tourId, userId)
-  }
-
-  // Chat Messages
-  async getMessagesByTourId(tourId: string): Promise<ChatMessage[]> {
-    return dataStore.getMessagesByTourId(tourId)
-  }
-
-  async addMessage(message: Omit<ChatMessage, 'id' | 'createdAt'>): Promise<ChatMessage> {
-    return dataStore.addMessage(message)
-  }
-
-  // Chat Read Status (Mock - uses localStorage as fallback)
-  async markTourAsRead(tourId: string, userId: string, timestamp: Date | string): Promise<boolean> {
-    if (typeof window === 'undefined') return false
-    const timestampStr = timestamp instanceof Date ? timestamp.toISOString() : timestamp
-    localStorage.setItem(`chat_last_read_${tourId}_${userId}`, timestampStr)
-    return true
-  }
-
-  async getLastReadTimestamp(tourId: string, userId: string): Promise<Date | null> {
-    if (typeof window === 'undefined') return null
-    const stored = localStorage.getItem(`chat_last_read_${tourId}_${userId}`)
-    if (!stored) return null
-    try {
-      return new Date(stored)
-    } catch {
-      return null
-    }
-  }
-
-  async getUnreadCount(tourId: string, userId: string): Promise<number> {
-    const lastRead = await this.getLastReadTimestamp(tourId, userId)
-    const messages = await this.getMessagesByTourId(tourId)
-    if (messages.length === 0) return 0
-    if (!lastRead) return messages.length
-    return messages.filter(msg => new Date(msg.createdAt) > lastRead).length
   }
 
   // Invitations

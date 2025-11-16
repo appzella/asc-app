@@ -2,6 +2,7 @@ import * as React from "react"
 import { CheckIcon, ChevronsUpDown } from "lucide-react"
 import * as RPNInput from "react-phone-number-input"
 import flags from "react-phone-number-input/flags"
+import { parsePhoneNumber } from "react-phone-number-input"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -33,6 +34,33 @@ type PhoneInputProps = Omit<
 const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
   React.forwardRef<React.ElementRef<typeof RPNInput.default>, PhoneInputProps>(
     ({ className, onChange, value, countries, ...props }, ref) => {
+      // Normalisiere den Wert zu E.164 Format, falls er formatiert ist
+      const normalizedValue = React.useMemo(() => {
+        if (!value || typeof value !== 'string') return value || undefined
+        
+        // Wenn der Wert bereits E.164 Format hat (keine Leerzeichen nach dem +), verwende ihn direkt
+        if (/^\+[1-9]\d{1,14}$/.test(value.replace(/\s/g, ''))) {
+          return value.replace(/\s/g, '') as RPNInput.Value
+        }
+        
+        // Versuche die Nummer zu parsen und zu normalisieren
+        try {
+          const phoneNumber = parsePhoneNumber(value)
+          if (phoneNumber && phoneNumber.isValid()) {
+            return phoneNumber.number as RPNInput.Value
+          }
+        } catch {
+          // Wenn Parsing fehlschlägt, entferne einfach Leerzeichen und prüfe Format
+          const cleaned = value.replace(/\s/g, '')
+          if (/^\+[1-9]\d{1,14}$/.test(cleaned)) {
+            return cleaned as RPNInput.Value
+          }
+        }
+        
+        // Fallback: Gib den Wert zurück (wird möglicherweise einen Fehler verursachen, aber besser als nichts)
+        return value as RPNInput.Value
+      }, [value])
+
       return (
         <RPNInput.default
           ref={ref}
@@ -41,7 +69,7 @@ const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
           countrySelectComponent={CountrySelect}
           inputComponent={InputComponent}
           smartCaret={false}
-          value={value || undefined}
+          value={normalizedValue}
           countries={countries}
           /**
            * Handles the onChange event.

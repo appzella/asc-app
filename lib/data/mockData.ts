@@ -1,10 +1,9 @@
-import { User, Tour, ChatMessage, Invitation, TourSettings } from '../types'
+import { User, Tour, Invitation, TourSettings } from '../types'
 
 // In-Memory Datenspeicher
 class DataStore {
   private users: User[] = []
   private tours: Tour[] = []
-  private messages: ChatMessage[] = []
   private invitations: Invitation[] = []
   private currentUser: User | null = null
   private settings: TourSettings = {
@@ -261,30 +260,6 @@ class DataStore {
     // Füge als Teilnehmer hinzu (auch wenn Tour bereits voll ist)
     tour.participants.push(userId)
     return true
-  }
-
-  // Chat Messages
-  getMessagesByTourId(tourId: string): ChatMessage[] {
-    return this.messages
-      .filter((m) => m.tourId === tourId)
-      .map((msg) => ({
-        ...msg,
-        user: this.getUserById(msg.userId),
-      }))
-      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
-  }
-
-  addMessage(message: Omit<ChatMessage, 'id' | 'createdAt'>): ChatMessage {
-    const newMessage: ChatMessage = {
-      ...message,
-      id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      createdAt: new Date(),
-    }
-    this.messages.push(newMessage)
-    return {
-      ...newMessage,
-      user: this.getUserById(newMessage.userId),
-    }
   }
 
   // Invitations
@@ -763,19 +738,6 @@ export function seedData() {
   dataStore.registerForTour(tour6.id, member2.id)
   dataStore.registerForTour(tour8.id, member1.id)
   dataStore.registerForTour(tour9.id, member2.id)
-
-  // Sample Chat Messages
-  dataStore.addMessage({
-    tourId: tour1.id,
-    userId: member1.id,
-    message: 'Wer fährt mit dem Auto? Ich habe noch 2 Plätze frei.',
-  })
-
-  dataStore.addMessage({
-    tourId: tour1.id,
-    userId: member2.id,
-    message: 'Ich komme mit! Wann treffen wir uns?',
-  })
 
   return { 
     admin, 
