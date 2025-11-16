@@ -47,13 +47,16 @@ export interface IDataRepository {
   updateSettings(updates: Partial<TourSettings>): Promise<TourSettings>
   addTourType(type: string): Promise<boolean>
   removeTourType(type: string): Promise<boolean>
+  renameTourType(oldName: string, newName: string): Promise<boolean>
   updateTourTypeIcon(tourType: string, iconName: string): Promise<boolean>
   addTourLength(length: string): Promise<boolean>
   removeTourLength(length: string): Promise<boolean>
+  renameTourLength(oldName: string, newName: string): Promise<boolean>
   updateTourTypesOrder(orderedTypes: string[]): Promise<void>
   updateTourLengthsOrder(orderedLengths: string[]): Promise<void>
   addDifficulty(tourType: string, difficulty: string): Promise<boolean>
   removeDifficulty(tourType: string, difficulty: string): Promise<boolean>
+  renameDifficulty(tourType: string, oldName: string, newName: string): Promise<boolean>
   updateDifficultiesOrder(tourType: string, orderedDifficulties: string[]): Promise<void>
   getDifficultiesForTourType(tourType: string): Promise<string[]>
 

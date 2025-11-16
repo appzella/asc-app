@@ -13,7 +13,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { canManageUsers } from '@/lib/roles'
 import Link from 'next/link'
 import { getIconByName, getTourIcon } from '@/lib/tourIcons'
-import { Trash2, ChevronDown, ChevronLeft } from 'lucide-react'
+import { Trash2, ChevronDown, ChevronLeft, SquarePen, Check, X } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function TourTypesSettingsPage() {
@@ -25,6 +25,8 @@ export default function TourTypesSettingsPage() {
   const [error, setError] = useState('')
   const [openIconPicker, setOpenIconPicker] = useState<string | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
+  const [editingType, setEditingType] = useState<string | null>(null)
+  const [editValue, setEditValue] = useState('')
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -87,6 +89,46 @@ export default function TourTypesSettingsPage() {
       setTourTypes(settings.tourTypes)
       setTourTypeIcons(settings.tourTypeIcons || {})
       toast.success('Tourentyp entfernt!')
+    }
+  }
+
+  const handleStartEdit = (type: string) => {
+    setEditingType(type)
+    setEditValue(type)
+  }
+
+  const handleCancelEdit = () => {
+    setEditingType(null)
+    setEditValue('')
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editingType || !editValue.trim()) {
+      toast.error('Bitte gib einen Namen ein')
+      return
+    }
+
+    if (editValue.trim() === editingType) {
+      handleCancelEdit()
+      return
+    }
+
+    // Prüfe auf Duplikat
+    if (tourTypes.includes(editValue.trim())) {
+      toast.error('Dieser Tourentyp existiert bereits')
+      return
+    }
+
+    const success = await dataRepository.renameTourType(editingType, editValue.trim())
+    if (success) {
+      const settings = await dataRepository.getSettings()
+      setTourTypes(settings.tourTypes)
+      setTourTypeIcons(settings.tourTypeIcons || {})
+      toast.success('Tourentyp umbenannt!')
+      setEditingType(null)
+      setEditValue('')
+    } else {
+      toast.error('Dieser Tourentyp existiert bereits')
     }
   }
 
@@ -212,7 +254,7 @@ export default function TourTypesSettingsPage() {
             variant="ghost"
             size="sm"
             asChild
-            className="hidden sm:inline-flex items-center gap-1 text-primary-600 hover:text-primary-700"
+            className="hidden sm:inline-flex items-center gap-1 text-primary-600 hover:text-white"
           >
             <Link href="/settings">
               <ChevronLeft className="w-4 h-4" strokeWidth={2} />
@@ -360,19 +402,86 @@ export default function TourTypesSettingsPage() {
                         </>
                       )}
                     </div>
-                    <span className="font-medium text-foreground flex-1 min-w-0 truncate text-sm">{type}</span>
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      draggable={false}
-                      onClick={() => handleRemove(type)}
-                      onDragStart={(e) => e.stopPropagation()}
-                      className="flex-shrink-0"
-                      aria-label="Entfernen"
-                    >
-                      <Trash2 className="w-4 h-4" strokeWidth={2} />
-                    </Button>
+                    {editingType === type ? (
+                      <>
+                        <Input
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault()
+                              handleSaveEdit()
+                            } else if (e.key === 'Escape') {
+                              e.preventDefault()
+                              handleCancelEdit()
+                            }
+                          }}
+                          className="flex-1 h-8 text-sm"
+                          autoFocus
+                          draggable={false}
+                          onDragStart={(e) => e.stopPropagation()}
+                        />
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            draggable={false}
+                            onClick={handleSaveEdit}
+                            onDragStart={(e) => e.stopPropagation()}
+                            className="h-8 w-8 p-0"
+                            aria-label="Speichern"
+                          >
+                            <Check className="w-4 h-4" strokeWidth={2} />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            draggable={false}
+                            onClick={handleCancelEdit}
+                            onDragStart={(e) => e.stopPropagation()}
+                            className="h-8 w-8 p-0"
+                            aria-label="Abbrechen"
+                          >
+                            <X className="w-4 h-4" strokeWidth={2} />
+                          </Button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <span className="font-medium text-foreground flex-1 min-w-0 truncate text-sm">{type}</span>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            draggable={false}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleStartEdit(type)
+                            }}
+                            onDragStart={(e) => e.stopPropagation()}
+                            className="h-9 w-9 p-0"
+                            aria-label="Bearbeiten"
+                          >
+                            <SquarePen className="w-4 h-4" strokeWidth={2} />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            draggable={false}
+                            onClick={() => handleRemove(type)}
+                            onDragStart={(e) => e.stopPropagation()}
+                            className="h-9 w-9 p-0"
+                            aria-label="Entfernen"
+                          >
+                            <Trash2 className="w-4 h-4" strokeWidth={2} />
+                          </Button>
+                        </div>
+                      </>
+                    )}
                     </div>
                   </div>
                 )

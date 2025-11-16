@@ -153,6 +153,10 @@ export class MockDataRepository implements IDataRepository {
     return dataStore.removeTourType(type)
   }
 
+  async renameTourType(oldName: string, newName: string): Promise<boolean> {
+    return dataStore.renameTourType(oldName, newName)
+  }
+
   async updateTourTypeIcon(tourType: string, iconName: string): Promise<boolean> {
     // Mock implementation - always returns true
     // In real implementation, this would update mockData
@@ -165,6 +169,10 @@ export class MockDataRepository implements IDataRepository {
 
   async removeTourLength(length: string): Promise<boolean> {
     return dataStore.removeTourLength(length)
+  }
+
+  async renameTourLength(oldName: string, newName: string): Promise<boolean> {
+    return dataStore.renameTourLength(oldName, newName)
   }
 
   async updateTourTypesOrder(orderedTypes: string[]): Promise<void> {
@@ -181,6 +189,10 @@ export class MockDataRepository implements IDataRepository {
 
   async removeDifficulty(tourType: string, difficulty: string): Promise<boolean> {
     return dataStore.removeDifficulty(tourType, difficulty)
+  }
+
+  async renameDifficulty(tourType: string, oldName: string, newName: string): Promise<boolean> {
+    return dataStore.renameDifficulty(tourType, oldName, newName)
   }
 
   async updateDifficultiesOrder(tourType: string, orderedDifficulties: string[]): Promise<void> {

@@ -339,6 +339,30 @@ class DataStore {
     return true
   }
 
+  renameTourType(oldName: string, newName: string): boolean {
+    if (!newName.trim() || oldName === newName) return false
+    const index = this.settings.tourTypes.indexOf(oldName)
+    if (index === -1) return false
+    if (this.settings.tourTypes.includes(newName.trim())) return false // Already exists
+    
+    this.settings.tourTypes[index] = newName.trim()
+    
+    // Update all tours that use this tour type
+    this.tours.forEach(tour => {
+      if (tour.tourType === oldName) {
+        tour.tourType = newName.trim()
+      }
+    })
+    
+    // Update icon mapping if it exists
+    if (this.settings.tourTypeIcons && this.settings.tourTypeIcons[oldName]) {
+      this.settings.tourTypeIcons[newName.trim()] = this.settings.tourTypeIcons[oldName]
+      delete this.settings.tourTypeIcons[oldName]
+    }
+    
+    return true
+  }
+
   addTourLength(length: string): boolean {
     if (this.settings.tourLengths.includes(length)) return false
     this.settings.tourLengths.push(length)
@@ -349,6 +373,24 @@ class DataStore {
     const index = this.settings.tourLengths.indexOf(length)
     if (index === -1) return false
     this.settings.tourLengths.splice(index, 1)
+    return true
+  }
+
+  renameTourLength(oldName: string, newName: string): boolean {
+    if (!newName.trim() || oldName === newName) return false
+    const index = this.settings.tourLengths.indexOf(oldName)
+    if (index === -1) return false
+    if (this.settings.tourLengths.includes(newName.trim())) return false // Already exists
+    
+    this.settings.tourLengths[index] = newName.trim()
+    
+    // Update all tours that use this tour length
+    this.tours.forEach(tour => {
+      if (tour.tourLength === oldName) {
+        tour.tourLength = newName.trim()
+      }
+    })
+    
     return true
   }
 
@@ -381,6 +423,25 @@ class DataStore {
     const index = this.settings.difficulties[tourType].indexOf(difficulty)
     if (index === -1) return false
     this.settings.difficulties[tourType].splice(index, 1)
+    return true
+  }
+
+  renameDifficulty(tourType: string, oldName: string, newName: string): boolean {
+    if (!newName.trim() || oldName === newName) return false
+    if (!this.settings.difficulties[tourType]) return false
+    const index = this.settings.difficulties[tourType].indexOf(oldName)
+    if (index === -1) return false
+    if (this.settings.difficulties[tourType].includes(newName.trim())) return false // Already exists
+    
+    this.settings.difficulties[tourType][index] = newName.trim()
+    
+    // Update all tours that use this difficulty for this tour type
+    this.tours.forEach(tour => {
+      if (tour.tourType === tourType && tour.difficulty === oldName) {
+        tour.difficulty = newName.trim()
+      }
+    })
+    
     return true
   }
 

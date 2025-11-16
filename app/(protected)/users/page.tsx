@@ -159,7 +159,7 @@ export default function UsersPage() {
             variant="ghost"
             size="sm"
             asChild
-            className="hidden sm:inline-flex items-center gap-1 text-primary-600 hover:text-primary-700"
+            className="hidden sm:inline-flex items-center gap-1 text-primary-600 hover:text-white"
           >
             <Link href="/settings">
               <ChevronLeft className="w-4 h-4" strokeWidth={2} />

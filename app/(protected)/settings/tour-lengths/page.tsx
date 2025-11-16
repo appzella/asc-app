@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { canManageUsers } from '@/lib/roles'
 import Link from 'next/link'
-import { Trash2, ChevronLeft } from 'lucide-react'
+import { Trash2, ChevronLeft, SquarePen, Check, X } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function TourLengthsSettingsPage() {
@@ -22,6 +22,8 @@ export default function TourLengthsSettingsPage() {
   const [newLength, setNewLength] = useState('')
   const [error, setError] = useState('')
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
+  const [editingLength, setEditingLength] = useState<string | null>(null)
+  const [editValue, setEditValue] = useState('')
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -80,6 +82,45 @@ export default function TourLengthsSettingsPage() {
       const settings = await dataRepository.getSettings()
       setTourLengths(settings.tourLengths)
       toast.success('Tourlänge entfernt!')
+    }
+  }
+
+  const handleStartEdit = (length: string) => {
+    setEditingLength(length)
+    setEditValue(length)
+  }
+
+  const handleCancelEdit = () => {
+    setEditingLength(null)
+    setEditValue('')
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editingLength || !editValue.trim()) {
+      toast.error('Bitte gib einen Namen ein')
+      return
+    }
+
+    if (editValue.trim() === editingLength) {
+      handleCancelEdit()
+      return
+    }
+
+    // Prüfe auf Duplikat
+    if (tourLengths.includes(editValue.trim())) {
+      toast.error('Diese Tourlänge existiert bereits')
+      return
+    }
+
+    const success = await dataRepository.renameTourLength(editingLength, editValue.trim())
+    if (success) {
+      const settings = await dataRepository.getSettings()
+      setTourLengths(settings.tourLengths)
+      toast.success('Tourlänge umbenannt!')
+      setEditingLength(null)
+      setEditValue('')
+    } else {
+      toast.error('Diese Tourlänge existiert bereits')
     }
   }
 
@@ -169,7 +210,7 @@ export default function TourLengthsSettingsPage() {
             variant="ghost"
             size="sm"
             asChild
-            className="hidden sm:inline-flex items-center gap-1 text-primary-600 hover:text-primary-700"
+            className="hidden sm:inline-flex items-center gap-1 text-primary-600 hover:text-white"
           >
             <Link href="/settings">
               <ChevronLeft className="w-4 h-4" strokeWidth={2} />
@@ -247,20 +288,87 @@ export default function TourLengthsSettingsPage() {
                     >
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <span className="text-muted-foreground group-hover:text-muted-foreground flex-shrink-0 text-sm">☰</span>
-                    <span className="font-medium text-foreground truncate text-sm">{length}</span>
+                    {editingLength === length ? (
+                      <>
+                        <Input
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault()
+                              handleSaveEdit()
+                            } else if (e.key === 'Escape') {
+                              e.preventDefault()
+                              handleCancelEdit()
+                            }
+                          }}
+                          className="flex-1 h-8 text-sm"
+                          autoFocus
+                          draggable={false}
+                          onDragStart={(e) => e.stopPropagation()}
+                        />
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            draggable={false}
+                            onClick={handleSaveEdit}
+                            onDragStart={(e) => e.stopPropagation()}
+                            className="h-8 w-8 p-0"
+                            aria-label="Speichern"
+                          >
+                            <Check className="w-4 h-4" strokeWidth={2} />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            draggable={false}
+                            onClick={handleCancelEdit}
+                            onDragStart={(e) => e.stopPropagation()}
+                            className="h-8 w-8 p-0"
+                            aria-label="Abbrechen"
+                          >
+                            <X className="w-4 h-4" strokeWidth={2} />
+                          </Button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <span className="font-medium text-foreground truncate text-sm flex-1 min-w-0">{length}</span>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            draggable={false}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleStartEdit(length)
+                            }}
+                            onDragStart={(e) => e.stopPropagation()}
+                            className="h-9 w-9 p-0"
+                            aria-label="Bearbeiten"
+                          >
+                            <SquarePen className="w-4 h-4" strokeWidth={2} />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            draggable={false}
+                            onClick={() => handleRemove(length)}
+                            onDragStart={(e) => e.stopPropagation()}
+                            className="h-9 w-9 p-0"
+                            aria-label="Entfernen"
+                          >
+                            <Trash2 className="w-4 h-4" strokeWidth={2} />
+                          </Button>
+                        </div>
+                      </>
+                    )}
                   </div>
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="sm"
-                    draggable={false}
-                    onClick={() => handleRemove(length)}
-                    onDragStart={(e) => e.stopPropagation()}
-                    className="flex-shrink-0"
-                    aria-label="Entfernen"
-                  >
-                    <Trash2 className="w-4 h-4" strokeWidth={2} />
-                  </Button>
                   </div>
                 </div>
               )

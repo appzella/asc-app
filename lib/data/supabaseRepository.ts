@@ -791,6 +791,18 @@ export class SupabaseDataRepository implements IDataRepository {
   }
 
   async addTourType(type: string): Promise<boolean> {
+    // Prüfe, ob der Typ bereits existiert
+    const { data: existing } = await supabase
+      .from('tour_settings')
+      .select('setting_key')
+      .eq('setting_type', 'tour_type')
+      .eq('setting_key', type.trim())
+      .single()
+
+    if (existing) {
+      return false // Bereits vorhanden
+    }
+
     // Set default icon based on type
     const defaultIcons: { [key: string]: string } = {
       Wanderung: 'Mountain',
@@ -803,7 +815,7 @@ export class SupabaseDataRepository implements IDataRepository {
       .from('tour_settings')
       .insert({
         setting_type: 'tour_type',
-        setting_key: type,
+        setting_key: type.trim(),
         icon_name: defaultIcon,
         display_order: 0,
       })
@@ -831,12 +843,82 @@ export class SupabaseDataRepository implements IDataRepository {
     return !error
   }
 
+  async renameTourType(oldName: string, newName: string): Promise<boolean> {
+    if (!newName.trim() || oldName === newName) {
+      return false
+    }
+
+    // Prüfe, ob der neue Name bereits existiert
+    const { data: existing } = await supabase
+      .from('tour_settings')
+      .select('setting_key')
+      .eq('setting_type', 'tour_type')
+      .eq('setting_key', newName.trim())
+      .single()
+
+    if (existing) {
+      return false // Name bereits vorhanden
+    }
+
+    // Update in tour_settings
+    const { error: settingsError } = await supabase
+      .from('tour_settings')
+      .update({ setting_key: newName.trim() })
+      .eq('setting_type', 'tour_type')
+      .eq('setting_key', oldName)
+
+    if (settingsError) {
+      if (!this.handleSupabaseError(settingsError)) {
+        throw settingsError
+      }
+      return false
+    }
+
+    // Update all tours that use this tour type
+    const { error: toursError } = await supabase
+      .from('tours')
+      .update({ tour_type: newName.trim() })
+      .eq('tour_type', oldName)
+
+    if (toursError) {
+      if (!this.handleSupabaseError(toursError)) {
+        throw toursError
+      }
+      return false
+    }
+
+    // Update icon mapping if it exists
+    const { data: iconData } = await supabase
+      .from('tour_settings')
+      .select('icon_name')
+      .eq('setting_type', 'tour_type')
+      .eq('setting_key', newName.trim())
+      .single()
+
+    // If icon exists, we need to update the old icon reference
+    // The icon_name is already updated with the setting_key, so we're good
+
+    return true
+  }
+
   async addTourLength(length: string): Promise<boolean> {
+    // Prüfe, ob die Länge bereits existiert
+    const { data: existing } = await supabase
+      .from('tour_settings')
+      .select('setting_key')
+      .eq('setting_type', 'tour_length')
+      .eq('setting_key', length.trim())
+      .single()
+
+    if (existing) {
+      return false // Bereits vorhanden
+    }
+
     const { error } = await supabase
       .from('tour_settings')
       .insert({
         setting_type: 'tour_length',
-        setting_key: length,
+        setting_key: length.trim(),
         display_order: 0,
       })
 
@@ -851,6 +933,53 @@ export class SupabaseDataRepository implements IDataRepository {
       .eq('setting_key', length)
 
     return !error
+  }
+
+  async renameTourLength(oldName: string, newName: string): Promise<boolean> {
+    if (!newName.trim() || oldName === newName) {
+      return false
+    }
+
+    // Prüfe, ob der neue Name bereits existiert
+    const { data: existing } = await supabase
+      .from('tour_settings')
+      .select('setting_key')
+      .eq('setting_type', 'tour_length')
+      .eq('setting_key', newName.trim())
+      .single()
+
+    if (existing) {
+      return false // Name bereits vorhanden
+    }
+
+    // Update in tour_settings
+    const { error: settingsError } = await supabase
+      .from('tour_settings')
+      .update({ setting_key: newName.trim() })
+      .eq('setting_type', 'tour_length')
+      .eq('setting_key', oldName)
+
+    if (settingsError) {
+      if (!this.handleSupabaseError(settingsError)) {
+        throw settingsError
+      }
+      return false
+    }
+
+    // Update all tours that use this tour length
+    const { error: toursError } = await supabase
+      .from('tours')
+      .update({ tour_length: newName.trim() })
+      .eq('tour_length', oldName)
+
+    if (toursError) {
+      if (!this.handleSupabaseError(toursError)) {
+        throw toursError
+      }
+      return false
+    }
+
+    return true
   }
 
   async updateTourTypesOrder(orderedTypes: string[]): Promise<void> {
@@ -875,11 +1004,24 @@ export class SupabaseDataRepository implements IDataRepository {
   }
 
   async addDifficulty(tourType: string, difficulty: string): Promise<boolean> {
+    // Prüfe, ob der Schwierigkeitsgrad bereits existiert
+    const { data: existing } = await supabase
+      .from('tour_settings')
+      .select('setting_key')
+      .eq('setting_type', 'difficulty')
+      .eq('setting_key', difficulty.trim())
+      .eq('setting_value', tourType)
+      .single()
+
+    if (existing) {
+      return false // Bereits vorhanden
+    }
+
     const { error } = await supabase
       .from('tour_settings')
       .insert({
         setting_type: 'difficulty',
-        setting_key: difficulty,
+        setting_key: difficulty.trim(),
         setting_value: tourType,
         display_order: 0,
       })
@@ -899,6 +1041,56 @@ export class SupabaseDataRepository implements IDataRepository {
       this.handleSupabaseError(error)
       return false
     }
+    return true
+  }
+
+  async renameDifficulty(tourType: string, oldName: string, newName: string): Promise<boolean> {
+    if (!newName.trim() || oldName === newName) {
+      return false
+    }
+
+    // Prüfe, ob der neue Name bereits existiert
+    const { data: existing } = await supabase
+      .from('tour_settings')
+      .select('setting_key')
+      .eq('setting_type', 'difficulty')
+      .eq('setting_key', newName.trim())
+      .eq('setting_value', tourType)
+      .single()
+
+    if (existing) {
+      return false // Name bereits vorhanden
+    }
+
+    // Update in tour_settings
+    const { error: settingsError } = await supabase
+      .from('tour_settings')
+      .update({ setting_key: newName.trim() })
+      .eq('setting_type', 'difficulty')
+      .eq('setting_key', oldName)
+      .eq('setting_value', tourType)
+
+    if (settingsError) {
+      if (!this.handleSupabaseError(settingsError)) {
+        throw settingsError
+      }
+      return false
+    }
+
+    // Update all tours that use this difficulty for this tour type
+    const { error: toursError } = await supabase
+      .from('tours')
+      .update({ difficulty: newName.trim() })
+      .eq('difficulty', oldName)
+      .eq('tour_type', tourType)
+
+    if (toursError) {
+      if (!this.handleSupabaseError(toursError)) {
+        throw toursError
+      }
+      return false
+    }
+
     return true
   }
 
