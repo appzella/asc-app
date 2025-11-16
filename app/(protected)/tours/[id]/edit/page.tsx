@@ -77,6 +77,7 @@ export default function EditTourPage() {
   const gpxFileInputRef = useRef<HTMLInputElement>(null)
   const [showWhatsAppGuide, setShowWhatsAppGuide] = useState(false)
   const [removeGpxFile, setRemoveGpxFile] = useState(false)
+  const [removeWhatsAppLink, setRemoveWhatsAppLink] = useState(false)
 
   const form = useForm<EditTourFormValues>({
     resolver: zodResolver(editTourSchema),
@@ -129,15 +130,11 @@ export default function EditTourPage() {
         // Reset GPX file removal state
         setRemoveGpxFile(false)
         setGpxFile(null)
+        // Reset WhatsApp link removal state
+        setRemoveWhatsAppLink(false)
         
         // Formular mit aktuellen Tour-Daten füllen
         const displayTour = tourData.pendingChanges ? { ...tourData, ...tourData.pendingChanges } : tourData
-        
-        // Debug: Log difficulty and WhatsApp link values
-        if (process.env.NODE_ENV === 'development') {
-          console.log('Tour difficulty:', displayTour.difficulty, typeof displayTour.difficulty)
-          console.log('Tour whatsappGroupLink:', displayTour.whatsappGroupLink, typeof displayTour.whatsappGroupLink)
-        }
         
         // Ensure leaderId is set - for leaders, use their own ID; for admins, use tour's leaderId
         const formLeaderId = currentUser.role === 'admin' 
@@ -148,15 +145,14 @@ export default function EditTourPage() {
         await new Promise(resolve => setTimeout(resolve, 100))
         
         // Stelle sicher, dass difficulty einen gültigen Wert hat
-        // difficulty kann ein Difficulty-Enum sein, also prüfe direkt auf String
         const difficultyValue = displayTour.difficulty && typeof displayTour.difficulty === 'string' && displayTour.difficulty.trim() !== ''
           ? displayTour.difficulty.trim()
           : (displayTour.difficulty || '')
         
-        // Debug: Log final difficulty value
-        if (process.env.NODE_ENV === 'development') {
-          console.log('Difficulty value for form:', difficultyValue)
-        }
+        // Stelle sicher, dass WhatsApp-Link korrekt gesetzt wird
+        const whatsappLinkValue = displayTour.whatsappGroupLink && typeof displayTour.whatsappGroupLink === 'string' && displayTour.whatsappGroupLink.trim() !== ''
+          ? displayTour.whatsappGroupLink.trim()
+          : (displayTour.whatsappGroupLink || '')
         
         form.reset({
           title: displayTour.title,
@@ -169,8 +165,15 @@ export default function EditTourPage() {
           duration: displayTour.duration.toString(),
           maxParticipants: displayTour.maxParticipants.toString(),
           leaderId: formLeaderId || '',
-          whatsappGroupLink: displayTour.whatsappGroupLink || '',
+          whatsappGroupLink: whatsappLinkValue,
         })
+        
+        // Stelle sicher, dass WhatsApp-Link explizit gesetzt wird, falls es beim Reset verloren geht
+        if (whatsappLinkValue) {
+          setTimeout(() => {
+            form.setValue('whatsappGroupLink', whatsappLinkValue, { shouldValidate: false, shouldDirty: false })
+          }, 150)
+        }
         
         // Stelle sicher, dass difficulty explizit gesetzt wird, nachdem tourType gesetzt ist
         // Warte nochmal kurz, damit die Select-Options verfügbar sind
@@ -221,14 +224,12 @@ export default function EditTourPage() {
       }
       
       // Normalisiere WhatsApp-Link: leerer String oder nur Whitespace wird zu null
-      const whatsappLinkValue = values.whatsappGroupLink && typeof values.whatsappGroupLink === 'string' && values.whatsappGroupLink.trim() !== ''
-        ? values.whatsappGroupLink.trim()
-        : null
-      
-      // Debug: Log WhatsApp link value
-      if (process.env.NODE_ENV === 'development') {
-        console.log('WhatsApp link value:', whatsappLinkValue, 'from:', values.whatsappGroupLink)
-      }
+      // Wenn removeWhatsAppLink true ist, setze auf null
+      const whatsappLinkValue = removeWhatsAppLink
+        ? null
+        : (values.whatsappGroupLink && typeof values.whatsappGroupLink === 'string' && values.whatsappGroupLink.trim() !== ''
+          ? values.whatsappGroupLink.trim()
+          : null)
       
       const updates = {
         title: values.title,
@@ -558,30 +559,84 @@ export default function EditTourPage() {
               <FormField
                 control={form.control}
                 name="whatsappGroupLink"
-                render={({ field }) => (
-                  <FormItem>
-                    <div className="flex items-center gap-2">
-                      <FormLabel>WhatsApp-Gruppen-Link (optional)</FormLabel>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="h-5 w-5"
-                        onClick={() => setShowWhatsAppGuide(true)}
-                        aria-label="Anleitung anzeigen"
-                      >
-                        <HelpCircle className="w-4 h-4 text-muted-foreground" />
-                      </Button>
+                render={({ field }) => {
+                  // Prüfe sowohl tour.whatsappGroupLink als auch field.value
+                  // field.value hat Priorität, da es der aktuelle Formularwert ist
+                  const currentLink = field.value || tour?.whatsappGroupLink || ''
+                  const hasLink = currentLink && typeof currentLink === 'string' && currentLink.trim() !== ''
+                  const displayLink = hasLink ? currentLink.trim() : ''
+                  
+                  return (
+                    <FormItem>
+                      <div className="flex items-center gap-2">
+                        <FormLabel>WhatsApp-Gruppen-Link (optional)</FormLabel>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-5 w-5"
+                          onClick={() => setShowWhatsAppGuide(true)}
+                          aria-label="Anleitung anzeigen"
+                        >
+                          <HelpCircle className="w-4 h-4 text-muted-foreground" />
+                        </Button>
+                      </div>
+                      <div className="space-y-2">
+                        {hasLink && !removeWhatsAppLink && (
+                        <div className="flex items-center justify-between p-2 border rounded-md bg-muted/50">
+                          <div className="flex-1 min-w-0 mr-2">
+                            <p className="text-xs text-muted-foreground mb-1">
+                              Aktueller Link:
+                            </p>
+                            <a
+                              href={displayLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-primary hover:underline truncate block"
+                            >
+                              {displayLink}
+                            </a>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setRemoveWhatsAppLink(true)
+                              field.onChange('')
+                            }}
+                          >
+                            <X className="w-4 h-4 mr-1" />
+                            Entfernen
+                          </Button>
+                        </div>
+                      )}
+                      {removeWhatsAppLink && (
+                        <p className="text-xs text-muted-foreground">
+                          WhatsApp-Link wird beim Speichern entfernt.
+                        </p>
+                      )}
+                      <FormControl>
+                        <Input
+                          placeholder="https://chat.whatsapp.com/..."
+                          value={removeWhatsAppLink ? '' : (field.value || displayLink)}
+                          onChange={(e) => {
+                            // Wenn der Benutzer beginnt zu tippen, entferne den "Entfernen"-Modus
+                            if (removeWhatsAppLink && e.target.value) {
+                              setRemoveWhatsAppLink(false)
+                            }
+                            field.onChange(e)
+                          }}
+                          onBlur={field.onBlur}
+                          name={field.name}
+                          ref={field.ref}
+                        />
+                      </FormControl>
                     </div>
-                    <FormControl>
-                      <Input
-                        placeholder="https://chat.whatsapp.com/..."
-                        {...field}
-                      />
-                    </FormControl>
                     <FormMessage />
                   </FormItem>
-                )}
+                  )
+                }}
               />
               
               {user?.role === 'admin' && (
