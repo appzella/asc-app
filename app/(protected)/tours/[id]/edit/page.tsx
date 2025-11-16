@@ -27,7 +27,7 @@ import { DatePicker } from '@/components/ui/date-picker'
 import { canEditTour } from '@/lib/roles'
 import { getDifficultyOptions } from '@/lib/difficulty'
 import Link from 'next/link'
-import { ChevronLeft, HelpCircle } from 'lucide-react'
+import { ChevronLeft, HelpCircle, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Separator } from '@/components/ui/separator'
 import { Label } from '@/components/ui/label'
@@ -76,6 +76,7 @@ export default function EditTourPage() {
   const [gpxFile, setGpxFile] = useState<File | null>(null)
   const gpxFileInputRef = useRef<HTMLInputElement>(null)
   const [showWhatsAppGuide, setShowWhatsAppGuide] = useState(false)
+  const [removeGpxFile, setRemoveGpxFile] = useState(false)
 
   const form = useForm<EditTourFormValues>({
     resolver: zodResolver(editTourSchema),
@@ -125,6 +126,10 @@ export default function EditTourPage() {
           setUsers(leaders)
         }
         
+        // Reset GPX file removal state
+        setRemoveGpxFile(false)
+        setGpxFile(null)
+        
         // Formular mit aktuellen Tour-Daten füllen
         const displayTour = tourData.pendingChanges ? { ...tourData, ...tourData.pendingChanges } : tourData
         
@@ -132,6 +137,9 @@ export default function EditTourPage() {
         const formLeaderId = currentUser.role === 'admin' 
           ? displayTour.leaderId 
           : (displayTour.leaderId || currentUser.id)
+        
+        // Warte kurz, damit Settings geladen sind, bevor Formular zurückgesetzt wird
+        await new Promise(resolve => setTimeout(resolve, 100))
         
         form.reset({
           title: displayTour.title,
@@ -205,9 +213,21 @@ export default function EditTourPage() {
       const submitForApproval = false // Nicht mehr benötigt mit neuer Status-Logik
       await dataRepository.updateTour(tourId, updates, submitForApproval)
 
-      // Upload GPX file if provided
-      if (gpxFile) {
+      // Handle GPX file: remove if requested, or upload new one
+      if (removeGpxFile && tour.gpxFile) {
         try {
+          await dataRepository.deleteGpxFile(tour.gpxFile)
+          await dataRepository.updateTour(tourId, { gpxFile: null })
+        } catch (gpxError) {
+          console.error('Error deleting GPX file:', gpxError)
+          toast.error('Tour wurde aktualisiert, aber GPX-Datei konnte nicht entfernt werden')
+        }
+      } else if (gpxFile) {
+        try {
+          // Delete old GPX file if exists
+          if (tour.gpxFile) {
+            await dataRepository.deleteGpxFile(tour.gpxFile)
+          }
           const gpxUrl = await dataRepository.uploadGpxFile(tourId, gpxFile)
           await dataRepository.updateTour(tourId, { gpxFile: gpxUrl })
         } catch (gpxError) {
@@ -358,7 +378,7 @@ export default function EditTourPage() {
                   <FormItem className="md:col-start-2 md:row-start-2">
                     <FormLabel>Schwierigkeit (SAC-Skala)</FormLabel>
                     <Select
-                      value={field.value}
+                      value={field.value || ''}
                       onValueChange={field.onChange}
                     >
                       <FormControl>
@@ -535,9 +555,31 @@ export default function EditTourPage() {
             <div className="space-y-2">
               <Label htmlFor="gpx-file-edit">GPX-Datei (optional)</Label>
               <div className="space-y-2">
-                {tour.gpxFile && (
+                {tour.gpxFile && !removeGpxFile && (
+                  <div className="flex items-center justify-between p-2 border rounded-md bg-muted/50">
+                    <p className="text-xs text-muted-foreground">
+                      Aktuelle GPX-Datei vorhanden
+                    </p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setRemoveGpxFile(true)
+                        setGpxFile(null)
+                        if (gpxFileInputRef.current) {
+                          gpxFileInputRef.current.value = ''
+                        }
+                      }}
+                    >
+                      <X className="w-4 h-4 mr-1" />
+                      Entfernen
+                    </Button>
+                  </div>
+                )}
+                {removeGpxFile && (
                   <p className="text-xs text-muted-foreground">
-                    Aktuelle GPX-Datei vorhanden. Neue Datei überschreibt die bestehende.
+                    GPX-Datei wird beim Speichern entfernt.
                   </p>
                 )}
                 <input
@@ -561,6 +603,7 @@ export default function EditTourPage() {
                         return
                       }
                       setGpxFile(file)
+                      setRemoveGpxFile(false) // Wenn neue Datei ausgewählt wird, nicht mehr entfernen
                     }
                   }}
                   className="w-full px-4 py-2.5 border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 border-border hover:border-border file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
