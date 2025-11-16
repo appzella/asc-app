@@ -133,6 +133,12 @@ export default function EditTourPage() {
         // Formular mit aktuellen Tour-Daten füllen
         const displayTour = tourData.pendingChanges ? { ...tourData, ...tourData.pendingChanges } : tourData
         
+        // Debug: Log difficulty and WhatsApp link values
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Tour difficulty:', displayTour.difficulty, typeof displayTour.difficulty)
+          console.log('Tour whatsappGroupLink:', displayTour.whatsappGroupLink, typeof displayTour.whatsappGroupLink)
+        }
+        
         // Ensure leaderId is set - for leaders, use their own ID; for admins, use tour's leaderId
         const formLeaderId = currentUser.role === 'admin' 
           ? displayTour.leaderId 
@@ -142,9 +148,15 @@ export default function EditTourPage() {
         await new Promise(resolve => setTimeout(resolve, 100))
         
         // Stelle sicher, dass difficulty einen gültigen Wert hat
-        const difficultyValue = displayTour.difficulty && displayTour.difficulty.trim() !== '' 
-          ? displayTour.difficulty 
-          : ''
+        // difficulty kann ein Difficulty-Enum sein, also prüfe direkt auf String
+        const difficultyValue = displayTour.difficulty && typeof displayTour.difficulty === 'string' && displayTour.difficulty.trim() !== ''
+          ? displayTour.difficulty.trim()
+          : (displayTour.difficulty || '')
+        
+        // Debug: Log final difficulty value
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Difficulty value for form:', difficultyValue)
+        }
         
         form.reset({
           title: displayTour.title,
@@ -160,9 +172,12 @@ export default function EditTourPage() {
           whatsappGroupLink: displayTour.whatsappGroupLink || '',
         })
         
-        // Stelle sicher, dass difficulty explizit gesetzt wird, falls es beim Reset verloren geht
+        // Stelle sicher, dass difficulty explizit gesetzt wird, nachdem tourType gesetzt ist
+        // Warte nochmal kurz, damit die Select-Options verfügbar sind
         if (difficultyValue) {
-          form.setValue('difficulty', difficultyValue, { shouldValidate: false })
+          setTimeout(() => {
+            form.setValue('difficulty', difficultyValue, { shouldValidate: false, shouldDirty: false })
+          }, 200)
         }
       }
     }
@@ -205,6 +220,16 @@ export default function EditTourPage() {
         return
       }
       
+      // Normalisiere WhatsApp-Link: leerer String oder nur Whitespace wird zu null
+      const whatsappLinkValue = values.whatsappGroupLink && typeof values.whatsappGroupLink === 'string' && values.whatsappGroupLink.trim() !== ''
+        ? values.whatsappGroupLink.trim()
+        : null
+      
+      // Debug: Log WhatsApp link value
+      if (process.env.NODE_ENV === 'development') {
+        console.log('WhatsApp link value:', whatsappLinkValue, 'from:', values.whatsappGroupLink)
+      }
+      
       const updates = {
         title: values.title,
         description: values.description,
@@ -216,7 +241,7 @@ export default function EditTourPage() {
         duration: parseInt(values.duration),
         maxParticipants: parseInt(values.maxParticipants),
         leaderId: finalLeaderId,
-        whatsappGroupLink: values.whatsappGroupLink && values.whatsappGroupLink.trim() !== '' ? values.whatsappGroupLink.trim() : null,
+        whatsappGroupLink: whatsappLinkValue,
       }
 
       // Wenn Tour bereits approved ist, werden Änderungen als pendingChanges gespeichert
@@ -400,35 +425,49 @@ export default function EditTourPage() {
               <FormField
                 control={form.control}
                 name="difficulty"
-                render={({ field }) => (
-                  <FormItem className="md:col-start-2 md:row-start-2">
-                    <FormLabel>Schwierigkeit (SAC-Skala)</FormLabel>
-                    <Select
-                      value={field.value || ''}
-                      onValueChange={field.onChange}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Bitte wählen" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {tourType ? (
-                          getDifficultyOptions(tourType as TourType, settings).map((opt) => (
-                            <SelectItem key={opt.value} value={opt.value}>
-                              {opt.label}
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                            Bitte zuerst Tourenart wählen
-                          </div>
-                        )}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  const difficultyOptions = tourType ? getDifficultyOptions(tourType as TourType, settings) : []
+                  const currentValue = field.value || ''
+                  
+                  return (
+                    <FormItem className="md:col-start-2 md:row-start-2">
+                      <FormLabel>Schwierigkeit (SAC-Skala)</FormLabel>
+                      <Select
+                        value={currentValue}
+                        onValueChange={field.onChange}
+                        disabled={!tourType}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder={tourType ? "Bitte wählen" : "Bitte zuerst Tourenart wählen"}>
+                              {currentValue && difficultyOptions.find(opt => opt.value === currentValue)?.label || currentValue}
+                            </SelectValue>
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {tourType ? (
+                            difficultyOptions.length > 0 ? (
+                              difficultyOptions.map((opt) => (
+                                <SelectItem key={opt.value} value={opt.value}>
+                                  {opt.label}
+                                </SelectItem>
+                              ))
+                            ) : (
+                              <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                                Lade Optionen...
+                              </div>
+                            )
+                          ) : (
+                            <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                              Bitte zuerst Tourenart wählen
+                            </div>
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )
+                }}
               />
 
               <FormField
