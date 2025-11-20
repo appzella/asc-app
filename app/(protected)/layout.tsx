@@ -43,13 +43,8 @@ export default function ProtectedLayout({
     let isMounted = true
 
     const initializeAuth = async () => {
-      // Wait for Supabase to restore session from localStorage
-      // onAuthStateChange with INITIAL_SESSION should fire, but we also wait a bit
-      // to ensure the session is fully restored
-      await new Promise(resolve => setTimeout(resolve, 200))
-      
       const currentUser = await authService.getCurrentUserAsync()
-      
+
       if (!isMounted) return
 
       setUser(currentUser)
@@ -65,11 +60,11 @@ export default function ProtectedLayout({
 
     const unsubscribe = authService.subscribe((updatedUser) => {
       if (!isMounted) return
-      
+
       setUser(updatedUser)
       // Don't set isLoading to false here if we're still initializing
       // The initial load will handle that
-      
+
       if (!updatedUser && !isLoading) {
         router.push('/login')
       }
@@ -145,28 +140,27 @@ export default function ProtectedLayout({
                   <ArrowLeft className="w-5 h-5" strokeWidth={2} />
                 </Button>
               )}
-              
+
               {/* Logo: Desktop immer links, Mobile nur auf Dashboard links */}
-              <Link 
+              <Link
                 href="/dashboard"
-                className={`flex items-center gap-2 ${
-                  pathname === '/dashboard' ? '' : 'hidden sm:flex'
-                }`}
+                className={`flex items-center gap-2 ${pathname === '/dashboard' ? '' : 'hidden sm:flex'
+                  }`}
               >
                 <ASCLogo size={32} />
                 <span className="text-2xl font-bold tracking-tight">ASC</span>
               </Link>
-              
+
               {/* Desktop Navigation Links */}
               <div className="hidden sm:flex sm:space-x-1 ml-4">
                 {desktopNavItems.map((item) => {
                   const itemKey = item.href || item.label
                   const hasChildren = item.children && item.children.length > 0
                   const isParentActive = hasChildren && item.children?.some(
-                    c => pathname === c.href || 
-                    (c.href === '/tours' && pathname?.startsWith('/tours/')) || 
-                    (c.href === '/users' && pathname?.startsWith('/users/')) || 
-                    (c.href === '/invitations' && pathname?.startsWith('/invitations/'))
+                    c => pathname === c.href ||
+                      (c.href === '/tours' && pathname?.startsWith('/tours/')) ||
+                      (c.href === '/users' && pathname?.startsWith('/users/')) ||
+                      (c.href === '/invitations' && pathname?.startsWith('/invitations/'))
                   )
 
                   if (hasChildren) {
@@ -174,11 +168,10 @@ export default function ProtectedLayout({
                       <DropdownMenu key={itemKey}>
                         <DropdownMenuTrigger asChild>
                           <button
-                            className={`inline-flex items-center gap-1 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                              isParentActive
+                            className={`inline-flex items-center gap-1 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${isParentActive
                                 ? 'bg-primary-50 text-primary-600'
                                 : 'text-muted-foreground hover:text-white hover:bg-accent'
-                            }`}
+                              }`}
                           >
                             {item.label}
                             <ChevronDown className="w-4 h-4" strokeWidth={1.8} />
@@ -186,19 +179,18 @@ export default function ProtectedLayout({
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="start" className="w-48">
                           {item.children?.map((child) => {
-                            const isActive = pathname === child.href || 
-                              (child.href === '/tours' && pathname?.startsWith('/tours/')) || 
-                              (child.href === '/users' && pathname?.startsWith('/users/')) || 
+                            const isActive = pathname === child.href ||
+                              (child.href === '/tours' && pathname?.startsWith('/tours/')) ||
+                              (child.href === '/users' && pathname?.startsWith('/users/')) ||
                               (child.href === '/invitations' && pathname?.startsWith('/invitations/'))
                             return (
                               <DropdownMenuItem key={child.href} asChild>
                                 <Link
                                   href={child.href}
-                                  className={`w-full ${
-                                    isActive
+                                  className={`w-full ${isActive
                                       ? 'bg-primary-50 text-primary-600'
                                       : ''
-                                  }`}
+                                    }`}
                                 >
                                   {child.label}
                                 </Link>
@@ -212,17 +204,16 @@ export default function ProtectedLayout({
 
                   // Normales Link-Item ohne Untermenü
                   if (!item.href) return null
-                  
+
                   const isActive = pathname === item.href
                   return (
                     <Link
                       key={itemKey}
                       href={item.href}
-                      className={`inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                        isActive
+                      className={`inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${isActive
                           ? 'bg-primary-50 text-primary-600'
                           : 'text-muted-foreground hover:text-white hover:bg-accent'
-                      }`}
+                        }`}
                     >
                       {item.label}
                     </Link>
@@ -230,7 +221,7 @@ export default function ProtectedLayout({
                 })}
               </div>
             </div>
-            
+
             {/* Mitte: ASC Logo (Mobile, nur auf anderen Seiten) */}
             {pathname !== '/dashboard' && (
               <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-2 sm:hidden">
@@ -240,7 +231,7 @@ export default function ProtectedLayout({
                 </Link>
               </div>
             )}
-            
+
             {/* Rechts: Settings und Profil */}
             <div className="flex items-center space-x-3 flex-1 justify-end">
               {/* Settings Icon für Mobile (nur Admin) */}
@@ -253,38 +244,37 @@ export default function ProtectedLayout({
                   aria-label="Einstellungen"
                 >
                   <Link href="/settings">
-                    <Settings 
-                      className="w-5 h-5 text-foreground" 
-                      strokeWidth={2} 
+                    <Settings
+                      className="w-5 h-5 text-foreground"
+                      strokeWidth={2}
                     />
                   </Link>
                 </Button>
               )}
-                <Button
-                  variant="ghost"
-                  asChild
-                  className={`hidden sm:flex items-center gap-2 ${
-                    pathname === '/profile' ? 'bg-primary-50 text-primary-600' : ''
+              <Button
+                variant="ghost"
+                asChild
+                className={`hidden sm:flex items-center gap-2 ${pathname === '/profile' ? 'bg-primary-50 text-primary-600' : ''
                   }`}
-                >
-                  <Link href="/profile" className="flex items-center gap-2">
-                    <Avatar className="w-8 h-8 flex-shrink-0">
-                      <AvatarImage
-                        src={user.profilePhoto || undefined}
-                        alt={user.name}
-                        className="object-cover"
-                        key={user.profilePhoto || user.id}
-                      />
-                      <AvatarFallback>
-                        {user.name.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-sm font-medium leading-none">{user.name}</span>
-                    <Badge variant="secondary" className="text-xs">
-                      {getRoleLabel(user.role)}
-                    </Badge>
-                  </Link>
-                </Button>
+              >
+                <Link href="/profile" className="flex items-center gap-2">
+                  <Avatar className="w-8 h-8 flex-shrink-0">
+                    <AvatarImage
+                      src={user.profilePhoto || undefined}
+                      alt={user.name}
+                      className="object-cover"
+                      key={user.profilePhoto || user.id}
+                    />
+                    <AvatarFallback>
+                      {user.name.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm font-medium leading-none">{user.name}</span>
+                  <Badge variant="secondary" className="text-xs">
+                    {getRoleLabel(user.role)}
+                  </Badge>
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
