@@ -71,78 +71,133 @@
   * {
     @apply border-border;
   }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
     overscroll-behavior-y: contain;
     font-weight: 400;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
   }
+
   h1 {
     @apply scroll-m-20 text-4xl font-bold tracking-tight lg:text-5xl;
   }
+
   h2 {
     @apply scroll-m-20 border-b pb-2 text-2xl font-semibold tracking-tight first:mt-0;
   }
+
   h3 {
     @apply scroll-m-20 text-xl font-semibold tracking-tight;
   }
+
   h4 {
     @apply scroll-m-20 text-lg font-semibold tracking-tight;
   }
+
   p {
     @apply leading-7;
   }
+
   p:not(:first-child) {
     @apply mt-6;
   }
-  h1 + p,
-  h2 + p,
-  h3 + p,
-  h4 + p {
+
+  h1+p,
+  h2+p,
+  h3+p,
+  h4+p {
     @apply !mt-0;
   }
+
   blockquote {
     @apply mt-6 border-l-2 pl-6 italic;
   }
+
   ul {
     @apply my-6 ml-6 list-disc;
   }
-  ul > li {
+
+  ul>li {
     @apply mt-2;
   }
+
   ol {
     @apply my-6 ml-6 list-decimal;
   }
-  ol > li {
+
+  ol>li {
     @apply mt-2;
   }
+
   code {
     @apply relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold;
   }
+
   pre {
     @apply my-6 overflow-x-auto rounded-lg border bg-muted p-4;
   }
+
   pre code {
     @apply relative rounded bg-transparent p-0 font-mono text-sm;
   }
+
   table {
     @apply my-6 w-full overflow-y-auto;
   }
+
   table thead {
     @apply border-b;
   }
+
   table tbody {
     @apply divide-y;
   }
+
   table tr {
     @apply m-0 border-t p-0 even:bg-muted;
   }
+
   table th {
     @apply border px-4 py-2 text-left font-bold [&[align=center]]:text-center [&[align=right]]:text-right;
   }
+
   table td {
     @apply border px-4 py-2 text-left [&[align=center]]:text-center [&[align=right]]:text-right;
   }
 }
 
+@layer utilities {
+  .glass {
+    @apply bg-white/70 dark:bg-black/70 backdrop-blur-md border border-white/20 dark:border-white/10;
+  }
+
+  .animate-in {
+    animation: animate-in 0.3s ease-out forwards;
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-out forwards;
+  }
+}
+
+@keyframes animate-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}

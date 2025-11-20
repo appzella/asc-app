@@ -16,7 +16,7 @@ export class SupabaseDataRepository implements IDataRepository {
     if (!error) return false
 
     // Prüfe auf session_not_found oder ähnliche Auth-Fehler
-    const isSessionError = 
+    const isSessionError =
       error.code === 'PGRST301' || // JWT expired
       error.message?.includes('session_not_found') ||
       error.message?.includes('JWT expired') ||
@@ -25,20 +25,20 @@ export class SupabaseDataRepository implements IDataRepository {
 
     if (isSessionError) {
       console.warn('Session invalid or expired, signing out...', error)
-      
+
       // Session löschen
       if (typeof window !== 'undefined' && supabase) {
         supabase.auth.signOut().catch(() => {
           // Ignore errors during signout
         })
-        
+
         // Zum Login umleiten
         window.location.href = '/login'
       }
-      
+
       return true
     }
-    
+
     return false
   }
   // User Management
@@ -77,9 +77,9 @@ export class SupabaseDataRepository implements IDataRepository {
         }
         return null
       }
-    
+
       if (!data) return null
-    
+
       try {
         return this.mapDbUserToUser(data)
       } catch (error) {
@@ -187,7 +187,7 @@ export class SupabaseDataRepository implements IDataRepository {
       }
       return null
     }
-    
+
     // Check if we got data back
     if (!data || data.length === 0) {
       // Update might have succeeded but RLS prevented us from reading it back
@@ -204,7 +204,7 @@ export class SupabaseDataRepository implements IDataRepository {
       }
       return null
     }
-    
+
     // Use first result if multiple (shouldn't happen, but be safe)
     return this.mapDbUserToUser(data[0])
   }
@@ -225,7 +225,7 @@ export class SupabaseDataRepository implements IDataRepository {
       }
       return []
     }
-    
+
     // Load waitlists for all tours
     const tourIds = (data || []).map((row: any) => row.id)
     const { data: waitlistData } = await supabase
@@ -244,7 +244,7 @@ export class SupabaseDataRepository implements IDataRepository {
         waitlistByTour[row.tour_id].push(row.user_id)
       }
     }
-    
+
     return (data || []).map((row: any) => this.mapDbTourToTour(row, waitlistByTour[row.id] || []))
   }
 
@@ -266,9 +266,9 @@ export class SupabaseDataRepository implements IDataRepository {
         console.error('Error fetching tour:', error)
         return null
       }
-      
+
       if (!data) return null
-      
+
       // Load waitlist separately
       const { data: waitlistData, error: waitlistError } = await supabase
         .from('tour_waitlist')
@@ -281,7 +281,7 @@ export class SupabaseDataRepository implements IDataRepository {
       }
 
       const waitlist = (waitlistData || []).map((row: any) => row.user_id)
-      
+
       return this.mapDbTourToTour(data, waitlist)
     } catch (error) {
       console.error('Error in getTourById:', error)
@@ -305,7 +305,7 @@ export class SupabaseDataRepository implements IDataRepository {
       }
       return []
     }
-    
+
     // Load waitlists for all tours
     const tourIds = (data || []).map((row: any) => row.id)
     const { data: waitlistData } = await supabase
@@ -324,7 +324,7 @@ export class SupabaseDataRepository implements IDataRepository {
         waitlistByTour[row.tour_id].push(row.user_id)
       }
     }
-    
+
     return (data || []).map((row: any) => this.mapDbTourToTour(row, waitlistByTour[row.id] || []))
   }
 
@@ -344,7 +344,7 @@ export class SupabaseDataRepository implements IDataRepository {
       }
       return []
     }
-    
+
     // Load waitlists for all tours
     const tourIds = (data || []).map((row: any) => row.id)
     const { data: waitlistData } = await supabase
@@ -363,7 +363,7 @@ export class SupabaseDataRepository implements IDataRepository {
         waitlistByTour[row.tour_id].push(row.user_id)
       }
     }
-    
+
     return (data || []).map((row: any) => this.mapDbTourToTour(row, waitlistByTour[row.id] || []))
   }
 
@@ -384,7 +384,7 @@ export class SupabaseDataRepository implements IDataRepository {
       }
       return []
     }
-    
+
     // Load waitlists for all tours
     const tourIds = (data || []).map((row: any) => row.id)
     const { data: waitlistData } = await supabase
@@ -403,7 +403,7 @@ export class SupabaseDataRepository implements IDataRepository {
         waitlistByTour[row.tour_id].push(row.user_id)
       }
     }
-    
+
     return (data || []).map((row: any) => this.mapDbTourToTour(row, waitlistByTour[row.id] || []))
   }
 
@@ -433,7 +433,7 @@ export class SupabaseDataRepository implements IDataRepository {
       }
       throw new Error('Session expired')
     }
-    
+
     const createdTour = await this.getTourById(data.id)
     if (!createdTour) throw new Error('Failed to retrieve created tour')
     return createdTour
@@ -484,7 +484,7 @@ export class SupabaseDataRepository implements IDataRepository {
   async publishTour(id: string): Promise<Tour | null> {
     const { error } = await supabase
       .from('tours')
-      .update({ 
+      .update({
         status: 'published',
         submitted_for_publishing: false,
       })
@@ -502,7 +502,7 @@ export class SupabaseDataRepository implements IDataRepository {
   async unpublishTour(id: string): Promise<Tour | null> {
     const { error } = await supabase
       .from('tours')
-      .update({ 
+      .update({
         status: 'draft',
         submitted_for_publishing: false,
       })
@@ -520,7 +520,7 @@ export class SupabaseDataRepository implements IDataRepository {
   async cancelTour(id: string): Promise<Tour | null> {
     const { error } = await supabase
       .from('tours')
-      .update({ 
+      .update({
         status: 'cancelled',
         submitted_for_publishing: false,
       })
@@ -565,7 +565,7 @@ export class SupabaseDataRepository implements IDataRepository {
     if (!tour || tour.status !== 'published') {
       return false
     }
-    
+
     // Prüfe ob Tour archiviert ist (Datum in der Vergangenheit)
     const today = new Date()
     today.setHours(0, 0, 0, 0)
@@ -574,12 +574,12 @@ export class SupabaseDataRepository implements IDataRepository {
     if (tourDate < today) {
       return false
     }
-    
+
     // Prüfe ob bereits Teilnehmer oder auf Warteliste
     if (tour.participants.includes(userId) || tour.waitlist.includes(userId)) {
       return false
     }
-    
+
     // Wenn Tour voll ist, zur Warteliste hinzufügen
     if (tour.participants.length >= tour.maxParticipants) {
       const { error } = await supabase
@@ -590,7 +590,7 @@ export class SupabaseDataRepository implements IDataRepository {
         })
       return !error
     }
-    
+
     // Sonst als Teilnehmer hinzufügen
     const { error } = await supabase
       .from('tour_participants')
@@ -608,7 +608,7 @@ export class SupabaseDataRepository implements IDataRepository {
     if (!tour) {
       return false
     }
-    
+
     // Entferne Teilnehmer
     const { error: deleteError } = await supabase
       .from('tour_participants')
@@ -619,7 +619,7 @@ export class SupabaseDataRepository implements IDataRepository {
     if (deleteError) {
       return false
     }
-    
+
     // Automatisches Nachrücken: Wenn noch Platz unter maxParticipants und Warteliste vorhanden
     if (tour.participants.length - 1 < tour.maxParticipants && tour.waitlist.length > 0) {
       // Hole ersten Eintrag von der Warteliste (ältestes created_at)
@@ -655,7 +655,7 @@ export class SupabaseDataRepository implements IDataRepository {
   // Invitations
   async createInvitation(email: string, createdBy: string): Promise<Invitation> {
     const token = `inv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-    
+
     const { data, error } = await supabase
       .from('invitations')
       .insert({
@@ -760,22 +760,22 @@ export class SupabaseDataRepository implements IDataRepository {
       tourTypeIcons: {},
     }
 
-    ;(data || []).forEach((row: any) => {
-      if (row.setting_type === 'tour_type') {
-        settings.tourTypes.push(row.setting_key)
-        if (row.icon_name) {
-          settings.tourTypeIcons![row.setting_key] = row.icon_name
+      ; (data || []).forEach((row: any) => {
+        if (row.setting_type === 'tour_type') {
+          settings.tourTypes.push(row.setting_key)
+          if (row.icon_name) {
+            settings.tourTypeIcons![row.setting_key] = row.icon_name
+          }
+        } else if (row.setting_type === 'tour_length') {
+          settings.tourLengths.push(row.setting_key)
+        } else if (row.setting_type === 'difficulty') {
+          const tourType = row.setting_value || 'unknown'
+          if (!settings.difficulties[tourType]) {
+            settings.difficulties[tourType] = []
+          }
+          settings.difficulties[tourType].push(row.setting_key)
         }
-      } else if (row.setting_type === 'tour_length') {
-        settings.tourLengths.push(row.setting_key)
-      } else if (row.setting_type === 'difficulty') {
-        const tourType = row.setting_value || 'unknown'
-        if (!settings.difficulties[tourType]) {
-          settings.difficulties[tourType] = []
-        }
-        settings.difficulties[tourType].push(row.setting_key)
-      }
-    })
+      })
 
     return settings
   }
@@ -848,55 +848,80 @@ export class SupabaseDataRepository implements IDataRepository {
       return false
     }
 
-    // Prüfe, ob der neue Name bereits existiert
+    const trimmedNewName = newName.trim()
+
+    // 1. Prüfe, ob der neue Name bereits existiert
     const { data: existing } = await supabase
       .from('tour_settings')
       .select('setting_key')
       .eq('setting_type', 'tour_type')
-      .eq('setting_key', newName.trim())
+      .eq('setting_key', trimmedNewName)
       .single()
 
     if (existing) {
       return false // Name bereits vorhanden
     }
 
-    // Update in tour_settings
-    const { error: settingsError } = await supabase
+    // 2. Hole die Daten des alten Eintrags (für Icon, Display Order etc.)
+    const { data: oldSetting, error: fetchError } = await supabase
       .from('tour_settings')
-      .update({ setting_key: newName.trim() })
+      .select('*')
       .eq('setting_type', 'tour_type')
       .eq('setting_key', oldName)
+      .single()
 
-    if (settingsError) {
-      if (!this.handleSupabaseError(settingsError)) {
-        throw settingsError
+    if (fetchError || !oldSetting) {
+      console.error('Fehler beim Laden des alten Tourentyps:', fetchError)
+      return false
+    }
+
+    // 3. Erstelle den neuen Eintrag
+    const { error: insertError } = await supabase
+      .from('tour_settings')
+      .insert({
+        ...oldSetting,
+        setting_key: trimmedNewName,
+        // ID weglassen, da sie automatisch generiert wird
+        id: undefined,
+        created_at: undefined
+      })
+
+    if (insertError) {
+      console.error('Fehler beim Erstellen des neuen Tourentyps:', JSON.stringify(insertError, null, 2))
+      if (!this.handleSupabaseError(insertError)) {
+        throw insertError
       }
       return false
     }
 
-    // Update all tours that use this tour type
+    // 4. Update alle Touren, die diesen Typ verwenden
     const { error: toursError } = await supabase
       .from('tours')
-      .update({ tour_type: newName.trim() })
+      .update({ tour_type: trimmedNewName })
       .eq('tour_type', oldName)
 
     if (toursError) {
+      console.error('Fehler beim Aktualisieren der Touren:', JSON.stringify(toursError, null, 2))
+      // Versuche Rollback (neuen Typ löschen)
+      await supabase.from('tour_settings').delete().eq('setting_type', 'tour_type').eq('setting_key', trimmedNewName)
+
       if (!this.handleSupabaseError(toursError)) {
         throw toursError
       }
       return false
     }
 
-    // Update icon mapping if it exists
-    const { data: iconData } = await supabase
+    // 5. Lösche den alten Eintrag
+    const { error: deleteError } = await supabase
       .from('tour_settings')
-      .select('icon_name')
+      .delete()
       .eq('setting_type', 'tour_type')
-      .eq('setting_key', newName.trim())
-      .single()
+      .eq('setting_key', oldName)
 
-    // If icon exists, we need to update the old icon reference
-    // The icon_name is already updated with the setting_key, so we're good
+    if (deleteError) {
+      console.error('Fehler beim Löschen des alten Tourentyps:', deleteError)
+      // Das ist nicht kritisch, aber unschön. Wir lassen es durchgehen, loggen es aber.
+    }
 
     return true
   }
@@ -1156,10 +1181,10 @@ export class SupabaseDataRepository implements IDataRepository {
 
   private mapDbTourToTour(row: any, waitlist: string[] = []): Tour {
     // Ensure status is valid (fallback to 'draft' if invalid)
-    const validStatus = ['draft', 'published', 'cancelled'].includes(row.status) 
-      ? row.status 
+    const validStatus = ['draft', 'published', 'cancelled'].includes(row.status)
+      ? row.status
       : 'draft'
-    
+
     return {
       id: row.id,
       title: row.title,
@@ -1283,8 +1308,8 @@ export class SupabaseDataRepository implements IDataRepository {
     const filePath = `gpx/${tourId}/${fileName}`
 
     // Determine correct MIME type
-    const mimeType = fileExt === 'gpx' 
-      ? 'application/gpx+xml' 
+    const mimeType = fileExt === 'gpx'
+      ? 'application/gpx+xml'
       : 'application/xml'
 
     // Create a new File object with the correct MIME type
@@ -1369,7 +1394,7 @@ export class SupabaseDataRepository implements IDataRepository {
         const { error: removeError } = await supabase.storage
           .from('avatars')
           .remove([filePath])
-        
+
         if (removeError) {
           this.handleSupabaseError(removeError)
           // Don't throw - deletion is not critical

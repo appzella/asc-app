@@ -28,7 +28,7 @@ export default function DashboardPage() {
         const allTours = await dataRepository.getTours()
         const today = new Date()
         today.setHours(0, 0, 0, 0)
-        
+
         // Zukünftige Touren (published oder cancelled - beide sollen sichtbar sein)
         const futureTours = allTours.filter((t) => {
           const tourDate = new Date(t.date)
@@ -36,7 +36,7 @@ export default function DashboardPage() {
           return tourDate >= today && (t.status === 'published' || t.status === 'cancelled')
         })
         setTours(futureTours)
-        
+
         // Vergangene Touren (Archiv)
         const pastTours = allTours.filter((t) => {
           const tourDate = new Date(t.date)
@@ -44,7 +44,7 @@ export default function DashboardPage() {
           return tourDate < today
         })
         setArchivedTours(pastTours)
-        
+
         if (currentUser.role === 'admin') {
           const submitted = await dataRepository.getToursSubmittedForPublishing()
           setPendingTours(submitted)
@@ -53,10 +53,10 @@ export default function DashboardPage() {
           const submitted = allTours.filter((t) => t.leaderId === currentUser.id && t.status === 'draft' && t.submittedForPublishing === true)
           setPendingTours(submitted)
         }
-        
+
         setIsLoading(false)
       }
-      
+
       loadTours()
     } else {
       setIsLoading(false)
@@ -100,7 +100,7 @@ export default function DashboardPage() {
     )
   }
 
-  const myTours = tours.filter((t) => 
+  const myTours = tours.filter((t) =>
     t.participants.includes(user.id) || t.leaderId === user.id
   )
 
@@ -138,22 +138,22 @@ export default function DashboardPage() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="flex flex-col transition-all h-full group">
+        <Card className="flex flex-col transition-all duration-300 h-full group hover:shadow-lg hover:border-primary/20 hover:-translate-y-1">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <ListChecks className="w-5 h-5 text-primary-600" strokeWidth={2} />
+              <ListChecks className="w-5 h-5 text-primary transition-colors group-hover:text-primary/80" strokeWidth={2} />
               <span className="text-xl">Meine Touren</span>
             </CardTitle>
             <CardDescription>Angemeldete oder geleitete Touren</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col flex-1">
             <div className="flex items-baseline gap-2 mb-4">
-              <span className="text-3xl font-bold text-primary-600">{myTours.length}</span>
+              <span className="text-3xl font-bold text-primary">{myTours.length}</span>
               <span className="text-sm text-muted-foreground">Touren</span>
             </div>
             <div className="mt-auto">
               <Link href="/tours?my=true">
-                <Button variant="outline" size="sm" className="w-full">
+                <Button variant="outline" size="sm" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                   Meine Touren öffnen
                 </Button>
               </Link>
@@ -161,22 +161,22 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="flex flex-col transition-all h-full group">
+        <Card className="flex flex-col transition-all duration-300 h-full group hover:shadow-lg hover:border-primary/20 hover:-translate-y-1">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-primary-600" strokeWidth={2} />
+              <Calendar className="w-5 h-5 text-primary transition-colors group-hover:text-primary/80" strokeWidth={2} />
               <span className="text-xl">Verfügbare Touren</span>
             </CardTitle>
             <CardDescription>Freigegebene Touren</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col flex-1">
             <div className="flex items-baseline gap-2 mb-4">
-              <span className="text-3xl font-bold text-primary-600">{tours.length}</span>
+              <span className="text-3xl font-bold text-primary">{tours.length}</span>
               <span className="text-sm text-muted-foreground">Touren</span>
             </div>
             <div className="mt-auto">
               <Link href="/tours">
-                <Button variant="outline" size="sm" className="w-full">
+                <Button variant="outline" size="sm" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                   Alle Touren durchsuchen
                 </Button>
               </Link>
@@ -184,22 +184,22 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="flex flex-col transition-all h-full group">
+        <Card className="flex flex-col transition-all duration-300 h-full group hover:shadow-lg hover:border-primary/20 hover:-translate-y-1">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Archive className="w-5 h-5 text-primary-600" strokeWidth={2} />
+              <Archive className="w-5 h-5 text-primary transition-colors group-hover:text-primary/80" strokeWidth={2} />
               <span className="text-xl">Tourenarchiv</span>
             </CardTitle>
             <CardDescription>Vergangene Touren</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col flex-1">
             <div className="flex items-baseline gap-2 mb-4">
-              <span className="text-3xl font-bold text-primary-600">{archivedTours.length}</span>
+              <span className="text-3xl font-bold text-primary">{archivedTours.length}</span>
               <span className="text-sm text-muted-foreground">Touren</span>
             </div>
             <div className="mt-auto">
               <Link href="/tours/archive">
-                <Button variant="outline" size="sm" className="w-full">
+                <Button variant="outline" size="sm" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                   Archiv öffnen
                 </Button>
               </Link>
@@ -208,10 +208,10 @@ export default function DashboardPage() {
         </Card>
 
         {(user.role === 'admin' || user.role === 'leader') && (
-          <Card className="flex flex-col transition-all h-full group">
+          <Card className="flex flex-col transition-all duration-300 h-full group hover:shadow-lg hover:border-primary/20 hover:-translate-y-1">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <PlusCircle className="w-5 h-5 text-primary-600" strokeWidth={2} />
+                <PlusCircle className="w-5 h-5 text-primary transition-colors group-hover:text-primary/80" strokeWidth={2} />
                 <span className="text-xl">Tour erstellen</span>
               </CardTitle>
               <CardDescription>Erstelle eine neue Tour</CardDescription>
@@ -219,7 +219,7 @@ export default function DashboardPage() {
             <CardContent className="flex flex-col flex-1">
               <div className="mt-auto">
                 <Link href="/tours/create">
-                  <Button variant="default" size="sm" className="w-full">
+                  <Button variant="default" size="sm" className="w-full shadow-md hover:shadow-lg transition-all">
                     Neue Tour
                   </Button>
                 </Link>
@@ -228,10 +228,10 @@ export default function DashboardPage() {
           </Card>
         )}
 
-        <Card className="flex flex-col transition-all h-full group">
+        <Card className="flex flex-col transition-all duration-300 h-full group hover:shadow-lg hover:border-primary/20 hover:-translate-y-1">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <BookOpen className="w-5 h-5 text-primary-600" strokeWidth={2} />
+              <BookOpen className="w-5 h-5 text-primary transition-colors group-hover:text-primary/80" strokeWidth={2} />
               <span className="text-xl">Hilfe</span>
             </CardTitle>
             <CardDescription>Benötigst du Hilfe bei der Nutzung der App?</CardDescription>
@@ -239,7 +239,7 @@ export default function DashboardPage() {
           <CardContent className="flex flex-col flex-1">
             <div className="mt-auto">
               <Link href="/help">
-                <Button variant="outline" size="sm" className="w-full">
+                <Button variant="outline" size="sm" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                   Hilfe öffnen
                 </Button>
               </Link>

@@ -90,9 +90,9 @@ export default function ProfilePage() {
     const initializeProfile = async () => {
       // Use async method to get the most recent user data
       const currentUser = await authService.getCurrentUserAsync()
-      
+
       if (!isMounted) return
-      
+
       setUser(currentUser)
 
       if (currentUser) {
@@ -112,7 +112,7 @@ export default function ProfilePage() {
 
     const unsubscribe = authService.subscribe((updatedUser) => {
       if (!isMounted) return
-      
+
       setUser(updatedUser)
       if (updatedUser) {
         // Nur resetten wenn sich die Werte wirklich geändert haben und Form nicht gerade bearbeitet wird
@@ -232,12 +232,12 @@ export default function ProfilePage() {
       const repo = dataRepository as any
       if (typeof repo.uploadProfilePhoto === 'function') {
         const photoUrl = await repo.uploadProfilePhoto(user.id, croppedFile)
-        
+
         // Update user with new photo URL
         const updatedUser = await dataRepository.updateUser(user.id, {
           profilePhoto: photoUrl,
         })
-        
+
         if (updatedUser) {
           setUser(updatedUser)
           // Refresh authService to update navbar and other components
@@ -379,7 +379,7 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
+      <div className="max-w-7xl mx-auto space-y-6 animate-fade-in">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <Skeleton className="h-9 w-32 mb-2" />
@@ -387,8 +387,8 @@ export default function ProfilePage() {
           </div>
           <Skeleton className="h-9 w-24" />
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <Card>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className="h-fit">
             <CardHeader>
               <Skeleton className="h-6 w-32" />
             </CardHeader>
@@ -400,13 +400,13 @@ export default function ProfilePage() {
               </div>
             </CardContent>
           </Card>
-          <div className="lg:col-span-2 space-y-4">
+          <div className="lg:col-span-2 space-y-6">
             <Card>
               <CardHeader>
                 <Skeleton className="h-6 w-48" />
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <Skeleton className="h-10 w-full" />
                   <Skeleton className="h-10 w-full" />
                   <Skeleton className="h-10 w-full" />
@@ -600,171 +600,171 @@ export default function ProfilePage() {
                           </p>
                         </div>
                       )}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <FormField
-                            control={profileForm.control}
-                            name="name"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Name</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="Ihr Name" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={profileForm.control}
+                          name="name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Name</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Ihr Name" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                          <FormField
-                            control={profileForm.control}
-                            name="email"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>E-Mail</FormLabel>
-                                <FormControl>
-                                  <Input type="email" disabled className="bg-muted" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                        <FormField
+                          control={profileForm.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>E-Mail</FormLabel>
+                              <FormControl>
+                                <Input type="email" disabled className="bg-muted" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={profileForm.control}
+                          name="phone"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Telefon (Festnetz)</FormLabel>
+                              <FormControl>
+                                <PhoneInput
+                                  defaultCountry="CH"
+                                  countries={['CH', 'DE', 'AT', 'FR', 'IT', 'LI']}
+                                  value={field.value || undefined}
+                                  onChange={(value) => {
+                                    // Wenn der Wert nur aus dem Ländercode besteht (z.B. "+670" oder "+41"), setze undefined
+                                    // Ländercodes sind normalerweise 1-3 Ziffern nach dem "+"
+                                    if (value && /^\+[0-9]{1,3}$/.test(value)) {
+                                      field.onChange(undefined)
+                                    } else {
+                                      field.onChange(value || undefined)
+                                    }
+                                  }}
+                                  placeholder="Telefonnummer eingeben"
+                                  className="w-full"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={profileForm.control}
+                          name="mobile"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Mobile</FormLabel>
+                              <FormControl>
+                                <PhoneInput
+                                  defaultCountry="CH"
+                                  countries={['CH', 'DE', 'AT', 'FR', 'IT', 'LI']}
+                                  value={field.value || undefined}
+                                  onChange={(value) => {
+                                    // Wenn der Wert nur aus dem Ländercode besteht (z.B. "+670" oder "+41"), setze undefined
+                                    // Ländercodes sind normalerweise 1-3 Ziffern nach dem "+"
+                                    if (value && /^\+[0-9]{1,3}$/.test(value)) {
+                                      field.onChange(undefined)
+                                    } else {
+                                      field.onChange(value || undefined)
+                                    }
+                                  }}
+                                  placeholder="Handynummer eingeben"
+                                  className="w-full"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <Separator />
+                      <div className="space-y-4">
+                        <div>
+                          <h4 className="mb-1">Adresse</h4>
+                          <p className="text-xs text-muted-foreground">Deine Kontaktadresse</p>
                         </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <FormField
-                            control={profileForm.control}
-                            name="phone"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Telefon (Festnetz)</FormLabel>
-                                <FormControl>
-                                  <PhoneInput
-                                    defaultCountry="CH"
-                                    countries={['CH', 'DE', 'AT', 'FR', 'IT', 'LI']}
-                                    value={field.value || undefined}
-                                    onChange={(value) => {
-                                      // Wenn der Wert nur aus dem Ländercode besteht (z.B. "+670" oder "+41"), setze undefined
-                                      // Ländercodes sind normalerweise 1-3 Ziffern nach dem "+"
-                                      if (value && /^\+[0-9]{1,3}$/.test(value)) {
-                                        field.onChange(undefined)
-                                      } else {
-                                        field.onChange(value || undefined)
-                                      }
-                                    }}
-                                    placeholder="Telefonnummer eingeben"
-                                    className="w-full"
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={profileForm.control}
-                            name="mobile"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Mobile</FormLabel>
-                                <FormControl>
-                                  <PhoneInput
-                                    defaultCountry="CH"
-                                    countries={['CH', 'DE', 'AT', 'FR', 'IT', 'LI']}
-                                    value={field.value || undefined}
-                                    onChange={(value) => {
-                                      // Wenn der Wert nur aus dem Ländercode besteht (z.B. "+670" oder "+41"), setze undefined
-                                      // Ländercodes sind normalerweise 1-3 Ziffern nach dem "+"
-                                      if (value && /^\+[0-9]{1,3}$/.test(value)) {
-                                        field.onChange(undefined)
-                                      } else {
-                                        field.onChange(value || undefined)
-                                      }
-                                    }}
-                                    placeholder="Handynummer eingeben"
-                                    className="w-full"
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-
-                        <Separator />
-                        <div className="space-y-4">
-                          <div>
-                            <h4 className="mb-1">Adresse</h4>
-                            <p className="text-xs text-muted-foreground">Deine Kontaktadresse</p>
+                        <FormField
+                          control={profileForm.control}
+                          name="street"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Adresse</FormLabel>
+                              <FormControl>
+                                <AddressAutocomplete
+                                  value={profileForm.watch('street') || ''}
+                                  onChange={(value) => {
+                                    field.onChange(value)
+                                  }}
+                                  onAddressSelect={(address) => {
+                                    profileForm.setValue('street', address.street)
+                                    profileForm.setValue('zip', address.zip)
+                                    profileForm.setValue('city', address.city)
+                                  }}
+                                  placeholder="Adresse eingeben (z.B. Musterstrasse 123, 9000 St. Gallen)"
+                                  useGooglePlaces={!!process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <div className="flex flex-col md:flex-row gap-4">
+                          <div className="w-full md:w-1/4">
+                            <FormField
+                              control={profileForm.control}
+                              name="zip"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>PLZ</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="9000" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
                           </div>
-                          <FormField
-                            control={profileForm.control}
-                            name="street"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Adresse</FormLabel>
-                                <FormControl>
-                                  <AddressAutocomplete
-                                    value={profileForm.watch('street') || ''}
-                                    onChange={(value) => {
-                                      field.onChange(value)
-                                    }}
-                                    onAddressSelect={(address) => {
-                                      profileForm.setValue('street', address.street)
-                                      profileForm.setValue('zip', address.zip)
-                                      profileForm.setValue('city', address.city)
-                                    }}
-                                    placeholder="Adresse eingeben (z.B. Musterstrasse 123, 9000 St. Gallen)"
-                                    useGooglePlaces={!!process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <div className="flex flex-col md:flex-row gap-4">
-                            <div className="w-full md:w-1/4">
-                              <FormField
-                                control={profileForm.control}
-                                name="zip"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>PLZ</FormLabel>
-                                    <FormControl>
-                                      <Input placeholder="9000" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            </div>
 
-                            <div className="w-full md:flex-1">
-                              <FormField
-                                control={profileForm.control}
-                                name="city"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Ort</FormLabel>
-                                    <FormControl>
-                                      <Input placeholder="St. Gallen" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            </div>
+                          <div className="w-full md:flex-1">
+                            <FormField
+                              control={profileForm.control}
+                              name="city"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Ort</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="St. Gallen" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
                           </div>
                         </div>
+                      </div>
 
-                        <div className="pt-2">
-                          <Button type="submit" variant="default" disabled={isLoading} className="w-full sm:w-auto">
-                            {isLoading ? 'Wird gespeichert...' : 'Änderungen speichern'}
-                          </Button>
-                        </div>
-                      </form>
-                    </Form>
-                  </CardContent>
-                </Card>
+                      <div className="pt-2">
+                        <Button type="submit" variant="default" disabled={isLoading} className="w-full sm:w-auto">
+                          {isLoading ? 'Wird gespeichert...' : 'Änderungen speichern'}
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
+                </CardContent>
+              </Card>
             )}
 
             {activeTab === 'password' && (
@@ -775,67 +775,67 @@ export default function ProfilePage() {
                 <CardContent>
                   <Form {...passwordForm}>
                     <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-6">
-                        <FormField
-                          control={passwordForm.control}
-                          name="currentPassword"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Aktuelles Passwort</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="password"
-                                  placeholder="Ihr aktuelles Passwort"
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={passwordForm.control}
-                          name="newPassword"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Neues Passwort</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="password"
-                                  placeholder="Mindestens 6 Zeichen"
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={passwordForm.control}
-                          name="confirmPassword"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Neues Passwort bestätigen</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="password"
-                                  placeholder="Passwort wiederholen"
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                      <FormField
+                        control={passwordForm.control}
+                        name="currentPassword"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Aktuelles Passwort</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="password"
+                                placeholder="Ihr aktuelles Passwort"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={passwordForm.control}
+                        name="newPassword"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Neues Passwort</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="password"
+                                placeholder="Mindestens 6 Zeichen"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={passwordForm.control}
+                        name="confirmPassword"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Neues Passwort bestätigen</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="password"
+                                placeholder="Passwort wiederholen"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                        <div className="pt-2">
-                          <Button type="submit" variant="default" disabled={isLoading} className="w-full sm:w-auto">
-                            {isLoading ? 'Wird gespeichert...' : 'Passwort ändern'}
-                          </Button>
-                        </div>
-                      </form>
-                    </Form>
-                  </CardContent>
-                </Card>
+                      <div className="pt-2">
+                        <Button type="submit" variant="default" disabled={isLoading} className="w-full sm:w-auto">
+                          {isLoading ? 'Wird gespeichert...' : 'Passwort ändern'}
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
+                </CardContent>
+              </Card>
             )}
           </div>
         </div>

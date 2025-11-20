@@ -169,8 +169,8 @@ export default function ProtectedLayout({
                         <DropdownMenuTrigger asChild>
                           <button
                             className={`inline-flex items-center gap-1 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${isParentActive
-                                ? 'bg-primary-50 text-primary-600'
-                                : 'text-muted-foreground hover:text-white hover:bg-accent'
+                              ? 'bg-primary-50 text-primary-600'
+                              : 'text-muted-foreground hover:text-white hover:bg-accent'
                               }`}
                           >
                             {item.label}
@@ -188,8 +188,8 @@ export default function ProtectedLayout({
                                 <Link
                                   href={child.href}
                                   className={`w-full ${isActive
-                                      ? 'bg-primary-50 text-primary-600'
-                                      : ''
+                                    ? 'bg-primary-50 text-primary-600'
+                                    : ''
                                     }`}
                                 >
                                   {child.label}
@@ -211,8 +211,8 @@ export default function ProtectedLayout({
                       key={itemKey}
                       href={item.href}
                       className={`inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${isActive
-                          ? 'bg-primary-50 text-primary-600'
-                          : 'text-muted-foreground hover:text-white hover:bg-accent'
+                        ? 'bg-primary-50 text-primary-600'
+                        : 'text-muted-foreground hover:text-white hover:bg-accent'
                         }`}
                     >
                       {item.label}

@@ -31,7 +31,7 @@ export default function ToursPage() {
   const [tours, setTours] = useState<Tour[]>([])
   const [filteredTours, setFilteredTours] = useState<Tour[]>([])
   const [settings, setSettings] = useState<TourSettings | null>(null)
-  
+
   // Filter state
   const [statusFilter, setStatusFilter] = useState<string>('')
   const [typeFilter, setTypeFilter] = useState<string>('')
@@ -49,13 +49,13 @@ export default function ToursPage() {
       const loadData = async () => {
         const tourSettings = await dataRepository.getSettings()
         setSettings(tourSettings)
-        
+
         let allTours = await dataRepository.getTours()
-        
+
         // URL-Parameter prüfen
         const statusParam = searchParams.get('status')
         const myParam = searchParams.get('my')
-        
+
         if (statusParam === 'submitted' && currentUser.role === 'admin') {
           allTours = await dataRepository.getToursSubmittedForPublishing()
           setStatusFilter('submitted')
@@ -70,9 +70,9 @@ export default function ToursPage() {
           allTours = allTours.filter((t) => t.status === 'published' || t.status === 'cancelled')
         } else if (currentUser.role === 'leader') {
           // Leaders sehen ihre eigenen Entwürfe, veröffentlichte und abgesagte Touren (Kommentar - keine Änderung nötig)
-          allTours = allTours.filter((t) => 
-            t.status === 'published' || 
-            t.status === 'cancelled' || 
+          allTours = allTours.filter((t) =>
+            t.status === 'published' ||
+            t.status === 'cancelled' ||
             (t.status === 'draft' && t.leaderId === currentUser.id)
           )
         }
@@ -84,7 +84,7 @@ export default function ToursPage() {
         setTours(allTours)
         setFilteredTours(allTours)
       }
-      
+
       loadData()
     }
 
@@ -111,7 +111,7 @@ export default function ToursPage() {
 
     // Meine Touren Filter
     if (showMyTours && user) {
-      filtered = filtered.filter((t) => 
+      filtered = filtered.filter((t) =>
         t.participants.includes(user.id) || t.leaderId === user.id
       )
     }
@@ -411,7 +411,7 @@ export default function ToursPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            
+
             {user.role === 'admin' && (
               <div className="space-y-2">
                 <Label>Status</Label>
@@ -506,16 +506,18 @@ export default function ToursPage() {
 
       {/* Tour Liste */}
       {filteredTours.length === 0 ? (
-        <Card>
+        <Card className="animate-fade-in">
           <CardContent className="text-center py-12">
             <p className="text-muted-foreground text-base">Keine Touren gefunden.</p>
             <CardDescription className="mt-2">Versuche es mit anderen Filtern.</CardDescription>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in">
           {filteredTours.map((tour) => (
-            <TourCard key={tour.id} tour={tour} tourTypeIcons={settings?.tourTypeIcons} userRole={user?.role} />
+            <div key={tour.id} className="h-full transition-transform hover:-translate-y-1 duration-300">
+              <TourCard tour={tour} tourTypeIcons={settings?.tourTypeIcons} userRole={user?.role} />
+            </div>
           ))}
         </div>
       )}

@@ -119,16 +119,21 @@ export default function TourTypesSettingsPage() {
       return
     }
 
-    const success = await dataRepository.renameTourType(editingType, editValue.trim())
-    if (success) {
-      const settings = await dataRepository.getSettings()
-      setTourTypes(settings.tourTypes)
-      setTourTypeIcons(settings.tourTypeIcons || {})
-      toast.success('Tourentyp umbenannt!')
-      setEditingType(null)
-      setEditValue('')
-    } else {
-      toast.error('Dieser Tourentyp existiert bereits')
+    try {
+      const success = await dataRepository.renameTourType(editingType, editValue.trim())
+      if (success) {
+        const settings = await dataRepository.getSettings()
+        setTourTypes(settings.tourTypes)
+        setTourTypeIcons(settings.tourTypeIcons || {})
+        toast.success('Tourentyp umbenannt!')
+        setEditingType(null)
+        setEditValue('')
+      } else {
+        toast.error('Dieser Tourentyp existiert bereits oder konnte nicht umbenannt werden')
+      }
+    } catch (error) {
+      console.error('Fehler beim Umbenennen:', error)
+      toast.error('Ein Fehler ist aufgetreten. Bitte versuche es erneut.')
     }
   }
 
@@ -176,10 +181,10 @@ export default function TourTypesSettingsPage() {
     e.preventDefault()
     e.stopPropagation()
     setDragOverIndex(null)
-    
+
     const dragIndexStr = e.dataTransfer.getData('application/json') || e.dataTransfer.getData('text/html')
     const dragIndex = parseInt(dragIndexStr)
-    
+
     if (isNaN(dragIndex) || dragIndex === dropIndex) return
 
     const newOrder = [...tourTypes]
@@ -313,7 +318,7 @@ export default function TourTypesSettingsPage() {
                 const CurrentIconComponent = getTourIcon(type as any, tourTypeIcons)
                 const isPickerOpen = openIconPicker === type
                 const isDragOver = dragOverIndex === index
-                
+
                 return (
                   <div key={type} className="relative">
                     {isDragOver && (
@@ -333,155 +338,154 @@ export default function TourTypesSettingsPage() {
                       onDrop={(e) => handleDrop(e, index)}
                       className="flex items-center justify-between gap-3 p-3 bg-muted rounded-md border border-border cursor-move hover:bg-muted transition-all group relative"
                     >
-                    <span className="text-muted-foreground group-hover:text-muted-foreground flex-shrink-0 text-sm">☰</span>
-                    <div className="relative flex-shrink-0">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        draggable={false}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setOpenIconPicker(isPickerOpen ? null : type)
-                        }}
-                        onDragStart={(e) => e.stopPropagation()}
-                        className="h-auto p-1.5 gap-1"
-                      >
-                        <CurrentIconComponent className="w-4 h-4 text-muted-foreground" strokeWidth={2} />
-                        <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${isPickerOpen ? 'rotate-180' : ''}`} strokeWidth={2} />
-                      </Button>
-                      {isPickerOpen && (
+                      <span className="text-muted-foreground group-hover:text-muted-foreground flex-shrink-0 text-sm">☰</span>
+                      <div className="relative flex-shrink-0">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          draggable={false}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setOpenIconPicker(isPickerOpen ? null : type)
+                          }}
+                          onDragStart={(e) => e.stopPropagation()}
+                          className="h-auto p-1.5 gap-1"
+                        >
+                          <CurrentIconComponent className="w-4 h-4 text-muted-foreground" strokeWidth={2} />
+                          <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${isPickerOpen ? 'rotate-180' : ''}`} strokeWidth={2} />
+                        </Button>
+                        {isPickerOpen && (
+                          <>
+                            <div
+                              className="fixed inset-0 z-10"
+                              onClick={() => setOpenIconPicker(null)}
+                            />
+                            <div className="absolute top-full left-0 mt-2 z-20 bg-background rounded-md shadow-lg border border-border p-2 grid grid-cols-4 gap-2 w-64 max-h-64 overflow-y-auto">
+                              {popularIcons
+                                .filter((iconOption, index, self) => {
+                                  // Entferne Duplikate basierend auf value
+                                  const firstIndex = self.findIndex(i => i.value === iconOption.value)
+                                  if (firstIndex !== index) return false
+
+                                  // Prüfe, ob Icon wirklich existiert
+                                  try {
+                                    const testIcon = getIconByName(iconOption.value)
+                                    // Wenn das Icon nicht existiert, gibt getIconByName das Mountain Fallback zurück
+                                    // Prüfe, ob es wirklich existiert, indem wir testen ob es ein anderes Icon zurückgibt als bei einem ungültigen Namen
+                                    const fallbackTest = getIconByName('NonExistentIcon12345')
+                                    // Wenn beide gleich sind (beide Mountain), dann existiert das Icon nicht wirklich
+                                    return testIcon !== fallbackTest || iconOption.value === 'Mountain'
+                                  } catch {
+                                    return false
+                                  }
+                                })
+                                .map((iconOption) => {
+                                  const IconOptionComponent = getIconByName(iconOption.value)
+                                  const isSelected = iconOption.value === currentIconName
+                                  return (
+                                    <button
+                                      key={iconOption.value}
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        handleIconChange(type, iconOption.value)
+                                        setOpenIconPicker(null)
+                                      }}
+                                      className={`flex items-center justify-center p-2 rounded-md hover:bg-muted transition-colors touch-target ${isSelected ? 'bg-primary-50 border border-primary-500' : 'border border-transparent'
+                                        }`}
+                                    >
+                                      <IconOptionComponent
+                                        className={`w-5 h-5 ${isSelected ? 'text-primary-600' : 'text-muted-foreground'}`}
+                                        strokeWidth={2}
+                                      />
+                                    </button>
+                                  )
+                                })}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                      {editingType === type ? (
                         <>
-                          <div 
-                            className="fixed inset-0 z-10" 
-                            onClick={() => setOpenIconPicker(null)}
+                          <Input
+                            value={editValue}
+                            onChange={(e) => setEditValue(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault()
+                                handleSaveEdit()
+                              } else if (e.key === 'Escape') {
+                                e.preventDefault()
+                                handleCancelEdit()
+                              }
+                            }}
+                            className="flex-1 h-8 text-sm"
+                            autoFocus
+                            draggable={false}
+                            onDragStart={(e) => e.stopPropagation()}
                           />
-                          <div className="absolute top-full left-0 mt-2 z-20 bg-background rounded-md shadow-lg border border-border p-2 grid grid-cols-4 gap-2 w-64 max-h-64 overflow-y-auto">
-                            {popularIcons
-                              .filter((iconOption, index, self) => {
-                                // Entferne Duplikate basierend auf value
-                                const firstIndex = self.findIndex(i => i.value === iconOption.value)
-                                if (firstIndex !== index) return false
-                                
-                                // Prüfe, ob Icon wirklich existiert
-                                try {
-                                  const testIcon = getIconByName(iconOption.value)
-                                  // Wenn das Icon nicht existiert, gibt getIconByName das Mountain Fallback zurück
-                                  // Prüfe, ob es wirklich existiert, indem wir testen ob es ein anderes Icon zurückgibt als bei einem ungültigen Namen
-                                  const fallbackTest = getIconByName('NonExistentIcon12345')
-                                  // Wenn beide gleich sind (beide Mountain), dann existiert das Icon nicht wirklich
-                                  return testIcon !== fallbackTest || iconOption.value === 'Mountain'
-                                } catch {
-                                  return false
-                                }
-                              })
-                              .map((iconOption) => {
-                                const IconOptionComponent = getIconByName(iconOption.value)
-                                const isSelected = iconOption.value === currentIconName
-                                return (
-                                  <button
-                                    key={iconOption.value}
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      handleIconChange(type, iconOption.value)
-                                      setOpenIconPicker(null)
-                                    }}
-                                    className={`flex items-center justify-center p-2 rounded-md hover:bg-muted transition-colors touch-target ${
-                                      isSelected ? 'bg-primary-50 border border-primary-500' : 'border border-transparent'
-                                    }`}
-                                  >
-                                    <IconOptionComponent 
-                                      className={`w-5 h-5 ${isSelected ? 'text-primary-600' : 'text-muted-foreground'}`} 
-                                      strokeWidth={2} 
-                                    />
-                                  </button>
-                                )
-                              })}
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              draggable={false}
+                              onClick={handleSaveEdit}
+                              onDragStart={(e) => e.stopPropagation()}
+                              className="h-8 w-8 p-0"
+                              aria-label="Speichern"
+                            >
+                              <Check className="w-4 h-4" strokeWidth={2} />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              draggable={false}
+                              onClick={handleCancelEdit}
+                              onDragStart={(e) => e.stopPropagation()}
+                              className="h-8 w-8 p-0"
+                              aria-label="Abbrechen"
+                            >
+                              <X className="w-4 h-4" strokeWidth={2} />
+                            </Button>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <span className="font-medium text-foreground flex-1 min-w-0 truncate text-sm">{type}</span>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              draggable={false}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleStartEdit(type)
+                              }}
+                              onDragStart={(e) => e.stopPropagation()}
+                              className="h-9 w-9 p-0"
+                              aria-label="Bearbeiten"
+                            >
+                              <SquarePen className="w-4 h-4" strokeWidth={2} />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              draggable={false}
+                              onClick={() => handleRemove(type)}
+                              onDragStart={(e) => e.stopPropagation()}
+                              className="h-9 w-9 p-0"
+                              aria-label="Entfernen"
+                            >
+                              <Trash2 className="w-4 h-4" strokeWidth={2} />
+                            </Button>
                           </div>
                         </>
                       )}
-                    </div>
-                    {editingType === type ? (
-                      <>
-                        <Input
-                          value={editValue}
-                          onChange={(e) => setEditValue(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault()
-                              handleSaveEdit()
-                            } else if (e.key === 'Escape') {
-                              e.preventDefault()
-                              handleCancelEdit()
-                            }
-                          }}
-                          className="flex-1 h-8 text-sm"
-                          autoFocus
-                          draggable={false}
-                          onDragStart={(e) => e.stopPropagation()}
-                        />
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            draggable={false}
-                            onClick={handleSaveEdit}
-                            onDragStart={(e) => e.stopPropagation()}
-                            className="h-8 w-8 p-0"
-                            aria-label="Speichern"
-                          >
-                            <Check className="w-4 h-4" strokeWidth={2} />
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            draggable={false}
-                            onClick={handleCancelEdit}
-                            onDragStart={(e) => e.stopPropagation()}
-                            className="h-8 w-8 p-0"
-                            aria-label="Abbrechen"
-                          >
-                            <X className="w-4 h-4" strokeWidth={2} />
-                          </Button>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <span className="font-medium text-foreground flex-1 min-w-0 truncate text-sm">{type}</span>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            draggable={false}
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleStartEdit(type)
-                            }}
-                            onDragStart={(e) => e.stopPropagation()}
-                            className="h-9 w-9 p-0"
-                            aria-label="Bearbeiten"
-                          >
-                            <SquarePen className="w-4 h-4" strokeWidth={2} />
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="sm"
-                            draggable={false}
-                            onClick={() => handleRemove(type)}
-                            onDragStart={(e) => e.stopPropagation()}
-                            className="h-9 w-9 p-0"
-                            aria-label="Entfernen"
-                          >
-                            <Trash2 className="w-4 h-4" strokeWidth={2} />
-                          </Button>
-                        </div>
-                      </>
-                    )}
                     </div>
                   </div>
                 )
