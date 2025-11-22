@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -20,6 +21,7 @@ import {
 import { authService } from '@/lib/auth'
 import { LoginTimeoutError } from '@/lib/auth/supabaseAuth'
 import { ASCLogo } from '@/components/ui/ASCLogo'
+import Snowfall from 'react-snowfall'
 
 const loginSchema = z.object({
   email: z.string().email('Ungültige E-Mail-Adresse').min(1, 'E-Mail ist erforderlich'),
@@ -47,7 +49,7 @@ export default function LoginPage() {
 
     try {
       const user = await authService.login(values.email, values.password)
-      
+
       if (user) {
         router.push('/dashboard')
         router.refresh()
@@ -69,8 +71,24 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-12">
-      <Card className="w-full max-w-md animate-scale-in">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 relative overflow-hidden">
+      <Image
+        src="/login-background.jpg"
+        alt="Login Background"
+        fill
+        className="object-cover"
+        priority
+      />
+      <div className="w-full absolute inset-0 h-full z-0">
+        <Snowfall
+          color="white"
+          snowflakeCount={1500}
+          radius={[0.2, 1.0]}
+          speed={[1.0, 5.0]}
+          wind={[0.5, 4.0]}
+        />
+      </div>
+      <Card className="w-full max-w-md animate-scale-in relative z-10">
         <CardHeader>
           <div className="text-center">
             <div className="flex justify-center mb-4">
@@ -90,11 +108,11 @@ export default function LoginPage() {
                   <FormItem>
                     <FormLabel>E-Mail</FormLabel>
                     <FormControl>
-              <Input
-                type="email"
-                placeholder="deine.email@example.com"
+                      <Input
+                        type="email"
+                        placeholder="deine.email@example.com"
                         {...field}
-              />
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -107,14 +125,14 @@ export default function LoginPage() {
                   <FormItem>
                     <div className="flex items-center justify-between">
                       <FormLabel>Passwort</FormLabel>
-                <a
-                  href="/forgot-password"
-                  className="text-sm text-primary-600 hover:text-primary-700 hover:underline transition-colors"
-                  tabIndex={-1}
-                >
-                  Passwort vergessen?
-                </a>
-              </div>
+                      <a
+                        href="/forgot-password"
+                        className="text-sm text-primary-600 hover:text-primary-700 hover:underline transition-colors"
+                        tabIndex={-1}
+                      >
+                        Passwort vergessen?
+                      </a>
+                    </div>
                     <FormControl>
                       <Input type="password" {...field} />
                     </FormControl>
@@ -122,15 +140,15 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
-            {error && (
+              {error && (
                 <Alert variant="destructive">
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
-            )}
-            <Button type="submit" className="w-full mt-6" disabled={isLoading}>
-              {isLoading ? 'Wird angemeldet...' : 'Anmelden'}
-            </Button>
-          </form>
+              )}
+              <Button type="submit" className="w-full mt-6" disabled={isLoading}>
+                {isLoading ? 'Wird angemeldet...' : 'Anmelden'}
+              </Button>
+            </form>
           </Form>
         </CardContent>
       </Card>
