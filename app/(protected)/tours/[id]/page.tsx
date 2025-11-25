@@ -1140,7 +1140,7 @@ export default function TourDetailPage() {
                   </Avatar>
                   <div className="flex-1">
                     <div className="text-sm font-medium">{user.name}</div>
-                    <div className="text-xs opacity-70">{user.email}</div>
+                    <div className="text-xs text-muted-foreground">{user.email}</div>
                   </div>
                 </CommandItem>
               ))}
