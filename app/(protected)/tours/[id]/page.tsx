@@ -70,7 +70,7 @@ export default function TourDetailPage() {
             dataRepository.getTourById(tourId),
             dataRepository.getSettings()
           ])
-          
+
           if (!tourData) {
             router.push('/tours')
             return
@@ -130,7 +130,7 @@ export default function TourDetailPage() {
           // Reload waitlist
           const waitlistUsers = await dataRepository.getWaitlistByTourId(tourId)
           setWaitlist(waitlistUsers)
-          
+
           // Zeige WhatsApp-Dialog wenn Link vorhanden
           if (updatedTour.whatsappGroupLink) {
             setShowWhatsAppDialog(true)
@@ -275,7 +275,7 @@ export default function TourDetailPage() {
           // Reload waitlist
           const waitlistUsers = await dataRepository.getWaitlistByTourId(tourId)
           setWaitlist(waitlistUsers)
-          
+
           const addedUser = await dataRepository.getUserById(userId)
           toast.success(`${addedUser?.name || 'Teilnehmer'} wurde zur Tour hinzugefügt`)
           setShowAddParticipantDialog(false)
@@ -487,14 +487,14 @@ export default function TourDetailPage() {
   const isLeader = tour.leaderId === user.id
   const canManageWaitlist = isLeader || user.role === 'admin'
   const manuallyAdded = Math.max(0, tour.participants.length - tour.maxParticipants)
-  
+
   // Prüfe ob Tour archiviert ist (Datum in der Vergangenheit)
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   const tourDate = new Date(tour.date)
   tourDate.setHours(0, 0, 0, 0)
   const isArchived = tourDate < today
-  
+
   // Kann sich normal anmelden (nur wenn Tour nicht voll ist)
   const canRegister = tour.status === 'published' && !isRegistered && !isFull && !isLeader && !isArchived && !isOnWaitlist
   // Kann sich auf Warteliste setzen (wenn Tour voll ist oder wenn Tour nicht voll aber User möchte explizit auf Warteliste)
@@ -541,9 +541,9 @@ export default function TourDetailPage() {
       {/* Mobile: Karte im Vollbildmodus anzeigen */}
       {tour.gpxFile && showMapOnMobile && (
         <div className="sm:hidden">
-          <TourMap 
-            gpxUrl={tour.gpxFile} 
-            height="400px" 
+          <TourMap
+            gpxUrl={tour.gpxFile}
+            height="400px"
             initialFullscreen={true}
             onFullscreenChange={(isFullscreen) => {
               if (!isFullscreen) {
@@ -749,10 +749,10 @@ export default function TourDetailPage() {
                     <Button variant="outline" onClick={handleUnpublish} className="w-full" size="sm">
                       Auf Entwurf setzen
                     </Button>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => setShowCancelDialog(true)} 
-                      className="w-full border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground" 
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowCancelDialog(true)}
+                      className="w-full border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
                       size="sm"
                     >
                       Tour absagen
@@ -839,21 +839,21 @@ export default function TourDetailPage() {
                           </Button>
                         ) : (
                           <p className="text-xs text-muted-foreground font-medium">
-                            {isLeader 
-                              ? 'Du bist der Tourenleiter' 
-                              : isArchived 
-                              ? 'Diese Tour liegt in der Vergangenheit'
-                              : 'Anmeldung nicht möglich'}
+                            {isLeader
+                              ? 'Du bist der Tourenleiter'
+                              : isArchived
+                                ? 'Diese Tour liegt in der Vergangenheit'
+                                : 'Anmeldung nicht möglich'}
                           </p>
                         )}
                       </>
                     ) : !canRegister ? (
                       <p className="text-xs text-muted-foreground font-medium">
-                        {isLeader 
-                          ? 'Du bist der Tourenleiter' 
-                          : isArchived 
-                          ? 'Diese Tour liegt in der Vergangenheit'
-                          : 'Anmeldung nicht möglich'}
+                        {isLeader
+                          ? 'Du bist der Tourenleiter'
+                          : isArchived
+                            ? 'Diese Tour liegt in der Vergangenheit'
+                            : 'Anmeldung nicht möglich'}
                       </p>
                     ) : (
                       <Button
@@ -882,8 +882,8 @@ export default function TourDetailPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex flex-col items-center gap-4">
-                  <QRCode 
-                    data={tour.whatsappGroupLink} 
+                  <QRCode
+                    data={tour.whatsappGroupLink}
                     className="w-48 h-48 rounded-lg border bg-white p-4"
                   />
                   <Button
@@ -891,9 +891,9 @@ export default function TourDetailPage() {
                     className="w-full"
                     asChild
                   >
-                    <a 
-                      href={tour.whatsappGroupLink} 
-                      target="_blank" 
+                    <a
+                      href={tour.whatsappGroupLink}
+                      target="_blank"
                       rel="noopener noreferrer"
                     >
                       <ExternalLink className="w-4 h-4 mr-2" />
@@ -1057,7 +1057,7 @@ export default function TourDetailPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={handleCancel}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
@@ -1078,7 +1078,7 @@ export default function TourDetailPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={handleDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
@@ -1104,7 +1104,7 @@ export default function TourDetailPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setParticipantToRemove(null)}>Abbrechen</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={handleConfirmRemoveParticipant}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
@@ -1140,7 +1140,7 @@ export default function TourDetailPage() {
                   </Avatar>
                   <div className="flex-1">
                     <div className="text-sm font-medium">{user.name}</div>
-                    <div className="text-xs text-muted-foreground">{user.email}</div>
+                    <div className="text-xs opacity-70">{user.email}</div>
                   </div>
                 </CommandItem>
               ))}
@@ -1161,8 +1161,8 @@ export default function TourDetailPage() {
           {tour?.whatsappGroupLink && (
             <div className="space-y-4 py-4">
               <div className="flex flex-col items-center gap-4">
-                <QRCode 
-                  data={tour.whatsappGroupLink} 
+                <QRCode
+                  data={tour.whatsappGroupLink}
                   className="w-48 h-48 rounded-lg border bg-white p-4"
                 />
                 <Button
@@ -1170,9 +1170,9 @@ export default function TourDetailPage() {
                   className="w-full"
                   asChild
                 >
-                  <a 
-                    href={tour.whatsappGroupLink} 
-                    target="_blank" 
+                  <a
+                    href={tour.whatsappGroupLink}
+                    target="_blank"
                     rel="noopener noreferrer"
                   >
                     <ExternalLink className="w-4 h-4 mr-2" />
