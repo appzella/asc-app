@@ -884,7 +884,7 @@ export default function TourDetailPage() {
                 <div className="flex flex-col items-center gap-4">
                   <QRCode
                     data={tour.whatsappGroupLink}
-                    className="w-48 h-48 rounded-lg border bg-white p-4"
+                    className="hidden md:flex w-48 h-48 rounded-lg border bg-white p-4"
                   />
                   <Button
                     variant="default"
@@ -1163,7 +1163,7 @@ export default function TourDetailPage() {
               <div className="flex flex-col items-center gap-4">
                 <QRCode
                   data={tour.whatsappGroupLink}
-                  className="w-48 h-48 rounded-lg border bg-white p-4"
+                  className="hidden md:flex w-48 h-48 rounded-lg border bg-white p-4"
                 />
                 <Button
                   variant="default"

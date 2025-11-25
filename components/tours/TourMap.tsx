@@ -77,10 +77,10 @@ function GPXLayer({ gpxUrl }: { gpxUrl: string }) {
       try {
         // Importiere leaflet-gpx - es fügt L.GPX hinzu
         await import('leaflet-gpx')
-        
+
         // Warte kurz, damit L.GPX verfügbar ist
         await new Promise(resolve => setTimeout(resolve, 100))
-        
+
         // Greife auf L.GPX zu
         const GPX = (L as any).GPX
         if (!GPX || typeof GPX !== 'function') {
@@ -209,13 +209,13 @@ function useFullscreenControl(initialFullscreen = false, onFullscreenChange?: (i
 
 function MapInitializer({ onMapReady }: { onMapReady: (map: L.Map) => void }) {
   const map = useMap()
-  
+
   useEffect(() => {
     if (map) {
       onMapReady(map)
     }
   }, [map, onMapReady])
-  
+
   return null
 }
 
@@ -247,15 +247,15 @@ export default function TourMap({ gpxUrl, height = '400px', initialFullscreen = 
 
   // Render-Funktion für die Karte (wird sowohl normal als auch im Fullscreen verwendet)
   const renderMap = (mapHeight: string) => (
-    <div 
-      className="relative w-full" 
+    <div
+      className="relative w-full"
       style={{ height: mapHeight }}
       data-map-wrapper
     >
       {/* Kartensteuerung - rechtsbündig ausgerichtet */}
-      <div 
-        className="absolute top-2 right-2 flex flex-col gap-2 items-end" 
-        style={{ 
+      <div
+        className="absolute top-2 right-2 flex flex-col gap-2 items-end"
+        style={{
           zIndex: 40
         }}
       >
@@ -286,7 +286,7 @@ export default function TourMap({ gpxUrl, height = '400px', initialFullscreen = 
             Satellit
           </Button>
         </div>
-        
+
         {/* Layer-Button mit Popover und Tooltip - quadratisch */}
         <TooltipProvider>
           <Popover open={isLayerPanelOpen} onOpenChange={setIsLayerPanelOpen}>
@@ -321,7 +321,7 @@ export default function TourMap({ gpxUrl, height = '400px', initialFullscreen = 
                     onCheckedChange={setShowHangneigung}
                   />
                 </div>
-                
+
                 {/* Wanderwege */}
                 <div className="flex items-center justify-between">
                   <label htmlFor="wanderwege" className="text-xs font-medium cursor-pointer">
@@ -333,7 +333,7 @@ export default function TourMap({ gpxUrl, height = '400px', initialFullscreen = 
                     onCheckedChange={setShowWanderwege}
                   />
                 </div>
-                
+
                 {/* Jagdbanngebiete */}
                 <div className="flex items-center justify-between">
                   <label htmlFor="jagdbanngebiete" className="text-xs font-medium cursor-pointer">
@@ -345,7 +345,7 @@ export default function TourMap({ gpxUrl, height = '400px', initialFullscreen = 
                     onCheckedChange={setShowJagdbanngebiete}
                   />
                 </div>
-                
+
                 {/* Wildruhezonen */}
                 <div className="flex items-center justify-between">
                   <label htmlFor="wildruhezonen" className="text-xs font-medium cursor-pointer">
@@ -360,7 +360,7 @@ export default function TourMap({ gpxUrl, height = '400px', initialFullscreen = 
               </div>
             </PopoverContent>
           </Popover>
-          
+
           {/* Vollbild-Button mit Tooltip - quadratisch */}
           <Tooltip>
             <TooltipTrigger asChild>
@@ -436,7 +436,7 @@ export default function TourMap({ gpxUrl, height = '400px', initialFullscreen = 
           <WMSTileLayer
             url="https://wms.geo.admin.ch/"
             params={{
-              layers: 'ch.bafu.jagdbanngebiete',
+              layers: 'ch.bafu.bundesinventare-jagdbanngebiete',
               format: 'image/png',
               transparent: true,
               version: '1.3.0',
@@ -448,7 +448,7 @@ export default function TourMap({ gpxUrl, height = '400px', initialFullscreen = 
           <WMSTileLayer
             url="https://wms.geo.admin.ch/"
             params={{
-              layers: 'ch.bafu.wildruhezonen',
+              layers: 'ch.bafu.wrz-wildruhezonen_portal',
               format: 'image/png',
               transparent: true,
               version: '1.3.0',
@@ -466,11 +466,11 @@ export default function TourMap({ gpxUrl, height = '400px', initialFullscreen = 
     <>
       {/* Fullscreen Overlay - ähnlich wie auf SAC-Website */}
       {isFullscreen && (
-        <div 
+        <div
           className="fixed inset-0 z-[9999] bg-background"
           onClick={() => toggleFullscreen()}
         >
-          <div 
+          <div
             className="relative w-full h-full"
             onClick={(e) => e.stopPropagation()}
           >
@@ -478,7 +478,7 @@ export default function TourMap({ gpxUrl, height = '400px', initialFullscreen = 
           </div>
         </div>
       )}
-      
+
       {/* Normale Kartenansicht */}
       {!isFullscreen && renderMap(height)}
     </>

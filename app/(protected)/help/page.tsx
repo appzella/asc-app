@@ -133,7 +133,8 @@ export default function HelpPage() {
               <li>Alle technischen Details (Datum, Dauer, Höhenmeter, etc.)</li>
               <li>Teilnehmerliste mit Profilfotos</li>
               <li>Anmeldung/Abmeldung für die Tour</li>
-              <li>Chat-Funktion für Kommunikation mit anderen Teilnehmern</li>
+              <li>Interaktive Karte (wenn GPX-Datei vorhanden)</li>
+              <li>Link zur WhatsApp-Gruppe (optional)</li>
               <li>Für Tourenleiter: Tour bearbeiten, auf Entwurf setzen oder Tour absagen</li>
               <li>Für Admins: Tour freigeben oder ablehnen</li>
             </ul>
@@ -286,7 +287,7 @@ export default function HelpPage() {
                 <li>Abgesagte Touren können wieder aktiviert werden</li>
               </ul>
             </div>
-            
+
             <div>
               <h4>Tour zur Freigabe einreichen</h4>
               <p className="text-muted-foreground">
@@ -447,9 +448,21 @@ export default function HelpPage() {
               <li>Die Teilnehmerzahl wird aktualisiert</li>
             </ol>
             <p className="text-muted-foreground mt-3">
-              <strong className="font-semibold">Hinweis:</strong> Du kannst dich nur für veröffentlichte Touren anmelden, die noch
-              nicht ausgebucht sind. Tourenleiter und Admins können sich ebenfalls für Touren anmelden.
+              <strong className="font-semibold">Hinweis:</strong> Du kannst dich nur für veröffentlichte Touren anmelden.
+              Tourenleiter und Admins können sich ebenfalls für Touren anmelden.
             </p>
+          </div>
+
+          <div>
+            <h4>Warteliste</h4>
+            <p className="text-muted-foreground">
+              Ist eine Tour bereits ausgebucht, kannst du dich auf die Warteliste setzen lassen:
+            </p>
+            <ul className="text-muted-foreground">
+              <li>Klicke auf <strong className="font-semibold">&quot;Auf Warteliste&quot;</strong></li>
+              <li>Sobald ein Platz frei wird (z.B. durch Abmeldung eines Teilnehmers), rücken Personen von der Warteliste automatisch nach</li>
+              <li>Du wirst per E-Mail informiert, wenn du einen Platz erhalten hast</li>
+            </ul>
           </div>
 
           <div>
@@ -478,45 +491,34 @@ export default function HelpPage() {
         </CardContent>
       </Card>
 
-      {/* Chat */}
+      {/* Kommunikation & Karte */}
       <Card>
         <CardHeader>
-          <CardTitle>Chat</CardTitle>
+          <CardTitle>Kommunikation & Karte</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-              <p className="text-muted-foreground">
-            Jede Tour hat einen eigenen Chat-Bereich, in dem sich alle Teilnehmer und Interessierte
-            austauschen können.
-          </p>
-
           <div>
-            <h4>Nachrichten senden</h4>
-            <ul className="text-muted-foreground">
-              <li>Gib deine Nachricht in das Eingabefeld ein</li>
-              <li>Klicke auf <strong className="font-semibold">&quot;Senden&quot;</strong> oder drücke Enter</li>
-              <li>Deine Nachricht wird sofort für alle sichtbar</li>
-              <li>Jede Nachricht zeigt den Namen des Absenders und die Uhrzeit</li>
-            </ul>
-          </div>
-
-          <div>
-            <h4>Typische Anwendungen</h4>
-            <ul className="text-muted-foreground">
-              <li>Fragen zur Tour stellen</li>
-              <li>Fahrgemeinschaften organisieren</li>
-              <li>Ausrüstung diskutieren</li>
-              <li>Wetter- und Schneeverhältnisse besprechen</li>
-              <li>Treffpunkt und Zeit absprechen</li>
-              <li>Allgemeine Kommunikation zwischen Teilnehmern</li>
-            </ul>
-          </div>
-
-          <div>
-            <h4>Nachrichten anzeigen</h4>
+            <h4>WhatsApp-Gruppe</h4>
             <p className="text-muted-foreground">
-              Der Chat scrollt automatisch zur neuesten Nachricht. Ältere Nachrichten bleiben
-              erhalten und können nach oben gescrollt werden.
+              Für die Kommunikation zwischen den Teilnehmern kann der Tourenleiter optional einen Link zu einer WhatsApp-Gruppe hinterlegen:
             </p>
+            <ul className="text-muted-foreground">
+              <li>Der Link ist auf der Tour-Detailseite sichtbar (für angemeldete Teilnehmer)</li>
+              <li>Nach der Anmeldung zur Tour wird dir der Beitritt zur Gruppe vorgeschlagen</li>
+              <li>Hier können Fahrgemeinschaften gebildet und Details besprochen werden</li>
+            </ul>
+          </div>
+
+          <div>
+            <h4>Interaktive Karte</h4>
+            <p className="text-muted-foreground">
+              Wenn für die Tour eine GPX-Datei hochgeladen wurde, wird eine interaktive Karte angezeigt:
+            </p>
+            <ul className="text-muted-foreground">
+              <li>Die Route wird auf der Karte visualisiert</li>
+              <li>Du kannst in die Karte hinein- und herauszoomen</li>
+              <li>Start- und Endpunkt sowie das Höhenprofil sind ersichtlich</li>
+            </ul>
           </div>
         </CardContent>
       </Card>
@@ -527,7 +529,7 @@ export default function HelpPage() {
           <CardTitle>Profil</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-              <p className="text-muted-foreground">
+          <p className="text-muted-foreground">
             In deinem Profil kannst du deine persönlichen Informationen verwalten. Klicke auf
             deinen Namen in der oberen Navigation, um zum Profil zu gelangen.
           </p>
@@ -572,7 +574,6 @@ export default function HelpPage() {
             <ul className="text-muted-foreground">
               <li>Touren ansehen und durchsuchen</li>
               <li>Dich für freigegebene Touren anmelden</li>
-              <li>Am Chat teilnehmen</li>
               <li>Profil bearbeiten</li>
             </ul>
           </div>
@@ -583,6 +584,7 @@ export default function HelpPage() {
               <li>Alle Funktionen eines Mitglieds</li>
               <li>Neue Touren erstellen</li>
               <li>Eigene Touren bearbeiten</li>
+              <li>Teilnehmer manuell hinzufügen (auch überbuchen möglich)</li>
             </ul>
           </div>
 
@@ -612,7 +614,7 @@ export default function HelpPage() {
               <li>Erstellen Sie Touren rechtzeitig, damit Admins Zeit zur Freigabe haben</li>
               <li>Geben Sie detaillierte Beschreibungen mit allen wichtigen Informationen</li>
               <li>Wählen Sie realistische Teilnehmerzahlen basierend auf der Schwierigkeit</li>
-              <li>Beantworten Sie Fragen im Chat schnell und ausführlich</li>
+              <li>Erstellen Sie eine WhatsApp-Gruppe für die einfache Koordination</li>
               <li>Informieren Sie Teilnehmer über Änderungen rechtzeitig</li>
             </ul>
           </div>
@@ -623,7 +625,7 @@ export default function HelpPage() {
               <li>Melden Sie sich frühzeitig für Touren an</li>
               <li>Lesen Sie die Tour-Beschreibung sorgfältig durch</li>
               <li>Überprüfen Sie, ob Sie die nötige Ausrüstung und Erfahrung haben</li>
-              <li>Nutzen Sie den Chat für Fragen und Koordination</li>
+              <li>Treten Sie der WhatsApp-Gruppe bei, falls vorhanden</li>
               <li>Melden Sie sich rechtzeitig ab, wenn Sie nicht teilnehmen können</li>
               <li>Halten Sie Ihr Profil aktuell, damit Sie kontaktiert werden können</li>
             </ul>
@@ -648,11 +650,11 @@ export default function HelpPage() {
           <CardTitle>Unterstützung</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-              <p className="text-muted-foreground">
+          <p className="text-muted-foreground">
             Falls Sie Fragen haben oder Probleme auftreten, wenden Sie sich bitte an einen Administrator
             des Clubs. Diese können Ihnen bei technischen Problemen oder Fragen zur Verwendung der App helfen.
           </p>
-              <p className="text-muted-foreground">
+          <p className="text-muted-foreground">
             Die App wird kontinuierlich weiterentwickelt. Feedback und Verbesserungsvorschläge sind
             jederzeit willkommen.
           </p>
