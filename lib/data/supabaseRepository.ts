@@ -1,6 +1,7 @@
 import { IDataRepository } from './repository'
 import { User, Tour, Invitation, TourSettings } from '../types'
 import { supabase, isSupabaseConfigured } from '../supabase/client'
+import { notifyNewTour, notifyParticipantSignup, notifyTourUpdate } from '@/app/actions/notifications'
 
 /**
  * Supabase Data Repository Implementation
@@ -91,6 +92,7 @@ export class SupabaseDataRepository implements IDataRepository {
       return null
     }
   }
+
 
   async getUserByEmail(email: string): Promise<User | null> {
     const { data, error } = await supabase
@@ -598,6 +600,10 @@ export class SupabaseDataRepository implements IDataRepository {
         tour_id: tourId,
         user_id: userId,
       })
+
+    if (!error) {
+      notifyParticipantSignup(tourId, userId).catch(err => console.error('Failed to send notification:', err))
+    }
 
     return !error
   }
