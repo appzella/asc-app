@@ -540,12 +540,13 @@ export default function ProfilePage() {
                         <div className="flex items-center gap-2">
                           <Button
                             type="button"
-                            variant="default"
-                            size="sm"
+                            variant="outline"
+                            size="default"
                             onClick={() => fileInputRef.current?.click()}
                             disabled={isLoading}
-                            className="w-fit"
+                            className="gap-2"
                           >
+                            <Upload className="w-4 h-4" />
                             {user.profilePhoto ? 'Bild ändern' : 'Bild hochladen'}
                           </Button>
                           <input
@@ -563,9 +564,8 @@ export default function ProfilePage() {
                               size="icon"
                               onClick={handleRemovePhoto}
                               disabled={isLoading}
-                              className="h-8 w-8"
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
+                              <Trash2 className="w-4 h-4" />
                             </Button>
                           )}
                         </div>

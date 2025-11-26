@@ -335,7 +335,7 @@ export default function CreateTourPage() {
                 <label className="block text-sm font-medium text-foreground mb-1">
                   Tour suchen
                 </label>
-                <input
+                <Input
                   ref={searchInputRef}
                   type="text"
                   value={searchQuery}
@@ -349,7 +349,7 @@ export default function CreateTourPage() {
                     setTimeout(() => setShowResults(false), 200)
                   }}
                   placeholder="Titel der Tour eingeben..."
-                  className="w-full px-4 py-2.5 border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 border-border hover:border-border min-h-[44px]"
+                  className="w-full"
                 />
               </div>
               {selectedTourId && (
@@ -460,7 +460,7 @@ export default function CreateTourPage() {
                   control={form.control}
                   name="date"
                   render={({ field }) => (
-                    <FormItem className="md:col-start-1 md:row-start-1">
+                    <FormItem>
                       <FormLabel>Datum</FormLabel>
                       <FormControl>
                         <DatePicker
@@ -478,7 +478,7 @@ export default function CreateTourPage() {
                   control={form.control}
                   name="tourType"
                   render={({ field }) => (
-                    <FormItem className="md:col-start-2 md:row-start-1">
+                    <FormItem>
                       <FormLabel>Tourenart</FormLabel>
                       <Select
                         value={field.value}
@@ -507,9 +507,37 @@ export default function CreateTourPage() {
 
                 <FormField
                   control={form.control}
+                  name="tourLength"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tourlänge</FormLabel>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Bitte wählen" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {settings.tourLengths.map((length) => (
+                            <SelectItem key={length} value={length}>
+                              {length}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
                   name="difficulty"
                   render={({ field }) => (
-                    <FormItem className="md:col-start-2 md:row-start-2">
+                    <FormItem>
                       <FormLabel>Schwierigkeit (SAC-Skala)</FormLabel>
                       <Select
                         value={field.value}
@@ -525,34 +553,6 @@ export default function CreateTourPage() {
                           {getDifficultyOptions(tourType as TourType, settings).map((opt) => (
                             <SelectItem key={opt.value} value={opt.value}>
                               {opt.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="tourLength"
-                  render={({ field }) => (
-                    <FormItem className="md:col-start-1 md:row-start-2">
-                      <FormLabel>Tourlänge</FormLabel>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Bitte wählen" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {settings.tourLengths.map((length) => (
-                            <SelectItem key={length} value={length}>
-                              {length}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -619,35 +619,6 @@ export default function CreateTourPage() {
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="whatsappGroupLink"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="flex items-center gap-2">
-                        <FormLabel>WhatsApp-Gruppen-Link (optional)</FormLabel>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="h-5 w-5"
-                          onClick={() => setShowWhatsAppGuide(true)}
-                          aria-label="Anleitung anzeigen"
-                        >
-                          <HelpCircle className="w-4 h-4 text-muted-foreground" />
-                        </Button>
-                      </div>
-                      <FormControl>
-                        <Input
-                          placeholder="https://chat.whatsapp.com/..."
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
                 {user?.role === 'admin' && (
                   <FormField
                     control={form.control}
@@ -677,6 +648,37 @@ export default function CreateTourPage() {
                     )}
                   />
                 )}
+              </div>
+
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="whatsappGroupLink"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex items-center gap-2">
+                        <FormLabel>WhatsApp-Gruppen-Link (optional)</FormLabel>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-5 w-5"
+                          onClick={() => setShowWhatsAppGuide(true)}
+                          aria-label="Anleitung anzeigen"
+                        >
+                          <HelpCircle className="w-4 h-4 text-muted-foreground" />
+                        </Button>
+                      </div>
+                      <FormControl>
+                        <Input
+                          placeholder="https://chat.whatsapp.com/..."
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
 
               <Separator />

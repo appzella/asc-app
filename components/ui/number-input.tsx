@@ -42,9 +42,9 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
         // Don't call onChange when clearing, keep it empty
         return
       }
-      
+
       let clampedValue = newValue
-      
+
       if (min !== undefined && clampedValue < min) {
         clampedValue = min
       }
@@ -75,7 +75,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
         onChange?.(min)
         return
       }
-      
+
       const numValue = parseInt(inputValue)
       if (!isNaN(numValue)) {
         handleChange(numValue)
@@ -95,7 +95,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
     }
 
     return (
-      <div className={cn("flex items-center border border-input rounded-md overflow-hidden w-full shadow-sm bg-transparent", className)}>
+      <div className={cn("flex items-center border border-input rounded-md overflow-hidden w-full shadow-sm bg-transparent h-9", className)}>
         <Input
           ref={inputRef}
           type="number"
@@ -106,13 +106,13 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
           max={max}
           step={step}
           disabled={disabled}
-          className="h-9 flex-1 border-0 rounded-none text-center px-3 text-base md:text-sm focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          className="h-full flex-1 border-0 rounded-none text-center px-3 text-base md:text-sm focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           {...props}
         />
         <Button
           type="button"
           variant="ghost"
-          className="h-9 w-8 aspect-square min-w-8 flex-shrink-0 rounded-none border-l border-input hover:bg-accent p-0"
+          className="h-full w-8 aspect-square min-w-8 flex-shrink-0 rounded-none border-l border-input hover:bg-accent p-0"
           onClick={handleDecrement}
           disabled={disabled || (min !== undefined && internalValue !== "" && internalValue <= min)}
           aria-label="Wert reduzieren"
@@ -122,7 +122,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
         <Button
           type="button"
           variant="ghost"
-          className="h-9 w-8 aspect-square min-w-8 flex-shrink-0 rounded-none border-l border-input hover:bg-accent p-0"
+          className="h-full w-8 aspect-square min-w-8 flex-shrink-0 rounded-none border-l border-input hover:bg-accent p-0"
           onClick={handleIncrement}
           disabled={disabled || (max !== undefined && internalValue !== "" && internalValue >= max)}
           aria-label="Wert erhöhen"

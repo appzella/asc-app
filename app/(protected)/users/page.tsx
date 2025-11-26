@@ -453,7 +453,7 @@ export default function UsersPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  size="sm"
+                  size="default"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploadLoading}
                   className="gap-2"
@@ -476,7 +476,6 @@ export default function UsersPage() {
                     size="icon"
                     onClick={handleRemovePhoto}
                     disabled={uploadLoading}
-                    className="h-9 w-9"
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
