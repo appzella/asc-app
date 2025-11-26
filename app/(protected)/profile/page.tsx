@@ -24,10 +24,11 @@ import { cn } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { ImageCropper } from '@/components/ui/ImageCropper'
-import { UserCircle, Lock, LogOut, Upload, X, Camera, ImageIcon, Trash2 } from 'lucide-react'
+import { UserCircle, Lock, LogOut, Upload, X, Camera, ImageIcon, Trash2, Bell } from 'lucide-react'
 import { PhoneInput } from '@/components/ui/phone-input'
 import { AddressAutocomplete } from '@/components/ui/address-autocomplete'
 import { toast } from 'sonner'
+import { NotificationSettings } from '@/components/profile/NotificationSettings'
 
 const profileSchema = z.object({
   name: z.string().min(1, 'Name ist erforderlich'),
@@ -59,7 +60,7 @@ export default function ProfilePage() {
   const [imageToCrop, setImageToCrop] = useState<string | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
-  const [activeTab, setActiveTab] = useState<'profile' | 'password'>('profile')
+  const [activeTab, setActiveTab] = useState<'profile' | 'password' | 'notifications'>('profile')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const profileForm = useForm<ProfileFormValues>({
@@ -472,6 +473,18 @@ export default function ProfilePage() {
                     <Lock className="w-4 h-4" />
                     Passwort
                   </button>
+                  <button
+                    onClick={() => setActiveTab('notifications')}
+                    className={cn(
+                      "w-full flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors",
+                      activeTab === 'notifications'
+                        ? "bg-primary-50 text-primary-600"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    )}
+                  >
+                    <Bell className="w-4 h-4" />
+                    Benachrichtigungen
+                  </button>
                 </nav>
               </CardContent>
             </Card>
@@ -503,6 +516,18 @@ export default function ProfilePage() {
               >
                 <Lock className="w-4 h-4" />
                 Passwort
+              </button>
+              <button
+                onClick={() => setActiveTab('notifications')}
+                className={cn(
+                  "flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors",
+                  activeTab === 'notifications'
+                    ? "bg-background text-primary-600 shadow-sm"
+                    : "text-muted-foreground"
+                )}
+              >
+                <Bell className="w-4 h-4" />
+                Benachrichtigungen
               </button>
             </div>
           </div>
@@ -815,7 +840,7 @@ export default function ProfilePage() {
                         name="confirmPassword"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Neues Passwort bestätigen</FormLabel>
+                            <FormLabel>Passwort bestätigen</FormLabel>
                             <FormControl>
                               <Input
                                 type="password"
@@ -827,7 +852,6 @@ export default function ProfilePage() {
                           </FormItem>
                         )}
                       />
-
                       <div className="pt-2">
                         <Button type="submit" variant="default" disabled={isLoading} className="w-full sm:w-auto">
                           {isLoading ? 'Wird gespeichert...' : 'Passwort ändern'}
@@ -838,10 +862,13 @@ export default function ProfilePage() {
                 </CardContent>
               </Card>
             )}
+
+            {activeTab === 'notifications' && (
+              <NotificationSettings />
+            )}
           </div>
         </div>
       </div>
     </>
   )
 }
-

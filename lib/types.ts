@@ -7,7 +7,7 @@ export type TourType = 'Wanderung' | 'Skitour' | 'Bike'
 export type TourLength = 'Eintagestour' | 'Mehrtagestour'
 
 // SAC Schwierigkeitsskalen
-export type Difficulty = 
+export type Difficulty =
   // Wanderungen (T-Skala)
   | 'T1' | 'T2' | 'T3' | 'T4' | 'T5' | 'T6'
   // Skitouren (SAC-Skala)
@@ -76,4 +76,29 @@ export interface TourSettings {
     [tourType: string]: string[] // z.B. { 'Wanderung': ['T1', 'T2', ...], 'Skitour': ['L', 'WS', ...] }
   }
   tourTypeIcons?: { [tourType: string]: string } // z.B. { 'Wanderung': 'Mountain', 'Skitour': 'Ski' }
+}
+
+export type NotificationType = 'NEW_TOUR' | 'PARTICIPANT_SIGNUP' | 'TOUR_UPDATE'
+
+export interface Notification {
+  id: string
+  userId: string
+  type: NotificationType
+  title: string
+  message: string
+  link?: string
+  read: boolean
+  createdAt: Date
+}
+
+export interface NotificationPreferences {
+  userId: string
+  emailNewTour: boolean
+  pushNewTour: boolean
+  emailParticipantSignup: boolean
+  pushParticipantSignup: boolean
+  emailTourUpdate: boolean
+  pushTourUpdate: boolean
+  createdAt: Date
+  updatedAt: Date
 }

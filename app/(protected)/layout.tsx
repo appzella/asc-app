@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { MobileTabBar } from '@/components/navigation/MobileTabBar'
+import { NotificationCenter } from '@/components/notifications/NotificationCenter'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -234,6 +235,8 @@ export default function ProtectedLayout({
 
             {/* Rechts: Settings und Profil */}
             <div className="flex items-center space-x-3 flex-1 justify-end">
+              <NotificationCenter />
+
               {/* Settings Icon für Mobile (nur Admin) */}
               {user.role === 'admin' && (
                 <Button
