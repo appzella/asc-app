@@ -170,7 +170,7 @@ export default function ProtectedLayout({
                           <button
                             className={`inline-flex items-center gap-1 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${isParentActive
                               ? 'bg-primary-50 text-primary-600'
-                              : 'text-muted-foreground hover:text-white hover:bg-accent'
+                              : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                               }`}
                           >
                             {item.label}
@@ -212,7 +212,7 @@ export default function ProtectedLayout({
                       href={item.href}
                       className={`inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${isActive
                         ? 'bg-primary-50 text-primary-600'
-                        : 'text-muted-foreground hover:text-white hover:bg-accent'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                         }`}
                     >
                       {item.label}

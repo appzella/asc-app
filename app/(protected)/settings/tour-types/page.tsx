@@ -259,7 +259,7 @@ export default function TourTypesSettingsPage() {
             variant="ghost"
             size="sm"
             asChild
-            className="hidden sm:inline-flex items-center gap-1 text-primary-600 hover:text-white"
+            className="hidden sm:inline-flex items-center gap-1 text-primary-600"
           >
             <Link href="/settings">
               <ChevronLeft className="w-4 h-4" strokeWidth={2} />

@@ -81,7 +81,7 @@ export default function CreateTourPage() {
   const [gpxFile, setGpxFile] = useState<File | null>(null)
   const gpxFileInputRef = useRef<HTMLInputElement>(null)
   const [showWhatsAppGuide, setShowWhatsAppGuide] = useState(false)
-  
+
   // Update position when showing results
   useEffect(() => {
     if (showResults && searchQuery && searchInputRef.current) {
@@ -95,15 +95,15 @@ export default function CreateTourPage() {
           })
         }
       }
-      
+
       updatePosition()
-      
+
       // Only update on scroll/resize, not continuously
       const handleUpdate = () => updatePosition()
-      
+
       window.addEventListener('scroll', handleUpdate, { passive: true, capture: true })
       window.addEventListener('resize', handleUpdate)
-      
+
       return () => {
         window.removeEventListener('scroll', handleUpdate, { capture: true } as any)
         window.removeEventListener('resize', handleUpdate)
@@ -135,17 +135,17 @@ export default function CreateTourPage() {
     const loadData = async () => {
       const currentUser = authService.getCurrentUser()
       setUser(currentUser)
-      
+
       if (currentUser) {
         const tourSettings = await dataRepository.getSettings()
         setSettings(tourSettings)
-        
+
         // Load tours for duplication
         const allTours = await dataRepository.getTours()
         // Sort by date descending (newest first)
         allTours.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
         setTours(allTours)
-        
+
         // Load users for leader selection (only for admins)
         if (currentUser.role === 'admin') {
           const allUsers = await dataRepository.getUsers()
@@ -158,7 +158,7 @@ export default function CreateTourPage() {
           // For non-admins, set leaderId to current user
           form.setValue('leaderId', currentUser.id)
         }
-        
+
         if (!canCreateTour(currentUser.role)) {
           router.push('/tours')
         }
@@ -221,7 +221,7 @@ export default function CreateTourPage() {
     try {
       // For leaders, always use their own ID as leaderId
       const finalLeaderId = user.role === 'admin' ? values.leaderId! : user.id
-      
+
       const tour = await dataRepository.createTour({
         title: values.title,
         description: values.description,
@@ -274,7 +274,7 @@ export default function CreateTourPage() {
             variant="ghost"
             size="sm"
             asChild
-            className="hidden sm:inline-flex items-center gap-1 text-primary-600 hover:text-white"
+            className="hidden sm:inline-flex items-center gap-1 text-primary-600"
           >
             <Link href="/tours">
               <ChevronLeft className="w-4 h-4" strokeWidth={2} />
@@ -403,13 +403,13 @@ export default function CreateTourPage() {
                 </div>
               </button>
             ))}
-          {tours.filter((tour) => 
+          {tours.filter((tour) =>
             tour.title.toLowerCase().includes(searchQuery.toLowerCase())
           ).length === 0 && (
-            <div className="px-4 py-3 text-sm text-muted-foreground text-center">
-              Keine Touren gefunden, die "{searchQuery}" enthalten.
-            </div>
-          )}
+              <div className="px-4 py-3 text-sm text-muted-foreground text-center">
+                Keine Touren gefunden, die "{searchQuery}" enthalten.
+              </div>
+            )}
         </div>
       )}
 
@@ -455,206 +455,91 @@ export default function CreateTourPage() {
                 )}
               />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-border">
-              <FormField
-                control={form.control}
-                name="date"
-                render={({ field }) => (
-                  <FormItem className="md:col-start-1 md:row-start-1">
-                    <FormLabel>Datum</FormLabel>
-                    <FormControl>
-                      <DatePicker
-                        value={field.value}
-                        onChange={field.onChange}
-                        placeholder="Datum auswählen"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="tourType"
-                render={({ field }) => (
-                  <FormItem className="md:col-start-2 md:row-start-1">
-                    <FormLabel>Tourenart</FormLabel>
-                    <Select
-                      value={field.value}
-                      onValueChange={(value) => {
-                        field.onChange(value)
-                        form.setValue('difficulty', '')
-                      }}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Bitte wählen" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {settings.tourTypes.map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {type}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="difficulty"
-                render={({ field }) => (
-                  <FormItem className="md:col-start-2 md:row-start-2">
-                    <FormLabel>Schwierigkeit (SAC-Skala)</FormLabel>
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      disabled={!tourType}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder={tourType ? "Bitte wählen" : "Bitte zuerst Tourenart wählen"} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {getDifficultyOptions(tourType as TourType, settings).map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="tourLength"
-                render={({ field }) => (
-                  <FormItem className="md:col-start-1 md:row-start-2">
-                    <FormLabel>Tourlänge</FormLabel>
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Bitte wählen" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {settings.tourLengths.map((length) => (
-                          <SelectItem key={length} value={length}>
-                            {length}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="elevation"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Höhenmeter</FormLabel>
-                    <FormControl>
-                      <NumberInput
-                        min={0}
-                        value={field.value || ""}
-                        onChange={(value) => field.onChange(value.toString())}
-                        onBlur={field.onBlur}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="duration"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Dauer (Stunden)</FormLabel>
-                    <FormControl>
-                      <NumberInput
-                        min={1}
-                        value={field.value || ""}
-                        onChange={(value) => field.onChange(value.toString())}
-                        onBlur={field.onBlur}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="maxParticipants"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Max. Teilnehmer</FormLabel>
-                    <FormControl>
-                      <NumberInput
-                        min={1}
-                        value={field.value || ""}
-                        onChange={(value) => field.onChange(value.toString())}
-                        onBlur={field.onBlur}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="whatsappGroupLink"
-                render={({ field }) => (
-                  <FormItem>
-                    <div className="flex items-center gap-2">
-                      <FormLabel>WhatsApp-Gruppen-Link (optional)</FormLabel>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="h-5 w-5"
-                        onClick={() => setShowWhatsAppGuide(true)}
-                        aria-label="Anleitung anzeigen"
-                      >
-                        <HelpCircle className="w-4 h-4 text-muted-foreground" />
-                      </Button>
-                    </div>
-                    <FormControl>
-                      <Input
-                        placeholder="https://chat.whatsapp.com/..."
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              {user?.role === 'admin' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-border">
                 <FormField
                   control={form.control}
-                  name="leaderId"
+                  name="date"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tourenleiter</FormLabel>
+                    <FormItem className="md:col-start-1 md:row-start-1">
+                      <FormLabel>Datum</FormLabel>
+                      <FormControl>
+                        <DatePicker
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder="Datum auswählen"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="tourType"
+                  render={({ field }) => (
+                    <FormItem className="md:col-start-2 md:row-start-1">
+                      <FormLabel>Tourenart</FormLabel>
+                      <Select
+                        value={field.value}
+                        onValueChange={(value) => {
+                          field.onChange(value)
+                          form.setValue('difficulty', '')
+                        }}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Bitte wählen" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {settings.tourTypes.map((type) => (
+                            <SelectItem key={type} value={type}>
+                              {type}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="difficulty"
+                  render={({ field }) => (
+                    <FormItem className="md:col-start-2 md:row-start-2">
+                      <FormLabel>Schwierigkeit (SAC-Skala)</FormLabel>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        disabled={!tourType}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder={tourType ? "Bitte wählen" : "Bitte zuerst Tourenart wählen"} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {getDifficultyOptions(tourType as TourType, settings).map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="tourLength"
+                  render={({ field }) => (
+                    <FormItem className="md:col-start-1 md:row-start-2">
+                      <FormLabel>Tourlänge</FormLabel>
                       <Select
                         value={field.value}
                         onValueChange={field.onChange}
@@ -665,9 +550,9 @@ export default function CreateTourPage() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {users.map((u) => (
-                            <SelectItem key={u.id} value={u.id}>
-                              {u.name}
+                          {settings.tourLengths.map((length) => (
+                            <SelectItem key={length} value={length}>
+                              {length}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -676,76 +561,191 @@ export default function CreateTourPage() {
                     </FormItem>
                   )}
                 />
-              )}
-            </div>
 
-            <Separator />
-
-            <div className="space-y-2">
-              <Label htmlFor="gpx-file">GPX-Datei (optional)</Label>
-              <div className="space-y-2">
-                <input
-                  ref={gpxFileInputRef}
-                  id="gpx-file"
-                  type="file"
-                  accept=".gpx,.xml"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0]
-                    if (file) {
-                      // Validate file type
-                      const validExtensions = ['gpx', 'xml']
-                      const fileExt = file.name.split('.').pop()?.toLowerCase()
-                      if (!fileExt || !validExtensions.includes(fileExt)) {
-                        toast.error('Ungültiger Dateityp. Nur GPX-Dateien sind erlaubt.')
-                        return
-                      }
-                      // Validate file size (max 10MB)
-                      if (file.size > 10 * 1024 * 1024) {
-                        toast.error('Die Datei ist zu groß. Bitte wähle eine Datei unter 10MB.')
-                        return
-                      }
-                      setGpxFile(file)
-                    }
-                  }}
-                  className="w-full px-4 py-2.5 border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 border-border hover:border-border file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
+                <FormField
+                  control={form.control}
+                  name="elevation"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Höhenmeter</FormLabel>
+                      <FormControl>
+                        <NumberInput
+                          min={0}
+                          value={field.value || ""}
+                          onChange={(value) => field.onChange(value.toString())}
+                          onBlur={field.onBlur}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-                {gpxFile && (
-                  <p className="text-xs text-muted-foreground">
-                    Ausgewählt: {gpxFile.name} ({(gpxFile.size / 1024).toFixed(2)} KB)
-                  </p>
+
+                <FormField
+                  control={form.control}
+                  name="duration"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Dauer (Stunden)</FormLabel>
+                      <FormControl>
+                        <NumberInput
+                          min={1}
+                          value={field.value || ""}
+                          onChange={(value) => field.onChange(value.toString())}
+                          onBlur={field.onBlur}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="maxParticipants"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Max. Teilnehmer</FormLabel>
+                      <FormControl>
+                        <NumberInput
+                          min={1}
+                          value={field.value || ""}
+                          onChange={(value) => field.onChange(value.toString())}
+                          onBlur={field.onBlur}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="whatsappGroupLink"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex items-center gap-2">
+                        <FormLabel>WhatsApp-Gruppen-Link (optional)</FormLabel>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-5 w-5"
+                          onClick={() => setShowWhatsAppGuide(true)}
+                          aria-label="Anleitung anzeigen"
+                        >
+                          <HelpCircle className="w-4 h-4 text-muted-foreground" />
+                        </Button>
+                      </div>
+                      <FormControl>
+                        <Input
+                          placeholder="https://chat.whatsapp.com/..."
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {user?.role === 'admin' && (
+                  <FormField
+                    control={form.control}
+                    name="leaderId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tourenleiter</FormLabel>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Bitte wählen" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {users.map((u) => (
+                              <SelectItem key={u.id} value={u.id}>
+                                {u.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 )}
-                <p className="text-xs text-muted-foreground">
-                  Lade eine GPX-Datei hoch, um die Tour auf einer Karte zu visualisieren.
-                </p>
               </div>
-            </div>
 
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
+              <Separator />
 
-            <div className="flex flex-col sm:flex-row gap-2 pt-2">
-              <Button type="submit" variant="default" disabled={isLoading} className="flex-1">
-                {isLoading ? 'Wird erstellt...' : 'Tour erstellen'}
-              </Button>
-              <Link href="/tours" className="flex-1 sm:flex-initial">
-                <Button type="button" variant="outline" className="w-full sm:w-auto">
-                  Abbrechen
+              <div className="space-y-2">
+                <Label htmlFor="gpx-file">GPX-Datei (optional)</Label>
+                <div className="space-y-2">
+                  <input
+                    ref={gpxFileInputRef}
+                    id="gpx-file"
+                    type="file"
+                    accept=".gpx,.xml"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) {
+                        // Validate file type
+                        const validExtensions = ['gpx', 'xml']
+                        const fileExt = file.name.split('.').pop()?.toLowerCase()
+                        if (!fileExt || !validExtensions.includes(fileExt)) {
+                          toast.error('Ungültiger Dateityp. Nur GPX-Dateien sind erlaubt.')
+                          return
+                        }
+                        // Validate file size (max 10MB)
+                        if (file.size > 10 * 1024 * 1024) {
+                          toast.error('Die Datei ist zu groß. Bitte wähle eine Datei unter 10MB.')
+                          return
+                        }
+                        setGpxFile(file)
+                      }
+                    }}
+                    className="w-full px-4 py-2.5 border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 border-border hover:border-border file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
+                  />
+                  {gpxFile && (
+                    <p className="text-xs text-muted-foreground">
+                      Ausgewählt: {gpxFile.name} ({(gpxFile.size / 1024).toFixed(2)} KB)
+                    </p>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Lade eine GPX-Datei hoch, um die Tour auf einer Karte zu visualisieren.
+                  </p>
+                </div>
+              </div>
+
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+
+              <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                <Button type="submit" variant="default" disabled={isLoading} className="flex-1">
+                  {isLoading ? 'Wird erstellt...' : 'Tour erstellen'}
                 </Button>
-              </Link>
-            </div>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+                <Link href="/tours" className="flex-1 sm:flex-initial">
+                  <Button type="button" variant="outline" className="w-full sm:w-auto">
+                    Abbrechen
+                  </Button>
+                </Link>
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
 
-    <WhatsAppGroupGuide
-      open={showWhatsAppGuide}
-      onOpenChange={setShowWhatsAppGuide}
-      tourName={form.watch('title') || 'Tour'}
-    />
+      <WhatsAppGroupGuide
+        open={showWhatsAppGuide}
+        onOpenChange={setShowWhatsAppGuide}
+        tourName={form.watch('title') || 'Tour'}
+      />
     </div>
   )
 }

@@ -96,7 +96,7 @@ export default function InvitationsPage() {
       }
 
       const invitation = await dataRepository.createInvitation(values.email, user.id)
-      
+
       // Automatically send email
       try {
         const emailResponse = await fetch('/api/invitations/send-email', {
@@ -111,20 +111,20 @@ export default function InvitationsPage() {
           // Fallback: Show link if email fails
           const registrationLink = `${window.location.origin}/register/${invitation.token}`
           const errorData = await emailResponse.json().catch(() => ({}))
-          
+
           toast.success(`Einladung erstellt! E-Mail konnte nicht automatisch gesendet werden. Link: ${registrationLink}`)
-          
+
           console.warn('Email sending failed:', errorData)
         }
       } catch (emailError) {
         // Fallback: Show link if email request fails completely
         const registrationLink = `${window.location.origin}/register/${invitation.token}`
-        
+
         toast.success(`Einladung erstellt! E-Mail konnte nicht gesendet werden. Link: ${registrationLink}`)
-        
+
         console.warn('Email sending error:', emailError)
       }
-      
+
       form.reset()
       const allInvitations = await dataRepository.getInvitations()
       setInvitations(allInvitations)
@@ -180,7 +180,7 @@ export default function InvitationsPage() {
             variant="ghost"
             size="sm"
             asChild
-            className="hidden sm:inline-flex items-center gap-1 text-primary-600 hover:text-white"
+            className="hidden sm:inline-flex items-center gap-1 text-primary-600"
           >
             <Link href="/settings">
               <ChevronLeft className="w-4 h-4" strokeWidth={2} />

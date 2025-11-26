@@ -183,7 +183,7 @@ export default function DifficultiesSettingsPage() {
 
     const dragIndexStr = e.dataTransfer.getData('application/json') || e.dataTransfer.getData('text/html')
     const dragIndex = parseInt(dragIndexStr)
-    
+
     if (isNaN(dragIndex) || dragIndex === dropIndex) return
 
     const newOrder = [...difficulties]
@@ -230,7 +230,7 @@ export default function DifficultiesSettingsPage() {
             variant="ghost"
             size="sm"
             asChild
-            className="hidden sm:inline-flex items-center gap-1 text-primary-600 hover:text-white"
+            className="hidden sm:inline-flex items-center gap-1 text-primary-600"
           >
             <Link href="/settings">
               <ChevronLeft className="w-4 h-4" strokeWidth={2} />
@@ -318,7 +318,7 @@ export default function DifficultiesSettingsPage() {
                 ) : (
                   difficulties.map((difficulty, index) => {
                     const isDragOver = dragOverIndex === index
-                    
+
                     return (
                       <div key={difficulty} className="relative">
                         {isDragOver && (
@@ -338,92 +338,92 @@ export default function DifficultiesSettingsPage() {
                           onDrop={(e) => handleDrop(e, index)}
                           className="flex items-center justify-between p-3 bg-muted rounded-md border border-border cursor-move hover:bg-muted transition-all group relative"
                         >
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <span className="text-muted-foreground group-hover:text-muted-foreground flex-shrink-0 text-sm">☰</span>
-                        {editingDifficulty === difficulty ? (
-                          <>
-                            <Input
-                              value={editValue}
-                              onChange={(e) => setEditValue(e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  e.preventDefault()
-                                  handleSaveEdit()
-                                } else if (e.key === 'Escape') {
-                                  e.preventDefault()
-                                  handleCancelEdit()
-                                }
-                              }}
-                              className="flex-1 h-8 text-sm"
-                              autoFocus
-                              draggable={false}
-                              onDragStart={(e) => e.stopPropagation()}
-                            />
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                draggable={false}
-                                onClick={handleSaveEdit}
-                                onDragStart={(e) => e.stopPropagation()}
-                                className="h-8 w-8 p-0"
-                                aria-label="Speichern"
-                              >
-                                <Check className="w-4 h-4" strokeWidth={2} />
-                              </Button>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                draggable={false}
-                                onClick={handleCancelEdit}
-                                onDragStart={(e) => e.stopPropagation()}
-                                className="h-8 w-8 p-0"
-                                aria-label="Abbrechen"
-                              >
-                                <X className="w-4 h-4" strokeWidth={2} />
-                              </Button>
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <span className="font-medium text-foreground truncate text-sm flex-1 min-w-0">{difficulty}</span>
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                draggable={false}
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleStartEdit(difficulty)
-                                }}
-                                onDragStart={(e) => e.stopPropagation()}
-                                className="h-9 w-9 p-0"
-                                aria-label="Bearbeiten"
-                              >
-                                <SquarePen className="w-4 h-4" strokeWidth={2} />
-                              </Button>
-                              <Button
-                                type="button"
-                                variant="destructive"
-                                size="sm"
-                                draggable={false}
-                                onClick={() => handleRemove(difficulty)}
-                                onDragStart={(e) => e.stopPropagation()}
-                                className="h-9 w-9 p-0"
-                                aria-label="Entfernen"
-                              >
-                                <Trash2 className="w-4 h-4" strokeWidth={2} />
-                              </Button>
-                            </div>
-                          </>
-                        )}
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <span className="text-muted-foreground group-hover:text-muted-foreground flex-shrink-0 text-sm">☰</span>
+                            {editingDifficulty === difficulty ? (
+                              <>
+                                <Input
+                                  value={editValue}
+                                  onChange={(e) => setEditValue(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      e.preventDefault()
+                                      handleSaveEdit()
+                                    } else if (e.key === 'Escape') {
+                                      e.preventDefault()
+                                      handleCancelEdit()
+                                    }
+                                  }}
+                                  className="flex-1 h-8 text-sm"
+                                  autoFocus
+                                  draggable={false}
+                                  onDragStart={(e) => e.stopPropagation()}
+                                />
+                                <div className="flex items-center gap-2 flex-shrink-0">
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    draggable={false}
+                                    onClick={handleSaveEdit}
+                                    onDragStart={(e) => e.stopPropagation()}
+                                    className="h-8 w-8 p-0"
+                                    aria-label="Speichern"
+                                  >
+                                    <Check className="w-4 h-4" strokeWidth={2} />
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    draggable={false}
+                                    onClick={handleCancelEdit}
+                                    onDragStart={(e) => e.stopPropagation()}
+                                    className="h-8 w-8 p-0"
+                                    aria-label="Abbrechen"
+                                  >
+                                    <X className="w-4 h-4" strokeWidth={2} />
+                                  </Button>
+                                </div>
+                              </>
+                            ) : (
+                              <>
+                                <span className="font-medium text-foreground truncate text-sm flex-1 min-w-0">{difficulty}</span>
+                                <div className="flex items-center gap-2 flex-shrink-0">
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    draggable={false}
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      handleStartEdit(difficulty)
+                                    }}
+                                    onDragStart={(e) => e.stopPropagation()}
+                                    className="h-9 w-9 p-0"
+                                    aria-label="Bearbeiten"
+                                  >
+                                    <SquarePen className="w-4 h-4" strokeWidth={2} />
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    variant="destructive"
+                                    size="sm"
+                                    draggable={false}
+                                    onClick={() => handleRemove(difficulty)}
+                                    onDragStart={(e) => e.stopPropagation()}
+                                    className="h-9 w-9 p-0"
+                                    aria-label="Entfernen"
+                                  >
+                                    <Trash2 className="w-4 h-4" strokeWidth={2} />
+                                  </Button>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                      </div>
-                    </div>
-                  )
+                    )
                   })
                 )}
               </div>
