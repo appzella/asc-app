@@ -541,7 +541,7 @@ export default function ProfilePage() {
                           <Button
                             type="button"
                             variant="outline"
-                            size="default"
+                            size="sm"
                             onClick={() => fileInputRef.current?.click()}
                             disabled={isLoading}
                             className="gap-2"
@@ -564,6 +564,7 @@ export default function ProfilePage() {
                               size="icon"
                               onClick={handleRemovePhoto}
                               disabled={isLoading}
+                              className="h-8 w-8"
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>

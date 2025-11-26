@@ -453,13 +453,13 @@ export default function UsersPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  size="default"
+                  size="sm"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploadLoading}
                   className="gap-2"
                 >
                   <Upload className="w-4 h-4" />
-                  Bild ändern
+                  {editingUser?.profilePhoto ? 'Bild ändern' : 'Bild hochladen'}
                 </Button>
                 <input
                   ref={fileInputRef}
@@ -476,6 +476,7 @@ export default function UsersPage() {
                     size="icon"
                     onClick={handleRemovePhoto}
                     disabled={uploadLoading}
+                    className="h-8 w-8"
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
