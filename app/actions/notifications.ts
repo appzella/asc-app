@@ -67,6 +67,7 @@ async function sendPushNotification(userId: string, title: string, body: string,
 }
 
 export async function notifyNewTour(tourId: string) {
+    console.log('notifyNewTour called for:', tourId)
     const supabase = getSupabaseAdmin()
 
     // 1. Fetch tour details
@@ -76,7 +77,10 @@ export async function notifyNewTour(tourId: string) {
         .eq('id', tourId)
         .single()
 
-    if (!tour) return
+    if (!tour) {
+        console.error('Tour not found:', tourId)
+        return
+    }
 
     // 2. Fetch all users except the creator (leader)
     const { data: users } = await supabase
@@ -92,16 +96,23 @@ export async function notifyNewTour(tourId: string) {
         .select('*')
         .in('user_id', users.map(u => u.id))
 
-    if (!preferences) return
+    // Map preferences by user_id for easy lookup
+    const prefsMap = new Map(preferences?.map(p => [p.user_id, p]))
 
     // 4. Filter users who want notifications
     const notificationsToCreate: any[] = []
     const pushNotificationsToSend: Promise<void>[] = []
 
-    for (const pref of preferences) {
-        if (pref.email_new_tour || pref.push_new_tour) {
+    for (const user of users) {
+        const pref = prefsMap.get(user.id)
+
+        // Default to TRUE if no preference record exists
+        const emailNewTour = pref ? pref.email_new_tour : true
+        const pushNewTour = pref ? pref.push_new_tour : true
+
+        if (emailNewTour || pushNewTour) {
             notificationsToCreate.push({
-                user_id: pref.user_id,
+                user_id: user.id,
                 type: 'NEW_TOUR',
                 title: 'Neue Tour verfügbar',
                 message: `Eine neue Tour "${tour.title}" wurde erstellt.`,
@@ -110,10 +121,10 @@ export async function notifyNewTour(tourId: string) {
             })
         }
 
-        if (pref.push_new_tour) {
+        if (pushNewTour) {
             pushNotificationsToSend.push(
                 sendPushNotification(
-                    pref.user_id,
+                    user.id,
                     'Neue Tour verfügbar',
                     `Eine neue Tour "${tour.title}" wurde erstellt.`,
                     `/tours/${tourId}`
@@ -124,7 +135,8 @@ export async function notifyNewTour(tourId: string) {
 
     // 5. Batch insert notifications
     if (notificationsToCreate.length > 0) {
-        await supabase.from('notifications').insert(notificationsToCreate)
+        const { error } = await supabase.from('notifications').insert(notificationsToCreate)
+        if (error) console.error('Error inserting notifications:', error)
     }
 
     // 6. Send push notifications
@@ -132,6 +144,7 @@ export async function notifyNewTour(tourId: string) {
 }
 
 export async function notifyParticipantSignup(tourId: string, participantId: string) {
+    console.log('notifyParticipantSignup called:', tourId, participantId)
     const supabase = getSupabaseAdmin()
 
     // 1. Fetch tour details
@@ -141,7 +154,10 @@ export async function notifyParticipantSignup(tourId: string, participantId: str
         .eq('id', tourId)
         .single()
 
-    if (!tour) return
+    if (!tour) {
+        console.error('Tour not found:', tourId)
+        return
+    }
 
     // 2. Fetch participant details
     const { data: participant } = await supabase
@@ -150,7 +166,10 @@ export async function notifyParticipantSignup(tourId: string, participantId: str
         .eq('id', participantId)
         .single()
 
-    if (!participant) return
+    if (!participant) {
+        console.error('Participant not found:', participantId)
+        return
+    }
 
     // 3. Get tour leader's preferences
     const { data: pref } = await supabase
@@ -159,11 +178,13 @@ export async function notifyParticipantSignup(tourId: string, participantId: str
         .eq('user_id', tour.leader_id)
         .single()
 
-    if (!pref) return
+    // Default to TRUE if no preference record exists
+    const emailParticipantSignup = pref ? pref.email_participant_signup : true
+    const pushParticipantSignup = pref ? pref.push_participant_signup : true
 
     // 4. Create notification if enabled
-    if (pref.email_participant_signup || pref.push_participant_signup) {
-        await supabase.from('notifications').insert({
+    if (emailParticipantSignup || pushParticipantSignup) {
+        const { error } = await supabase.from('notifications').insert({
             user_id: tour.leader_id,
             type: 'PARTICIPANT_SIGNUP',
             title: 'Neue Anmeldung',
@@ -171,10 +192,11 @@ export async function notifyParticipantSignup(tourId: string, participantId: str
             link: `/tours/${tourId}`,
             is_read: false,
         })
+        if (error) console.error('Error creating notification:', error)
     }
 
     // 5. Send push if enabled
-    if (pref.push_participant_signup) {
+    if (pushParticipantSignup) {
         await sendPushNotification(
             tour.leader_id,
             'Neue Anmeldung',
@@ -185,6 +207,7 @@ export async function notifyParticipantSignup(tourId: string, participantId: str
 }
 
 export async function notifyTourUpdate(tourId: string, updatedByUserId: string) {
+    console.log('notifyTourUpdate called:', tourId)
     const supabase = getSupabaseAdmin()
 
     // 1. Fetch tour details
@@ -217,15 +240,21 @@ export async function notifyTourUpdate(tourId: string, updatedByUserId: string) 
         .select('*')
         .in('user_id', participantIds)
 
-    if (!preferences) return
+    const prefsMap = new Map(preferences?.map(p => [p.user_id, p]))
 
     const notificationsToCreate: any[] = []
     const pushNotificationsToSend: Promise<void>[] = []
 
-    for (const pref of preferences) {
-        if (pref.email_tour_update || pref.push_tour_update) {
+    for (const userId of participantIds) {
+        const pref = prefsMap.get(userId)
+
+        // Default to TRUE
+        const emailTourUpdate = pref ? pref.email_tour_update : true
+        const pushTourUpdate = pref ? pref.push_tour_update : true
+
+        if (emailTourUpdate || pushTourUpdate) {
             notificationsToCreate.push({
-                user_id: pref.user_id,
+                user_id: userId,
                 type: 'TOUR_UPDATE',
                 title: 'Tour aktualisiert',
                 message: `Die Tour "${tour.title}" wurde aktualisiert.`,
@@ -234,10 +263,10 @@ export async function notifyTourUpdate(tourId: string, updatedByUserId: string) 
             })
         }
 
-        if (pref.push_tour_update) {
+        if (pushTourUpdate) {
             pushNotificationsToSend.push(
                 sendPushNotification(
-                    pref.user_id,
+                    userId,
                     'Tour aktualisiert',
                     `Die Tour "${tour.title}" wurde aktualisiert.`,
                     `/tours/${tourId}`
@@ -247,7 +276,8 @@ export async function notifyTourUpdate(tourId: string, updatedByUserId: string) 
     }
 
     if (notificationsToCreate.length > 0) {
-        await supabase.from('notifications').insert(notificationsToCreate)
+        const { error } = await supabase.from('notifications').insert(notificationsToCreate)
+        if (error) console.error('Error inserting notifications:', error)
     }
 
     await Promise.all(pushNotificationsToSend)
