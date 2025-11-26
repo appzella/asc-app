@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "analyze": "ANALYZE=true next build"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -62,6 +63,7 @@
     "zustand": "^4.4.7"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.0.4",
     "@types/culori": "^4.0.1",
     "@types/node": "^20",
     "@types/react": "^19",

@@ -123,7 +123,7 @@ function GPXLayer({ gpxUrl }: { gpxUrl: string }) {
 
         gpxLayer.on('loaded', function (e: any) {
           try {
-            console.log('GPX loaded', e.target)
+
             map.fitBounds(e.target.getBounds(), { padding: [20, 20] })
 
             // Sammle alle Layer
