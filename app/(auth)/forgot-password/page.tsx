@@ -46,7 +46,7 @@ export default function ForgotPasswordPage() {
       // Use Supabase Auth resetPassword function
       // This will send a password reset email if the user exists
       const result = await authService.resetPassword(values.email)
-      
+
       if (result) {
         // Success - email sent (or at least no error occurred)
         setSuccess(true)
@@ -62,57 +62,56 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-50 px-4">
-      <Card className="w-full max-w-md animate-scale-in">
-        <CardHeader>
-          <div className="text-center mb-6">
-            <h1 className="text-3xl font-bold gradient-text mb-2">ASC Skitouren App</h1>
-            <p className="text-muted-foreground">Passwort zurücksetzen</p>
+    <Card className="w-full animate-scale-in">
+      <CardHeader>
+        <div className="text-center mb-6">
+          <h1 className="text-3xl font-bold gradient-text mb-2">ASC Skitouren App</h1>
+          <p className="text-muted-foreground">Passwort zurücksetzen</p>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {success ? (
+          <div className="space-y-4">
+            <Alert>
+              <AlertTitle>E-Mail gesendet!</AlertTitle>
+              <AlertDescription>
+                Falls ein Konto mit dieser E-Mail-Adresse existiert, haben wir dir einen Link zum Zurücksetzen des Passworts gesendet.
+              </AlertDescription>
+            </Alert>
+            <Button
+              onClick={() => router.push('/login')}
+              className="w-full"
+            >
+              Zurück zur Anmeldung
+            </Button>
           </div>
-        </CardHeader>
-        <CardContent>
-          {success ? (
-            <div className="space-y-4">
-              <Alert>
-                <AlertTitle>E-Mail gesendet!</AlertTitle>
-                <AlertDescription>
-                  Falls ein Konto mit dieser E-Mail-Adresse existiert, haben wir dir einen Link zum Zurücksetzen des Passworts gesendet.
-                </AlertDescription>
-              </Alert>
-              <Button
-                onClick={() => router.push('/login')}
-                className="w-full"
-              >
-                Zurück zur Anmeldung
-              </Button>
-            </div>
-          ) : (
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        ) : (
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <p className="text-sm text-muted-foreground mb-4">
                 Gib deine E-Mail-Adresse ein. Wir senden dir einen Link zum Zurücksetzen deines Passworts.
               </p>
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>E-Mail</FormLabel>
-                      <FormControl>
-              <Input
-                type="email"
-                placeholder="deine.email@example.com"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>E-Mail</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="deine.email@example.com"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
               {error && (
-                  <Alert variant="destructive">
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
               )}
               <div className="flex gap-3">
                 <Button
@@ -128,11 +127,10 @@ export default function ForgotPasswordPage() {
                 </Button>
               </div>
             </form>
-            </Form>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+          </Form>
+        )}
+      </CardContent>
+    </Card>
   )
 }
 

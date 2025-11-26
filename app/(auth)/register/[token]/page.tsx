@@ -102,91 +102,89 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-12">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl text-center">Registrierung</CardTitle>
-          <p className="text-center text-muted-foreground mt-2 text-sm">
-            Erstelle dein Konto für {invitation?.email}
-          </p>
-        </CardHeader>
-        <CardContent>
-          {isSuccess ? (
-            <Alert className="border-green-500 bg-green-50">
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-              <AlertDescription className="text-green-800">
-                <div className="font-semibold mb-2">Registrierung erfolgreich!</div>
-                <div className="text-sm">
-                  Wir haben eine Bestätigungs-E-Mail an <strong>{invitation?.email}</strong> gesendet.
-                  Bitte öffne dein Postfach und klicke auf den Bestätigungslink, um dein Konto zu aktivieren.
-                  Danach kannst du dich mit deinen Zugangsdaten anmelden.
-                </div>
-              </AlertDescription>
-            </Alert>
-          ) : error && !invitation ? (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          ) : (
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Name</FormLabel>
-                      <FormControl>
-              <Input
-                type="text"
-                placeholder="Dein Name"
-                          {...field}
+    <Card className="w-full animate-scale-in">
+      <CardHeader>
+        <CardTitle className="text-2xl text-center">Registrierung</CardTitle>
+        <p className="text-center text-muted-foreground mt-2 text-sm">
+          Erstelle dein Konto für {invitation?.email}
+        </p>
+      </CardHeader>
+      <CardContent>
+        {isSuccess ? (
+          <Alert className="border-green-500 bg-green-50">
+            <CheckCircle2 className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-800">
+              <div className="font-semibold mb-2">Registrierung erfolgreich!</div>
+              <div className="text-sm">
+                Wir haben eine Bestätigungs-E-Mail an <strong>{invitation?.email}</strong> gesendet.
+                Bitte öffne dein Postfach und klicke auf den Bestätigungslink, um dein Konto zu aktivieren.
+                Danach kannst du dich mit deinen Zugangsdaten anmelden.
+              </div>
+            </AlertDescription>
+          </Alert>
+        ) : error && !invitation ? (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        ) : (
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        placeholder="Dein Name"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Passwort</FormLabel>
-                      <FormControl>
-                        <Input type="password" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="confirmPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Passwort bestätigen</FormLabel>
-                      <FormControl>
-                        <Input type="password" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Passwort</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Passwort bestätigen</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
               {error && (
-                  <Alert variant="destructive">
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
               )}
               <Button type="submit" className="w-full mt-6" disabled={isLoading}>
                 {isLoading ? 'Wird registriert...' : 'Registrieren'}
               </Button>
             </form>
-            </Form>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+          </Form>
+        )}
+      </CardContent>
+    </Card>
   )
 }
 

@@ -71,88 +71,70 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 relative overflow-hidden">
-      <Image
-        src="/login-background.jpg"
-        alt="Login Background"
-        fill
-        className="object-cover"
-        priority
-      />
-      <div className="w-full absolute inset-0 h-full z-0">
-        <Snowfall
-          color="white"
-          snowflakeCount={1500}
-          radius={[0.2, 1.0]}
-          speed={[1.0, 5.0]}
-          wind={[0.5, 4.0]}
-        />
-      </div>
-      <Card className="w-full max-w-md animate-scale-in relative z-10">
-        <CardHeader>
-          <div className="text-center">
-            <div className="flex justify-center mb-4">
-              <ASCLogo size={64} />
-            </div>
-            <h1 className="text-2xl font-bold gradient-text mb-2">ASC Skitouren App</h1>
-            <p className="text-muted-foreground text-sm">Anmelden</p>
+    <Card className="w-full animate-scale-in">
+      <CardHeader>
+        <div className="text-center">
+          <div className="flex justify-center mb-4">
+            <ASCLogo size={64} />
           </div>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>E-Mail</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="deine.email@example.com"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <div className="flex items-center justify-between">
-                      <FormLabel>Passwort</FormLabel>
-                      <a
-                        href="/forgot-password"
-                        className="text-sm text-primary-600 hover:text-primary-700 hover:underline transition-colors"
-                        tabIndex={-1}
-                      >
-                        Passwort vergessen?
-                      </a>
-                    </div>
-                    <FormControl>
-                      <Input type="password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
+          <h1 className="text-2xl font-bold gradient-text mb-2">ASC Skitouren App</h1>
+          <p className="text-muted-foreground text-sm">Anmelden</p>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>E-Mail</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      placeholder="deine.email@example.com"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
-              <Button type="submit" className="w-full mt-6" disabled={isLoading}>
-                {isLoading ? 'Wird angemeldet...' : 'Anmelden'}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-    </div>
+            />
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-center justify-between">
+                    <FormLabel>Passwort</FormLabel>
+                    <a
+                      href="/forgot-password"
+                      className="text-sm text-primary-600 hover:text-primary-700 hover:underline transition-colors"
+                      tabIndex={-1}
+                    >
+                      Passwort vergessen?
+                    </a>
+                  </div>
+                  <FormControl>
+                    <Input type="password" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            <Button type="submit" className="w-full mt-6" disabled={isLoading}>
+              {isLoading ? 'Wird angemeldet...' : 'Anmelden'}
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   )
 }
 
