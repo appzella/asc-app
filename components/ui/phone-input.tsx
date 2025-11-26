@@ -3,6 +3,7 @@ import { CheckIcon, ChevronsUpDown } from "lucide-react"
 import * as RPNInput from "react-phone-number-input"
 import flags from "react-phone-number-input/flags"
 import { parsePhoneNumber } from "react-phone-number-input"
+import de from "react-phone-number-input/locale/de.json"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -37,12 +38,12 @@ const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
       // Normalisiere den Wert zu E.164 Format, falls er formatiert ist
       const normalizedValue = React.useMemo(() => {
         if (!value || typeof value !== 'string') return value || undefined
-        
+
         // Wenn der Wert bereits E.164 Format hat (keine Leerzeichen nach dem +), verwende ihn direkt
         if (/^\+[1-9]\d{1,14}$/.test(value.replace(/\s/g, ''))) {
           return value.replace(/\s/g, '') as RPNInput.Value
         }
-        
+
         // Versuche die Nummer zu parsen und zu normalisieren
         try {
           const phoneNumber = parsePhoneNumber(value)
@@ -56,7 +57,7 @@ const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
             return cleaned as RPNInput.Value
           }
         }
-        
+
         // Fallback: Gib den Wert zurück (wird möglicherweise einen Fehler verursachen, aber besser als nichts)
         return value as RPNInput.Value
       }, [value])
@@ -71,6 +72,7 @@ const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
           smartCaret={false}
           value={normalizedValue}
           countries={countries}
+          labels={de}
           /**
            * Handles the onChange event.
            *
