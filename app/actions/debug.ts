@@ -136,8 +136,8 @@ export async function testPushNotification(userId: string) {
         const pushSubscription = {
             endpoint: sub.endpoint,
             keys: {
-                p256dh: atob(sub.p256dh),
-                auth: atob(sub.auth),
+                p256dh: sub.p256dh,
+                auth: sub.auth,
             },
         }
 
