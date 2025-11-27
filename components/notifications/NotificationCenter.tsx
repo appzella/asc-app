@@ -6,10 +6,12 @@ import { supabase } from '@/lib/supabase/client'
 import { Notification } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/components/ui/popover'
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from '@/components/ui/sheet'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
@@ -61,21 +63,12 @@ export function NotificationCenter() {
             .select('*')
             .eq('user_id', user.id)
             .order('created_at', { ascending: false })
-            .limit(20)
+            .limit(50) // Increased limit for sheet view
 
         if (error) {
             console.error('Error fetching notifications:', error)
             return
         }
-
-        // Map Supabase response to Notification type (adjusting property names if needed)
-        // Supabase returns snake_case, our type is camelCase? 
-        // Wait, my type definition in lib/types.ts used camelCase (userId, createdAt), 
-        // but Supabase returns snake_case (user_id, created_at).
-        // I should probably update the type definition to match Supabase or map it here.
-        // For simplicity and consistency with other parts of the app (if they use camelCase), I'll map it.
-        // However, looking at existing code might be better. 
-        // Let's assume I need to map it for now based on my type definition.
 
         const mappedNotifications: Notification[] = data.map((n: any) => ({
             id: n.id,
@@ -128,12 +121,12 @@ export function NotificationCenter() {
         // Optimistic update
         setNotifications(prev => prev.map(n => ({ ...n, read: true })))
         setUnreadCount(0)
-        setIsOpen(false)
+        // Keep sheet open after marking all as read, as it's a larger view
     }
 
     return (
-        <Popover open={isOpen} onOpenChange={setIsOpen}>
-            <PopoverTrigger asChild>
+        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+            <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="relative">
                     <Bell className="h-5 w-5" />
                     {unreadCount > 0 && (
@@ -145,25 +138,28 @@ export function NotificationCenter() {
                         </Badge>
                     )}
                 </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-0" align="end">
-                <div className="flex items-center justify-between p-4 border-b">
-                    <h4 className="font-semibold">Benachrichtigungen</h4>
-                    {unreadCount > 0 && (
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-xs h-auto py-1 px-2"
-                            onClick={markAllAsRead}
-                        >
-                            Alle gelesen
-                        </Button>
-                    )}
-                </div>
-                <ScrollArea className="h-[300px]">
+            </SheetTrigger>
+            <SheetContent className="w-full sm:w-[400px] p-0 flex flex-col">
+                <SheetHeader className="p-4 border-b">
+                    <div className="flex items-center justify-between">
+                        <SheetTitle>Benachrichtigungen</SheetTitle>
+                        {unreadCount > 0 && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-xs h-auto py-1 px-2"
+                                onClick={markAllAsRead}
+                            >
+                                Alle als gelesen markieren
+                            </Button>
+                        )}
+                    </div>
+                </SheetHeader>
+                <ScrollArea className="flex-1">
                     {notifications.length === 0 ? (
-                        <div className="p-4 text-center text-muted-foreground text-sm">
-                            Keine Benachrichtigungen
+                        <div className="flex flex-col items-center justify-center h-40 text-muted-foreground p-4">
+                            <Bell className="h-8 w-8 mb-2 opacity-20" />
+                            <p className="text-sm">Keine Benachrichtigungen</p>
                         </div>
                     ) : (
                         <div className="divide-y">
@@ -171,57 +167,59 @@ export function NotificationCenter() {
                                 <div
                                     key={notification.id}
                                     className={cn(
-                                        "p-4 hover:bg-muted/50 transition-colors relative group",
-                                        !notification.read && "bg-muted/20"
+                                        "p-4 hover:bg-muted/50 transition-colors relative group flex gap-4",
+                                        !notification.read ? "bg-muted/30" : "bg-background"
                                     )}
                                 >
-                                    <div className="flex gap-3">
-                                        <div className="flex-1 space-y-1">
-                                            <div className="flex items-start justify-between gap-2">
-                                                <p className={cn("text-sm font-medium leading-none", !notification.read && "font-semibold")}>
-                                                    {notification.title}
-                                                </p>
-                                                <span className="text-xs text-muted-foreground whitespace-nowrap">
-                                                    {formatDistanceToNow(notification.createdAt, { addSuffix: true, locale: de })}
-                                                </span>
-                                            </div>
-                                            <p className="text-sm text-muted-foreground line-clamp-2">
-                                                {notification.message}
+                                    <div className="mt-1">
+                                        {!notification.read ? (
+                                            <div className="w-2 h-2 rounded-full bg-primary" />
+                                        ) : (
+                                            <div className="w-2 h-2" />
+                                        )}
+                                    </div>
+                                    <div className="flex-1 space-y-1">
+                                        <div className="flex items-start justify-between gap-2">
+                                            <p className={cn("text-sm font-medium leading-none", !notification.read && "font-semibold")}>
+                                                {notification.title}
                                             </p>
-                                            {notification.link && (
-                                                <Link
-                                                    href={notification.link}
-                                                    className="text-xs text-primary hover:underline block mt-1"
-                                                    onClick={() => {
-                                                        if (!notification.read) markAsRead(notification.id)
-                                                        setIsOpen(false)
-                                                    }}
-                                                >
-                                                    Ansehen
-                                                </Link>
-                                            )}
+                                            <span className="text-xs text-muted-foreground whitespace-nowrap">
+                                                {formatDistanceToNow(notification.createdAt, { addSuffix: true, locale: de })}
+                                            </span>
                                         </div>
-                                        {!notification.read && (
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity absolute right-2 top-1/2 -translate-y-1/2"
-                                                onClick={() => markAsRead(notification.id)}
-                                                title="Als gelesen markieren"
+                                        <p className="text-sm text-muted-foreground line-clamp-3">
+                                            {notification.message}
+                                        </p>
+                                        {notification.link && (
+                                            <Link
+                                                href={notification.link}
+                                                className="text-xs text-primary hover:underline block mt-2 font-medium"
+                                                onClick={() => {
+                                                    if (!notification.read) markAsRead(notification.id)
+                                                    setIsOpen(false)
+                                                }}
                                             >
-                                                <Check className="h-3 w-3" />
-                                            </Button>
+                                                Details ansehen
+                                            </Link>
                                         )}
                                     </div>
                                     {!notification.read && (
-                                        <div className="absolute left-2 top-1/2 -translate-y-1/2 w-1 h-1 rounded-full bg-primary" />
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                            onClick={() => markAsRead(notification.id)}
+                                            title="Als gelesen markieren"
+                                        >
+                                            <Check className="h-4 w-4" />
+                                        </Button>
                                     )}
                                 </div>
                             ))}
                         </div>
                     )}
                 </ScrollArea>
-            </PopoverContent>
-        </Popover>
+            </SheetContent>
+        </Sheet>
     )
 }
