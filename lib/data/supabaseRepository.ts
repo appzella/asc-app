@@ -483,11 +483,10 @@ export class SupabaseDataRepository implements IDataRepository {
 
     // Notify about update (fire and forget)
     // We need the current user ID to exclude them from notifications
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        notifyTourUpdate(id, user.id).catch(err => console.error('Failed to send update notification:', err))
-      }
-    })
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      notifyTourUpdate(id, user.id).catch(err => console.error('Failed to send update notification:', err))
+    }
 
     return this.getTourById(id)
   }
