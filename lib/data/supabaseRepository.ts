@@ -480,6 +480,15 @@ export class SupabaseDataRepository implements IDataRepository {
       }
       return null
     }
+
+    // Notify about update (fire and forget)
+    // We need the current user ID to exclude them from notifications
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        notifyTourUpdate(id, user.id).catch(err => console.error('Failed to send update notification:', err))
+      }
+    })
+
     return this.getTourById(id)
   }
 
@@ -498,6 +507,10 @@ export class SupabaseDataRepository implements IDataRepository {
       }
       return null
     }
+
+    // Notify about new tour (fire and forget)
+    notifyNewTour(id).catch(err => console.error('Failed to send new tour notification:', err))
+
     return this.getTourById(id)
   }
 
