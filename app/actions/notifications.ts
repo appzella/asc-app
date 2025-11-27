@@ -117,7 +117,7 @@ export async function notifyNewTour(tourId: string) {
                 title: 'Neue Tour verfügbar',
                 message: `Eine neue Tour "${tour.title}" wurde erstellt.`,
                 link: `/tours/${tourId}`,
-                is_read: false,
+                read: false,
             })
         }
 
@@ -190,7 +190,7 @@ export async function notifyParticipantSignup(tourId: string, participantId: str
             title: 'Neue Anmeldung',
             message: `${participant.name} hat sich für Ihre Tour "${tour.title}" angemeldet.`,
             link: `/tours/${tourId}`,
-            is_read: false,
+            read: false,
         })
         if (error) console.error('Error creating notification:', error)
     }
@@ -259,7 +259,7 @@ export async function notifyTourUpdate(tourId: string, updatedByUserId: string) 
                 title: 'Tour aktualisiert',
                 message: `Die Tour "${tour.title}" wurde aktualisiert.`,
                 link: `/tours/${tourId}`,
-                is_read: false,
+                read: false,
             })
         }
 
