@@ -81,3 +81,83 @@ export async function testNotificationSystem(userId: string) {
 
     return logs
 }
+
+import webpush from 'web-push'
+
+export async function testPushNotification(userId: string) {
+    const logs: string[] = []
+    logs.push('Starting Push Notification Test...')
+
+    const publicVapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+    const privateVapidKey = process.env.VAPID_PRIVATE_KEY
+    const vapidSubject = process.env.VAPID_SUBJECT || 'mailto:admin@asc-skitouren.ch'
+
+    if (!publicVapidKey || !privateVapidKey) {
+        logs.push('❌ VAPID keys are missing!')
+        return logs
+    }
+
+    try {
+        webpush.setVapidDetails(
+            vapidSubject,
+            publicVapidKey,
+            privateVapidKey
+        )
+        logs.push('✅ WebPush configured')
+    } catch (err: any) {
+        logs.push(`❌ WebPush configuration failed: ${err.message}`)
+        return logs
+    }
+
+    const supabase = getSupabaseAdmin()
+
+    // Fetch subscriptions
+    const { data: subscriptions, error } = await supabase
+        .from('push_subscriptions')
+        .select('*')
+        .eq('user_id', userId)
+
+    if (error) {
+        logs.push(`❌ Error fetching subscriptions: ${error.message}`)
+        return logs
+    }
+
+    if (!subscriptions || subscriptions.length === 0) {
+        logs.push('⚠️ No push subscriptions found for this user.')
+        logs.push('   Please ensure you have enabled push notifications in your profile settings.')
+        return logs
+    }
+
+    logs.push(`✅ Found ${subscriptions.length} subscription(s)`)
+
+    for (const sub of subscriptions) {
+        logs.push(`Testing subscription: ${sub.endpoint.substring(0, 20)}...`)
+
+        const pushSubscription = {
+            endpoint: sub.endpoint,
+            keys: {
+                p256dh: atob(sub.p256dh),
+                auth: atob(sub.auth),
+            },
+        }
+
+        const payload = JSON.stringify({
+            title: 'Debug Push',
+            body: 'This is a test push notification from the debug tool.',
+            url: '/debug',
+        })
+
+        try {
+            await webpush.sendNotification(pushSubscription, payload)
+            logs.push('✅ Push sent successfully!')
+        } catch (err: any) {
+            logs.push(`❌ Failed to send push: ${err.message}`)
+            logs.push(`   Status Code: ${err.statusCode}`)
+            if (err.statusCode === 410 || err.statusCode === 404) {
+                logs.push('   (Subscription is invalid/expired)')
+            }
+        }
+    }
+
+    return logs
+}
