@@ -602,7 +602,9 @@ export class SupabaseDataRepository implements IDataRepository {
       })
 
     if (!error) {
-      notifyParticipantSignup(tourId, userId).catch(err => console.error('Failed to send notification:', err))
+      // Await the notification to ensure it's sent (or at least attempted) before returning
+      // This might slightly delay the UI, but ensures reliability
+      await notifyParticipantSignup(tourId, userId).catch(err => console.error('Failed to send notification:', err))
     }
 
     return !error
