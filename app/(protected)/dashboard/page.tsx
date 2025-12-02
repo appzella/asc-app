@@ -9,7 +9,28 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { ListChecks, Calendar, Archive, BookOpen, PlusCircle, AlertCircle } from 'lucide-react'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import {
+  ListChecks,
+  Calendar,
+  Archive,
+  BookOpen,
+  PlusCircle,
+  AlertCircle,
+  TrendingUp,
+  Users,
+  Map as MapIcon,
+  ArrowRight
+} from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { ContentLayout } from '@/components/admin-panel/content-layout'
 
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null)
@@ -29,15 +50,15 @@ export default function DashboardPage() {
         const today = new Date()
         today.setHours(0, 0, 0, 0)
 
-        // Zukünftige Touren (published oder cancelled - beide sollen sichtbar sein)
+        // Zukünftige Touren
         const futureTours = allTours.filter((t) => {
           const tourDate = new Date(t.date)
           tourDate.setHours(0, 0, 0, 0)
           return tourDate >= today && (t.status === 'published' || t.status === 'cancelled')
-        })
+        }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
         setTours(futureTours)
 
-        // Vergangene Touren (Archiv)
+        // Vergangene Touren
         const pastTours = allTours.filter((t) => {
           const tourDate = new Date(t.date)
           tourDate.setHours(0, 0, 0, 0)
@@ -73,29 +94,16 @@ export default function DashboardPage() {
 
   if (!user || isLoading) {
     return (
-      <div className="space-y-6 animate-fade-in">
-        <div>
-          <Skeleton className="h-9 w-64 mb-2" />
-          <Skeleton className="h-5 w-96" />
+      <div className="space-y-6 p-6">
+        <div className="flex items-center justify-between space-y-2">
+          <Skeleton className="h-8 w-64" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <Card key={i} className="flex flex-col h-full">
-              <CardHeader>
-                <Skeleton className="h-6 w-32 mb-2" />
-                <Skeleton className="h-4 w-48" />
-              </CardHeader>
-              <CardContent className="flex flex-col flex-1">
-                <div className="flex-1">
-                  <Skeleton className="h-10 w-16 mb-2" />
-                </div>
-                <div className="mt-auto pt-4">
-                  <Skeleton className="h-8 w-full" />
-                </div>
-              </CardContent>
-            </Card>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-32 rounded-xl" />
           ))}
         </div>
+        <Skeleton className="h-[400px] rounded-xl" />
       </div>
     )
   }
@@ -105,149 +113,192 @@ export default function DashboardPage() {
   )
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1>Dashboard</h1>
-        <p className="text-muted-foreground">Willkommen zurück, <span className="font-semibold text-foreground">{user.name}</span>!</p>
-      </div>
-
-      {user.role === 'admin' && pendingTours.length > 0 && (
-        <Alert className="border-yellow-300 bg-yellow-50/50">
-          <AlertCircle className="h-4 w-4 text-yellow-600" />
-          <AlertTitle className="text-yellow-800">
-            {pendingTours.length} Tour{pendingTours.length !== 1 ? 'en' : ''} wartet{pendingTours.length === 1 ? '' : ''} auf Freigabe
-          </AlertTitle>
-          <AlertDescription className="mt-2">
-            <Link href="/tours?status=submitted">
-              <Button variant="default" size="sm">Zur Veröffentlichung</Button>
-            </Link>
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {user.role === 'leader' && pendingTours.length > 0 && (
-        <Alert className="border-blue-300 bg-blue-50/50">
-          <AlertCircle className="h-4 w-4 text-blue-600" />
-          <AlertTitle className="text-blue-800">
-            {pendingTours.length} deiner Tour{pendingTours.length !== 1 ? 'en' : ''} wartet{pendingTours.length === 1 ? '' : ''} auf Freigabe
-          </AlertTitle>
-          <AlertDescription className="mt-2 text-blue-700">
-            Ein Admin wird deine Tour{pendingTours.length !== 1 ? 'en' : ''} in Kürze prüfen und veröffentlichen.
-          </AlertDescription>
-        </Alert>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="flex flex-col transition-all duration-300 h-full group hover:shadow-lg hover:border-primary/20 hover:-translate-y-1">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ListChecks className="w-5 h-5 text-primary transition-colors group-hover:text-primary/80" strokeWidth={2} />
-              <span className="text-xl">Meine Touren</span>
-            </CardTitle>
-            <CardDescription>Angemeldete oder geleitete Touren</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col flex-1">
-            <div className="flex items-baseline gap-2 mb-4">
-              <span className="text-3xl font-bold text-primary">{myTours.length}</span>
-              <span className="text-sm text-muted-foreground">Touren</span>
-            </div>
-            <div className="mt-auto">
-              <Link href="/tours?my=true">
-                <Button variant="outline" size="sm" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                  Meine Touren öffnen
+    <ContentLayout title="Dashboard">
+      <div className="space-y-4">
+        <div className="flex items-center justify-end space-y-2">
+          <div className="flex items-center space-x-2">
+            {(user.role === 'admin' || user.role === 'leader') && (
+              <Link href="/tours/create">
+                <Button>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Neue Tour
                 </Button>
               </Link>
-            </div>
-          </CardContent>
-        </Card>
+            )}
+          </div>
+        </div>
 
-        <Card className="flex flex-col transition-all duration-300 h-full group hover:shadow-lg hover:border-primary/20 hover:-translate-y-1">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-primary transition-colors group-hover:text-primary/80" strokeWidth={2} />
-              <span className="text-xl">Verfügbare Touren</span>
-            </CardTitle>
-            <CardDescription>Freigegebene Touren</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col flex-1">
-            <div className="flex items-baseline gap-2 mb-4">
-              <span className="text-3xl font-bold text-primary">{tours.length}</span>
-              <span className="text-sm text-muted-foreground">Touren</span>
-            </div>
-            <div className="mt-auto">
-              <Link href="/tours">
-                <Button variant="outline" size="sm" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                  Alle Touren durchsuchen
+        {/* Alerts for Pending Tours */}
+        {(user.role === 'admin' || user.role === 'leader') && pendingTours.length > 0 && (
+          <Alert className="border-yellow-500/50 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Freigabe erforderlich</AlertTitle>
+            <AlertDescription className="flex items-center justify-between">
+              <span>
+                {pendingTours.length} Tour{pendingTours.length !== 1 ? 'en' : ''} wartet{pendingTours.length === 1 ? '' : ''} auf Freigabe.
+              </span>
+              <Link href="/tours?status=submitted">
+                <Button variant="outline" size="sm" className="ml-4 border-yellow-500/50 hover:bg-yellow-500/20">
+                  Ansehen
                 </Button>
               </Link>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="flex flex-col transition-all duration-300 h-full group hover:shadow-lg hover:border-primary/20 hover:-translate-y-1">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Archive className="w-5 h-5 text-primary transition-colors group-hover:text-primary/80" strokeWidth={2} />
-              <span className="text-xl">Tourenarchiv</span>
-            </CardTitle>
-            <CardDescription>Vergangene Touren</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col flex-1">
-            <div className="flex items-baseline gap-2 mb-4">
-              <span className="text-3xl font-bold text-primary">{archivedTours.length}</span>
-              <span className="text-sm text-muted-foreground">Touren</span>
-            </div>
-            <div className="mt-auto">
-              <Link href="/tours/archive">
-                <Button variant="outline" size="sm" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                  Archiv öffnen
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-
-        {(user.role === 'admin' || user.role === 'leader') && (
-          <Card className="flex flex-col transition-all duration-300 h-full group hover:shadow-lg hover:border-primary/20 hover:-translate-y-1">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <PlusCircle className="w-5 h-5 text-primary transition-colors group-hover:text-primary/80" strokeWidth={2} />
-                <span className="text-xl">Tour erstellen</span>
-              </CardTitle>
-              <CardDescription>Erstelle eine neue Tour</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col flex-1">
-              <div className="mt-auto">
-                <Link href="/tours/create">
-                  <Button variant="default" size="sm" className="w-full shadow-md hover:shadow-lg transition-all">
-                    Neue Tour
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
+            </AlertDescription>
+          </Alert>
         )}
 
-        <Card className="flex flex-col transition-all duration-300 h-full group hover:shadow-lg hover:border-primary/20 hover:-translate-y-1">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BookOpen className="w-5 h-5 text-primary transition-colors group-hover:text-primary/80" strokeWidth={2} />
-              <span className="text-xl">Hilfe</span>
-            </CardTitle>
-            <CardDescription>Benötigst du Hilfe bei der Nutzung der App?</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col flex-1">
-            <div className="mt-auto">
-              <Link href="/help">
-                <Button variant="outline" size="sm" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                  Hilfe öffnen
-                </Button>
+        {/* Stats Grid */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Meine Touren</CardTitle>
+              <ListChecks className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{myTours.length}</div>
+              <p className="text-xs text-muted-foreground">
+                Angemeldet oder geleitet
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Kommende Touren</CardTitle>
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{tours.length}</div>
+              <p className="text-xs text-muted-foreground">
+                Insgesamt verfügbar
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Archiv</CardTitle>
+              <Archive className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{archivedTours.length}</div>
+              <p className="text-xs text-muted-foreground">
+                Vergangene Touren
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Aktivität</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">+2</div>
+              <p className="text-xs text-muted-foreground">
+                Neue Touren diese Woche
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Recent Tours Table */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+          <Card className="col-span-4">
+            <CardHeader>
+              <CardTitle>Nächste Touren</CardTitle>
+              <CardDescription>
+                Die nächsten 5 anstehenden Touren im Verein.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Titel</TableHead>
+                    <TableHead>Datum</TableHead>
+                    <TableHead>Typ</TableHead>
+                    <TableHead className="text-right">Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {tours.slice(0, 5).map((tour) => (
+                    <TableRow key={tour.id}>
+                      <TableCell className="font-medium">
+                        <Link href={`/tours/${tour.id}`} className="hover:underline">
+                          {tour.title}
+                        </Link>
+                      </TableCell>
+                      <TableCell>{new Date(tour.date).toLocaleDateString('de-CH')}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{tour.tourType}</Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {tour.status === 'cancelled' ? (
+                          <Badge variant="destructive">Abgesagt</Badge>
+                        ) : (
+                          <Badge variant="secondary">Geplant</Badge>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {tours.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center text-muted-foreground">
+                        Keine kommenden Touren gefunden.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+
+          {/* Quick Links / Info */}
+          <Card className="col-span-3">
+            <CardHeader>
+              <CardTitle>Schnellzugriff</CardTitle>
+              <CardDescription>
+                Häufig genutzte Funktionen
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4">
+              <Link href="/tours">
+                <div className="flex items-center justify-between space-x-4 rounded-md border p-4 hover:bg-accent hover:text-accent-foreground transition-colors">
+                  <div className="flex items-center space-x-4">
+                    <MapIcon className="h-6 w-6 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium leading-none">Tourenübersicht</p>
+                      <p className="text-sm text-muted-foreground">Alle Touren anzeigen</p>
+                    </div>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                </div>
               </Link>
-            </div>
-          </CardContent>
-        </Card>
+              <Link href="/profile">
+                <div className="flex items-center justify-between space-x-4 rounded-md border p-4 hover:bg-accent hover:text-accent-foreground transition-colors">
+                  <div className="flex items-center space-x-4">
+                    <Users className="h-6 w-6 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium leading-none">Mein Profil</p>
+                      <p className="text-sm text-muted-foreground">Einstellungen verwalten</p>
+                    </div>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                </div>
+              </Link>
+              <Link href="/help">
+                <div className="flex items-center justify-between space-x-4 rounded-md border p-4 hover:bg-accent hover:text-accent-foreground transition-colors">
+                  <div className="flex items-center space-x-4">
+                    <BookOpen className="h-6 w-6 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium leading-none">Hilfe & FAQ</p>
+                      <p className="text-sm text-muted-foreground">Anleitungen lesen</p>
+                    </div>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                </div>
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </div>
+    </ContentLayout>
   )
 }
-

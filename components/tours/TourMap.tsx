@@ -14,7 +14,6 @@ import {
 } from '@/components/ui/popover'
 import {
   Tooltip,
-  TooltipArrow,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
@@ -396,7 +395,7 @@ export default function TourMap({ gpxUrl, height = '400px', initialFullscreen = 
               </TooltipTrigger>
               <TooltipContent side="left">
                 <p>Kartenebenen</p>
-                <TooltipArrow />
+
               </TooltipContent>
             </Tooltip>
             <PopoverContent side="left" align="start" className="w-80 z-[10000]">
@@ -479,7 +478,7 @@ export default function TourMap({ gpxUrl, height = '400px', initialFullscreen = 
             </TooltipTrigger>
             <TooltipContent side="left">
               <p>{isFullscreen ? 'Vollbild beenden' : 'Vollbild'}</p>
-              <TooltipArrow />
+
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

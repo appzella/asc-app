@@ -678,7 +678,7 @@ export default function TourDetailPage() {
                     <Link href={`/tours/${tourId}/edit`}>Tour bearbeiten</Link>
                   </Button>
                 )}
-                <Button variant="warning" onClick={handleSubmitForPublishing} className="w-full" size="sm">
+                <Button variant="secondary" onClick={handleSubmitForPublishing} className="w-full bg-yellow-500 hover:bg-yellow-600 text-white" size="sm">
                   Zur Veröffentlichung einreichen
                 </Button>
               </CardContent>
@@ -697,7 +697,7 @@ export default function TourDetailPage() {
                     <Link href={`/tours/${tourId}/edit`}>Tour bearbeiten</Link>
                   </Button>
                 )}
-                <Button variant="success" onClick={handleApprove} className="w-full" size="sm" disabled={isArchived}>
+                <Button variant="default" onClick={handleApprove} className="w-full bg-green-600 hover:bg-green-700 text-white" size="sm" disabled={isArchived}>
                   Tour veröffentlichen
                 </Button>
                 {!isArchived && (
@@ -721,7 +721,7 @@ export default function TourDetailPage() {
                     <Link href={`/tours/${tourId}/edit`}>Tour bearbeiten</Link>
                   </Button>
                 )}
-                <Button variant="success" onClick={handleApprove} className="w-full" size="sm" disabled={isArchived}>
+                <Button variant="default" onClick={handleApprove} className="w-full bg-green-600 hover:bg-green-700 text-white" size="sm" disabled={isArchived}>
                   Tour veröffentlichen
                 </Button>
                 {isArchived && (
@@ -782,7 +782,7 @@ export default function TourDetailPage() {
                     <Button variant="outline" onClick={handleUnpublish} className="w-full" size="sm">
                       Auf Entwurf setzen
                     </Button>
-                    <Button variant="success" onClick={handleApprove} className="w-full" size="sm">
+                    <Button variant="default" onClick={handleApprove} className="w-full bg-green-600 hover:bg-green-700 text-white" size="sm">
                       Tour wieder aktivieren
                     </Button>
                   </>
@@ -857,9 +857,9 @@ export default function TourDetailPage() {
                       </p>
                     ) : (
                       <Button
-                        variant="success"
+                        variant="default"
                         onClick={handleRegister}
-                        className="w-full"
+                        className="w-full bg-green-600 hover:bg-green-700 text-white"
                         size="sm"
                       >
                         Anmelden

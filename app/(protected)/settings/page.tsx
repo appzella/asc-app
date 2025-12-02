@@ -2,44 +2,59 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { authService } from '@/lib/auth'
 import { User } from '@/lib/types'
+import { canManageUsers } from '@/lib/roles'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { canManageUsers } from '@/lib/roles'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
 import { SettingsIcon } from '@/components/ui/SettingsIcon'
-import { Users, Mail, ChevronRight } from 'lucide-react'
+import { Users, Mail, ChevronRight, Settings } from 'lucide-react'
+import { ContentLayout } from '@/components/admin-panel/content-layout'
 
 export default function SettingsPage() {
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const currentUser = authService.getCurrentUser()
-    setUser(currentUser)
+    let isMounted = true
 
-    if (currentUser && !canManageUsers(currentUser.role)) {
-      router.push('/dashboard')
-      return
+    const checkAuth = async () => {
+      const currentUser = await authService.getCurrentUserAsync()
+
+      if (!isMounted) return
+
+      if (!currentUser || !canManageUsers(currentUser.role)) {
+        router.push('/dashboard')
+        return
+      }
+
+      setUser(currentUser)
+      setIsLoading(false)
     }
 
+    checkAuth()
+
     const unsubscribe = authService.subscribe((updatedUser) => {
-      setUser(updatedUser)
+      if (!isMounted) return
+
       if (!updatedUser || !canManageUsers(updatedUser.role)) {
         router.push('/dashboard')
+        return
       }
+      setUser(updatedUser)
     })
 
     return () => {
+      isMounted = false
       unsubscribe()
     }
   }, [router])
 
-  if (!user) {
+  if (isLoading || !user) {
     return (
-      <div className="max-w-6xl mx-auto space-y-6 animate-fade-in px-4 sm:px-0">
+      <div className="space-y-6 p-4 md:p-6">
         <div>
           <Skeleton className="h-9 w-64 mb-2" />
           <Skeleton className="h-5 w-96" />
@@ -47,11 +62,10 @@ export default function SettingsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1, 2, 3, 4, 5].map((i) => (
             <Card key={i}>
-              <CardContent className="p-4">
-                <Skeleton className="h-10 w-10 mb-4" />
+              <CardHeader className="p-6">
                 <Skeleton className="h-6 w-3/4 mb-2" />
                 <Skeleton className="h-4 w-full" />
-              </CardContent>
+              </CardHeader>
             </Card>
           ))}
         </div>
@@ -59,80 +73,81 @@ export default function SettingsPage() {
     )
   }
 
-  const settingsCategories: Array<{
-    title: string
-    description: string
-    href: string
-    iconType: 'tour-types' | 'tour-lengths' | 'difficulties' | 'users' | 'invitations'
-  }> = [
+  const settingsCategories = [
     {
       title: 'Tourentypen',
-      description: 'Verwalte die verfügbaren Tourentypen',
+      description: 'Verwalte die verfügbaren Tourentypen und ihre Icons.',
       href: '/settings/tour-types',
       iconType: 'tour-types',
     },
     {
       title: 'Tourlängen',
-      description: 'Verwalte die verfügbaren Tourlängen',
+      description: 'Definiere die Kategorien für Tourlängen.',
       href: '/settings/tour-lengths',
       iconType: 'tour-lengths',
     },
     {
       title: 'Schwierigkeitsgrade',
-      description: 'Verwalte die Schwierigkeitsgrade für jede Tourenart',
+      description: 'Konfiguriere Schwierigkeitsskalen für verschiedene Tourenarten.',
       href: '/settings/difficulties',
       iconType: 'difficulties',
     },
     {
       title: 'Benutzerverwaltung',
-      description: 'Verwalte Benutzer, Rollen und Zugriffsrechte',
+      description: 'Verwalte Benutzer, Rollen und Zugriffsrechte.',
       href: '/users',
       iconType: 'users',
     },
     {
       title: 'Einladungen',
-      description: 'Verwalte Einladungen für neue Benutzer',
+      description: 'Erstelle und verwalte Einladungen für neue Mitglieder.',
       href: '/invitations',
       iconType: 'invitations',
     },
   ]
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 animate-fade-in px-4 sm:px-0">
-      <div>
-        <h1>Einstellungen</h1>
-        <p className="text-muted-foreground mt-4">Verwalte die Optionen für Touren</p>
-      </div>
+    <ContentLayout title="Einstellungen">
+      <div className="space-y-6">
+        <div>
+          <p className="text-muted-foreground">
+            Verwalte globale Einstellungen und Konfigurationen für die Anwendung.
+          </p>
+        </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {settingsCategories.map((category) => {
-          const isCustomIcon = category.iconType === 'users' || category.iconType === 'invitations'
-          const IconComponent = category.iconType === 'users' ? Users : category.iconType === 'invitations' ? Mail : null
-          
-          return (
-            <Link key={category.href} href={category.href} className="touch-manipulation">
-              <Card className="hover:shadow-lg transition-all cursor-pointer h-full group flex flex-col">
-                <CardHeader className="p-4 md:p-6">
-                  <div className="flex items-center gap-4">
-                    <div className="flex-1 min-w-0">
-                      <CardTitle className="flex items-center gap-2 group-hover:text-primary-600 transition-colors">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {settingsCategories.map((category) => {
+            const isCustomIcon = category.iconType === 'users' || category.iconType === 'invitations'
+            const IconComponent = category.iconType === 'users' ? Users : category.iconType === 'invitations' ? Mail : null
+
+            return (
+              <Link key={category.href} href={category.href} className="block h-full">
+                <Card className="h-full hover:bg-muted/50 transition-colors cursor-pointer">
+                  <CardHeader>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="p-2 bg-primary/10 rounded-lg">
                         {isCustomIcon && IconComponent ? (
-                          <IconComponent className="w-5 h-5 text-primary-600 flex-shrink-0" strokeWidth={2} />
+                          <IconComponent className="w-5 h-5 text-primary" />
                         ) : (
-                          <SettingsIcon type={category.iconType as 'tour-types' | 'tour-lengths' | 'difficulties'} className="w-5 h-5 text-primary-600 flex-shrink-0" strokeWidth={2} />
+                          <SettingsIcon
+                            type={category.iconType as 'tour-types' | 'tour-lengths' | 'difficulties'}
+                            className="w-5 h-5 text-primary"
+                          />
                         )}
-                        {category.title}
-                      </CardTitle>
-                      <CardDescription className="hidden sm:block line-clamp-2 mt-1.5">{category.description}</CardDescription>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-muted-foreground" />
                     </div>
-                    <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary-600 transition-colors flex-shrink-0" strokeWidth={2} />
-                  </div>
-                </CardHeader>
-              </Card>
-          </Link>
-        )
-        })}
+                    <CardTitle className="text-xl">{category.title}</CardTitle>
+                    <CardDescription className="line-clamp-2">
+                      {category.description}
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </Link>
+            )
+          })}
+        </div>
       </div>
-    </div>
+    </ContentLayout>
   )
 }

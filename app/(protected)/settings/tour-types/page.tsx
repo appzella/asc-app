@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { authService } from '@/lib/auth'
 import { dataRepository } from '@/lib/data'
-import { User, TourSettings } from '@/lib/types'
+import { User } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
@@ -13,7 +13,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { canManageUsers } from '@/lib/roles'
 import Link from 'next/link'
 import { getIconByName, getTourIcon } from '@/lib/tourIcons'
-import { Trash2, ChevronDown, ChevronLeft, SquarePen, Check, X } from 'lucide-react'
+import { Trash2, ChevronDown, ChevronLeft, SquarePen, Check, X, GripVertical } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function TourTypesSettingsPage() {
@@ -27,38 +27,45 @@ export default function TourTypesSettingsPage() {
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
   const [editingType, setEditingType] = useState<string | null>(null)
   const [editValue, setEditValue] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const loadSettings = async () => {
-      const currentUser = authService.getCurrentUser()
-      setUser(currentUser)
+    let isMounted = true
 
-      if (currentUser && !canManageUsers(currentUser.role)) {
+    const loadSettings = async () => {
+      const currentUser = await authService.getCurrentUserAsync()
+
+      if (!isMounted) return
+
+      if (!currentUser || !canManageUsers(currentUser.role)) {
         router.push('/dashboard')
         return
       }
 
-      if (currentUser) {
-        const settings = await dataRepository.getSettings()
-        setTourTypes(settings.tourTypes)
-        setTourTypeIcons(settings.tourTypeIcons || {})
-      }
+      setUser(currentUser)
+      const settings = await dataRepository.getSettings()
+      setTourTypes(settings.tourTypes)
+      setTourTypeIcons(settings.tourTypeIcons || {})
+      setIsLoading(false)
     }
 
     loadSettings()
 
     const unsubscribe = authService.subscribe(async (updatedUser) => {
-      setUser(updatedUser)
+      if (!isMounted) return
+
       if (!updatedUser || !canManageUsers(updatedUser.role)) {
         router.push('/dashboard')
-      } else {
-        const settings = await dataRepository.getSettings()
-        setTourTypes(settings.tourTypes)
-        setTourTypeIcons(settings.tourTypeIcons || {})
+        return
       }
+      setUser(updatedUser)
+      const settings = await dataRepository.getSettings()
+      setTourTypes(settings.tourTypes)
+      setTourTypeIcons(settings.tourTypeIcons || {})
     })
 
     return () => {
+      isMounted = false
       unsubscribe()
     }
   }, [router])
@@ -113,7 +120,6 @@ export default function TourTypesSettingsPage() {
       return
     }
 
-    // Prüfe auf Duplikat
     if (tourTypes.includes(editValue.trim())) {
       toast.error('Dieser Tourentyp existiert bereits')
       return
@@ -150,9 +156,7 @@ export default function TourTypesSettingsPage() {
   const handleDragStart = (e: React.DragEvent, index: number) => {
     e.dataTransfer.effectAllowed = 'move'
     e.dataTransfer.setData('application/json', index.toString())
-    // Setze auch text/html als Fallback für ältere Browser
     e.dataTransfer.setData('text/html', index.toString())
-    // Setze Opacity für besseres visuelles Feedback
     if (e.currentTarget instanceof HTMLElement) {
       e.currentTarget.style.opacity = '0.5'
     }
@@ -162,14 +166,12 @@ export default function TourTypesSettingsPage() {
     e.preventDefault()
     e.stopPropagation()
     e.dataTransfer.dropEffect = 'move'
-    // Nur updaten wenn sich der Index wirklich ändert
     if (dragOverIndex !== index) {
       setDragOverIndex(index)
     }
   }
 
   const handleDragLeave = (e: React.DragEvent) => {
-    // Ignoriere dragLeave wenn wir über ein Child-Element fahren
     const relatedTarget = e.relatedTarget as HTMLElement
     if (relatedTarget && e.currentTarget.contains(relatedTarget)) {
       return
@@ -196,8 +198,6 @@ export default function TourTypesSettingsPage() {
     toast.success('Reihenfolge aktualisiert!')
   }
 
-  // Beliebte Icons für Tourenarten (nur existierende lucide-react Icons)
-  // Icons werden zur Laufzeit gefiltert, um nur existierende anzuzeigen
   const popularIcons = [
     { value: 'Mountain', label: 'Mountain' },
     { value: 'Footprints', label: 'Footprints' },
@@ -219,9 +219,9 @@ export default function TourTypesSettingsPage() {
     { value: 'Landmark', label: 'Landmark' },
   ]
 
-  if (!user) {
+  if (isLoading || !user) {
     return (
-      <div className="max-w-4xl mx-auto space-y-4 animate-fade-in">
+      <div className="max-w-4xl mx-auto space-y-6 p-4 md:p-6">
         <div>
           <Skeleton className="h-9 w-32 mb-2" />
           <Skeleton className="h-5 w-96" />
@@ -252,23 +252,25 @@ export default function TourTypesSettingsPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-4 animate-fade-in">
+    <div className="max-w-4xl mx-auto space-y-6 p-4 md:p-6">
       <div>
         <div className="flex items-center gap-3 mb-3">
           <Button
             variant="ghost"
             size="sm"
             asChild
-            className="hidden sm:inline-flex items-center gap-1 text-primary-600"
+            className="hidden sm:inline-flex items-center gap-1 text-muted-foreground hover:text-foreground pl-0"
           >
             <Link href="/settings">
-              <ChevronLeft className="w-4 h-4" strokeWidth={2} />
+              <ChevronLeft className="w-4 h-4" />
               Zurück zur Übersicht
             </Link>
           </Button>
         </div>
-        <h1>Tourentypen</h1>
-        <CardDescription>Verwalte die verfügbaren Tourentypen</CardDescription>
+        <h1 className="text-3xl font-bold tracking-tight">Tourentypen</h1>
+        <p className="text-muted-foreground">
+          Verwalte die verfügbaren Tourentypen und ihre Icons.
+        </p>
       </div>
 
       {error && (
@@ -280,9 +282,10 @@ export default function TourTypesSettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Neuen Tourentyp hinzufügen</CardTitle>
+          <CardDescription>Erstelle eine neue Kategorie für Touren.</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex flex-col sm:flex-row gap-4">
             <Input
               value={newType}
               onChange={(e) => {
@@ -298,7 +301,7 @@ export default function TourTypesSettingsPage() {
               }}
               className="flex-1"
             />
-            <Button onClick={handleAdd} size="sm">Hinzufügen</Button>
+            <Button onClick={handleAdd}>Hinzufügen</Button>
           </div>
         </CardContent>
       </Card>
@@ -306,12 +309,14 @@ export default function TourTypesSettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Tourentypen ({tourTypes.length})</CardTitle>
-          <CardDescription>Ziehe die Einträge, um die Reihenfolge zu ändern</CardDescription>
+          <CardDescription>Ziehe die Einträge, um die Reihenfolge zu ändern.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
             {tourTypes.length === 0 ? (
-              <p className="text-muted-foreground text-sm text-center py-4">Keine Tourentypen vorhanden</p>
+              <div className="text-center py-8 text-muted-foreground">
+                Keine Tourentypen vorhanden
+              </div>
             ) : (
               tourTypes.map((type, index) => {
                 const currentIconName = tourTypeIcons[type] || 'Mountain'
@@ -322,7 +327,7 @@ export default function TourTypesSettingsPage() {
                 return (
                   <div key={type} className="relative">
                     {isDragOver && (
-                      <div className="absolute -top-1 left-0 right-0 h-0.5 bg-primary-400 rounded-full z-10" />
+                      <div className="absolute -top-1 left-0 right-0 h-0.5 bg-primary rounded-full z-10" />
                     )}
                     <div
                       draggable
@@ -336,45 +341,39 @@ export default function TourTypesSettingsPage() {
                       onDragOver={(e) => handleDragOver(e, index)}
                       onDragLeave={handleDragLeave}
                       onDrop={(e) => handleDrop(e, index)}
-                      className="flex items-center justify-between gap-3 p-3 bg-muted rounded-md border border-border cursor-move hover:bg-muted transition-all group relative"
+                      className="flex items-center justify-between gap-3 p-3 bg-card rounded-md border hover:bg-accent/50 transition-all group relative"
                     >
-                      <span className="text-muted-foreground group-hover:text-muted-foreground flex-shrink-0 text-sm">☰</span>
+                      <GripVertical className="w-5 h-5 text-muted-foreground cursor-move" />
+
                       <div className="relative flex-shrink-0">
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
-                          draggable={false}
                           onClick={(e) => {
                             e.stopPropagation()
                             setOpenIconPicker(isPickerOpen ? null : type)
                           }}
-                          onDragStart={(e) => e.stopPropagation()}
-                          className="h-auto p-1.5 gap-1"
+                          className="h-9 px-2 gap-1 border border-input"
                         >
-                          <CurrentIconComponent className="w-4 h-4 text-muted-foreground" strokeWidth={2} />
-                          <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${isPickerOpen ? 'rotate-180' : ''}`} strokeWidth={2} />
+                          <CurrentIconComponent className="w-4 h-4" />
+                          <ChevronDown className={`w-3 h-3 transition-transform ${isPickerOpen ? 'rotate-180' : ''}`} />
                         </Button>
+
                         {isPickerOpen && (
                           <>
                             <div
                               className="fixed inset-0 z-10"
                               onClick={() => setOpenIconPicker(null)}
                             />
-                            <div className="absolute top-full left-0 mt-2 z-20 bg-background rounded-md shadow-lg border border-border p-2 grid grid-cols-4 gap-2 w-64 max-h-64 overflow-y-auto">
+                            <div className="absolute top-full left-0 mt-2 z-20 bg-popover text-popover-foreground rounded-md shadow-md border p-2 grid grid-cols-4 gap-2 w-64 max-h-64 overflow-y-auto">
                               {popularIcons
                                 .filter((iconOption, index, self) => {
-                                  // Entferne Duplikate basierend auf value
                                   const firstIndex = self.findIndex(i => i.value === iconOption.value)
                                   if (firstIndex !== index) return false
-
-                                  // Prüfe, ob Icon wirklich existiert
                                   try {
                                     const testIcon = getIconByName(iconOption.value)
-                                    // Wenn das Icon nicht existiert, gibt getIconByName das Mountain Fallback zurück
-                                    // Prüfe, ob es wirklich existiert, indem wir testen ob es ein anderes Icon zurückgibt als bei einem ungültigen Namen
                                     const fallbackTest = getIconByName('NonExistentIcon12345')
-                                    // Wenn beide gleich sind (beide Mountain), dann existiert das Icon nicht wirklich
                                     return testIcon !== fallbackTest || iconOption.value === 'Mountain'
                                   } catch {
                                     return false
@@ -392,13 +391,10 @@ export default function TourTypesSettingsPage() {
                                         handleIconChange(type, iconOption.value)
                                         setOpenIconPicker(null)
                                       }}
-                                      className={`flex items-center justify-center p-2 rounded-md hover:bg-muted transition-colors touch-target ${isSelected ? 'bg-primary-50 border border-primary-500' : 'border border-transparent'
+                                      className={`flex items-center justify-center p-2 rounded-md hover:bg-accent transition-colors ${isSelected ? 'bg-accent text-accent-foreground' : ''
                                         }`}
                                     >
-                                      <IconOptionComponent
-                                        className={`w-5 h-5 ${isSelected ? 'text-primary-600' : 'text-muted-foreground'}`}
-                                        strokeWidth={2}
-                                      />
+                                      <IconOptionComponent className="w-5 h-5" />
                                     </button>
                                   )
                                 })}
@@ -406,8 +402,9 @@ export default function TourTypesSettingsPage() {
                           </>
                         )}
                       </div>
+
                       {editingType === type ? (
-                        <>
+                        <div className="flex-1 flex items-center gap-2">
                           <Input
                             value={editValue}
                             onChange={(e) => setEditValue(e.target.value)}
@@ -420,68 +417,35 @@ export default function TourTypesSettingsPage() {
                                 handleCancelEdit()
                               }
                             }}
-                            className="flex-1 h-8 text-sm"
+                            className="h-9"
                             autoFocus
-                            draggable={false}
-                            onDragStart={(e) => e.stopPropagation()}
                           />
-                          <div className="flex items-center gap-2 flex-shrink-0">
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              draggable={false}
-                              onClick={handleSaveEdit}
-                              onDragStart={(e) => e.stopPropagation()}
-                              className="h-8 w-8 p-0"
-                              aria-label="Speichern"
-                            >
-                              <Check className="w-4 h-4" strokeWidth={2} />
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              draggable={false}
-                              onClick={handleCancelEdit}
-                              onDragStart={(e) => e.stopPropagation()}
-                              className="h-8 w-8 p-0"
-                              aria-label="Abbrechen"
-                            >
-                              <X className="w-4 h-4" strokeWidth={2} />
-                            </Button>
-                          </div>
-                        </>
+                          <Button size="icon" variant="ghost" onClick={handleSaveEdit} className="h-9 w-9">
+                            <Check className="w-4 h-4 text-green-600" />
+                          </Button>
+                          <Button size="icon" variant="ghost" onClick={handleCancelEdit} className="h-9 w-9">
+                            <X className="w-4 h-4 text-destructive" />
+                          </Button>
+                        </div>
                       ) : (
                         <>
-                          <span className="font-medium text-foreground flex-1 min-w-0 truncate text-sm">{type}</span>
-                          <div className="flex items-center gap-2 flex-shrink-0">
+                          <span className="flex-1 font-medium truncate">{type}</span>
+                          <div className="flex items-center gap-1">
                             <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              draggable={false}
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleStartEdit(type)
-                              }}
-                              onDragStart={(e) => e.stopPropagation()}
-                              className="h-9 w-9 p-0"
-                              aria-label="Bearbeiten"
+                              size="icon"
+                              variant="ghost"
+                              onClick={() => handleStartEdit(type)}
+                              className="h-8 w-8 text-muted-foreground hover:text-foreground"
                             >
-                              <SquarePen className="w-4 h-4" strokeWidth={2} />
+                              <SquarePen className="w-4 h-4" />
                             </Button>
                             <Button
-                              type="button"
-                              variant="destructive"
-                              size="sm"
-                              draggable={false}
+                              size="icon"
+                              variant="ghost"
                               onClick={() => handleRemove(type)}
-                              onDragStart={(e) => e.stopPropagation()}
-                              className="h-9 w-9 p-0"
-                              aria-label="Entfernen"
+                              className="h-8 w-8 text-muted-foreground hover:text-destructive"
                             >
-                              <Trash2 className="w-4 h-4" strokeWidth={2} />
+                              <Trash2 className="w-4 h-4" />
                             </Button>
                           </div>
                         </>
