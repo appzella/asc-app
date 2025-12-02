@@ -2,12 +2,10 @@
 const nextConfig = {
   reactStrictMode: true,
   // Turbopack configuration
-  turbopack: {
-    // Turbopack-specific configurations can be added here if needed
-  },
+  // turbopack: {},
   // Optional: Enable experimental Turbopack features
   experimental: {
-    turbopackFileSystemCacheForDev: true,
+    // turbopackFileSystemCacheForDev: true,
   },
 }
 
