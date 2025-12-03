@@ -32,15 +32,8 @@ import { toast } from 'sonner'
 import { Separator } from '@/components/ui/separator'
 import { Label } from '@/components/ui/label'
 import { WhatsAppGroupGuide } from '@/components/tours/WhatsAppGroupGuide'
-import { ContentLayout } from '@/components/admin-panel/content-layout'
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { ContentLayout } from '@/components/content-layout'
+
 
 const editTourSchema = z.object({
   title: z.string().min(1, 'Titel ist erforderlich'),
@@ -306,33 +299,7 @@ export default function EditTourPage() {
   return (
     <ContentLayout
       title="Tour bearbeiten"
-      breadcrumb={
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link href="/">Home</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link href="/tours">Touren</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link href={`/tours/${tourId}`}>{tour.title}</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Bearbeiten</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      }
+
     >
       <div className="max-w-2xl mx-auto space-y-6">
 

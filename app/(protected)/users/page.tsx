@@ -21,15 +21,8 @@ import Link from 'next/link'
 import { ChevronLeft, Edit, Upload, Trash2, Camera, ImageIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { ImageCropper } from '@/components/ui/ImageCropper'
-import { ContentLayout } from '@/components/admin-panel/content-layout'
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { ContentLayout } from '@/components/content-layout'
+
 
 export default function UsersPage() {
   const router = useRouter()
@@ -288,21 +281,7 @@ export default function UsersPage() {
     return (
       <ContentLayout
         title="Benutzerverwaltung"
-        breadcrumb={
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href="/">Home</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Benutzer</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        }
+
       >
         <div className="space-y-4">
           <div>
@@ -329,21 +308,7 @@ export default function UsersPage() {
   return (
     <ContentLayout
       title="Benutzerverwaltung"
-      breadcrumb={
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link href="/">Home</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Benutzer</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      }
+
     >
       <div className="space-y-4">
         <div>

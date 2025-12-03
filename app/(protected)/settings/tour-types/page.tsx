@@ -15,15 +15,8 @@ import Link from 'next/link'
 import { getIconByName, getTourIcon } from '@/lib/tourIcons'
 import { Trash2, ChevronDown, ChevronLeft, SquarePen, Check, X, GripVertical } from 'lucide-react'
 import { toast } from 'sonner'
-import { ContentLayout } from '@/components/admin-panel/content-layout'
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { ContentLayout } from '@/components/content-layout'
+
 
 export default function TourTypesSettingsPage() {
   const router = useRouter()
@@ -232,27 +225,7 @@ export default function TourTypesSettingsPage() {
     return (
       <ContentLayout
         title="Tourentypen"
-        breadcrumb={
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href="/">Home</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href="/settings">Einstellungen</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Tourentypen</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        }
+
       >
         <div className="max-w-4xl mx-auto space-y-6">
           <div>
@@ -288,27 +261,7 @@ export default function TourTypesSettingsPage() {
   return (
     <ContentLayout
       title="Tourentypen"
-      breadcrumb={
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link href="/">Home</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link href="/settings">Einstellungen</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Tourentypen</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      }
+
     >
       <div className="max-w-4xl mx-auto space-y-6">
         <div>

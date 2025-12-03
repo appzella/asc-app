@@ -5,15 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { authService } from '@/lib/auth'
 import { testNotificationSystem, testPushNotification } from '@/app/actions/debug'
-import { ContentLayout } from '@/components/admin-panel/content-layout'
-import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { ContentLayout } from '@/components/content-layout'
 import Link from 'next/link'
 
 export default function DebugPage() {
@@ -61,21 +53,6 @@ export default function DebugPage() {
     return (
         <ContentLayout
             title="Debug"
-            breadcrumb={
-                <Breadcrumb>
-                    <BreadcrumbList>
-                        <BreadcrumbItem>
-                            <BreadcrumbLink asChild>
-                                <Link href="/">Home</Link>
-                            </BreadcrumbLink>
-                        </BreadcrumbItem>
-                        <BreadcrumbSeparator />
-                        <BreadcrumbItem>
-                            <BreadcrumbPage>Debug</BreadcrumbPage>
-                        </BreadcrumbItem>
-                    </BreadcrumbList>
-                </Breadcrumb>
-            }
         >
             <div className="container max-w-2xl py-8">
                 <Card>

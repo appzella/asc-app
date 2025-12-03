@@ -14,15 +14,8 @@ import { canManageUsers } from '@/lib/roles'
 import Link from 'next/link'
 import { Trash2, ChevronLeft, SquarePen, Check, X, GripVertical } from 'lucide-react'
 import { toast } from 'sonner'
-import { ContentLayout } from '@/components/admin-panel/content-layout'
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { ContentLayout } from '@/components/content-layout'
+
 
 export default function TourLengthsSettingsPage() {
   const router = useRouter()
@@ -189,27 +182,7 @@ export default function TourLengthsSettingsPage() {
     return (
       <ContentLayout
         title="Tourlängen"
-        breadcrumb={
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href="/">Home</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href="/settings">Einstellungen</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Tourlängen</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        }
+
       >
         <div className="max-w-4xl mx-auto space-y-6">
           <div>
@@ -245,27 +218,7 @@ export default function TourLengthsSettingsPage() {
   return (
     <ContentLayout
       title="Tourlängen"
-      breadcrumb={
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link href="/">Home</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link href="/settings">Einstellungen</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Tourlängen</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      }
+
     >
       <div className="max-w-4xl mx-auto space-y-6">
         <div>

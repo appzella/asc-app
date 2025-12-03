@@ -30,15 +30,8 @@ import {
   ArrowRight
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import { ContentLayout } from '@/components/admin-panel/content-layout'
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { ContentLayout } from '@/components/content-layout'
+
 
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null)
@@ -123,21 +116,7 @@ export default function DashboardPage() {
   return (
     <ContentLayout
       title="Dashboard"
-      breadcrumb={
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link href="/">Home</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Dashboard</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      }
+
     >
       <div className="space-y-4">
         <div className="flex items-center justify-end space-y-2">

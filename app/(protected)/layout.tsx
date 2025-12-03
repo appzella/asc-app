@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { authService } from '@/lib/auth'
 import { User } from '@/lib/types'
-import AdminPanelLayout from "@/components/admin-panel/admin-panel-layout"
 
 export default function ProtectedLayout({
   children,
@@ -65,8 +64,8 @@ export default function ProtectedLayout({
   }
 
   return (
-    <AdminPanelLayout>
+    <>
       {children}
-    </AdminPanelLayout>
+    </>
   )
 }

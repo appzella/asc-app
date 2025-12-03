@@ -33,15 +33,8 @@ import Link from 'next/link'
 import { ChevronLeft, HelpCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { WhatsAppGroupGuide } from '@/components/tours/WhatsAppGroupGuide'
-import { ContentLayout } from '@/components/admin-panel/content-layout'
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { ContentLayout } from '@/components/content-layout'
+
 
 const createTourSchema = z.object({
   title: z.string().min(1, 'Titel ist erforderlich'),
@@ -278,27 +271,7 @@ export default function CreateTourPage() {
   return (
     <ContentLayout
       title="Neue Tour erstellen"
-      breadcrumb={
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link href="/">Home</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link href="/tours">Touren</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Neue Tour</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      }
+
     >
       <div className="max-w-2xl mx-auto space-y-4 animate-fade-in">
 
