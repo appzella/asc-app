@@ -20,7 +20,6 @@ import {
 } from '@/components/ui/form'
 import { authService } from '@/lib/auth'
 import { LoginTimeoutError } from '@/lib/auth/supabaseAuth'
-import { ASCLogo } from '@/components/ui/ASCLogo'
 import Snowfall from 'react-snowfall'
 
 const loginSchema = z.object({
@@ -75,7 +74,19 @@ export default function LoginPage() {
       <CardHeader>
         <div className="text-center">
           <div className="flex justify-center mb-4">
-            <ASCLogo size={64} />
+            <div
+              className="w-16 h-16 bg-primary"
+              style={{
+                maskImage: "url(/asc-logo.svg)",
+                WebkitMaskImage: "url(/asc-logo.svg)",
+                maskSize: "contain",
+                WebkitMaskSize: "contain",
+                maskRepeat: "no-repeat",
+                WebkitMaskRepeat: "no-repeat",
+                maskPosition: "center",
+                WebkitMaskPosition: "center",
+              }}
+            />
           </div>
           <h1 className="text-2xl font-bold gradient-text mb-2">ASC Skitouren App</h1>
           <p className="text-muted-foreground text-sm">Anmelden</p>

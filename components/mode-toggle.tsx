@@ -27,10 +27,10 @@ export function ModeToggle() {
                     >
                         <SunIcon className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all duration-500 ease-in-out dark:-rotate-90 dark:scale-0" />
                         <MoonIcon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all duration-500 ease-in-out dark:rotate-0 dark:scale-100" />
-                        <span className="sr-only">Switch Theme</span>
+                        <span className="sr-only">Design wechseln</span>
                     </Button>
                 </TooltipTrigger>
-                <TooltipContent side="bottom">Switch Theme</TooltipContent>
+                <TooltipContent side="bottom">Design wechseln</TooltipContent>
             </Tooltip>
         </TooltipProvider>
     );
