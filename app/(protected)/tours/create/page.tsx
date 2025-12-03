@@ -32,7 +32,7 @@ import { getTourIcon } from '@/lib/tourIcons'
 import Link from 'next/link'
 import { ChevronLeft, HelpCircle } from 'lucide-react'
 import { toast } from 'sonner'
-import { WhatsAppGroupGuide } from '@/components/tours/WhatsAppGroupGuide'
+import { WhatsAppGroupGuide } from '@/components/tours/whatsapp-group-guide'
 import { ContentLayout } from '@/components/content-layout'
 
 

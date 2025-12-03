@@ -8,7 +8,7 @@ import { User } from '@/lib/types'
 import { canManageUsers } from '@/lib/roles'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { SettingsIcon } from '@/components/ui/SettingsIcon'
+import { SettingsIcon } from '@/components/ui/settings-icon'
 import { Users, Mail, ChevronRight, Settings } from 'lucide-react'
 import { ContentLayout } from '@/components/content-layout'
 

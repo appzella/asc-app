@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react'
 import { X } from 'lucide-react'
-import { ASCLogo } from '@/components/ui/ASCLogo'
+import { ASCLogo } from "@/components/ui/asc-logo"
 
 interface DrawerProps {
   open: boolean

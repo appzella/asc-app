@@ -31,7 +31,7 @@ import { ChevronLeft, HelpCircle, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Separator } from '@/components/ui/separator'
 import { Label } from '@/components/ui/label'
-import { WhatsAppGroupGuide } from '@/components/tours/WhatsAppGroupGuide'
+import { WhatsAppGroupGuide } from '@/components/tours/whatsapp-group-guide'
 import { ContentLayout } from '@/components/content-layout'
 
 

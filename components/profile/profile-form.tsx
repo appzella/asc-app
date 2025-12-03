@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/form'
 import { Separator } from '@/components/ui/separator'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import { ImageCropper } from '@/components/ui/ImageCropper'
+import { ImageCropper } from '@/components/ui/image-cropper'
 import { Upload, Trash2, Loader2 } from 'lucide-react'
 import { PhoneInput } from '@/components/ui/phone-input'
 import { AddressAutocomplete } from '@/components/ui/address-autocomplete'

@@ -20,7 +20,7 @@ import { canManageUsers } from '@/lib/roles'
 import Link from 'next/link'
 import { ChevronLeft, Edit, Upload, Trash2, Camera, ImageIcon } from 'lucide-react'
 import { toast } from 'sonner'
-import { ImageCropper } from '@/components/ui/ImageCropper'
+import { ImageCropper } from '@/components/ui/image-cropper'
 import { ContentLayout } from '@/components/content-layout'
 
 
