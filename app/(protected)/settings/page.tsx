@@ -11,6 +11,14 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { SettingsIcon } from '@/components/ui/SettingsIcon'
 import { Users, Mail, ChevronRight, Settings } from 'lucide-react'
 import { ContentLayout } from '@/components/admin-panel/content-layout'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 
 export default function SettingsPage() {
   const router = useRouter()
@@ -107,7 +115,24 @@ export default function SettingsPage() {
   ]
 
   return (
-    <ContentLayout title="Einstellungen">
+    <ContentLayout
+      title="Einstellungen"
+      breadcrumb={
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href="/">Home</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Einstellungen</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      }
+    >
       <div className="space-y-6">
         <div>
           <p className="text-muted-foreground">

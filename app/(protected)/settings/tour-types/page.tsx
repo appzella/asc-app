@@ -15,6 +15,15 @@ import Link from 'next/link'
 import { getIconByName, getTourIcon } from '@/lib/tourIcons'
 import { Trash2, ChevronDown, ChevronLeft, SquarePen, Check, X, GripVertical } from 'lucide-react'
 import { toast } from 'sonner'
+import { ContentLayout } from '@/components/admin-panel/content-layout'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 
 export default function TourTypesSettingsPage() {
   const router = useRouter()
@@ -221,243 +230,279 @@ export default function TourTypesSettingsPage() {
 
   if (isLoading || !user) {
     return (
-      <div className="max-w-4xl mx-auto space-y-6 p-4 md:p-6">
-        <div>
-          <Skeleton className="h-9 w-32 mb-2" />
-          <Skeleton className="h-5 w-96" />
+      <ContentLayout
+        title="Tourentypen"
+        breadcrumb={
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href="/">Home</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href="/settings">Einstellungen</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Tourentypen</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        }
+      >
+        <div className="max-w-4xl mx-auto space-y-6">
+          <div>
+            <Skeleton className="h-9 w-32 mb-2" />
+            <Skeleton className="h-5 w-96" />
+          </div>
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-48" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-10 w-full" />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-48 mb-2" />
+              <Skeleton className="h-4 w-64" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="h-12 w-full" />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-48" />
-          </CardHeader>
-          <CardContent>
-            <Skeleton className="h-10 w-full" />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-48 mb-2" />
-            <Skeleton className="h-4 w-64" />
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {[1, 2, 3].map((i) => (
-                <Skeleton key={i} className="h-12 w-full" />
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      </ContentLayout>
     )
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 p-4 md:p-6">
-      <div>
-        <div className="flex items-center gap-3 mb-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            asChild
-            className="hidden sm:inline-flex items-center gap-1 text-muted-foreground hover:text-foreground pl-0"
-          >
-            <Link href="/settings">
-              <ChevronLeft className="w-4 h-4" />
-              Zurück zur Übersicht
-            </Link>
-          </Button>
+    <ContentLayout
+      title="Tourentypen"
+      breadcrumb={
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href="/">Home</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href="/settings">Einstellungen</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Tourentypen</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      }
+    >
+      <div className="max-w-4xl mx-auto space-y-6">
+        <div>
+          <p className="text-muted-foreground">
+            Verwalte die verfügbaren Tourentypen und ihre Icons.
+          </p>
         </div>
-        <h1 className="text-3xl font-bold tracking-tight">Tourentypen</h1>
-        <p className="text-muted-foreground">
-          Verwalte die verfügbaren Tourentypen und ihre Icons.
-        </p>
-      </div>
 
-      {error && (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Neuen Tourentyp hinzufügen</CardTitle>
-          <CardDescription>Erstelle eine neue Kategorie für Touren.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Input
-              value={newType}
-              onChange={(e) => {
-                setNewType(e.target.value)
-                setError('')
-              }}
-              placeholder="z.B. Klettern"
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault()
-                  handleAdd()
-                }
-              }}
-              className="flex-1"
-            />
-            <Button onClick={handleAdd}>Hinzufügen</Button>
-          </div>
-        </CardContent>
-      </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Neuen Tourentyp hinzufügen</CardTitle>
+            <CardDescription>Erstelle eine neue Kategorie für Touren.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Input
+                value={newType}
+                onChange={(e) => {
+                  setNewType(e.target.value)
+                  setError('')
+                }}
+                placeholder="z.B. Klettern"
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    handleAdd()
+                  }
+                }}
+                className="flex-1"
+              />
+              <Button onClick={handleAdd}>Hinzufügen</Button>
+            </div>
+          </CardContent>
+        </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Tourentypen ({tourTypes.length})</CardTitle>
-          <CardDescription>Ziehe die Einträge, um die Reihenfolge zu ändern.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {tourTypes.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                Keine Tourentypen vorhanden
-              </div>
-            ) : (
-              tourTypes.map((type, index) => {
-                const currentIconName = tourTypeIcons[type] || 'Mountain'
-                const CurrentIconComponent = getTourIcon(type as any, tourTypeIcons)
-                const isPickerOpen = openIconPicker === type
-                const isDragOver = dragOverIndex === index
+        <Card>
+          <CardHeader>
+            <CardTitle>Tourentypen ({tourTypes.length})</CardTitle>
+            <CardDescription>Ziehe die Einträge, um die Reihenfolge zu ändern.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {tourTypes.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  Keine Tourentypen vorhanden
+                </div>
+              ) : (
+                tourTypes.map((type, index) => {
+                  const currentIconName = tourTypeIcons[type] || 'Mountain'
+                  const CurrentIconComponent = getTourIcon(type as any, tourTypeIcons)
+                  const isPickerOpen = openIconPicker === type
+                  const isDragOver = dragOverIndex === index
 
-                return (
-                  <div key={type} className="relative">
-                    {isDragOver && (
-                      <div className="absolute -top-1 left-0 right-0 h-0.5 bg-primary rounded-full z-10" />
-                    )}
-                    <div
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, index)}
-                      onDragEnd={(e) => {
-                        if (e.currentTarget instanceof HTMLElement) {
-                          e.currentTarget.style.opacity = '1'
-                        }
-                        setDragOverIndex(null)
-                      }}
-                      onDragOver={(e) => handleDragOver(e, index)}
-                      onDragLeave={handleDragLeave}
-                      onDrop={(e) => handleDrop(e, index)}
-                      className="flex items-center justify-between gap-3 p-3 bg-card rounded-md border hover:bg-accent/50 transition-all group relative"
-                    >
-                      <GripVertical className="w-5 h-5 text-muted-foreground cursor-move" />
+                  return (
+                    <div key={type} className="relative">
+                      {isDragOver && (
+                        <div className="absolute -top-1 left-0 right-0 h-0.5 bg-primary rounded-full z-10" />
+                      )}
+                      <div
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, index)}
+                        onDragEnd={(e) => {
+                          if (e.currentTarget instanceof HTMLElement) {
+                            e.currentTarget.style.opacity = '1'
+                          }
+                          setDragOverIndex(null)
+                        }}
+                        onDragOver={(e) => handleDragOver(e, index)}
+                        onDragLeave={handleDragLeave}
+                        onDrop={(e) => handleDrop(e, index)}
+                        className="flex items-center justify-between gap-3 p-3 bg-card rounded-md border hover:bg-accent/50 transition-all group relative"
+                      >
+                        <GripVertical className="w-5 h-5 text-muted-foreground cursor-move" />
 
-                      <div className="relative flex-shrink-0">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setOpenIconPicker(isPickerOpen ? null : type)
-                          }}
-                          className="h-9 px-2 gap-1 border border-input"
-                        >
-                          <CurrentIconComponent className="w-4 h-4" />
-                          <ChevronDown className={`w-3 h-3 transition-transform ${isPickerOpen ? 'rotate-180' : ''}`} />
-                        </Button>
+                        <div className="relative flex-shrink-0">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setOpenIconPicker(isPickerOpen ? null : type)
+                            }}
+                            className="h-9 px-2 gap-1 border border-input"
+                          >
+                            <CurrentIconComponent className="w-4 h-4" />
+                            <ChevronDown className={`w-3 h-3 transition-transform ${isPickerOpen ? 'rotate-180' : ''}`} />
+                          </Button>
 
-                        {isPickerOpen && (
-                          <>
-                            <div
-                              className="fixed inset-0 z-10"
-                              onClick={() => setOpenIconPicker(null)}
+                          {isPickerOpen && (
+                            <>
+                              <div
+                                className="fixed inset-0 z-10"
+                                onClick={() => setOpenIconPicker(null)}
+                              />
+                              <div className="absolute top-full left-0 mt-2 z-20 bg-popover text-popover-foreground rounded-md shadow-md border p-2 grid grid-cols-4 gap-2 w-64 max-h-64 overflow-y-auto">
+                                {popularIcons
+                                  .filter((iconOption, index, self) => {
+                                    const firstIndex = self.findIndex(i => i.value === iconOption.value)
+                                    if (firstIndex !== index) return false
+                                    try {
+                                      const testIcon = getIconByName(iconOption.value)
+                                      const fallbackTest = getIconByName('NonExistentIcon12345')
+                                      return testIcon !== fallbackTest || iconOption.value === 'Mountain'
+                                    } catch {
+                                      return false
+                                    }
+                                  })
+                                  .map((iconOption) => {
+                                    const IconOptionComponent = getIconByName(iconOption.value)
+                                    const isSelected = iconOption.value === currentIconName
+                                    return (
+                                      <button
+                                        key={iconOption.value}
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          handleIconChange(type, iconOption.value)
+                                          setOpenIconPicker(null)
+                                        }}
+                                        className={`flex items-center justify-center p-2 rounded-md hover:bg-accent transition-colors ${isSelected ? 'bg-accent text-accent-foreground' : ''
+                                          }`}
+                                      >
+                                        <IconOptionComponent className="w-5 h-5" />
+                                      </button>
+                                    )
+                                  })}
+                              </div>
+                            </>
+                          )}
+                        </div>
+
+                        {editingType === type ? (
+                          <div className="flex-1 flex items-center gap-2">
+                            <Input
+                              value={editValue}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault()
+                                  handleSaveEdit()
+                                } else if (e.key === 'Escape') {
+                                  e.preventDefault()
+                                  handleCancelEdit()
+                                }
+                              }}
+                              className="h-9"
+                              autoFocus
                             />
-                            <div className="absolute top-full left-0 mt-2 z-20 bg-popover text-popover-foreground rounded-md shadow-md border p-2 grid grid-cols-4 gap-2 w-64 max-h-64 overflow-y-auto">
-                              {popularIcons
-                                .filter((iconOption, index, self) => {
-                                  const firstIndex = self.findIndex(i => i.value === iconOption.value)
-                                  if (firstIndex !== index) return false
-                                  try {
-                                    const testIcon = getIconByName(iconOption.value)
-                                    const fallbackTest = getIconByName('NonExistentIcon12345')
-                                    return testIcon !== fallbackTest || iconOption.value === 'Mountain'
-                                  } catch {
-                                    return false
-                                  }
-                                })
-                                .map((iconOption) => {
-                                  const IconOptionComponent = getIconByName(iconOption.value)
-                                  const isSelected = iconOption.value === currentIconName
-                                  return (
-                                    <button
-                                      key={iconOption.value}
-                                      type="button"
-                                      onClick={(e) => {
-                                        e.stopPropagation()
-                                        handleIconChange(type, iconOption.value)
-                                        setOpenIconPicker(null)
-                                      }}
-                                      className={`flex items-center justify-center p-2 rounded-md hover:bg-accent transition-colors ${isSelected ? 'bg-accent text-accent-foreground' : ''
-                                        }`}
-                                    >
-                                      <IconOptionComponent className="w-5 h-5" />
-                                    </button>
-                                  )
-                                })}
+                            <Button size="icon" variant="ghost" onClick={handleSaveEdit} className="h-9 w-9">
+                              <Check className="w-4 h-4 text-green-600" />
+                            </Button>
+                            <Button size="icon" variant="ghost" onClick={handleCancelEdit} className="h-9 w-9">
+                              <X className="w-4 h-4 text-destructive" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <>
+                            <span className="flex-1 font-medium truncate">{type}</span>
+                            <div className="flex items-center gap-1">
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={() => handleStartEdit(type)}
+                                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                              >
+                                <SquarePen className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={() => handleRemove(type)}
+                                className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
                             </div>
                           </>
                         )}
                       </div>
-
-                      {editingType === type ? (
-                        <div className="flex-1 flex items-center gap-2">
-                          <Input
-                            value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                e.preventDefault()
-                                handleSaveEdit()
-                              } else if (e.key === 'Escape') {
-                                e.preventDefault()
-                                handleCancelEdit()
-                              }
-                            }}
-                            className="h-9"
-                            autoFocus
-                          />
-                          <Button size="icon" variant="ghost" onClick={handleSaveEdit} className="h-9 w-9">
-                            <Check className="w-4 h-4 text-green-600" />
-                          </Button>
-                          <Button size="icon" variant="ghost" onClick={handleCancelEdit} className="h-9 w-9">
-                            <X className="w-4 h-4 text-destructive" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <>
-                          <span className="flex-1 font-medium truncate">{type}</span>
-                          <div className="flex items-center gap-1">
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              onClick={() => handleStartEdit(type)}
-                              className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                            >
-                              <SquarePen className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              onClick={() => handleRemove(type)}
-                              className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </>
-                      )}
                     </div>
-                  </div>
-                )
-              })
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+                  )
+                })
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </ContentLayout>
   )
 }

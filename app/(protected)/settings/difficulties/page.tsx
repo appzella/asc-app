@@ -16,6 +16,15 @@ import { canManageUsers } from '@/lib/roles'
 import Link from 'next/link'
 import { Trash2, ChevronLeft, SquarePen, Check, X, GripVertical } from 'lucide-react'
 import { toast } from 'sonner'
+import { ContentLayout } from '@/components/admin-panel/content-layout'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 
 export default function DifficultiesSettingsPage() {
   const router = useRouter()
@@ -203,214 +212,250 @@ export default function DifficultiesSettingsPage() {
 
   if (isLoading || !user) {
     return (
-      <div className="max-w-4xl mx-auto space-y-6 p-4 md:p-6">
-        <div>
-          <Skeleton className="h-9 w-32 mb-2" />
-          <Skeleton className="h-5 w-96" />
+      <ContentLayout
+        title="Schwierigkeitsgrade"
+        breadcrumb={
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href="/">Home</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href="/settings">Einstellungen</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Schwierigkeitsgrade</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        }
+      >
+        <div className="max-w-4xl mx-auto space-y-6">
+          <div>
+            <Skeleton className="h-9 w-32 mb-2" />
+            <Skeleton className="h-5 w-96" />
+          </div>
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-48" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-10 w-full" />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-48" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-10 w-full" />
+            </CardContent>
+          </Card>
         </div>
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-48" />
-          </CardHeader>
-          <CardContent>
-            <Skeleton className="h-10 w-full" />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-48" />
-          </CardHeader>
-          <CardContent>
-            <Skeleton className="h-10 w-full" />
-          </CardContent>
-        </Card>
-      </div>
+      </ContentLayout>
     )
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 p-4 md:p-6">
-      <div>
-        <div className="flex items-center gap-3 mb-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            asChild
-            className="hidden sm:inline-flex items-center gap-1 text-muted-foreground hover:text-foreground pl-0"
-          >
-            <Link href="/settings">
-              <ChevronLeft className="w-4 h-4" />
-              Zurück zur Übersicht
-            </Link>
-          </Button>
+    <ContentLayout
+      title="Schwierigkeitsgrade"
+      breadcrumb={
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href="/">Home</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href="/settings">Einstellungen</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Schwierigkeitsgrade</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      }
+    >
+      <div className="max-w-4xl mx-auto space-y-6">
+        <div>
+          <p className="text-muted-foreground">
+            Verwalten Sie die Schwierigkeitsgrade für jede Tourenart.
+          </p>
         </div>
-        <h1 className="text-3xl font-bold tracking-tight">Schwierigkeitsgrade</h1>
-        <p className="text-muted-foreground">
-          Verwalten Sie die Schwierigkeitsgrade für jede Tourenart.
-        </p>
-      </div>
 
-      {error && (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Tourenart auswählen</CardTitle>
-          <CardDescription>Wählen Sie eine Tourenart, um deren Schwierigkeitsgrade zu bearbeiten.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <Label htmlFor="tour-type-select">Tourenart</Label>
-            <Select
-              value={selectedTourType}
-              onValueChange={(value) => {
-                setSelectedTourType(value)
-                setNewDifficulty('')
-                setError('')
-              }}
-            >
-              <SelectTrigger id="tour-type-select" className="w-full">
-                <SelectValue placeholder="Bitte wählen" />
-              </SelectTrigger>
-              <SelectContent>
-                {settings.tourTypes.map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {type}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Tourenart auswählen</CardTitle>
+            <CardDescription>Wählen Sie eine Tourenart, um deren Schwierigkeitsgrade zu bearbeiten.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <Label htmlFor="tour-type-select">Tourenart</Label>
+              <Select
+                value={selectedTourType}
+                onValueChange={(value) => {
+                  setSelectedTourType(value)
+                  setNewDifficulty('')
+                  setError('')
+                }}
+              >
+                <SelectTrigger id="tour-type-select" className="w-full">
+                  <SelectValue placeholder="Bitte wählen" />
+                </SelectTrigger>
+                <SelectContent>
+                  {settings.tourTypes.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
 
-      {selectedTourType && (
-        <>
-          <Card>
-            <CardHeader>
-              <CardTitle>Neuen Schwierigkeitsgrad hinzufügen</CardTitle>
-              <CardDescription>Fügen Sie einen neuen Schwierigkeitsgrad für {selectedTourType} hinzu.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Input
-                  value={newDifficulty}
-                  onChange={(e) => {
-                    setNewDifficulty(e.target.value)
-                    setError('')
-                  }}
-                  placeholder="z.B. T1, L, B1"
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault()
-                      handleAdd()
-                    }
-                  }}
-                  className="flex-1"
-                />
-                <Button onClick={handleAdd}>Hinzufügen</Button>
-              </div>
-            </CardContent>
-          </Card>
+        {selectedTourType && (
+          <>
+            <Card>
+              <CardHeader>
+                <CardTitle>Neuen Schwierigkeitsgrad hinzufügen</CardTitle>
+                <CardDescription>Fügen Sie einen neuen Schwierigkeitsgrad für {selectedTourType} hinzu.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Input
+                    value={newDifficulty}
+                    onChange={(e) => {
+                      setNewDifficulty(e.target.value)
+                      setError('')
+                    }}
+                    placeholder="z.B. T1, L, B1"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        handleAdd()
+                      }
+                    }}
+                    className="flex-1"
+                  />
+                  <Button onClick={handleAdd}>Hinzufügen</Button>
+                </div>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Schwierigkeitsgrade ({difficulties.length})</CardTitle>
-              <CardDescription>Ziehen Sie die Einträge, um die Reihenfolge zu ändern.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {difficulties.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    Keine Schwierigkeitsgrade vorhanden
-                  </div>
-                ) : (
-                  difficulties.map((difficulty, index) => {
-                    const isDragOver = dragOverIndex === index
+            <Card>
+              <CardHeader>
+                <CardTitle>Schwierigkeitsgrade ({difficulties.length})</CardTitle>
+                <CardDescription>Ziehen Sie die Einträge, um die Reihenfolge zu ändern.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {difficulties.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      Keine Schwierigkeitsgrade vorhanden
+                    </div>
+                  ) : (
+                    difficulties.map((difficulty, index) => {
+                      const isDragOver = dragOverIndex === index
 
-                    return (
-                      <div key={difficulty} className="relative">
-                        {isDragOver && (
-                          <div className="absolute -top-1 left-0 right-0 h-0.5 bg-primary rounded-full z-10" />
-                        )}
-                        <div
-                          draggable
-                          onDragStart={(e) => handleDragStart(e, index)}
-                          onDragEnd={(e) => {
-                            if (e.currentTarget instanceof HTMLElement) {
-                              e.currentTarget.style.opacity = '1'
-                            }
-                            setDragOverIndex(null)
-                          }}
-                          onDragOver={(e) => handleDragOver(e, index)}
-                          onDragLeave={handleDragLeave}
-                          onDrop={(e) => handleDrop(e, index)}
-                          className="flex items-center justify-between p-3 bg-card rounded-md border hover:bg-accent/50 transition-all group relative"
-                        >
-                          <GripVertical className="w-5 h-5 text-muted-foreground cursor-move" />
+                      return (
+                        <div key={difficulty} className="relative">
+                          {isDragOver && (
+                            <div className="absolute -top-1 left-0 right-0 h-0.5 bg-primary rounded-full z-10" />
+                          )}
+                          <div
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, index)}
+                            onDragEnd={(e) => {
+                              if (e.currentTarget instanceof HTMLElement) {
+                                e.currentTarget.style.opacity = '1'
+                              }
+                              setDragOverIndex(null)
+                            }}
+                            onDragOver={(e) => handleDragOver(e, index)}
+                            onDragLeave={handleDragLeave}
+                            onDrop={(e) => handleDrop(e, index)}
+                            className="flex items-center justify-between p-3 bg-card rounded-md border hover:bg-accent/50 transition-all group relative"
+                          >
+                            <GripVertical className="w-5 h-5 text-muted-foreground cursor-move" />
 
-                          <div className="flex items-center gap-3 flex-1 min-w-0 ml-2">
-                            {editingDifficulty === difficulty ? (
-                              <div className="flex-1 flex items-center gap-2">
-                                <Input
-                                  value={editValue}
-                                  onChange={(e) => setEditValue(e.target.value)}
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                      e.preventDefault()
-                                      handleSaveEdit()
-                                    } else if (e.key === 'Escape') {
-                                      e.preventDefault()
-                                      handleCancelEdit()
-                                    }
-                                  }}
-                                  className="h-9"
-                                  autoFocus
-                                />
-                                <Button size="icon" variant="ghost" onClick={handleSaveEdit} className="h-9 w-9">
-                                  <Check className="w-4 h-4 text-green-600" />
-                                </Button>
-                                <Button size="icon" variant="ghost" onClick={handleCancelEdit} className="h-9 w-9">
-                                  <X className="w-4 h-4 text-destructive" />
-                                </Button>
-                              </div>
-                            ) : (
-                              <>
-                                <span className="flex-1 font-medium truncate">{difficulty}</span>
-                                <div className="flex items-center gap-1">
-                                  <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    onClick={() => handleStartEdit(difficulty)}
-                                    className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                                  >
-                                    <SquarePen className="w-4 h-4" />
+                            <div className="flex items-center gap-3 flex-1 min-w-0 ml-2">
+                              {editingDifficulty === difficulty ? (
+                                <div className="flex-1 flex items-center gap-2">
+                                  <Input
+                                    value={editValue}
+                                    onChange={(e) => setEditValue(e.target.value)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') {
+                                        e.preventDefault()
+                                        handleSaveEdit()
+                                      } else if (e.key === 'Escape') {
+                                        e.preventDefault()
+                                        handleCancelEdit()
+                                      }
+                                    }}
+                                    className="h-9"
+                                    autoFocus
+                                  />
+                                  <Button size="icon" variant="ghost" onClick={handleSaveEdit} className="h-9 w-9">
+                                    <Check className="w-4 h-4 text-green-600" />
                                   </Button>
-                                  <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    onClick={() => handleRemove(difficulty)}
-                                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
+                                  <Button size="icon" variant="ghost" onClick={handleCancelEdit} className="h-9 w-9">
+                                    <X className="w-4 h-4 text-destructive" />
                                   </Button>
                                 </div>
-                              </>
-                            )}
+                              ) : (
+                                <>
+                                  <span className="flex-1 font-medium truncate">{difficulty}</span>
+                                  <div className="flex items-center gap-1">
+                                    <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      onClick={() => handleStartEdit(difficulty)}
+                                      className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                    >
+                                      <SquarePen className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      onClick={() => handleRemove(difficulty)}
+                                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                  </div>
+                                </>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    )
-                  })
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </>
-      )}
-    </div>
+                      )
+                    })
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
+      </div>
+    </ContentLayout>
   )
 }

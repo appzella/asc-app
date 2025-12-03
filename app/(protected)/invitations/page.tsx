@@ -28,6 +28,15 @@ import { canManageUsers } from '@/lib/roles'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 import { toast } from 'sonner'
+import { ContentLayout } from '@/components/admin-panel/content-layout'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 
 const invitationSchema = z.object({
   email: z.string().email('Ungültige E-Mail-Adresse').min(1, 'E-Mail ist erforderlich'),
@@ -142,154 +151,178 @@ export default function InvitationsPage() {
 
   if (!user) {
     return (
-      <div className="space-y-4">
-        <div>
-          <Skeleton className="h-9 w-32 mb-2" />
-          <Skeleton className="h-5 w-96" />
+      <ContentLayout
+        title="Einladungen"
+        breadcrumb={
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href="/">Home</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Einladungen</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        }
+      >
+        <div className="space-y-4">
+          <div>
+            <Skeleton className="h-9 w-32 mb-2" />
+            <Skeleton className="h-5 w-96" />
+          </div>
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-48" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-10 w-full mb-4" />
+              <Skeleton className="h-9 w-32" />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-48" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="h-24 w-full" />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-48" />
-          </CardHeader>
-          <CardContent>
-            <Skeleton className="h-10 w-full mb-4" />
-            <Skeleton className="h-9 w-32" />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-48" />
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
-                <Skeleton key={i} className="h-24 w-full" />
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      </ContentLayout>
     )
   }
 
   return (
-    <div className="space-y-4">
-      <div>
-        <div className="flex items-center gap-3 mb-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            asChild
-            className="hidden sm:inline-flex items-center gap-1 text-primary-600"
-          >
-            <Link href="/settings">
-              <ChevronLeft className="w-4 h-4" strokeWidth={2} />
-              Zurück zur Übersicht
-            </Link>
-          </Button>
+    <ContentLayout
+      title="Einladungen"
+      breadcrumb={
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href="/">Home</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Einladungen</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      }
+    >
+      <div className="space-y-4">
+        <div>
+          <CardDescription>Erstelle Einladungen für neue Clubmitglieder</CardDescription>
         </div>
-        <h1>Einladungen</h1>
-        <CardDescription>Erstelle Einladungen für neue Clubmitglieder</CardDescription>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Neue Einladung erstellen</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>E-Mail-Adresse</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="email"
+                          placeholder="neues.mitglied@example.com"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit" variant="default" disabled={isLoading} size="sm">
+                  {isLoading ? 'Wird erstellt...' : 'Einladung erstellen'}
+                </Button>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Einladungen ({invitations.length})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {invitations.length === 0 ? (
+              <p className="text-muted-foreground text-center py-8 text-sm">Noch keine Einladungen erstellt</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>E-Mail</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Erstellt am</TableHead>
+                      <TableHead>Registrierungslink</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {invitations.map((invitation) => {
+                      const registrationLink = `${typeof window !== 'undefined' ? window.location.origin : ''}/register/${invitation.token}`
+                      return (
+                        <TableRow key={invitation.id}>
+                          <TableCell className="font-medium">{invitation.email}</TableCell>
+                          <TableCell>
+                            {invitation.used ? (
+                              <Badge variant="outline-success">Verwendet</Badge>
+                            ) : (
+                              <Badge variant="outline-warning">Ausstehend</Badge>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {new Date(invitation.createdAt).toLocaleDateString('de-CH')}
+                          </TableCell>
+                          <TableCell>
+                            {!invitation.used ? (
+                              <div className="flex items-center gap-2">
+                                <Input
+                                  value={registrationLink}
+                                  readOnly
+                                  className="flex-1 text-xs h-8"
+                                />
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  onClick={() => copyToClipboard(registrationLink)}
+                                  className="h-8 w-8"
+                                  aria-label="Link kopieren"
+                                >
+                                  <Copy className="w-4 h-4" strokeWidth={2} />
+                                </Button>
+                              </div>
+                            ) : (
+                              <span className="text-sm text-muted-foreground">-</span>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Neue Einladung erstellen</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>E-Mail-Adresse</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="neues.mitglied@example.com"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" variant="default" disabled={isLoading} size="sm">
-                {isLoading ? 'Wird erstellt...' : 'Einladung erstellen'}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Einladungen ({invitations.length})</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {invitations.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8 text-sm">Noch keine Einladungen erstellt</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>E-Mail</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Erstellt am</TableHead>
-                    <TableHead>Registrierungslink</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {invitations.map((invitation) => {
-                    const registrationLink = `${typeof window !== 'undefined' ? window.location.origin : ''}/register/${invitation.token}`
-                    return (
-                      <TableRow key={invitation.id}>
-                        <TableCell className="font-medium">{invitation.email}</TableCell>
-                        <TableCell>
-                          {invitation.used ? (
-                            <Badge variant="outline-success">Verwendet</Badge>
-                          ) : (
-                            <Badge variant="outline-warning">Ausstehend</Badge>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {new Date(invitation.createdAt).toLocaleDateString('de-CH')}
-                        </TableCell>
-                        <TableCell>
-                          {!invitation.used ? (
-                            <div className="flex items-center gap-2">
-                              <Input
-                                value={registrationLink}
-                                readOnly
-                                className="flex-1 text-xs h-8"
-                              />
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={() => copyToClipboard(registrationLink)}
-                                className="h-8 w-8"
-                                aria-label="Link kopieren"
-                              >
-                                <Copy className="w-4 h-4" strokeWidth={2} />
-                              </Button>
-                            </div>
-                          ) : (
-                            <span className="text-sm text-muted-foreground">-</span>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+    </ContentLayout>
   )
 }
 

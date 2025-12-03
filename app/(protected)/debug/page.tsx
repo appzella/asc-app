@@ -5,6 +5,16 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { authService } from '@/lib/auth'
 import { testNotificationSystem, testPushNotification } from '@/app/actions/debug'
+import { ContentLayout } from '@/components/admin-panel/content-layout'
+import {
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbPage,
+    BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
+import Link from 'next/link'
 
 export default function DebugPage() {
     const [logs, setLogs] = useState<string[]>([])
@@ -49,26 +59,45 @@ export default function DebugPage() {
     }
 
     return (
-        <div className="container max-w-2xl py-8">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Notification System Debug</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="flex gap-4">
-                        <Button onClick={runTest} disabled={isLoading}>
-                            {isLoading ? 'Running...' : 'Run System Test'}
-                        </Button>
-                        <Button onClick={runPushTest} disabled={isLoading} variant="secondary">
-                            {isLoading ? 'Running...' : 'Test Push Notification'}
-                        </Button>
-                    </div>
+        <ContentLayout
+            title="Debug"
+            breadcrumb={
+                <Breadcrumb>
+                    <BreadcrumbList>
+                        <BreadcrumbItem>
+                            <BreadcrumbLink asChild>
+                                <Link href="/">Home</Link>
+                            </BreadcrumbLink>
+                        </BreadcrumbItem>
+                        <BreadcrumbSeparator />
+                        <BreadcrumbItem>
+                            <BreadcrumbPage>Debug</BreadcrumbPage>
+                        </BreadcrumbItem>
+                    </BreadcrumbList>
+                </Breadcrumb>
+            }
+        >
+            <div className="container max-w-2xl py-8">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Notification System Debug</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="flex gap-4">
+                            <Button onClick={runTest} disabled={isLoading}>
+                                {isLoading ? 'Running...' : 'Run System Test'}
+                            </Button>
+                            <Button onClick={runPushTest} disabled={isLoading} variant="secondary">
+                                {isLoading ? 'Running...' : 'Test Push Notification'}
+                            </Button>
+                        </div>
 
-                    <div className="bg-slate-950 text-slate-50 p-4 rounded-md font-mono text-sm whitespace-pre-wrap">
-                        {logs.length === 0 ? 'Click "Run Test" to start' : logs.join('\n')}
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
+                        <div className="bg-slate-950 text-slate-50 p-4 rounded-md font-mono text-sm whitespace-pre-wrap">
+                            {logs.length === 0 ? 'Click "Run Test" to start' : logs.join('\n')}
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        </ContentLayout>
     )
 }

@@ -26,6 +26,14 @@ import {
 import { Archive, Filter, Plus, Search, SlidersHorizontal } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { ContentLayout } from '@/components/admin-panel/content-layout'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 
 export default function ToursPage() {
   const searchParams = useSearchParams()
@@ -206,7 +214,24 @@ export default function ToursPage() {
   }
 
   return (
-    <ContentLayout title="Touren">
+    <ContentLayout
+      title="Touren"
+      breadcrumb={
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href="/">Home</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Touren</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      }
+    >
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>

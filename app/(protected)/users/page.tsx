@@ -21,6 +21,15 @@ import Link from 'next/link'
 import { ChevronLeft, Edit, Upload, Trash2, Camera, ImageIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { ImageCropper } from '@/components/ui/ImageCropper'
+import { ContentLayout } from '@/components/admin-panel/content-layout'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 
 export default function UsersPage() {
   const router = useRouter()
@@ -277,298 +286,322 @@ export default function UsersPage() {
 
   if (!user) {
     return (
-      <div className="space-y-4">
-        <div>
-          <Skeleton className="h-9 w-64 mb-2" />
-          <Skeleton className="h-5 w-96" />
+      <ContentLayout
+        title="Benutzerverwaltung"
+        breadcrumb={
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href="/">Home</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Benutzer</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        }
+      >
+        <div className="space-y-4">
+          <div>
+            <Skeleton className="h-9 w-64 mb-2" />
+            <Skeleton className="h-5 w-96" />
+          </div>
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-48" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Skeleton key={i} className="h-12 w-full" />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-48" />
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <Skeleton key={i} className="h-12 w-full" />
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      </ContentLayout>
     )
   }
 
   return (
-    <div className="space-y-4">
-      <div>
-        <div className="flex items-center gap-3 mb-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            asChild
-            className="hidden sm:inline-flex items-center gap-1 text-primary-600"
-          >
-            <Link href="/settings">
-              <ChevronLeft className="w-4 h-4" strokeWidth={2} />
-              Zurück zur Übersicht
-            </Link>
-          </Button>
+    <ContentLayout
+      title="Benutzerverwaltung"
+      breadcrumb={
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href="/">Home</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Benutzer</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      }
+    >
+      <div className="space-y-4">
+        <div>
+          <CardDescription>Verwalte Benutzer und deren Rollen</CardDescription>
         </div>
-        <h1>Benutzerverwaltung</h1>
-        <CardDescription>Verwalte Benutzer und deren Rollen</CardDescription>
-      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Alle Benutzer ({users.length})</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {users.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8 text-sm">Keine Benutzer vorhanden</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Benutzer</TableHead>
-                    <TableHead>E-Mail</TableHead>
-                    <TableHead>Rolle</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Aktiv</TableHead>
-                    <TableHead>Erstellt am</TableHead>
-                    <TableHead className="text-right">Aktionen</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {users.map((u) => (
-                    <TableRow key={u.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar className="w-8 h-8">
-                            <AvatarImage src={u.profilePhoto || undefined} alt={u.name || 'Unbekannt'} className="object-cover" />
-                            <AvatarFallback>
-                              {u.name ? u.name.charAt(0).toUpperCase() : '?'}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="font-medium">{u.name || 'Unbekannt'}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>{u.email}</TableCell>
-                      <TableCell>
-                        <Select
-                          value={u.role}
-                          onValueChange={(value) => handleRoleChange(u.id, value as UserRole)}
-                        >
-                          <SelectTrigger className="w-40 text-sm">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="member">Mitglied</SelectItem>
-                            <SelectItem value="leader">Tourenleiter</SelectItem>
-                            <SelectItem value="admin">Admin</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell>
-                        {u.registered ? (
-                          <Badge variant="outline-success">
-                            Registriert
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline-warning">
-                            Ausstehend
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            checked={u.active}
-                            onCheckedChange={() => handleToggleActive(u.id, u.active)}
-                            disabled={u.id === user?.id && !u.active}
-                          />
-                          <span className="text-xs text-muted-foreground">
-                            {u.active ? 'Aktiv' : 'Deaktiviert'}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {new Date(u.createdAt).toLocaleDateString('de-CH')}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEditClick(u)}
-                            className="h-8 w-8 p-0"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
+        <Card>
+          <CardHeader>
+            <CardTitle>Alle Benutzer ({users.length})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {users.length === 0 ? (
+              <p className="text-muted-foreground text-center py-8 text-sm">Keine Benutzer vorhanden</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Benutzer</TableHead>
+                      <TableHead>E-Mail</TableHead>
+                      <TableHead>Rolle</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Aktiv</TableHead>
+                      <TableHead>Erstellt am</TableHead>
+                      <TableHead className="text-right">Aktionen</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Edit Dialog */}
-      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="sm:max-w-[500px] max-h-[85vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle>Benutzer bearbeiten</DialogTitle>
-            <DialogDescription>
-              Bearbeite die Benutzerinformationen
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-6 py-4 overflow-y-auto flex-1 px-1">
-            {/* Profile Picture Section */}
-            <div className="flex flex-col items-center gap-4">
-              <div className="relative group">
-                <Avatar className="w-24 h-24 border-2 border-muted">
-                  <AvatarImage
-                    src={editingUser?.profilePhoto || undefined}
-                    alt={editingUser?.name || 'User'}
-                    className="object-cover"
-                    key={editingUser?.profilePhoto || editingUser?.id} // Force re-render on change
-                  />
-                  <AvatarFallback className="text-2xl">
-                    {editingUser?.name ? editingUser.name.charAt(0).toUpperCase() : '?'}
-                  </AvatarFallback>
-                </Avatar>
-                <div
-                  className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Camera className="w-8 h-8 text-white" />
-                </div>
+                  </TableHeader>
+                  <TableBody>
+                    {users.map((u) => (
+                      <TableRow key={u.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <Avatar className="w-8 h-8">
+                              <AvatarImage src={u.profilePhoto || undefined} alt={u.name || 'Unbekannt'} className="object-cover" />
+                              <AvatarFallback>
+                                {u.name ? u.name.charAt(0).toUpperCase() : '?'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="font-medium">{u.name || 'Unbekannt'}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>{u.email}</TableCell>
+                        <TableCell>
+                          <Select
+                            value={u.role}
+                            onValueChange={(value) => handleRoleChange(u.id, value as UserRole)}
+                          >
+                            <SelectTrigger className="w-40 text-sm">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="member">Mitglied</SelectItem>
+                              <SelectItem value="leader">Tourenleiter</SelectItem>
+                              <SelectItem value="admin">Admin</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell>
+                          {u.registered ? (
+                            <Badge variant="outline-success">
+                              Registriert
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline-warning">
+                              Ausstehend
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={u.active}
+                              onCheckedChange={() => handleToggleActive(u.id, u.active)}
+                              disabled={u.id === user?.id && !u.active}
+                            />
+                            <span className="text-xs text-muted-foreground">
+                              {u.active ? 'Aktiv' : 'Deaktiviert'}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {new Date(u.createdAt).toLocaleDateString('de-CH')}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditClick(u)}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
+            )}
+          </CardContent>
+        </Card>
 
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploadLoading}
-                  className="gap-2"
-                >
-                  <Upload className="w-4 h-4" />
-                  {editingUser?.profilePhoto ? 'Bild ändern' : 'Bild hochladen'}
-                </Button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="hidden"
-                  disabled={uploadLoading}
-                />
-                {editingUser?.profilePhoto && (
+        {/* Edit Dialog */}
+        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+          <DialogContent className="sm:max-w-[500px] max-h-[85vh] flex flex-col">
+            <DialogHeader>
+              <DialogTitle>Benutzer bearbeiten</DialogTitle>
+              <DialogDescription>
+                Bearbeite die Benutzerinformationen
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-6 py-4 overflow-y-auto flex-1 px-1">
+              {/* Profile Picture Section */}
+              <div className="flex flex-col items-center gap-4">
+                <div className="relative group">
+                  <Avatar className="w-24 h-24 border-2 border-muted">
+                    <AvatarImage
+                      src={editingUser?.profilePhoto || undefined}
+                      alt={editingUser?.name || 'User'}
+                      className="object-cover"
+                      key={editingUser?.profilePhoto || editingUser?.id} // Force re-render on change
+                    />
+                    <AvatarFallback className="text-2xl">
+                      {editingUser?.name ? editingUser.name.charAt(0).toUpperCase() : '?'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div
+                    className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Camera className="w-8 h-8 text-white" />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
                   <Button
                     type="button"
-                    variant="destructive"
-                    size="icon"
-                    onClick={handleRemovePhoto}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
                     disabled={uploadLoading}
-                    className="h-8 w-8"
+                    className="gap-2"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Upload className="w-4 h-4" />
+                    {editingUser?.profilePhoto ? 'Bild ändern' : 'Bild hochladen'}
                   </Button>
-                )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="hidden"
+                    disabled={uploadLoading}
+                  />
+                  {editingUser?.profilePhoto && (
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      onClick={handleRemovePhoto}
+                      disabled={uploadLoading}
+                      className="h-8 w-8"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
               </div>
-            </div>
 
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-name">Name</Label>
-                <Input
-                  id="edit-name"
-                  value={editFormData.name || ''}
-                  onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-email">E-Mail</Label>
-                <Input
-                  id="edit-email"
-                  type="email"
-                  value={editFormData.email || ''}
-                  onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-phone">Telefon (Festnetz)</Label>
-                <Input
-                  id="edit-phone"
-                  value={editFormData.phone || ''}
-                  onChange={(e) => setEditFormData({ ...editFormData, phone: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-mobile">Mobiltelefon</Label>
-                <Input
-                  id="edit-mobile"
-                  value={editFormData.mobile || ''}
-                  onChange={(e) => setEditFormData({ ...editFormData, mobile: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-street">Strasse</Label>
-                <Input
-                  id="edit-street"
-                  value={editFormData.street || ''}
-                  onChange={(e) => setEditFormData({ ...editFormData, street: e.target.value })}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="edit-zip">PLZ</Label>
+                  <Label htmlFor="edit-name">Name</Label>
                   <Input
-                    id="edit-zip"
-                    value={editFormData.zip || ''}
-                    onChange={(e) => setEditFormData({ ...editFormData, zip: e.target.value })}
+                    id="edit-name"
+                    value={editFormData.name || ''}
+                    onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="edit-city">Ort</Label>
+                  <Label htmlFor="edit-email">E-Mail</Label>
                   <Input
-                    id="edit-city"
-                    value={editFormData.city || ''}
-                    onChange={(e) => setEditFormData({ ...editFormData, city: e.target.value })}
+                    id="edit-email"
+                    type="email"
+                    value={editFormData.email || ''}
+                    onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-phone">Telefon (Festnetz)</Label>
+                  <Input
+                    id="edit-phone"
+                    value={editFormData.phone || ''}
+                    onChange={(e) => setEditFormData({ ...editFormData, phone: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-mobile">Mobiltelefon</Label>
+                  <Input
+                    id="edit-mobile"
+                    value={editFormData.mobile || ''}
+                    onChange={(e) => setEditFormData({ ...editFormData, mobile: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-street">Strasse</Label>
+                  <Input
+                    id="edit-street"
+                    value={editFormData.street || ''}
+                    onChange={(e) => setEditFormData({ ...editFormData, street: e.target.value })}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-zip">PLZ</Label>
+                    <Input
+                      id="edit-zip"
+                      value={editFormData.zip || ''}
+                      onChange={(e) => setEditFormData({ ...editFormData, zip: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-city">Ort</Label>
+                    <Input
+                      id="edit-city"
+                      value={editFormData.city || ''}
+                      onChange={(e) => setEditFormData({ ...editFormData, city: e.target.value })}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowEditDialog(false)}>
-              Abbrechen
-            </Button>
-            <Button onClick={handleSaveEdit}>
-              Speichern
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+                Abbrechen
+              </Button>
+              <Button onClick={handleSaveEdit}>
+                Speichern
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
-      {/* Image Cropper */}
-      {showCropper && imageToCrop && (
-        <ImageCropper
-          image={imageToCrop}
-          onCropComplete={handleCropComplete}
-          onCancel={handleCropCancel}
-          aspectRatio={1}
-          cropShape="round"
-        />
-      )}
+        {/* Image Cropper */}
+        {showCropper && imageToCrop && (
+          <ImageCropper
+            image={imageToCrop}
+            onCropComplete={handleCropComplete}
+            onCancel={handleCropCancel}
+            aspectRatio={1}
+            cropShape="round"
+          />
+        )}
 
-    </div>
+      </div>
+    </ContentLayout>
   )
 }
 

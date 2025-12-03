@@ -34,6 +34,15 @@ import TourMap from '@/components/tours/TourMap'
 import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { toast } from 'sonner'
 import { QRCode } from '@/components/ui/shadcn-io/qr-code'
+import { ContentLayout } from '@/components/admin-panel/content-layout'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 
 export default function TourDetailPage() {
   const params = useParams()
@@ -501,386 +510,665 @@ export default function TourDetailPage() {
   const canAddToWaitlist = tour.status === 'published' && !isRegistered && !isLeader && !isArchived && !isOnWaitlist
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex-1">
-          <div className="flex items-center gap-3 mb-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              asChild
-              className="hidden sm:inline-flex items-center gap-1 text-primary-600"
-            >
-              <Link href="/tours">
-                <ChevronLeft className="w-4 h-4" strokeWidth={2} />
-                Zurück zur Übersicht
-              </Link>
-            </Button>
+    <ContentLayout
+      title={tour.title}
+      breadcrumb={
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href="/">Home</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href="/tours">Touren</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{tour.title}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      }
+    >
+      <div className="space-y-4">
+
+        {/* Desktop: Karte immer anzeigen */}
+        {tour.gpxFile && (
+          <div className="mb-4 hidden sm:block">
+            <Card>
+              <CardContent className="p-0">
+                <TourMap gpxUrl={tour.gpxFile} height="500px" />
+              </CardContent>
+            </Card>
           </div>
-          <div className="flex items-center gap-2">
-            {(() => {
-              const IconComponent = getTourIcon(tour.tourType, settings?.tourTypeIcons)
-              return <IconComponent className="w-6 h-6 text-foreground flex-shrink-0" strokeWidth={2} />
-            })()}
-            <h1>{tour.title}</h1>
+        )}
+
+        {/* Mobile: Karte im Vollbildmodus anzeigen */}
+        {tour.gpxFile && showMapOnMobile && (
+          <div className="sm:hidden">
+            <TourMap
+              gpxUrl={tour.gpxFile}
+              height="400px"
+              initialFullscreen={true}
+              onFullscreenChange={(isFullscreen) => {
+                if (!isFullscreen) {
+                  setShowMapOnMobile(false)
+                }
+              }}
+            />
           </div>
-        </div>
-      </div>
+        )}
 
-      {/* Desktop: Karte immer anzeigen */}
-      {tour.gpxFile && (
-        <div className="mb-4 hidden sm:block">
-          <Card>
-            <CardContent className="p-0">
-              <TourMap gpxUrl={tour.gpxFile} height="500px" />
-            </CardContent>
-          </Card>
-        </div>
-      )}
+        {/* Mobile: Fixed Karte-Button rechts oben */}
+        {tour.gpxFile && (
+          <Button
+            onClick={() => setShowMapOnMobile(true)}
+            className="fixed bottom-[calc(60px+max(env(safe-area-inset-bottom,8px),8px)+100px)] right-4 sm:hidden z-40 inline-flex items-center gap-1 h-10 py-2"
+          >
+            <Map className="w-4 h-4" strokeWidth={2} />
+            Karte
+          </Button>
+        )}
 
-      {/* Mobile: Karte im Vollbildmodus anzeigen */}
-      {tour.gpxFile && showMapOnMobile && (
-        <div className="sm:hidden">
-          <TourMap
-            gpxUrl={tour.gpxFile}
-            height="400px"
-            initialFullscreen={true}
-            onFullscreenChange={(isFullscreen) => {
-              if (!isFullscreen) {
-                setShowMapOnMobile(false)
-              }
-            }}
-          />
-        </div>
-      )}
-
-      {/* Mobile: Fixed Karte-Button rechts oben */}
-      {tour.gpxFile && (
-        <Button
-          onClick={() => setShowMapOnMobile(true)}
-          className="fixed bottom-[calc(60px+max(env(safe-area-inset-bottom,8px),8px)+100px)] right-4 sm:hidden z-40 inline-flex items-center gap-1 h-10 py-2"
-        >
-          <Map className="w-4 h-4" strokeWidth={2} />
-          Karte
-        </Button>
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 space-y-4">
-          {/* Tour Details */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Tour-Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <h4 className="mb-2">Beschreibung</h4>
-                <p className="text-muted-foreground whitespace-pre-wrap">{tour.description}</p>
-              </div>
-
-              <Separator />
-              <div className="grid grid-cols-2 gap-3 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-primary flex-shrink-0" strokeWidth={2} />
-                  <span className="text-xs">{formatDate(tour.date)}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-primary flex-shrink-0" strokeWidth={2} />
-                  <span className="text-xs">{tour.duration} h</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <ArrowUpRight className="w-4 h-4 text-primary flex-shrink-0" strokeWidth={2} />
-                  <span className="text-xs">{tour.elevation} Hm</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4 text-primary flex-shrink-0" strokeWidth={2} />
-                  <span className="text-xs">
-                    {tour.participants.length}/{tour.maxParticipants}
-                    {manuallyAdded > 0 && `+${manuallyAdded}`}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <ChartNoAxesColumnIncreasing className="w-4 h-4 text-primary flex-shrink-0" strokeWidth={2} />
-                  <span className="text-xs">{formatDifficulty(tour.difficulty, tour.tourType)}</span>
-                </div>
-              </div>
-
-              <Separator />
-              <div className="flex flex-wrap gap-2">
-                <Badge variant="outline">
-                  {tour.tourType}
-                </Badge>
-                <Badge variant="outline">
-                  {tour.tourLength}
-                </Badge>
-                {tour.status === 'draft' && (
-                  <Badge variant="outline-warning">
-                    Entwurf
-                  </Badge>
-                )}
-                {tour.status === 'published' && (
-                  <Badge variant="outline-success">
-                    Veröffentlicht
-                  </Badge>
-                )}
-                {tour.status === 'draft' && tour.submittedForPublishing && (
-                  <Badge variant="outline-warning">
-                    Zur Veröffentlichung eingereicht
-                  </Badge>
-                )}
-                {tour.status === 'cancelled' && (
-                  <Badge variant="outline-destructive">
-                    Abgesagt
-                  </Badge>
-                )}
-              </div>
-
-              {tour.leader && (
-                <>
-                  <Separator />
-                  <div>
-                    <span className="text-xs font-medium text-muted-foreground block mb-2">Tourenleiter</span>
-                    <div className="flex items-center gap-2">
-                      <Avatar className="w-8 h-8 flex-shrink-0">
-                        <AvatarImage
-                          src={tour.leader.profilePhoto || undefined}
-                          alt={tour.leader.name}
-                          className="object-cover"
-                        />
-                        <AvatarFallback>
-                          {tour.leader.name.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="text-foreground text-sm font-medium leading-none">{tour.leader.name}</span>
-                    </div>
-                  </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
-
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-4">
-          {/* Leader Actions */}
-          {canSubmit && tour.status === 'draft' && !tour.submittedForPublishing && (
-            <Card className="border-blue-300 bg-blue-50/50">
-              <CardHeader>
-                <CardTitle className="text-blue-800 text-base">Tour einreichen</CardTitle>
-                <CardDescription className="text-xs">
-                  Reiche diese Tour zur Veröffentlichung ein. Ein Admin wird sie prüfen und veröffentlichen.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {canEdit && (
-                  <Button variant="outline" asChild className="w-full" size="sm">
-                    <Link href={`/tours/${tourId}/edit`}>Tour bearbeiten</Link>
-                  </Button>
-                )}
-                <Button variant="secondary" onClick={handleSubmitForPublishing} className="w-full bg-yellow-500 hover:bg-yellow-600 text-white" size="sm">
-                  Zur Veröffentlichung einreichen
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Admin Actions - Tour zur Veröffentlichung eingereicht */}
-          {canPublish && tour.status === 'draft' && tour.submittedForPublishing && (
-            <Card className="border-yellow-300 bg-yellow-50/50">
-              <CardHeader>
-                <CardTitle className="text-yellow-800 text-base">Veröffentlichung</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {canEdit && (
-                  <Button variant="outline" asChild className="w-full" size="sm">
-                    <Link href={`/tours/${tourId}/edit`}>Tour bearbeiten</Link>
-                  </Button>
-                )}
-                <Button variant="default" onClick={handleApprove} className="w-full bg-green-600 hover:bg-green-700 text-white" size="sm" disabled={isArchived}>
-                  Tour veröffentlichen
-                </Button>
-                {!isArchived && (
-                  <Button variant="outline" onClick={handleUnpublish} className="w-full" size="sm">
-                    Auf Entwurf zurücksetzen
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Admin Actions - Tour im Entwurf (nicht eingereicht) */}
-          {canPublish && tour.status === 'draft' && !tour.submittedForPublishing && (
-            <Card className="border-border bg-muted/50">
-              <CardHeader>
-                <CardTitle className="text-foreground text-base">Admin-Aktionen</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {canEdit && (
-                  <Button variant="outline" asChild className="w-full" size="sm">
-                    <Link href={`/tours/${tourId}/edit`}>Tour bearbeiten</Link>
-                  </Button>
-                )}
-                <Button variant="default" onClick={handleApprove} className="w-full bg-green-600 hover:bg-green-700 text-white" size="sm" disabled={isArchived}>
-                  Tour veröffentlichen
-                </Button>
-                {isArchived && (
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Archivierte Touren können nicht mehr veröffentlicht werden.
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          )}
-
-          {canPublish && tour.status === 'published' && (
-            <Card className="border-border bg-muted/50">
-              <CardHeader>
-                <CardTitle className="text-foreground text-base">Verwaltung</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {canEdit && (
-                  <Button variant="outline" asChild className="w-full" size="sm">
-                    <Link href={`/tours/${tourId}/edit`}>Tour bearbeiten</Link>
-                  </Button>
-                )}
-                {!isArchived && (
-                  <>
-                    <Button variant="outline" onClick={handleUnpublish} className="w-full" size="sm">
-                      Auf Entwurf setzen
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowCancelDialog(true)}
-                      className="w-full border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
-                      size="sm"
-                    >
-                      Tour absagen
-                    </Button>
-                  </>
-                )}
-                <Button variant="destructive" onClick={() => setShowDeleteDialog(true)} className="w-full" size="sm">
-                  Tour löschen
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-
-          {canPublish && tour.status === 'cancelled' && (
-            <Card className="border-red-300 bg-red-50/50">
-              <CardHeader>
-                <CardTitle className="text-red-800 text-base">Verwaltung</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {canEdit && (
-                  <Button variant="outline" asChild className="w-full" size="sm">
-                    <Link href={`/tours/${tourId}/edit`}>Tour bearbeiten</Link>
-                  </Button>
-                )}
-                {!isArchived && (
-                  <>
-                    <Button variant="outline" onClick={handleUnpublish} className="w-full" size="sm">
-                      Auf Entwurf setzen
-                    </Button>
-                    <Button variant="default" onClick={handleApprove} className="w-full bg-green-600 hover:bg-green-700 text-white" size="sm">
-                      Tour wieder aktivieren
-                    </Button>
-                  </>
-                )}
-                <Button variant="destructive" onClick={() => setShowDeleteDialog(true)} className="w-full" size="sm">
-                  Tour löschen
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Anmeldung */}
-          {tour.status === 'published' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-2 space-y-4">
+            {/* Tour Details */}
             <Card>
               <CardHeader>
-                <CardTitle>Anmeldung</CardTitle>
+                <CardTitle>Tour-Details</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <p className="text-xs text-muted-foreground mb-2">
-                    {tour.participants.length} von {tour.maxParticipants} Plätzen belegt
-                    {manuallyAdded > 0 && ` (+${manuallyAdded} manuell hinzugefügt)`}
-                  </p>
-                  <Progress value={(Math.min(tour.participants.length, tour.maxParticipants) / tour.maxParticipants) * 100} className="h-2" />
+                  <h4 className="mb-2">Beschreibung</h4>
+                  <p className="text-muted-foreground whitespace-pre-wrap">{tour.description}</p>
                 </div>
 
-                {isRegistered ? (
-                  <div className="space-y-2">
-                    <p className="text-xs text-green-600 font-medium">Du bist angemeldet</p>
-                    <Button variant="outline" onClick={handleUnregister} className="w-full" size="sm">
-                      Abmelden
-                    </Button>
+                <Separator />
+                <div className="grid grid-cols-2 gap-3 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-primary flex-shrink-0" strokeWidth={2} />
+                    <span className="text-xs">{formatDate(tour.date)}</span>
                   </div>
-                ) : isOnWaitlist ? (
-                  <div className="space-y-2">
-                    <p className="text-xs text-yellow-600 font-medium">Du bist auf der Warteliste</p>
-                    <Button variant="outline" onClick={handleRemoveFromWaitlist} className="w-full" size="sm">
-                      Von Warteliste entfernen
-                    </Button>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-primary flex-shrink-0" strokeWidth={2} />
+                    <span className="text-xs">{tour.duration} h</span>
                   </div>
-                ) : (
-                  <div className="space-y-2">
-                    {isFull ? (
-                      <>
-                        <p className="text-xs text-red-600 font-medium mb-2">Tour ist ausgebucht</p>
-                        {canAddToWaitlist ? (
-                          <Button
-                            variant="outline"
-                            onClick={handleAddToWaitlist}
-                            className="w-full"
-                            size="sm"
-                          >
-                            Auf Warteliste setzen
-                          </Button>
-                        ) : (
-                          <p className="text-xs text-muted-foreground font-medium">
-                            {isLeader
-                              ? 'Du bist der Tourenleiter'
-                              : isArchived
-                                ? 'Diese Tour liegt in der Vergangenheit'
-                                : 'Anmeldung nicht möglich'}
-                          </p>
-                        )}
-                      </>
-                    ) : !canRegister ? (
-                      <p className="text-xs text-muted-foreground font-medium">
-                        {isLeader
-                          ? 'Du bist der Tourenleiter'
-                          : isArchived
-                            ? 'Diese Tour liegt in der Vergangenheit'
-                            : 'Anmeldung nicht möglich'}
-                      </p>
-                    ) : (
-                      <Button
-                        variant="default"
-                        onClick={handleRegister}
-                        className="w-full bg-green-600 hover:bg-green-700 text-white"
-                        size="sm"
-                      >
-                        Anmelden
-                      </Button>
-                    )}
+                  <div className="flex items-center gap-2">
+                    <ArrowUpRight className="w-4 h-4 text-primary flex-shrink-0" strokeWidth={2} />
+                    <span className="text-xs">{tour.elevation} Hm</span>
                   </div>
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-primary flex-shrink-0" strokeWidth={2} />
+                    <span className="text-xs">
+                      {tour.participants.length}/{tour.maxParticipants}
+                      {manuallyAdded > 0 && `+${manuallyAdded}`}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <ChartNoAxesColumnIncreasing className="w-4 h-4 text-primary flex-shrink-0" strokeWidth={2} />
+                    <span className="text-xs">{formatDifficulty(tour.difficulty, tour.tourType)}</span>
+                  </div>
+                </div>
+
+                <Separator />
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="outline">
+                    {tour.tourType}
+                  </Badge>
+                  <Badge variant="outline">
+                    {tour.tourLength}
+                  </Badge>
+                  {tour.status === 'draft' && (
+                    <Badge variant="outline-warning">
+                      Entwurf
+                    </Badge>
+                  )}
+                  {tour.status === 'published' && (
+                    <Badge variant="outline-success">
+                      Veröffentlicht
+                    </Badge>
+                  )}
+                  {tour.status === 'draft' && tour.submittedForPublishing && (
+                    <Badge variant="outline-warning">
+                      Zur Veröffentlichung eingereicht
+                    </Badge>
+                  )}
+                  {tour.status === 'cancelled' && (
+                    <Badge variant="outline-destructive">
+                      Abgesagt
+                    </Badge>
+                  )}
+                </div>
+
+                {tour.leader && (
+                  <>
+                    <Separator />
+                    <div>
+                      <span className="text-xs font-medium text-muted-foreground block mb-2">Tourenleiter</span>
+                      <div className="flex items-center gap-2">
+                        <Avatar className="w-8 h-8 flex-shrink-0">
+                          <AvatarImage
+                            src={tour.leader.profilePhoto || undefined}
+                            alt={tour.leader.name}
+                            className="object-cover"
+                          />
+                          <AvatarFallback>
+                            {tour.leader.name.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-foreground text-sm font-medium leading-none">{tour.leader.name}</span>
+                      </div>
+                    </div>
+                  </>
                 )}
               </CardContent>
             </Card>
-          )}
 
-          {/* WhatsApp-Gruppe - nur für Teilnehmer, Tourenleiter und Admins */}
-          {tour.status === 'published' && tour.whatsappGroupLink && (isRegistered || isLeader || user?.role === 'admin') && (
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-4">
+            {/* Leader Actions */}
+            {canSubmit && tour.status === 'draft' && !tour.submittedForPublishing && (
+              <Card className="border-blue-300 bg-blue-50/50">
+                <CardHeader>
+                  <CardTitle className="text-blue-800 text-base">Tour einreichen</CardTitle>
+                  <CardDescription className="text-xs">
+                    Reiche diese Tour zur Veröffentlichung ein. Ein Admin wird sie prüfen und veröffentlichen.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {canEdit && (
+                    <Button variant="outline" asChild className="w-full" size="sm">
+                      <Link href={`/tours/${tourId}/edit`}>Tour bearbeiten</Link>
+                    </Button>
+                  )}
+                  <Button variant="secondary" onClick={handleSubmitForPublishing} className="w-full bg-yellow-500 hover:bg-yellow-600 text-white" size="sm">
+                    Zur Veröffentlichung einreichen
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Admin Actions - Tour zur Veröffentlichung eingereicht */}
+            {canPublish && tour.status === 'draft' && tour.submittedForPublishing && (
+              <Card className="border-yellow-300 bg-yellow-50/50">
+                <CardHeader>
+                  <CardTitle className="text-yellow-800 text-base">Veröffentlichung</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {canEdit && (
+                    <Button variant="outline" asChild className="w-full" size="sm">
+                      <Link href={`/tours/${tourId}/edit`}>Tour bearbeiten</Link>
+                    </Button>
+                  )}
+                  <Button variant="default" onClick={handleApprove} className="w-full bg-green-600 hover:bg-green-700 text-white" size="sm" disabled={isArchived}>
+                    Tour veröffentlichen
+                  </Button>
+                  {!isArchived && (
+                    <Button variant="outline" onClick={handleUnpublish} className="w-full" size="sm">
+                      Auf Entwurf zurücksetzen
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Admin Actions - Tour im Entwurf (nicht eingereicht) */}
+            {canPublish && tour.status === 'draft' && !tour.submittedForPublishing && (
+              <Card className="border-border bg-muted/50">
+                <CardHeader>
+                  <CardTitle className="text-foreground text-base">Admin-Aktionen</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {canEdit && (
+                    <Button variant="outline" asChild className="w-full" size="sm">
+                      <Link href={`/tours/${tourId}/edit`}>Tour bearbeiten</Link>
+                    </Button>
+                  )}
+                  <Button variant="default" onClick={handleApprove} className="w-full bg-green-600 hover:bg-green-700 text-white" size="sm" disabled={isArchived}>
+                    Tour veröffentlichen
+                  </Button>
+                  {isArchived && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Archivierte Touren können nicht mehr veröffentlicht werden.
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {canPublish && tour.status === 'published' && (
+              <Card className="border-border bg-muted/50">
+                <CardHeader>
+                  <CardTitle className="text-foreground text-base">Verwaltung</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {canEdit && (
+                    <Button variant="outline" asChild className="w-full" size="sm">
+                      <Link href={`/tours/${tourId}/edit`}>Tour bearbeiten</Link>
+                    </Button>
+                  )}
+                  {!isArchived && (
+                    <>
+                      <Button variant="outline" onClick={handleUnpublish} className="w-full" size="sm">
+                        Auf Entwurf setzen
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowCancelDialog(true)}
+                        className="w-full border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                        size="sm"
+                      >
+                        Tour absagen
+                      </Button>
+                    </>
+                  )}
+                  <Button variant="destructive" onClick={() => setShowDeleteDialog(true)} className="w-full" size="sm">
+                    Tour löschen
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
+            {canPublish && tour.status === 'cancelled' && (
+              <Card className="border-red-300 bg-red-50/50">
+                <CardHeader>
+                  <CardTitle className="text-red-800 text-base">Verwaltung</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {canEdit && (
+                    <Button variant="outline" asChild className="w-full" size="sm">
+                      <Link href={`/tours/${tourId}/edit`}>Tour bearbeiten</Link>
+                    </Button>
+                  )}
+                  {!isArchived && (
+                    <>
+                      <Button variant="outline" onClick={handleUnpublish} className="w-full" size="sm">
+                        Auf Entwurf setzen
+                      </Button>
+                      <Button variant="default" onClick={handleApprove} className="w-full bg-green-600 hover:bg-green-700 text-white" size="sm">
+                        Tour wieder aktivieren
+                      </Button>
+                    </>
+                  )}
+                  <Button variant="destructive" onClick={() => setShowDeleteDialog(true)} className="w-full" size="sm">
+                    Tour löschen
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Anmeldung */}
+            {tour.status === 'published' && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Anmeldung</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-2">
+                      {tour.participants.length} von {tour.maxParticipants} Plätzen belegt
+                      {manuallyAdded > 0 && ` (+${manuallyAdded} manuell hinzugefügt)`}
+                    </p>
+                    <Progress value={(Math.min(tour.participants.length, tour.maxParticipants) / tour.maxParticipants) * 100} className="h-2" />
+                  </div>
+
+                  {isRegistered ? (
+                    <div className="space-y-2">
+                      <p className="text-xs text-green-600 font-medium">Du bist angemeldet</p>
+                      <Button variant="outline" onClick={handleUnregister} className="w-full" size="sm">
+                        Abmelden
+                      </Button>
+                    </div>
+                  ) : isOnWaitlist ? (
+                    <div className="space-y-2">
+                      <p className="text-xs text-yellow-600 font-medium">Du bist auf der Warteliste</p>
+                      <Button variant="outline" onClick={handleRemoveFromWaitlist} className="w-full" size="sm">
+                        Von Warteliste entfernen
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {isFull ? (
+                        <>
+                          <p className="text-xs text-red-600 font-medium mb-2">Tour ist ausgebucht</p>
+                          {canAddToWaitlist ? (
+                            <Button
+                              variant="outline"
+                              onClick={handleAddToWaitlist}
+                              className="w-full"
+                              size="sm"
+                            >
+                              Auf Warteliste setzen
+                            </Button>
+                          ) : (
+                            <p className="text-xs text-muted-foreground font-medium">
+                              {isLeader
+                                ? 'Du bist der Tourenleiter'
+                                : isArchived
+                                  ? 'Diese Tour liegt in der Vergangenheit'
+                                  : 'Anmeldung nicht möglich'}
+                            </p>
+                          )}
+                        </>
+                      ) : !canRegister ? (
+                        <p className="text-xs text-muted-foreground font-medium">
+                          {isLeader
+                            ? 'Du bist der Tourenleiter'
+                            : isArchived
+                              ? 'Diese Tour liegt in der Vergangenheit'
+                              : 'Anmeldung nicht möglich'}
+                        </p>
+                      ) : (
+                        <Button
+                          variant="default"
+                          onClick={handleRegister}
+                          className="w-full bg-green-600 hover:bg-green-700 text-white"
+                          size="sm"
+                        >
+                          Anmelden
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* WhatsApp-Gruppe - nur für Teilnehmer, Tourenleiter und Admins */}
+            {tour.status === 'published' && tour.whatsappGroupLink && (isRegistered || isLeader || user?.role === 'admin') && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>WhatsApp-Gruppe</CardTitle>
+                  <CardDescription>
+                    Tritt der WhatsApp-Gruppe für diese Tour bei
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex flex-col items-center gap-4">
+                    <QRCode
+                      data={tour.whatsappGroupLink}
+                      className="hidden md:flex w-48 h-48 rounded-lg border bg-white p-4"
+                    />
+                    <Button
+                      variant="default"
+                      className="w-full"
+                      asChild
+                    >
+                      <a
+                        href={tour.whatsappGroupLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        Zur WhatsApp-Gruppe
+                      </a>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Teilnehmerliste */}
             <Card>
               <CardHeader>
-                <CardTitle>WhatsApp-Gruppe</CardTitle>
-                <CardDescription>
-                  Tritt der WhatsApp-Gruppe für diese Tour bei
-                </CardDescription>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Teilnehmer ({participants.length})</CardTitle>
+                  {canManageWaitlist && tour.status === 'published' && !isArchived && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleAddParticipantClick}
+                      className="h-8"
+                    >
+                      <UserPlus className="h-4 w-4 mr-1" />
+                      Hinzufügen
+                    </Button>
+                  )}
+                </div>
               </CardHeader>
-              <CardContent className="space-y-4">
+              {participants.length > 0 ? (
+                <CardContent>
+                  <ul className="space-y-3">
+                    {participants.map((participant) => (
+                      <li key={participant.id} className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 flex-1">
+                          <Avatar className="w-8 h-8 flex-shrink-0">
+                            <AvatarImage
+                              src={participant.profilePhoto || undefined}
+                              alt={participant.name}
+                              className="object-cover"
+                            />
+                            <AvatarFallback>
+                              {participant.name.charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-sm font-medium text-foreground">{participant.name}</span>
+                        </div>
+                        {canManageWaitlist && participant.id !== user.id && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRemoveParticipantClick(participant)}
+                            className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              ) : (
+                <CardContent>
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    Noch keine Teilnehmer angemeldet
+                  </p>
+                </CardContent>
+              )}
+            </Card>
+
+            {/* Warteliste */}
+            {tour.status === 'published' && waitlist.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Warteliste ({waitlist.length})</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-3">
+                    {waitlist.map((waitlistUser) => (
+                      <li key={waitlistUser.id} className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 flex-1">
+                          <Avatar className="w-8 h-8 flex-shrink-0">
+                            <AvatarImage
+                              src={waitlistUser.profilePhoto || undefined}
+                              alt={waitlistUser.name}
+                              className="object-cover"
+                            />
+                            <AvatarFallback>
+                              {waitlistUser.name.charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-sm font-medium text-foreground">{waitlistUser.name}</span>
+                        </div>
+                        {canManageWaitlist && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePromoteFromWaitlist(waitlistUser.id)}
+                          >
+                            Hinzufügen
+                          </Button>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
+
+        {/* Reject Dialog */}
+        <Dialog open={showRejectModal} onOpenChange={setShowRejectModal}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Tour ablehnen</DialogTitle>
+              <DialogDescription>
+                Möchtest du diese Tour wirklich ablehnen? Du kannst optional einen Kommentar hinzufügen.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="rejection-comment">Kommentar (optional)</Label>
+                <Textarea
+                  id="rejection-comment"
+                  value={rejectionComment}
+                  onChange={(e) => setRejectionComment(e.target.value)}
+                  placeholder="Grund für die Ablehnung..."
+                  rows={4}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowRejectModal(false)
+                  setRejectionComment('')
+                }}
+              >
+                Abbrechen
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleConfirmReject}
+              >
+                Ablehnen
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Cancel Tour Alert Dialog */}
+        <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Tour absagen</AlertDialogTitle>
+              <AlertDialogDescription>
+                Möchtest du diese Tour wirklich absagen? Die Tour wird als abgesagt markiert und ist nicht mehr für Anmeldungen verfügbar.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleCancel}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Tour absagen
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Delete Tour Alert Dialog */}
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Tour löschen</AlertDialogTitle>
+              <AlertDialogDescription>
+                Möchtest du diese Tour wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDelete}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Tour löschen
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Remove Participant Alert Dialog */}
+        <AlertDialog open={showRemoveParticipantDialog} onOpenChange={setShowRemoveParticipantDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Teilnehmer entfernen</AlertDialogTitle>
+              <AlertDialogDescription>
+                Möchtest du <strong>{participantToRemove?.name}</strong> wirklich von dieser Tour entfernen?
+                {tour && tour.participants.length >= tour.maxParticipants && waitlist.length > 0 && (
+                  <span className="block mt-2 text-sm">
+                    Der erste Teilnehmer von der Warteliste wird automatisch nachrücken.
+                  </span>
+                )}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setParticipantToRemove(null)}>Abbrechen</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleConfirmRemoveParticipant}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Entfernen
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Add Participant Dialog */}
+        <CommandDialog open={showAddParticipantDialog} onOpenChange={setShowAddParticipantDialog}>
+          <Command>
+            <CommandInput placeholder="Benutzer suchen..." />
+            <CommandList>
+              <CommandEmpty>Keine Benutzer gefunden.</CommandEmpty>
+              <CommandGroup heading="Benutzer">
+                {allUsers.map((user) => (
+                  <CommandItem
+                    key={user.id}
+                    value={user.name}
+                    onSelect={() => handleAddParticipant(user.id)}
+                    className="flex items-center gap-3 cursor-pointer"
+                  >
+                    <Avatar className="w-8 h-8 flex-shrink-0">
+                      <AvatarImage
+                        src={user.profilePhoto || undefined}
+                        alt={user.name}
+                        className="object-cover"
+                      />
+                      <AvatarFallback>
+                        {user.name.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium">{user.name}</div>
+                      <div className="text-xs text-muted-foreground">{user.email}</div>
+                    </div>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </CommandDialog>
+
+        {/* WhatsApp-Dialog nach Anmeldung */}
+        <Dialog open={showWhatsAppDialog} onOpenChange={setShowWhatsAppDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>WhatsApp-Gruppe beitreten</DialogTitle>
+              <DialogDescription>
+                Du hast dich erfolgreich für die Tour angemeldet. Tritt jetzt der WhatsApp-Gruppe bei!
+              </DialogDescription>
+            </DialogHeader>
+            {tour?.whatsappGroupLink && (
+              <div className="space-y-4 py-4">
                 <div className="flex flex-col items-center gap-4">
                   <QRCode
                     data={tour.whatsappGroupLink}
@@ -901,290 +1189,12 @@ export default function TourDetailPage() {
                     </a>
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Teilnehmerliste */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Teilnehmer ({participants.length})</CardTitle>
-                {canManageWaitlist && tour.status === 'published' && !isArchived && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleAddParticipantClick}
-                    className="h-8"
-                  >
-                    <UserPlus className="h-4 w-4 mr-1" />
-                    Hinzufügen
-                  </Button>
-                )}
               </div>
-            </CardHeader>
-            {participants.length > 0 ? (
-              <CardContent>
-                <ul className="space-y-3">
-                  {participants.map((participant) => (
-                    <li key={participant.id} className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3 flex-1">
-                        <Avatar className="w-8 h-8 flex-shrink-0">
-                          <AvatarImage
-                            src={participant.profilePhoto || undefined}
-                            alt={participant.name}
-                            className="object-cover"
-                          />
-                          <AvatarFallback>
-                            {participant.name.charAt(0).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="text-sm font-medium text-foreground">{participant.name}</span>
-                      </div>
-                      {canManageWaitlist && participant.id !== user.id && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleRemoveParticipantClick(participant)}
-                          className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            ) : (
-              <CardContent>
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  Noch keine Teilnehmer angemeldet
-                </p>
-              </CardContent>
             )}
-          </Card>
-
-          {/* Warteliste */}
-          {tour.status === 'published' && waitlist.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Warteliste ({waitlist.length})</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  {waitlist.map((waitlistUser) => (
-                    <li key={waitlistUser.id} className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3 flex-1">
-                        <Avatar className="w-8 h-8 flex-shrink-0">
-                          <AvatarImage
-                            src={waitlistUser.profilePhoto || undefined}
-                            alt={waitlistUser.name}
-                            className="object-cover"
-                          />
-                          <AvatarFallback>
-                            {waitlistUser.name.charAt(0).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="text-sm font-medium text-foreground">{waitlistUser.name}</span>
-                      </div>
-                      {canManageWaitlist && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handlePromoteFromWaitlist(waitlistUser.id)}
-                        >
-                          Hinzufügen
-                        </Button>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+          </DialogContent>
+        </Dialog>
       </div>
-
-      {/* Reject Dialog */}
-      <Dialog open={showRejectModal} onOpenChange={setShowRejectModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Tour ablehnen</DialogTitle>
-            <DialogDescription>
-              Möchtest du diese Tour wirklich ablehnen? Du kannst optional einen Kommentar hinzufügen.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="rejection-comment">Kommentar (optional)</Label>
-              <Textarea
-                id="rejection-comment"
-                value={rejectionComment}
-                onChange={(e) => setRejectionComment(e.target.value)}
-                placeholder="Grund für die Ablehnung..."
-                rows={4}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowRejectModal(false)
-                setRejectionComment('')
-              }}
-            >
-              Abbrechen
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleConfirmReject}
-            >
-              Ablehnen
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Cancel Tour Alert Dialog */}
-      <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Tour absagen</AlertDialogTitle>
-            <AlertDialogDescription>
-              Möchtest du diese Tour wirklich absagen? Die Tour wird als abgesagt markiert und ist nicht mehr für Anmeldungen verfügbar.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleCancel}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Tour absagen
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Delete Tour Alert Dialog */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Tour löschen</AlertDialogTitle>
-            <AlertDialogDescription>
-              Möchtest du diese Tour wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Tour löschen
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Remove Participant Alert Dialog */}
-      <AlertDialog open={showRemoveParticipantDialog} onOpenChange={setShowRemoveParticipantDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Teilnehmer entfernen</AlertDialogTitle>
-            <AlertDialogDescription>
-              Möchtest du <strong>{participantToRemove?.name}</strong> wirklich von dieser Tour entfernen?
-              {tour && tour.participants.length >= tour.maxParticipants && waitlist.length > 0 && (
-                <span className="block mt-2 text-sm">
-                  Der erste Teilnehmer von der Warteliste wird automatisch nachrücken.
-                </span>
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setParticipantToRemove(null)}>Abbrechen</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmRemoveParticipant}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Entfernen
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Add Participant Dialog */}
-      <CommandDialog open={showAddParticipantDialog} onOpenChange={setShowAddParticipantDialog}>
-        <Command>
-          <CommandInput placeholder="Benutzer suchen..." />
-          <CommandList>
-            <CommandEmpty>Keine Benutzer gefunden.</CommandEmpty>
-            <CommandGroup heading="Benutzer">
-              {allUsers.map((user) => (
-                <CommandItem
-                  key={user.id}
-                  value={user.name}
-                  onSelect={() => handleAddParticipant(user.id)}
-                  className="flex items-center gap-3 cursor-pointer"
-                >
-                  <Avatar className="w-8 h-8 flex-shrink-0">
-                    <AvatarImage
-                      src={user.profilePhoto || undefined}
-                      alt={user.name}
-                      className="object-cover"
-                    />
-                    <AvatarFallback>
-                      {user.name.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <div className="text-sm font-medium">{user.name}</div>
-                    <div className="text-xs text-muted-foreground">{user.email}</div>
-                  </div>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </CommandDialog>
-
-      {/* WhatsApp-Dialog nach Anmeldung */}
-      <Dialog open={showWhatsAppDialog} onOpenChange={setShowWhatsAppDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>WhatsApp-Gruppe beitreten</DialogTitle>
-            <DialogDescription>
-              Du hast dich erfolgreich für die Tour angemeldet. Tritt jetzt der WhatsApp-Gruppe bei!
-            </DialogDescription>
-          </DialogHeader>
-          {tour?.whatsappGroupLink && (
-            <div className="space-y-4 py-4">
-              <div className="flex flex-col items-center gap-4">
-                <QRCode
-                  data={tour.whatsappGroupLink}
-                  className="hidden md:flex w-48 h-48 rounded-lg border bg-white p-4"
-                />
-                <Button
-                  variant="default"
-                  className="w-full"
-                  asChild
-                >
-                  <a
-                    href={tour.whatsappGroupLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    Zur WhatsApp-Gruppe
-                  </a>
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-    </div>
+    </ContentLayout>
   )
 }
 
