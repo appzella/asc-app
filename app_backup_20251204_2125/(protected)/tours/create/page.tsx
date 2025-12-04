@@ -271,7 +271,11 @@ export default function CreateTourPage() {
   return (
     <ContentLayout
       title="Neue Tour erstellen"
-
+      breadcrumbs={[
+        { label: 'Dashboard', href: '/dashboard' },
+        { label: 'Touren', href: '/tours' },
+        { label: 'Neue Tour', active: true },
+      ]}
     >
       <div className="max-w-2xl mx-auto space-y-4 animate-fade-in">
 

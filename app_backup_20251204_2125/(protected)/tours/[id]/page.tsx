@@ -505,7 +505,11 @@ export default function TourDetailPage() {
   return (
     <ContentLayout
       title={tour.title}
-
+      breadcrumbs={[
+        { label: 'Dashboard', href: '/dashboard' },
+        { label: 'Touren', href: '/tours' },
+        { label: tour.title, active: true },
+      ]}
     >
       <div className="space-y-4">
 

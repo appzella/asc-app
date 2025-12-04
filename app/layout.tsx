@@ -1,47 +1,31 @@
-import type { Metadata, Viewport } from 'next'
-import { GeistSans } from 'geist/font/sans'
-import { GeistMono } from 'geist/font/mono'
-import './globals.css'
-import { Toaster } from '@/components/ui/sonner'
+import "./globals.css"
+import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 
-export const metadata: Metadata = {
-  title: 'ASC Skitouren App',
-  description: 'Tourenverwaltung für den Alpinen Skiclub St. Gallen',
-  manifest: '/manifest.json',
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'black-translucent',
-    title: 'ASC App',
-  },
-}
+const inter = Inter({ subsets: ["latin"] })
 
-export const viewport: Viewport = {
-  themeColor: '#ffffff',
+export const metadata = {
+    title: "Dashboard",
+    description: "Dashboard built with shadcn/ui",
 }
 
 export default function RootLayout({
-  children,
+    children,
 }: {
-  children: React.ReactNode
+    children: React.ReactNode
 }) {
-  return (
-    <html lang="de" suppressHydrationWarning>
-      <head>
-
-
-      </head>
-      <body className={`${GeistSans.variable} ${GeistMono.variable} font-sans`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-        >
-          {children}
-          <Toaster />
-        </ThemeProvider>
-      </body>
-    </html>
-  )
+    return (
+        <html lang="en" suppressHydrationWarning>
+            <body className={inter.className} suppressHydrationWarning>
+                <ThemeProvider
+                    attribute="class"
+                    defaultTheme="system"
+                    enableSystem
+                    disableTransitionOnChange
+                >
+                    {children}
+                </ThemeProvider>
+            </body>
+        </html>
+    )
 }
-

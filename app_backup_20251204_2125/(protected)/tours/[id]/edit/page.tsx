@@ -299,7 +299,12 @@ export default function EditTourPage() {
   return (
     <ContentLayout
       title="Tour bearbeiten"
-
+      breadcrumbs={[
+        { label: 'Dashboard', href: '/dashboard' },
+        { label: 'Touren', href: '/tours' },
+        { label: tour.title, href: `/tours/${tour.id}` },
+        { label: 'Bearbeiten', active: true },
+      ]}
     >
       <div className="max-w-2xl mx-auto space-y-6">
 

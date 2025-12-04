@@ -152,7 +152,11 @@ export default function ToursArchivePage() {
     return (
       <ContentLayout
         title="Tourenarchiv"
-
+        breadcrumbs={[
+          { label: 'Dashboard', href: '/dashboard' },
+          { label: 'Touren', href: '/tours' },
+          { label: 'Archiv', active: true },
+        ]}
       >
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -191,7 +195,11 @@ export default function ToursArchivePage() {
   return (
     <ContentLayout
       title="Tourenarchiv"
-
+      breadcrumbs={[
+        { label: 'Dashboard', href: '/dashboard' },
+        { label: 'Touren', href: '/tours' },
+        { label: 'Archiv', active: true },
+      ]}
     >
       <div className="space-y-4">
 
