@@ -91,7 +91,7 @@ const data = {
       icon: UsersIcon,
       items: [
         {
-          title: "Verwaltung",
+          title: "Liste",
           url: "/admin/users",
         },
         {
