@@ -10,6 +10,7 @@ import {
   UsersIcon,
 } from "lucide-react"
 
+import { NavAdmin } from "@/components/nav-admin"
 import { NavMain } from "@/components/nav-main"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
@@ -59,20 +60,37 @@ const data = {
       url: "/users",
       icon: UsersIcon,
     },
+  ],
+  navAdmin: [
     {
-      title: "Verwaltung",
-      url: "#",
+      title: "Einstellungen",
+      url: "/settings",
       icon: SettingsIcon,
-      items: [
-        {
-          title: "Einstellungen",
-          url: "/settings",
-        },
-        {
-          title: "Debug",
-          url: "/debug",
-        },
-      ],
+    },
+    {
+      title: "Tourenarten",
+      url: "/admin/tour-types",
+      icon: MapIcon, // Placeholder, can be changed
+    },
+    {
+      title: "Tourenlängen",
+      url: "/admin/tour-lengths",
+      icon: MapIcon, // Placeholder
+    },
+    {
+      title: "Schwierigkeitsgrade",
+      url: "/admin/difficulties",
+      icon: MapIcon, // Placeholder
+    },
+    {
+      title: "Benutzerverwaltung",
+      url: "/admin/users",
+      icon: UsersIcon,
+    },
+    {
+      title: "Einladungen",
+      url: "/admin/invitations",
+      icon: UsersIcon, // Placeholder
     },
   ],
   navSecondary: [
@@ -104,6 +122,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
+        <NavAdmin items={data.navAdmin} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
