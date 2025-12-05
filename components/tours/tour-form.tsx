@@ -1,5 +1,7 @@
 "use client"
 
+import { Label } from "@/components/ui/label"
+
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, useWatch } from "react-hook-form"
 import { format } from "date-fns"
@@ -356,19 +358,18 @@ export function TourForm() {
                     />
                     {/* GPX Placeholder */}
                     <div className="flex flex-col gap-3">
-                        <FormLabel>GPX Datei (Optional)</FormLabel>
+                        <Label>GPX Datei (Optional)</Label>
                         <div className="border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground cursor-pointer transition-colors">
                             <UploadCloud className="h-8 w-8 mb-2" />
                             <span className="text-sm font-medium">Datei hier ablegen oder klicken</span>
                             <span className="text-xs text-muted-foreground/70 mt-1">.gpx Dateien bis 5MB</span>
                         </div>
                     </div>
-                </div>
 
-                <div className="flex justify-end gap-4">
-                    <Button variant="outline" type="button">Abbrechen</Button>
-                    <Button type="submit">Tour erstellen</Button>
-                </div>
+                    <div className="flex justify-end gap-4">
+                        <Button variant="outline" type="button">Abbrechen</Button>
+                        <Button type="submit">Tour erstellen</Button>
+                    </div>
             </form>
         </Form>
     )
