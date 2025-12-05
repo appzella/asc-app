@@ -49,10 +49,6 @@ const data = {
           title: "Archiv",
           url: "/tours/archive",
         },
-        {
-          title: "Erstellen",
-          url: "/tours/create",
-        },
       ],
     },
     {
