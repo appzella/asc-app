@@ -63,6 +63,13 @@ const MOCK_EXISTING_TOURS: Partial<Tour>[] = [
     },
 ]
 
+const MOCK_GUIDES = [
+    { id: "1", name: "Pascal Staub", role: "Admin" },
+    { id: "2", name: "Max Muster", role: "Tourenleiter" },
+    { id: "3", name: "Anna Alpin", role: "Tourenleiter" },
+    { id: "4", name: "Felix Fels", role: "Tourenleiter" },
+]
+
 export function TourForm() {
     const [duplicateMatch, setDuplicateMatch] = useState<Partial<Tour> | null>(null)
 
@@ -271,9 +278,20 @@ export function TourForm() {
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Tourenleiter</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="Vorname Nachname" {...field} />
-                                </FormControl>
+                                <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Leiter wählen" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {MOCK_GUIDES.map((guide) => (
+                                            <SelectItem key={guide.id} value={guide.name}>
+                                                {guide.name} <span className="text-muted-foreground text-xs ml-2">({guide.role})</span>
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -334,6 +352,8 @@ export function TourForm() {
                                         value={field.value}
                                         onValueChange={field.onChange}
                                         className="py-4"
+                                    // Note: If slider is 'buggy', check if dual-range-slider primitive is needed. 
+                                    // Radix slider supports multiple values by default.
                                     />
                                 </FormControl>
                                 <FormMessage />
