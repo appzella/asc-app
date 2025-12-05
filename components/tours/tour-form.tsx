@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils"
 import { tourFormSchema, type TourFormValues } from "@/lib/validations/tour"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
     Form,
     FormControl,
@@ -146,246 +147,266 @@ export function TourForm() {
                     </Alert>
                 )}
 
-                <div className="grid gap-6 md:grid-cols-2">
-                    <FormField
-                        control={form.control}
-                        name="title"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Titel</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="z.B. Piz Palü" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    <FormField
-                        control={form.control}
-                        name="date"
-                        render={({ field }) => (
-                            <FormItem className="flex flex-col">
-                                <FormLabel>Datum</FormLabel>
-                                <Popover>
-                                    <PopoverTrigger asChild>
+                <div className="grid gap-6 lg:grid-cols-2">
+                    {/* Card 1: Allgemein */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Allgemein</CardTitle>
+                        </CardHeader>
+                        <CardContent className="grid gap-4">
+                            <FormField
+                                control={form.control}
+                                name="title"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Titel</FormLabel>
                                         <FormControl>
-                                            <Button
-                                                variant={"outline"}
-                                                className={cn(
-                                                    "w-full pl-3 text-left font-normal",
-                                                    !field.value && "text-muted-foreground"
-                                                )}
-                                            >
-                                                {field.value ? (
-                                                    format(field.value, "PPP", { locale: de })
-                                                ) : (
-                                                    <span>Datum wählen</span>
-                                                )}
-                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                            </Button>
+                                            <Input placeholder="z.B. Piz Palü" {...field} />
                                         </FormControl>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0" align="start">
-                                        <Calendar
-                                            mode="single"
-                                            selected={field.value}
-                                            onSelect={field.onChange}
-                                            disabled={(date) =>
-                                                date < new Date("1900-01-01")
-                                            }
-                                            initialFocus
-                                        />
-                                    </PopoverContent>
-                                </Popover>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                </div>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="date"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-col">
+                                        <FormLabel>Datum</FormLabel>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <FormControl>
+                                                    <Button
+                                                        variant={"outline"}
+                                                        className={cn(
+                                                            "w-full pl-3 text-left font-normal",
+                                                            !field.value && "text-muted-foreground"
+                                                        )}
+                                                    >
+                                                        {field.value ? (
+                                                            format(field.value, "PPP", { locale: de })
+                                                        ) : (
+                                                            <span>Datum wählen</span>
+                                                        )}
+                                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                    </Button>
+                                                </FormControl>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-0" align="start">
+                                                <Calendar
+                                                    mode="single"
+                                                    selected={field.value}
+                                                    onSelect={field.onChange}
+                                                    disabled={(date) =>
+                                                        date < new Date("1900-01-01")
+                                                    }
+                                                    initialFocus
+                                                />
+                                            </PopoverContent>
+                                        </Popover>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="description"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Beschreibung</FormLabel>
+                                        <FormControl>
+                                            <Textarea
+                                                placeholder="Beschreibe die Tour, Route, Treffpunkt..."
+                                                className="resize-y min-h-[100px]"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </CardContent>
+                    </Card>
 
-                <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Beschreibung</FormLabel>
-                            <FormControl>
-                                <Textarea
-                                    placeholder="Beschreibe die Tour, Route, Treffpunkt..."
-                                    className="resize-y min-h-[100px]"
-                                    {...field}
+                    {/* Card 2: Technische Daten */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Technische Daten</CardTitle>
+                        </CardHeader>
+                        <CardContent className="grid gap-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="type"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Art</FormLabel>
+                                            <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Art" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    <SelectItem value="Skitour">Skitour</SelectItem>
+                                                    <SelectItem value="Hochtour">Hochtour</SelectItem>
+                                                    <SelectItem value="Wanderung">Wanderung</SelectItem>
+                                                    <SelectItem value="Klettern">Klettern</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
                                 />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                                <FormField
+                                    control={form.control}
+                                    name="difficulty"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Schwierigkeit</FormLabel>
+                                            <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Grad" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    <SelectItem value="L">Leicht (L)</SelectItem>
+                                                    <SelectItem value="WS">Wenig Schwierig (WS)</SelectItem>
+                                                    <SelectItem value="ZS">Ziemlich Schwierig (ZS)</SelectItem>
+                                                    <SelectItem value="S">Schwierig (S)</SelectItem>
+                                                    <SelectItem value="SS">Sehr Schwierig (SS)</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
 
-                <div className="grid gap-6 md:grid-cols-3">
-                    <FormField
-                        control={form.control}
-                        name="type"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Art</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Wähle eine Art" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="Skitour">Skitour</SelectItem>
-                                        <SelectItem value="Hochtour">Hochtour</SelectItem>
-                                        <SelectItem value="Wanderung">Wanderung</SelectItem>
-                                        <SelectItem value="Klettern">Klettern</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                            <div className="grid grid-cols-2 gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="ascent"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Aufstieg</FormLabel>
+                                            <FormControl>
+                                                <div className="relative">
+                                                    <Input type="number" {...field} className="pr-10" />
+                                                    <span className="absolute right-3 top-2.5 text-sm text-muted-foreground">hm</span>
+                                                </div>
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="descent"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Abstieg</FormLabel>
+                                            <FormControl>
+                                                <div className="relative">
+                                                    <Input type="number" {...field} className="pr-10" />
+                                                    <span className="absolute right-3 top-2.5 text-sm text-muted-foreground">hm</span>
+                                                </div>
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
 
-                    <FormField
-                        control={form.control}
-                        name="difficulty"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Schwierigkeit</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Grad wählen" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="L">Leicht (L)</SelectItem>
-                                        <SelectItem value="WS">Wenig Schwierig (WS)</SelectItem>
-                                        <SelectItem value="ZS">Ziemlich Schwierig (ZS)</SelectItem>
-                                        <SelectItem value="S">Schwierig (S)</SelectItem>
-                                        <SelectItem value="SS">Sehr Schwierig (SS)</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                            <FormField
+                                control={form.control}
+                                name="duration"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="flex justify-between">
+                                            <span>Dauer</span>
+                                            <span className="text-muted-foreground font-normal">
+                                                {field.value?.[0]}h - {field.value?.[1]}h
+                                            </span>
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Slider
+                                                defaultValue={[3, 5]}
+                                                min={0.5}
+                                                max={12}
+                                                step={0.5}
+                                                minStepsBetweenThumbs={1}
+                                                value={field.value}
+                                                onValueChange={field.onChange}
+                                                className="py-4"
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </CardContent>
+                    </Card>
 
-                    <FormField
-                        control={form.control}
-                        name="guide"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Tourenleiter</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Leiter wählen" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        {MOCK_GUIDES.map((guide) => (
-                                            <SelectItem key={guide.id} value={guide.name}>
-                                                {guide.name} <span className="text-muted-foreground text-xs ml-2">({guide.role})</span>
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                </div>
+                    {/* Card 3: Organisation & Multimedia */}
+                    <Card className="lg:col-span-2">
+                        <CardHeader>
+                            <CardTitle>Organisation & Dateien</CardTitle>
+                        </CardHeader>
+                        <CardContent className="grid gap-6 md:grid-cols-2">
+                            <div className="space-y-4">
+                                <FormField
+                                    control={form.control}
+                                    name="guide"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Tourenleiter</FormLabel>
+                                            <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Leiter wählen" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    {MOCK_GUIDES.map((guide) => (
+                                                        <SelectItem key={guide.id} value={guide.name}>
+                                                            {guide.name} <span className="text-muted-foreground text-xs ml-2">({guide.role})</span>
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
 
-                <div className="grid gap-6 md:grid-cols-3">
-                    <FormField
-                        control={form.control}
-                        name="ascent"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Aufstieg (hm)</FormLabel>
-                                <FormControl>
-                                    <div className="relative">
-                                        <Input type="number" {...field} className="pr-12" />
-                                        <span className="absolute right-3 top-2.5 text-sm text-muted-foreground">hm</span>
-                                    </div>
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="descent"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Abstieg (hm)</FormLabel>
-                                <FormControl>
-                                    <div className="relative">
-                                        <Input type="number" {...field} className="pr-12" />
-                                        <span className="absolute right-3 top-2.5 text-sm text-muted-foreground">hm</span>
-                                    </div>
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="duration"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel className="flex justify-between">
-                                    <span>Dauer</span>
-                                    <span className="text-muted-foreground font-normal">
-                                        {field.value?.[0]}h - {field.value?.[1]}h
-                                    </span>
-                                </FormLabel>
-                                <FormControl>
-                                    <Slider
-                                        defaultValue={[3, 5]}
-                                        min={0.5}
-                                        max={12}
-                                        step={0.5}
-                                        minStepsBetweenThumbs={1}
-                                        value={field.value}
-                                        onValueChange={field.onChange}
-                                        className="py-4"
-                                    // Note: If slider is 'buggy', check if dual-range-slider primitive is needed. 
-                                    // Radix slider supports multiple values by default.
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                </div>
+                                <FormField
+                                    control={form.control}
+                                    name="whatsappLink"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>WhatsApp Gruppe (Optional)</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="Link zur Gruppe" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
 
-                <div className="grid gap-6 md:grid-cols-2">
-                    <FormField
-                        control={form.control}
-                        name="whatsappLink"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>WhatsApp Gruppe (Optional)</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="https://chat.whatsapp.com/..." {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    {/* GPX Placeholder */}
-                    <div className="flex flex-col gap-3">
-                        <Label>GPX Datei (Optional)</Label>
-                        <div className="border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground cursor-pointer transition-colors">
-                            <UploadCloud className="h-8 w-8 mb-2" />
-                            <span className="text-sm font-medium">Datei hier ablegen oder klicken</span>
-                            <span className="text-xs text-muted-foreground/70 mt-1">.gpx Dateien bis 5MB</span>
-                        </div>
-                    </div>
-
+                            {/* GPX Placeholder */}
+                            <div className="flex flex-col gap-3">
+                                <Label>GPX Datei (Optional)</Label>
+                                <div className="border-2 border-dashed rounded-lg h-[132px] flex flex-col items-center justify-center text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground cursor-pointer transition-colors">
+                                    <UploadCloud className="h-8 w-8 mb-2" />
+                                    <span className="text-sm font-medium">Datei hier ablegen</span>
+                                    <span className="text-xs text-muted-foreground/70 mt-1">.gpx bis 5MB</span>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
 
                 <div className="flex justify-end gap-4">
