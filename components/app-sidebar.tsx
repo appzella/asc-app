@@ -82,7 +82,7 @@ const data = {
       ],
     },
     {
-      title: "Benutzerverwaltung",
+      title: "Benutzer",
       url: "/admin/users",
       icon: UsersIcon,
     },
