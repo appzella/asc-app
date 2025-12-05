@@ -14,9 +14,11 @@ export default function ToursPage() {
     })
 
     return (
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-            <TourFilterBar onFilterChange={setFilters} />
-            <TourGrid filters={filters} />
+        <div className="flex flex-1 flex-col gap-4 py-4 md:gap-6 md:py-6">
+            <div className="px-4 lg:px-6 flex flex-col gap-4">
+                <TourFilterBar onFilterChange={setFilters} />
+                <TourGrid filters={filters} />
+            </div>
         </div>
     )
 }
