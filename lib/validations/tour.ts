@@ -12,15 +12,9 @@ export const tourFormSchema = z.object({
     description: z.string().max(500, {
         message: "Beschreibung darf maximal 500 Zeichen lang sein.",
     }).optional(),
-    date: z.date({
-        required_error: "Bitte wähle ein Datum aus.",
-    }),
-    type: z.string({
-        required_error: "Bitte wähle eine Tourenart aus.",
-    }),
-    difficulty: z.string({
-        required_error: "Bitte wähle einen Schwierigkeitsgrad aus.",
-    }),
+    date: z.date(),
+    type: z.string(),
+    difficulty: z.string(),
     ascent: z.coerce.number().min(0).optional(),
     descent: z.coerce.number().min(0).optional(),
     duration: z.array(z.number()).min(2).max(2).optional(), // Range slider [min, max]
