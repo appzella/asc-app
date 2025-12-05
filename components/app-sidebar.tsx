@@ -68,6 +68,10 @@ const data = {
       icon: SettingsIcon,
       items: [
         {
+          title: "Allgemein",
+          url: "/settings",
+        },
+        {
           title: "Tourenarten",
           url: "/admin/tour-types",
         },
@@ -85,11 +89,16 @@ const data = {
       title: "Benutzer",
       url: "/admin/users",
       icon: UsersIcon,
-    },
-    {
-      title: "Einladungen",
-      url: "/admin/invitations",
-      icon: UsersIcon, // Placeholder
+      items: [
+        {
+          title: "Verwaltung",
+          url: "/admin/users",
+        },
+        {
+          title: "Einladungen",
+          url: "/admin/invitations",
+        },
+      ],
     },
   ],
   navSecondary: [
