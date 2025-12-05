@@ -366,11 +366,13 @@ export function TourForm() {
                         </div>
                     </div>
 
-                    <div className="flex justify-end gap-4">
-                        <Button variant="outline" type="button">Abbrechen</Button>
-                        <Button type="submit">Tour erstellen</Button>
-                    </div>
+                </div>
+
+                <div className="flex justify-end gap-4">
+                    <Button variant="outline" type="button">Abbrechen</Button>
+                    <Button type="submit">Tour erstellen</Button>
+                </div>
             </form>
-        </Form>
+        </Form >
     )
 }
