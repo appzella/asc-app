@@ -10,7 +10,9 @@ import { CalendarIcon, CopyIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
+import { NumberStepper } from "@/components/ui/number-stepper"
 import {
     Form,
     FormControl,
@@ -46,7 +48,7 @@ const MOCK_EXISTING_TOURS: Partial<Tour>[] = [
         description: "Klassische Hochtour über den Normalweg.",
         ascent: 1200,
         descent: 1200,
-        duration: "5h", // handled as string in legacy type, but form needs parsing logic ideally
+        duration: "5h",
         type: "Skitour",
         difficulty: "ZS",
         guide: "Max Muster",
@@ -117,7 +119,7 @@ export function TourForm() {
 
     function onSubmit(data: TourFormValues) {
         console.log(data)
-        // Submit logic here
+        // Submit logic would go here
     }
 
     return (
@@ -140,68 +142,74 @@ export function TourForm() {
                     </Alert>
                 )}
 
-                <div className="grid gap-6 lg:grid-cols-2">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Tour Details</CardTitle>
+                        <CardDescription>
+                            Erfasse hier alle notwendigen Informationen zur Tour.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-8">
 
-                    {/* Card 1: Allgemein */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Allgemein</CardTitle>
-                        </CardHeader>
-                        <CardContent className="grid gap-4">
-                            <FormField
-                                control={form.control}
-                                name="title"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Titel</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="z.B. Piz Palü" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="date"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-col">
-                                        <FormLabel>Datum</FormLabel>
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <FormControl>
-                                                    <Button
-                                                        variant={"outline"}
-                                                        className={cn(
-                                                            "w-full pl-3 text-left font-normal",
-                                                            !field.value && "text-muted-foreground"
-                                                        )}
-                                                    >
-                                                        {field.value ? (
-                                                            format(field.value, "PPP", { locale: de })
-                                                        ) : (
-                                                            <span>Datum wählen</span>
-                                                        )}
-                                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                    </Button>
-                                                </FormControl>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-auto p-0" align="start">
-                                                <Calendar
-                                                    mode="single"
-                                                    selected={field.value}
-                                                    onSelect={field.onChange}
-                                                    disabled={(date) =>
-                                                        date < new Date("1900-01-01")
-                                                    }
-                                                    initialFocus
-                                                />
-                                            </PopoverContent>
-                                        </Popover>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                        {/* Section 1: Allgemein */}
+                        <div className="space-y-4">
+                            <h3 className="text-lg font-medium">Allgemein</h3>
+                            <div className="grid gap-4 lg:grid-cols-2">
+                                <FormField
+                                    control={form.control}
+                                    name="title"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Titel</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="z.B. Piz Palü" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="date"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-col">
+                                            <FormLabel>Datum</FormLabel>
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <FormControl>
+                                                        <Button
+                                                            variant={"outline"}
+                                                            className={cn(
+                                                                "w-full pl-3 text-left font-normal",
+                                                                !field.value && "text-muted-foreground"
+                                                            )}
+                                                        >
+                                                            {field.value ? (
+                                                                format(field.value, "PPP", { locale: de })
+                                                            ) : (
+                                                                <span>Datum wählen</span>
+                                                            )}
+                                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                        </Button>
+                                                    </FormControl>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="w-auto p-0" align="start">
+                                                    <Calendar
+                                                        mode="single"
+                                                        selected={field.value}
+                                                        onSelect={field.onChange}
+                                                        disabled={(date) =>
+                                                            date < new Date("1900-01-01")
+                                                        }
+                                                        initialFocus
+                                                    />
+                                                </PopoverContent>
+                                            </Popover>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
                             <FormField
                                 control={form.control}
                                 name="description"
@@ -219,16 +227,14 @@ export function TourForm() {
                                     </FormItem>
                                 )}
                             />
-                        </CardContent>
-                    </Card>
+                        </div>
 
-                    {/* Card 2: Technische Details */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Technische Details</CardTitle>
-                        </CardHeader>
-                        <CardContent className="grid gap-4">
-                            <div className="grid grid-cols-2 gap-4">
+                        <Separator />
+
+                        {/* Section 2: Technische Details */}
+                        <div className="space-y-4">
+                            <h3 className="text-lg font-medium">Technische Details</h3>
+                            <div className="grid gap-4 lg:grid-cols-2">
                                 <FormField
                                     control={form.control}
                                     name="type"
@@ -278,7 +284,7 @@ export function TourForm() {
                                 />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid gap-4 lg:grid-cols-2">
                                 <FormField
                                     control={form.control}
                                     name="ascent"
@@ -286,10 +292,13 @@ export function TourForm() {
                                         <FormItem>
                                             <FormLabel>Aufstieg</FormLabel>
                                             <FormControl>
-                                                <div className="relative">
-                                                    <Input type="number" {...field} className="pr-8" />
-                                                    <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">hm</span>
-                                                </div>
+                                                <NumberStepper
+                                                    value={field.value || 0}
+                                                    onValueChange={field.onChange}
+                                                    min={0}
+                                                    step={50}
+                                                    unit="hm"
+                                                />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -302,10 +311,13 @@ export function TourForm() {
                                         <FormItem>
                                             <FormLabel>Abstieg</FormLabel>
                                             <FormControl>
-                                                <div className="relative">
-                                                    <Input type="number" {...field} className="pr-8" />
-                                                    <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">hm</span>
-                                                </div>
+                                                <NumberStepper
+                                                    value={field.value || 0}
+                                                    onValueChange={field.onChange}
+                                                    min={0}
+                                                    step={50}
+                                                    unit="hm"
+                                                />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -340,16 +352,14 @@ export function TourForm() {
                                     </FormItem>
                                 )}
                             />
-                        </CardContent>
-                    </Card>
+                        </div>
 
-                    {/* Card 3: Organisation & Dateien */}
-                    <Card className="lg:col-span-2">
-                        <CardHeader>
-                            <CardTitle>Organisation & Dateien</CardTitle>
-                        </CardHeader>
-                        <CardContent className="grid gap-6 md:grid-cols-2">
-                            <div className="space-y-4">
+                        <Separator />
+
+                        {/* Section 3: Organisation & Dateien */}
+                        <div className="space-y-4">
+                            <h3 className="text-lg font-medium">Organisation & Dateien</h3>
+                            <div className="grid gap-4 lg:grid-cols-2">
                                 <FormField
                                     control={form.control}
                                     name="guide"
@@ -390,35 +400,34 @@ export function TourForm() {
                                 />
                             </div>
 
-                            <div className="flex flex-col space-y-2">
-                                <FormField
-                                    control={form.control}
-                                    name="gpx"
-                                    render={({ field: { value, onChange, ...fieldProps } }) => (
-                                        <FormItem>
-                                            <FormLabel>GPX Datei (Optional)</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    {...fieldProps}
-                                                    type="file"
-                                                    accept=".gpx"
-                                                    onChange={(event) => {
-                                                        onChange(event.target.files && event.target.files[0]);
-                                                    }}
-                                                    className="cursor-pointer file:cursor-pointer"
-                                                />
-                                            </FormControl>
-                                            <p className="text-[0.8rem] text-muted-foreground">
-                                                Erlaubte Formate: .gpx (max. 5MB)
-                                            </p>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
+                            <FormField
+                                control={form.control}
+                                name="gpx"
+                                render={({ field: { value, onChange, ...fieldProps } }) => (
+                                    <FormItem>
+                                        <FormLabel>GPX Datei (Optional)</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                {...fieldProps}
+                                                type="file"
+                                                accept=".gpx"
+                                                onChange={(event) => {
+                                                    onChange(event.target.files && event.target.files[0]);
+                                                }}
+                                                className="cursor-pointer file:cursor-pointer"
+                                            />
+                                        </FormControl>
+                                        <p className="text-[0.8rem] text-muted-foreground">
+                                            Erlaubte Formate: .gpx (max. 5MB)
+                                        </p>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+
+                    </CardContent>
+                </Card>
 
                 <div className="flex justify-end gap-4">
                     <Button variant="outline" type="button">Abbrechen</Button>

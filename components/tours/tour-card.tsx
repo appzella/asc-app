@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
+  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -57,10 +58,13 @@ export function TourCard({ tour }: TourCardProps) {
             <CardTitle className="line-clamp-2 text-xl leading-tight group-hover:text-primary transition-colors">
               {tour.title}
             </CardTitle>
-            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+            <div className="flex items-center gap-1.5 text-sm text-muted-foreground pb-2">
               <MapPinIcon className="h-3.5 w-3.5" />
               <span className="line-clamp-1">{tour.location}</span>
             </div>
+            <CardDescription className="line-clamp-2 text-sm text-muted-foreground">
+              {tour.description}
+            </CardDescription>
           </div>
         </CardHeader>
 
@@ -74,11 +78,6 @@ export function TourCard({ tour }: TourCardProps) {
               {tour.difficulty}
             </Badge>
           </div>
-
-          {/* Description */}
-          <p className="line-clamp-2 text-sm text-muted-foreground min-h-[2.5rem]">
-            {tour.description}
-          </p>
 
           <div className="mt-auto space-y-4">
             {/* Specs Grid */}
@@ -130,9 +129,11 @@ export function TourCard({ tour }: TourCardProps) {
                 <UserIcon className="h-3.5 w-3.5 text-primary" />
               </div>
               <span className="text-xs font-medium text-muted-foreground">
-                Guide: <span className="text-foreground">{tour.guide}</span>
+                <span className="text-foreground">{tour.guide}</span>
               </span>
             </div>
+
+
           </div>
         </CardContent>
       </Card>
