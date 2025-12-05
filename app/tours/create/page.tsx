@@ -1,5 +1,4 @@
 import { TourForm } from "@/components/tours/tour-form"
-import { Separator } from "@/components/ui/separator"
 
 export default function CreateTourPage() {
     return (
@@ -10,7 +9,6 @@ export default function CreateTourPage() {
                     Erfasse eine neue Tour für den Club.
                 </p>
             </div>
-            <Separator />
             <TourForm />
         </div>
     )
