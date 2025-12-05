@@ -66,21 +66,20 @@ const data = {
       title: "Einstellungen",
       url: "/settings",
       icon: SettingsIcon,
-    },
-    {
-      title: "Tourenarten",
-      url: "/admin/tour-types",
-      icon: MapIcon, // Placeholder, can be changed
-    },
-    {
-      title: "Tourenlängen",
-      url: "/admin/tour-lengths",
-      icon: MapIcon, // Placeholder
-    },
-    {
-      title: "Schwierigkeitsgrade",
-      url: "/admin/difficulties",
-      icon: MapIcon, // Placeholder
+      items: [
+        {
+          title: "Tourenarten",
+          url: "/admin/tour-types",
+        },
+        {
+          title: "Tourenlängen",
+          url: "/admin/tour-lengths",
+        },
+        {
+          title: "Schwierigkeitsgrade",
+          url: "/admin/difficulties",
+        },
+      ],
     },
     {
       title: "Benutzerverwaltung",
