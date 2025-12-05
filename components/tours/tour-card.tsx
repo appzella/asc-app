@@ -1,4 +1,4 @@
-import { ArrowDownRight, ArrowUpRight, CalendarIcon, ClockIcon, MapPinIcon, UserIcon } from "lucide-react"
+import { ArrowDownRight, ArrowUpRight, CalendarIcon, ClockIcon, MapPinIcon, UsersIcon, UserIcon } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -21,6 +21,12 @@ export interface Tour {
   ascent: number
   descent: number
   duration: string
+  description: string
+  participants: {
+    current: number
+    max: number
+  }
+  status: "published" | "draft" | "cancelled"
 }
 
 interface TourCardProps {
@@ -33,7 +39,12 @@ export function TourCard({ tour }: TourCardProps) {
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <Badge variant="secondary">{tour.type}</Badge>
-          <Badge variant="outline">{tour.difficulty}</Badge>
+          <div className="flex gap-2">
+            <Badge variant={tour.status === 'published' ? 'default' : tour.status === 'cancelled' ? 'destructive' : 'secondary'}>
+              {tour.status === 'published' ? 'Veröffentlicht' : tour.status === 'cancelled' ? 'Abgesagt' : 'Entwurf'}
+            </Badge>
+            <Badge variant="outline">{tour.difficulty}</Badge>
+          </div>
         </div>
         <CardTitle className="line-clamp-2 text-lg leading-tight pt-2">
           {tour.title}
@@ -41,6 +52,9 @@ export function TourCard({ tour }: TourCardProps) {
       </CardHeader>
       <CardContent className="flex-1 pb-3">
         <div className="flex flex-col gap-3 text-sm text-muted-foreground">
+          <p className="line-clamp-2 text-sm text-muted-foreground">
+            {tour.description}
+          </p>
           <div className="flex items-center gap-2">
             <CalendarIcon className="h-4 w-4 shrink-0" />
             <span>{tour.date}</span>
@@ -59,9 +73,13 @@ export function TourCard({ tour }: TourCardProps) {
               <ArrowDownRight className="h-4 w-4 shrink-0" />
               <span>{tour.descent} Hm</span>
             </div>
-            <div className="flex items-center gap-2 col-span-2" title="Dauer">
+            <div className="flex items-center gap-2" title="Dauer">
               <ClockIcon className="h-4 w-4 shrink-0" />
               <span>{tour.duration}</span>
+            </div>
+            <div className="flex items-center gap-2" title="Teilnehmer">
+              <UsersIcon className="h-4 w-4 shrink-0" />
+              <span>{tour.participants.current}/{tour.participants.max}</span>
             </div>
           </div>
 

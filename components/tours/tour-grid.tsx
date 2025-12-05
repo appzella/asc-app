@@ -20,6 +20,9 @@ const MOCK_TOURS: Tour[] = [
         ascent: 1200,
         descent: 1200,
         duration: "5-6h",
+        description: "Wunderschöne Skitour auf einen der bekanntesten Gipfel der Ostalpen. Wir starten bei der Diavolezza und steigen über den Persgletscher auf.",
+        participants: { current: 3, max: 6 },
+        status: "published",
     },
     {
         id: "2",
@@ -32,6 +35,9 @@ const MOCK_TOURS: Tour[] = [
         ascent: 800,
         descent: 800,
         duration: "4h",
+        description: "Gemütliche Wanderung im Alpstein mit spektakulärer Aussicht auf den Bodensee und die Alpen. Trittsicherheit erforderlich.",
+        participants: { current: 5, max: 10 },
+        status: "published",
     },
     {
         id: "3",
@@ -44,6 +50,9 @@ const MOCK_TOURS: Tour[] = [
         ascent: 1400,
         descent: 1400,
         duration: "8-9h",
+        description: "Anspruchsvolle Hochtour über den Hörnligrat. Nur für sehr erfahrene Alpinisten mit sehr guter Kondition.",
+        participants: { current: 1, max: 2 },
+        status: "published",
     },
     {
         id: "4",
@@ -56,6 +65,9 @@ const MOCK_TOURS: Tour[] = [
         ascent: 400,
         descent: 400,
         duration: "6h",
+        description: "Klettertour im besten Kalk der Voralpen. Wir klettern die 'Supertramp' Route. Vorstiegskenntnisse im 6. Grad obligatorisch.",
+        participants: { current: 2, max: 4 },
+        status: "draft",
     },
     {
         id: "5",
@@ -68,6 +80,9 @@ const MOCK_TOURS: Tour[] = [
         ascent: 950,
         descent: 950,
         duration: "3.5h",
+        description: "Flowige Trails rund um Chur. Wir nutzen die Bergbahnen für den Uphill und geniessen die Abfahrt.",
+        participants: { current: 4, max: 8 },
+        status: "cancelled",
     },
     {
         id: "6",
@@ -80,6 +95,9 @@ const MOCK_TOURS: Tour[] = [
         ascent: 1800,
         descent: 1800,
         duration: "7h",
+        description: "Der Klassiker in den Glarner Alpen. Langer Aufstieg der mit einer grandiosen Aussicht belohnt wird.",
+        participants: { current: 6, max: 6 },
+        status: "published",
     },
 ]
 
