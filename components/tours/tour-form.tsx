@@ -65,7 +65,8 @@ export function TourForm() {
     const [duplicateMatch, setDuplicateMatch] = useState<Partial<Tour> | null>(null)
 
     const form = useForm<TourFormValues>({
-        resolver: zodResolver(tourFormSchema),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        resolver: zodResolver(tourFormSchema) as any,
         defaultValues: {
             title: "",
             description: "",
