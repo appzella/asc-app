@@ -28,7 +28,7 @@ export default function RootLayout({
                 >
                     <SidebarProvider>
                         <AppSidebar variant="inset" />
-                        <SidebarInset>
+                        <SidebarInset className="overflow-hidden">
                             <SiteHeader />
                             {children}
                         </SidebarInset>
