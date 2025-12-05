@@ -54,6 +54,16 @@ const data = {
       title: "Analytics",
       url: "#",
       icon: BarChartIcon,
+      items: [
+        {
+          title: "Overview",
+          url: "#",
+        },
+        {
+          title: "Reports",
+          url: "#",
+        },
+      ],
     },
     {
       title: "Projects",
