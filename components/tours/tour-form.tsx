@@ -1,7 +1,6 @@
 "use client"
 
-import { Label } from "@/components/ui/label"
-
+import { useState, useEffect } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, useWatch } from "react-hook-form"
 import { format } from "date-fns"
@@ -9,14 +8,12 @@ import { de } from "date-fns/locale"
 import { CalendarIcon, CopyIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { tourFormSchema, type TourFormValues } from "@/lib/validations/tour"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -38,17 +35,18 @@ import {
 } from "@/components/ui/popover"
 import { Slider } from "@/components/ui/slider"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { useState, useEffect } from "react"
+
+import { tourFormSchema, type TourFormValues } from "@/lib/validations/tour"
 import type { Tour } from '@/components/tours/tour-card'
 
-// Mock Data for Duplication Check
+// Mock Data
 const MOCK_EXISTING_TOURS: Partial<Tour>[] = [
     {
         title: "Piz Palü",
         description: "Klassische Hochtour über den Normalweg.",
         ascent: 1200,
         descent: 1200,
-        duration: "5h", // Will need parsing for form, or form uses string for now
+        duration: "5h", // handled as string in legacy type, but form needs parsing logic ideally
         type: "Skitour",
         difficulty: "ZS",
         guide: "Max Muster",
@@ -86,11 +84,10 @@ export function TourForm() {
             type: "Skitour",
             difficulty: "WS",
             whatsappLink: "",
-            guide: "", // User would be default here
+            guide: "",
         },
     })
 
-    // Watch Title for Duplication Logic
     const watchedTitle = useWatch({
         control: form.control,
         name: "title",
@@ -101,7 +98,6 @@ export function TourForm() {
             setDuplicateMatch(null)
             return
         }
-
         const match = MOCK_EXISTING_TOURS.find(
             (t) => t.title?.toLowerCase() === watchedTitle.toLowerCase()
         )
@@ -110,33 +106,30 @@ export function TourForm() {
 
     const applyDuplicate = () => {
         if (!duplicateMatch) return
-
-        // Map fields. Note: Duration format handling would be needed in real app
         form.setValue("description", duplicateMatch.description || "")
         form.setValue("ascent", duplicateMatch.ascent || 0)
         form.setValue("descent", duplicateMatch.descent || 0)
         form.setValue("type", duplicateMatch.type || "Skitour")
         form.setValue("difficulty", duplicateMatch.difficulty || "WS")
         form.setValue("guide", duplicateMatch.guide || "")
-
-        // Optional: Toast or feedback
-        setDuplicateMatch(null) // Hide alert after applying
+        setDuplicateMatch(null)
     }
 
     function onSubmit(data: TourFormValues) {
         console.log(data)
-        // Perform API call
+        // Submit logic here
     }
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 
+                {/* Duplicate Alert */}
                 {duplicateMatch && (
                     <Alert className="border-primary/50 bg-primary/10 text-primary-foreground">
                         <CopyIcon className="h-4 w-4 stroke-primary" />
                         <AlertTitle className="text-primary">Ähnliche Tour gefunden</AlertTitle>
-                        <AlertDescription className="flex items-center justify-between text-muted-foreground">
+                        <AlertDescription className="flex items-center justify-between text-muted-foreground mt-2">
                             <span>
                                 Wir haben eine Tour mit dem Namen <strong>{duplicateMatch.title}</strong> gefunden. Möchtest du die Daten kopieren?
                             </span>
@@ -148,6 +141,7 @@ export function TourForm() {
                 )}
 
                 <div className="grid gap-6 lg:grid-cols-2">
+
                     {/* Card 1: Allgemein */}
                     <Card>
                         <CardHeader>
@@ -228,10 +222,10 @@ export function TourForm() {
                         </CardContent>
                     </Card>
 
-                    {/* Card 2: Technische Daten */}
+                    {/* Card 2: Technische Details */}
                     <Card>
                         <CardHeader>
-                            <CardTitle>Technische Daten</CardTitle>
+                            <CardTitle>Technische Details</CardTitle>
                         </CardHeader>
                         <CardContent className="grid gap-4">
                             <div className="grid grid-cols-2 gap-4">
@@ -293,8 +287,8 @@ export function TourForm() {
                                             <FormLabel>Aufstieg</FormLabel>
                                             <FormControl>
                                                 <div className="relative">
-                                                    <Input type="number" {...field} className="pr-10" />
-                                                    <span className="absolute right-3 top-2.5 text-sm text-muted-foreground">hm</span>
+                                                    <Input type="number" {...field} className="pr-8" />
+                                                    <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">hm</span>
                                                 </div>
                                             </FormControl>
                                             <FormMessage />
@@ -309,8 +303,8 @@ export function TourForm() {
                                             <FormLabel>Abstieg</FormLabel>
                                             <FormControl>
                                                 <div className="relative">
-                                                    <Input type="number" {...field} className="pr-10" />
-                                                    <span className="absolute right-3 top-2.5 text-sm text-muted-foreground">hm</span>
+                                                    <Input type="number" {...field} className="pr-8" />
+                                                    <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">hm</span>
                                                 </div>
                                             </FormControl>
                                             <FormMessage />
@@ -349,7 +343,7 @@ export function TourForm() {
                         </CardContent>
                     </Card>
 
-                    {/* Card 3: Organisation & Multimedia */}
+                    {/* Card 3: Organisation & Dateien */}
                     <Card className="lg:col-span-2">
                         <CardHeader>
                             <CardTitle>Organisation & Dateien</CardTitle>
@@ -388,7 +382,7 @@ export function TourForm() {
                                         <FormItem>
                                             <FormLabel>WhatsApp Gruppe (Optional)</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="Link zur Gruppe" {...field} />
+                                                <Input placeholder="https://chat.whatsapp.com/..." {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -396,11 +390,32 @@ export function TourForm() {
                                 />
                             </div>
 
-                            <Label>GPX Datei (Optional)</Label>
-                            <Input type="file" accept=".gpx" className="cursor-pointer" />
-                            <p className="text-[0.8rem] text-muted-foreground">
-                                Erlaubte Formate: .gpx (max. 5MB)
-                            </p>
+                            <div className="flex flex-col space-y-2">
+                                <FormField
+                                    control={form.control}
+                                    name="gpx"
+                                    render={({ field: { value, onChange, ...fieldProps } }) => (
+                                        <FormItem>
+                                            <FormLabel>GPX Datei (Optional)</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    {...fieldProps}
+                                                    type="file"
+                                                    accept=".gpx"
+                                                    onChange={(event) => {
+                                                        onChange(event.target.files && event.target.files[0]);
+                                                    }}
+                                                    className="cursor-pointer file:cursor-pointer"
+                                                />
+                                            </FormControl>
+                                            <p className="text-[0.8rem] text-muted-foreground">
+                                                Erlaubte Formate: .gpx (max. 5MB)
+                                            </p>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
                         </CardContent>
                     </Card>
                 </div>
@@ -410,6 +425,6 @@ export function TourForm() {
                     <Button type="submit">Tour erstellen</Button>
                 </div>
             </form>
-        </Form >
+        </Form>
     )
 }

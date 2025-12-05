@@ -22,8 +22,7 @@ export const tourFormSchema = z.object({
         message: "Bitte gib einen Tourenleiter an.",
     }),
     whatsappLink: z.string().url({ message: "Bitte gib eine gültige URL ein." }).optional().or(z.literal("")),
-    // File upload is handled separately in the component state usually, or custom refined here
-    // For now we just validate existence if needed, but it's optional
+    gpx: z.any().optional(),
 })
 
 export type TourFormValues = z.infer<typeof tourFormSchema>
