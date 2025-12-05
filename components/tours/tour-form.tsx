@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, useWatch } from "react-hook-form"
 import { format } from "date-fns"
 import { de } from "date-fns/locale"
-import { CalendarIcon, UploadCloud, CopyIcon } from "lucide-react"
+import { CalendarIcon, CopyIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { tourFormSchema, type TourFormValues } from "@/lib/validations/tour"
@@ -396,15 +396,11 @@ export function TourForm() {
                                 />
                             </div>
 
-                            {/* GPX Placeholder */}
-                            <div className="flex flex-col gap-3">
-                                <Label>GPX Datei (Optional)</Label>
-                                <div className="border-2 border-dashed rounded-lg h-[132px] flex flex-col items-center justify-center text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground cursor-pointer transition-colors">
-                                    <UploadCloud className="h-8 w-8 mb-2" />
-                                    <span className="text-sm font-medium">Datei hier ablegen</span>
-                                    <span className="text-xs text-muted-foreground/70 mt-1">.gpx bis 5MB</span>
-                                </div>
-                            </div>
+                            <Label>GPX Datei (Optional)</Label>
+                            <Input type="file" accept=".gpx" className="cursor-pointer" />
+                            <p className="text-[0.8rem] text-muted-foreground">
+                                Erlaubte Formate: .gpx (max. 5MB)
+                            </p>
                         </CardContent>
                     </Card>
                 </div>
