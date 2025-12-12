@@ -1,9 +1,6 @@
 import "./globals.css"
 import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
-import { AppSidebar } from "@/components/app-sidebar"
-import { SiteHeader } from "@/components/site-header"
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -26,13 +23,7 @@ export default function RootLayout({
                     enableSystem
                     disableTransitionOnChange
                 >
-                    <SidebarProvider>
-                        <AppSidebar variant="inset" />
-                        <SidebarInset className="overflow-hidden">
-                            <SiteHeader />
-                            {children}
-                        </SidebarInset>
-                    </SidebarProvider>
+                    {children}
                 </ThemeProvider>
             </body>
         </html>
