@@ -27,6 +27,7 @@ export function SiteHeader() {
     if (sectionTitle === "Tours") sectionTitle = "Touren"
     if (sectionTitle === "Users") sectionTitle = "Mitglieder"
     if (sectionTitle === "Settings") sectionTitle = "Einstellungen"
+    if (sectionTitle === "Profile") sectionTitle = "Profil"
   }
 
   return (
@@ -49,6 +50,7 @@ export function SiteHeader() {
               if (title === "Tours") title = "Touren"
               if (title === "Create") title = "Erstellen"
               if (title === "Users") title = "Mitglieder"
+              if (title === "Profile") title = "Profil"
 
               return (
                 <div key={href} className="flex items-center">

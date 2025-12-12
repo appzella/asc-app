@@ -6,6 +6,9 @@ import {
   SettingsIcon,
   UserCircleIcon,
 } from "lucide-react"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
+import { authService } from "@/lib/auth"
 
 import {
   Avatar,
@@ -38,6 +41,13 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    await authService.logout()
+    router.push("/login")
+    router.refresh()
+  }
 
   return (
     <SidebarMenu>
@@ -84,20 +94,20 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <a href="/profile">
+                <Link href="/profile">
                   <UserCircleIcon />
                   Profil
-                </a>
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <a href="/settings">
+                <Link href="/settings">
                   <SettingsIcon />
                   Einstellungen
-                </a>
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOutIcon />
               Abmelden
             </DropdownMenuItem>
