@@ -42,7 +42,9 @@ export interface Tour {
   difficulty: Difficulty
   tourType: TourType
   tourLength: TourLength
-  elevation: number // Höhenmeter
+  peak?: string // Name of the peak/destination
+  peakElevation?: number // Height of the peak in meters
+  elevation: number // Höhenmeter (ascent)
   duration: number // Dauer in Stunden
   leaderId: string // User-ID des Tourenleiters
   leader?: User // Referenz zum Leader

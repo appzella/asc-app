@@ -1,8 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Bell, Check } from 'lucide-react'
-import { supabase } from '@/lib/supabase/client'
 import { Notification } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import {
@@ -25,84 +24,15 @@ import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { toast } from 'sonner'
-import { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 
 export function NotificationCenter() {
+    // Mock state for migration
     const [notifications, setNotifications] = useState<Notification[]>([])
     const [unreadCount, setUnreadCount] = useState(0)
     const [isOpen, setIsOpen] = useState(false)
 
-    useEffect(() => {
-        if (!supabase) return
-
-        fetchNotifications()
-
-        // Subscribe to realtime changes
-        const channel = supabase
-            .channel('notifications')
-            .on(
-                'postgres_changes',
-                {
-                    event: '*',
-                    schema: 'public',
-                    table: 'notifications',
-                },
-                (payload: RealtimePostgresChangesPayload<any>) => {
-                    // Refresh notifications on any change
-                    fetchNotifications()
-                }
-            )
-            .subscribe()
-
-        return () => {
-            supabase.removeChannel(channel)
-        }
-    }, [])
-
-    const fetchNotifications = async () => {
-        if (!supabase) return
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return
-
-        const { data, error } = await supabase
-            .from('notifications')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: false })
-            .limit(50) // Increased limit for sheet view
-
-        if (error) {
-            console.error('Error fetching notifications:', error)
-            return
-        }
-
-        const mappedNotifications: Notification[] = data.map((n: any) => ({
-            id: n.id,
-            userId: n.user_id,
-            type: n.type,
-            title: n.title,
-            message: n.message,
-            link: n.link,
-            read: n.read,
-            createdAt: new Date(n.created_at),
-        }))
-
-        setNotifications(mappedNotifications)
-        setUnreadCount(mappedNotifications.filter(n => !n.read).length)
-    }
-
+    // No-op for now
     const markAsRead = async (id: string) => {
-        const { error } = await supabase
-            .from('notifications')
-            .update({ read: true })
-            .eq('id', id)
-
-        if (error) {
-            toast.error('Fehler beim Markieren als gelesen')
-            return
-        }
-
-        // Optimistic update
         setNotifications(prev => prev.map(n =>
             n.id === id ? { ...n, read: true } : n
         ))
@@ -110,24 +40,8 @@ export function NotificationCenter() {
     }
 
     const markAllAsRead = async () => {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return
-
-        const { error } = await supabase
-            .from('notifications')
-            .update({ read: true })
-            .eq('user_id', user.id)
-            .eq('read', false)
-
-        if (error) {
-            toast.error('Fehler beim Markieren als gelesen')
-            return
-        }
-
-        // Optimistic update
         setNotifications(prev => prev.map(n => ({ ...n, read: true })))
         setUnreadCount(0)
-        // Keep sheet open after marking all as read, as it's a larger view
     }
 
     return (

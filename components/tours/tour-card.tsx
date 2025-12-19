@@ -29,6 +29,8 @@ export interface Tour {
     max: number
   }
   status: "published" | "draft" | "cancelled"
+  peak?: string
+  peakElevation?: number
 }
 
 interface TourCardProps {
@@ -46,22 +48,35 @@ export function TourCard({ tour }: TourCardProps) {
               <CalendarIcon className="h-4 w-4 text-primary" />
               <span>{tour.date}</span>
             </div>
-            {tour.status !== 'published' && (
-              <Badge variant={tour.status === 'cancelled' ? 'destructive' : 'secondary'} className="h-6">
-                {tour.status === 'cancelled' ? 'Abgesagt' : 'Entwurf'}
+            <div className="flex gap-2 items-center">
+              <Badge variant="secondary" className="rounded-md px-2.5 py-0.5 font-normal h-6">
+                {tour.type}
               </Badge>
-            )}
+              <Badge variant="outline" className="rounded-md px-2.5 py-0.5 font-normal border-primary/20 text-primary h-6">
+                {tour.difficulty}
+              </Badge>
+              {tour.status !== 'published' && (
+                <Badge
+                  variant={tour.status === 'cancelled' ? 'destructive' : 'secondary'}
+                  className="rounded-md px-2.5 py-0.5 font-normal h-6"
+                >
+                  {tour.status === 'cancelled' ? 'Abgesagt' : 'Entwurf'}
+                </Badge>
+              )}
+            </div>
           </div>
 
           {/* Title & Location */}
           <div className="space-y-1">
             <CardTitle className="line-clamp-2 text-xl leading-tight group-hover:text-primary transition-colors">
-              {tour.title}
+              {tour.peak && tour.peakElevation ? (
+                <>
+                  {tour.peak} <span className="text-muted-foreground">{tour.peakElevation} m</span>
+                </>
+              ) : (
+                tour.title
+              )}
             </CardTitle>
-            <div className="flex items-center gap-1.5 text-sm text-muted-foreground pb-2">
-              <MapPinIcon className="h-3.5 w-3.5" />
-              <span className="line-clamp-1">{tour.location}</span>
-            </div>
             <CardDescription className="line-clamp-2 text-sm text-muted-foreground">
               {tour.description}
             </CardDescription>
@@ -70,14 +85,6 @@ export function TourCard({ tour }: TourCardProps) {
 
         <CardContent className="flex flex-1 flex-col gap-4">
           {/* Tags */}
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="secondary" className="rounded-md px-2.5 py-0.5 font-normal">
-              {tour.type}
-            </Badge>
-            <Badge variant="outline" className="rounded-md px-2.5 py-0.5 font-normal border-primary/20 text-primary">
-              {tour.difficulty}
-            </Badge>
-          </div>
 
           <div className="mt-auto space-y-4">
             {/* Specs Grid */}

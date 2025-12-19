@@ -1,7 +1,6 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { createClient } from "@/lib/supabase/server"
 import { dataRepository } from "@/lib/data"
 import { profileSchema, type ProfileFormValues } from "@/lib/validations/profile"
 import { User } from "@/lib/types"
@@ -31,30 +30,27 @@ export async function updateUserProfile(
     try {
         const { name, phone, mobile, street, zip, city, profilePhoto } = validatedFields.data
 
-        const supabase = await createClient()
-
-        // Prepare update data mapping manually since we aren't using repo
-        const updateData: any = {
+        // Prepare update data mapping manually
+        const updateData: Partial<User> = {
             name,
-            phone: phone === '' ? null : phone,
-            mobile: mobile === '' ? null : mobile,
-            street: street === '' ? null : street,
-            zip: zip === '' ? null : zip,
-            city: city === '' ? null : city,
+            phone: phone === '' ? undefined : phone,
+            mobile: mobile === '' ? undefined : mobile,
+            street: street === '' ? undefined : street,
+            zip: zip === '' ? undefined : zip,
+            city: city === '' ? undefined : city,
         }
 
         // Handle profilePhoto specifically
         if (profilePhoto !== undefined) {
-            updateData.profile_photo = profilePhoto
+            // Cast to string or null if necessary, assuming User type expects string | null
+            updateData.profilePhoto = profilePhoto as string | null
         }
 
-        const { error } = await supabase
-            .from('users')
-            .update(updateData)
-            .eq('id', userId)
+        // Use repository instead of direct Supabase call
+        const updatedUser = await dataRepository.updateUser(userId, updateData)
 
-        if (error) {
-            console.error("Supabase update error:", error)
+        if (!updatedUser) {
+            console.error("Repository update failed")
             return {
                 status: "error",
                 message: "Datenbankfehler beim Aktualisieren.",
