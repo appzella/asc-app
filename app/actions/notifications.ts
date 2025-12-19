@@ -67,7 +67,6 @@ async function sendPushNotification(userId: string, title: string, body: string,
 }
 
 export async function notifyNewTour(tourId: string) {
-    console.log('notifyNewTour called for:', tourId)
     const supabase = getSupabaseAdmin()
 
     // 1. Fetch tour details
@@ -144,7 +143,6 @@ export async function notifyNewTour(tourId: string) {
 }
 
 export async function notifyParticipantSignup(tourId: string, participantId: string) {
-    console.log('notifyParticipantSignup called:', tourId, participantId)
     const supabase = getSupabaseAdmin()
 
     // 1. Fetch tour details
@@ -207,7 +205,6 @@ export async function notifyParticipantSignup(tourId: string, participantId: str
 }
 
 export async function notifyTourUpdate(tourId: string, updatedByUserId: string) {
-    console.log('notifyTourUpdate called:', tourId)
     const supabase = getSupabaseAdmin()
 
     // 1. Fetch tour details

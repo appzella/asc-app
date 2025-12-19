@@ -70,7 +70,9 @@ export default function RegisterPage() {
                     setError("Diese Einladung ist ungültig oder wurde bereits verwendet.")
                 }
             } catch (err) {
-                console.error("Token validation error", err)
+                if (process.env.NODE_ENV === 'development') {
+                    console.error("Token validation error", err)
+                }
                 setError("Fehler beim Prüfen der Einladung.")
             } finally {
                 setIsValidating(false)
@@ -97,7 +99,9 @@ export default function RegisterPage() {
                 setIsSuccess(true)
             }
         } catch (err) {
-            console.error("Registration failed", err)
+            if (process.env.NODE_ENV === 'development') {
+                console.error("Registration failed", err)
+            }
             setError("Ein Fehler ist aufgetreten.")
         } finally {
             setIsLoading(false)

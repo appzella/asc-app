@@ -62,7 +62,9 @@ export default function LoginPage() {
                 setError("Ungültige E-Mail oder Passwort")
             }
         } catch (err: any) {
-            console.error("Login failed", err)
+            if (process.env.NODE_ENV === 'development') {
+                console.error("Login failed", err)
+            }
             // Show actual error message if available, otherwise generic
             setError(err?.message || "Ein Fehler ist aufgetreten. Bitte versuche es später erneut.")
         } finally {

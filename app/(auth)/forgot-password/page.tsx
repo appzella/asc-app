@@ -53,7 +53,9 @@ export default function ForgotPasswordPage() {
             await authService.resetPassword(data.email)
             setIsSuccess(true)
         } catch (err) {
-            console.error("Reset password failed", err)
+            if (process.env.NODE_ENV === 'development') {
+                console.error("Reset password failed", err)
+            }
             setError("Ein Fehler ist aufgetreten. Bitte versuche es später erneut.")
         } finally {
             setIsLoading(false)

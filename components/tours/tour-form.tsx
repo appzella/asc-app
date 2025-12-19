@@ -118,7 +118,6 @@ export function TourForm() {
     }
 
     function onSubmit(data: TourFormValues) {
-        console.log(data)
         // Submit logic would go here
     }
 
