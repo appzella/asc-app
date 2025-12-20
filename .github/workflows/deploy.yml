@@ -4,17 +4,13 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
-    types: [opened, synchronize]
+      - staging
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: write
       id-token: write
     steps:
       - name: Checkout repository
@@ -35,9 +31,4 @@ jobs:
       - name: 'Deploy to Firebase'
         uses: 'firebase/firebase-tools-action@v0'
         with:
-          command: |
-            if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-              firebase apphosting:backends:deploy --project asc-app-project --backend-id next-js-app --pr "${{ github.event.number }}"
-            else
-              firebase apphosting:backends:deploy --project asc-app-project --backend-id next-js-app --branch main
-            fi
+          command: firebase apphosting:backends:deploy --project asc-app-project --backend-id next-js-app --branch ${{ github.ref_name }}
