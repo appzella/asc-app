@@ -1,136 +1,130 @@
-'use client'
+"use client"
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { useState } from "react"
+import Link from "next/link"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
+import { Loader2, ArrowLeft, CheckCircle2 } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
-import { authService } from '@/lib/auth'
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card"
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { authService } from "@/lib/auth"
 
 const forgotPasswordSchema = z.object({
-  email: z.string().email('Ungültige E-Mail-Adresse').min(1, 'E-Mail ist erforderlich'),
+    email: z.string().email("Ungültige E-Mail-Adresse"),
 })
 
 type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>
 
 export default function ForgotPasswordPage() {
-  const router = useRouter()
-  const [error, setError] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
+    const [isSuccess, setIsSuccess] = useState(false)
+    const [error, setError] = useState("")
 
-  const form = useForm<ForgotPasswordFormValues>({
-    resolver: zodResolver(forgotPasswordSchema),
-    defaultValues: {
-      email: '',
-    },
-  })
+    const form = useForm<ForgotPasswordFormValues>({
+        resolver: zodResolver(forgotPasswordSchema),
+        defaultValues: {
+            email: "",
+        },
+    })
 
-  const onSubmit = async (values: ForgotPasswordFormValues) => {
-    setError('')
-    setIsLoading(true)
+    async function onSubmit(data: ForgotPasswordFormValues) {
+        setIsLoading(true)
+        setError("")
 
-    try {
-      // Use Supabase Auth resetPassword function
-      // This will send a password reset email if the user exists
-      const result = await authService.resetPassword(values.email)
-
-      if (result) {
-        // Success - email sent (or at least no error occurred)
-        setSuccess(true)
-      } else {
-        setError('Kein Konto mit dieser E-Mail-Adresse gefunden')
-      }
-    } catch (err) {
-      console.error('Password reset error:', err)
-      setError('Ein Fehler ist aufgetreten')
-    } finally {
-      setIsLoading(false)
+        try {
+            await authService.resetPassword(data.email)
+            setIsSuccess(true)
+        } catch (err) {
+            if (process.env.NODE_ENV === 'development') {
+                console.error("Reset password failed", err)
+            }
+            setError("Ein Fehler ist aufgetreten. Bitte versuche es später erneut.")
+        } finally {
+            setIsLoading(false)
+        }
     }
-  }
 
-  return (
-    <Card className="w-full animate-scale-in">
-      <CardHeader>
-        <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold gradient-text mb-2">ASC Skitouren App</h1>
-          <p className="text-muted-foreground">Passwort zurücksetzen</p>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {success ? (
-          <div className="space-y-4">
-            <Alert>
-              <AlertTitle>E-Mail gesendet!</AlertTitle>
-              <AlertDescription>
-                Falls ein Konto mit dieser E-Mail-Adresse existiert, haben wir dir einen Link zum Zurücksetzen des Passworts gesendet.
-              </AlertDescription>
-            </Alert>
-            <Button
-              onClick={() => router.push('/login')}
-              className="w-full"
-            >
-              Zurück zur Anmeldung
-            </Button>
-          </div>
-        ) : (
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <p className="text-sm text-muted-foreground mb-4">
-                Gib deine E-Mail-Adresse ein. Wir senden dir einen Link zum Zurücksetzen deines Passworts.
-              </p>
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>E-Mail</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="deine.email@example.com"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+    return (
+        <Card>
+            <CardHeader className="space-y-1">
+                <CardTitle className="text-2xl font-bold">Passwort vergessen</CardTitle>
+                <CardDescription>
+                    Gib deine E-Mail ein, um einen Link zum Zurücksetzen zu erhalten.
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                {isSuccess ? (
+                    <div className="space-y-6">
+                        <Alert className="border-green-500/50 bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300">
+                            <CheckCircle2 className="h-4 w-4" />
+                            <AlertTitle>E-Mail gesendet</AlertTitle>
+                            <AlertDescription>
+                                Falls ein Konto mit dieser E-Mail existiert, haben wir dir einen Link gesendet.
+                            </AlertDescription>
+                        </Alert>
+                        <Button asChild className="w-full" variant="outline">
+                            <Link href="/login">Zurück zur Anmeldung</Link>
+                        </Button>
+                    </div>
+                ) : (
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                            <FormField
+                                control={form.control}
+                                name="email"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>E-Mail</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                placeholder="name@example.com"
+                                                {...field}
+                                                disabled={isLoading}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            {error && (
+                                <Alert variant="destructive">
+                                    <AlertDescription>{error}</AlertDescription>
+                                </Alert>
+                            )}
+
+                            <Button type="submit" className="w-full" disabled={isLoading}>
+                                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Link senden
+                            </Button>
+
+                            <Button asChild variant="link" className="w-full font-normal text-muted-foreground" size="sm">
+                                <Link href="/login" className="flex items-center gap-2">
+                                    <ArrowLeft className="h-4 w-4" /> Zurück zur Anmeldung
+                                </Link>
+                            </Button>
+                        </form>
+                    </Form>
                 )}
-              />
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-              <div className="flex gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => router.push('/login')}
-                  className="flex-1"
-                >
-                  Abbrechen
-                </Button>
-                <Button type="submit" className="flex-1" disabled={isLoading}>
-                  {isLoading ? 'Wird gesendet...' : 'Link senden'}
-                </Button>
-              </div>
-            </form>
-          </Form>
-        )}
-      </CardContent>
-    </Card>
-  )
+            </CardContent>
+        </Card>
+    )
 }
-

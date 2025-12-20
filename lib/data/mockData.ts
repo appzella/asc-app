@@ -171,7 +171,7 @@ class DataStore {
     // Only allow registration for published tours (not draft, cancelled, etc.)
     if (!tour || tour.status !== 'published') return false
     if (tour.participants.includes(userId) || tour.waitlist.includes(userId)) return false
-    
+
     // Wenn Tour voll ist, zur Warteliste hinzufügen
     if (tour.participants.length >= tour.maxParticipants) {
       tour.waitlist.push(userId)
@@ -190,13 +190,13 @@ class DataStore {
     if (index === -1) return false
 
     tour.participants.splice(index, 1)
-    
+
     // Automatisches Nachrücken: Wenn noch Platz unter maxParticipants und Warteliste vorhanden
     if (tour.participants.length < tour.maxParticipants && tour.waitlist.length > 0) {
       const firstWaitlistUserId = tour.waitlist.shift()!
       tour.participants.push(firstWaitlistUserId)
     }
-    
+
     return true
   }
 
@@ -204,7 +204,7 @@ class DataStore {
     const tour = this.tours.find((t) => t.id === tourId)
     if (!tour) return false
     if (tour.waitlist.includes(userId) || tour.participants.includes(userId)) return false
-    
+
     tour.waitlist.push(userId)
     return true
   }
@@ -223,7 +223,7 @@ class DataStore {
   getWaitlistByTourId(tourId: string): User[] {
     const tour = this.tours.find((t) => t.id === tourId)
     if (!tour) return []
-    
+
     return tour.waitlist
       .map((userId) => this.getUserById(userId))
       .filter((user): user is User => user !== undefined)
@@ -238,7 +238,7 @@ class DataStore {
 
     // Entferne von Warteliste
     tour.waitlist.splice(waitlistIndex, 1)
-    
+
     // Füge als Teilnehmer hinzu (auch wenn Tour bereits voll ist)
     tour.participants.push(userId)
     return true
@@ -344,22 +344,22 @@ class DataStore {
     const index = this.settings.tourTypes.indexOf(oldName)
     if (index === -1) return false
     if (this.settings.tourTypes.includes(newName.trim())) return false // Already exists
-    
+
     this.settings.tourTypes[index] = newName.trim()
-    
+
     // Update all tours that use this tour type
     this.tours.forEach(tour => {
       if (tour.tourType === oldName) {
         tour.tourType = newName.trim() as TourType
       }
     })
-    
+
     // Update icon mapping if it exists
     if (this.settings.tourTypeIcons && this.settings.tourTypeIcons[oldName]) {
       this.settings.tourTypeIcons[newName.trim()] = this.settings.tourTypeIcons[oldName]
       delete this.settings.tourTypeIcons[oldName]
     }
-    
+
     return true
   }
 
@@ -381,16 +381,16 @@ class DataStore {
     const index = this.settings.tourLengths.indexOf(oldName)
     if (index === -1) return false
     if (this.settings.tourLengths.includes(newName.trim())) return false // Already exists
-    
+
     this.settings.tourLengths[index] = newName.trim()
-    
+
     // Update all tours that use this tour length
     this.tours.forEach(tour => {
       if (tour.tourLength === oldName) {
         tour.tourLength = newName.trim() as TourLength
       }
     })
-    
+
     return true
   }
 
@@ -432,16 +432,16 @@ class DataStore {
     const index = this.settings.difficulties[tourType].indexOf(oldName)
     if (index === -1) return false
     if (this.settings.difficulties[tourType].includes(newName.trim())) return false // Already exists
-    
+
     this.settings.difficulties[tourType][index] = newName.trim()
-    
+
     // Update all tours that use this difficulty for this tour type
     this.tours.forEach(tour => {
       if (tour.tourType === tourType && tour.difficulty === oldName) {
         tour.difficulty = newName.trim() as Difficulty
       }
     })
-    
+
     return true
   }
 
@@ -511,6 +511,8 @@ export function seedData() {
     difficulty: 'ZS',
     tourType: 'Skitour',
     tourLength: 'Eintagestour',
+    peak: 'Säntis',
+    peakElevation: 2502,
     elevation: 1800,
     duration: 6,
     leaderId: leader1.id,
@@ -525,6 +527,8 @@ export function seedData() {
     difficulty: 'T2',
     tourType: 'Wanderung',
     tourLength: 'Eintagestour',
+    peak: 'Chäserrugg',
+    peakElevation: 2262,
     elevation: 500,
     duration: 4,
     leaderId: leader2.id,
@@ -540,6 +544,8 @@ export function seedData() {
     difficulty: 'ZS',
     tourType: 'Skitour',
     tourLength: 'Eintagestour',
+    peak: 'Hinterrugg',
+    peakElevation: 2306,
     elevation: 1200,
     duration: 5,
     leaderId: leader1.id,
@@ -554,6 +560,8 @@ export function seedData() {
     difficulty: 'S',
     tourType: 'Skitour',
     tourLength: 'Eintagestour',
+    peak: 'Pizol',
+    peakElevation: 2844,
     elevation: 1100,
     duration: 5.5,
     leaderId: leader2.id,
@@ -568,6 +576,8 @@ export function seedData() {
     difficulty: 'WS',
     tourType: 'Skitour',
     tourLength: 'Eintagestour',
+    peak: 'Kronberg',
+    peakElevation: 1663,
     elevation: 800,
     duration: 4,
     leaderId: leader1.id,
@@ -582,6 +592,8 @@ export function seedData() {
     difficulty: 'ZS',
     tourType: 'Skitour',
     tourLength: 'Eintagestour',
+    peak: 'Mattstock',
+    peakElevation: 1936,
     elevation: 950,
     duration: 4.5,
     leaderId: leader2.id,
@@ -596,6 +608,8 @@ export function seedData() {
     difficulty: 'S',
     tourType: 'Skitour',
     tourLength: 'Eintagestour',
+    peak: 'Speer',
+    peakElevation: 1950,
     elevation: 1300,
     duration: 6,
     leaderId: leader1.id,
@@ -610,6 +624,8 @@ export function seedData() {
     difficulty: 'ZS',
     tourType: 'Skitour',
     tourLength: 'Eintagestour',
+    peak: 'Chäserrugg',
+    peakElevation: 2262,
     elevation: 1050,
     duration: 5,
     leaderId: leader2.id,
@@ -624,6 +640,8 @@ export function seedData() {
     difficulty: 'WS',
     tourType: 'Skitour',
     tourLength: 'Eintagestour',
+    peak: 'Selun',
+    peakElevation: 2205,
     elevation: 700,
     duration: 3.5,
     leaderId: leader1.id,
@@ -638,6 +656,8 @@ export function seedData() {
     difficulty: 'SS',
     tourType: 'Skitour',
     tourLength: 'Eintagestour',
+    peak: 'Hochgrat',
+    peakElevation: 1834,
     elevation: 1400,
     duration: 6.5,
     leaderId: leader2.id,
@@ -652,6 +672,8 @@ export function seedData() {
     difficulty: 'ZS',
     tourType: 'Skitour',
     tourLength: 'Eintagestour',
+    peak: 'Gamsberg',
+    peakElevation: 2385,
     elevation: 880,
     duration: 4.5,
     leaderId: leader1.id,
@@ -666,6 +688,8 @@ export function seedData() {
     difficulty: 'L',
     tourType: 'Skitour',
     tourLength: 'Eintagestour',
+    peak: 'Mägisalp',
+    peakElevation: 1705,
     elevation: 550,
     duration: 3,
     leaderId: leader2.id,
@@ -681,6 +705,8 @@ export function seedData() {
     difficulty: 'ZS',
     tourType: 'Skitour',
     tourLength: 'Eintagestour',
+    peak: 'Säntis',
+    peakElevation: 2502,
     elevation: 1800,
     duration: 6,
     leaderId: leader1.id,
@@ -695,6 +721,8 @@ export function seedData() {
     difficulty: 'WS',
     tourType: 'Skitour',
     tourLength: 'Eintagestour',
+    peak: 'Altmann',
+    peakElevation: 2435,
     elevation: 750,
     duration: 4,
     leaderId: leader2.id,
@@ -709,6 +737,8 @@ export function seedData() {
     difficulty: 'L',
     tourType: 'Skitour',
     tourLength: 'Eintagestour',
+    peak: 'Biberlichopf',
+    peakElevation: 1400,
     elevation: 600,
     duration: 3.5,
     leaderId: leader1.id,
@@ -723,6 +753,8 @@ export function seedData() {
     difficulty: 'ZS',
     tourType: 'Skitour',
     tourLength: 'Eintagestour',
+    peak: 'Wildhauser Schafberg',
+    peakElevation: 2373,
     elevation: 900,
     duration: 4.5,
     leaderId: leader2.id,
@@ -737,6 +769,8 @@ export function seedData() {
     difficulty: 'S',
     tourType: 'Skitour',
     tourLength: 'Eintagestour',
+    peak: 'Leistchamm',
+    peakElevation: 2101,
     elevation: 1350,
     duration: 6.5,
     leaderId: leader1.id,
@@ -751,6 +785,8 @@ export function seedData() {
     difficulty: 'WS',
     tourType: 'Skitour',
     tourLength: 'Eintagestour',
+    peak: 'Hörnli',
+    peakElevation: 1133,
     elevation: 850,
     duration: 4.5,
     leaderId: leader2.id,
@@ -765,6 +801,8 @@ export function seedData() {
     difficulty: 'ZS',
     tourType: 'Skitour',
     tourLength: 'Eintagestour',
+    peak: 'Lütispitz',
+    peakElevation: 1987,
     elevation: 1000,
     duration: 5,
     leaderId: leader1.id,
@@ -800,23 +838,23 @@ export function seedData() {
   dataStore.registerForTour(tour8.id, member1.id)
   dataStore.registerForTour(tour9.id, member2.id)
 
-  return { 
-    admin, 
-    leader1, 
-    leader2, 
-    member1, 
-    member2, 
-    tour1, 
-    tour2, 
-    tour3, 
-    tour4, 
-    tour5, 
-    tour6, 
-    tour7, 
-    tour8, 
-    tour9, 
-    tour10, 
-    tour11, 
+  return {
+    admin,
+    leader1,
+    leader2,
+    member1,
+    member2,
+    tour1,
+    tour2,
+    tour3,
+    tour4,
+    tour5,
+    tour6,
+    tour7,
+    tour8,
+    tour9,
+    tour10,
+    tour11,
     tour12,
     tour13,
     tour14,

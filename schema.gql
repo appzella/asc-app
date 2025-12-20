@@ -1,0 +1,120 @@
+
+# Valid Firebase Data Connect Schema
+# Maps to the TypeScript interfaces in lib/types.ts
+
+enum UserRole {
+  admin
+  leader
+  member
+}
+
+enum TourStatus {
+  draft
+  published
+  cancelled
+}
+
+enum TourType {
+  Wanderung
+  Skitour
+  Bike
+}
+
+enum TourLength {
+  Eintagestour
+  Mehrtagestour
+}
+
+# Values for Difficulty are dynamic in TS, but we can model them as String or Enums if strict.
+# For simplicity and flexibility, we use String here, or we could define multiple Enums.
+# Given the TS union types, String is safest for now unless we create separate enums for each.
+
+type User @table {
+  email: String!
+  name: String!
+  role: UserRole!
+  createdAt: Date! @default(expr: "request.time")
+  registered: Boolean! @default(value: false)
+  active: Boolean! @default(value: true)
+  
+  # Profile fields
+  profilePhoto: String
+  phone: String
+  mobile: String
+  street: String
+  zip: String
+  city: String
+  
+  # Auth & Invite
+  invitedByUserId: String
+  registrationToken: String
+  
+  # Relationships
+  tours: [Tour!]! @ref(foreignKey: "leaderId")
+}
+
+type Tour @table {
+  title: String!
+  description: String!
+  date: Date!
+  difficulty: String! # e.g. "T3", "ZS"
+  tourType: TourType!
+  tourLength: TourLength!
+  
+  # Peak Info
+  peak: String
+  peakElevation: Int
+  
+  # Specs
+  elevation: Int! # ascent
+  duration: Float! # hours
+  maxParticipants: Int!
+  status: TourStatus! @default(value: "draft")
+  
+  # Relationships
+  leader: User!
+  createdBy: String! # User ID string or ref? Assuming string for now matching TS
+  
+  # JSON/Array types are supported in PG via specific scalar or JSON
+  # Data Connect supports List of scalars
+  participants: [String!]! # Array of UserIDs
+  waitlist: [String!]! # Array of UserIDs
+  
+  createdAt: Date! @default(expr: "request.time")
+  updatedAt: Date! @default(expr: "request.time")
+  
+  submittedForPublishing: Boolean
+  gpxFile: String
+  whatsappGroupLink: String
+}
+
+type Invitation @table {
+  email: String!
+  token: String!
+  createdBy: String!
+  createdAt: Date! @default(expr: "request.time")
+  used: Boolean! @default(value: false)
+  usedAt: Date
+}
+
+type Notification @table {
+  userId: String!
+  type: String! # NEW_TOUR, etc.
+  title: String!
+  message: String!
+  link: String
+  read: Boolean! @default(value: false)
+  createdAt: Date! @default(expr: "request.time")
+}
+
+type NotificationPreferences @table {
+  userId: String!
+  emailNewTour: Boolean! @default(value: true)
+  pushNewTour: Boolean! @default(value: true)
+  emailParticipantSignup: Boolean! @default(value: true)
+  pushParticipantSignup: Boolean! @default(value: true)
+  emailTourUpdate: Boolean! @default(value: true)
+  pushTourUpdate: Boolean! @default(value: true)
+  createdAt: Date! @default(expr: "request.time")
+  updatedAt: Date! @default(expr: "request.time")
+}

@@ -1,6 +1,4 @@
 import { User } from './types'
-import { isSupabaseConfigured } from './supabase/client'
-import { supabaseAuthService } from './auth/supabaseAuth'
 import { mockAuthService } from './auth/mockAuth'
 
 export interface AuthState {
@@ -10,11 +8,11 @@ export interface AuthState {
 
 /**
  * Unified Auth Service
- * Wählt automatisch zwischen Supabase Auth und Mock Auth
+ * Currently hardcoded to use MockAuthService for the migration to Firebase.
  */
 class AuthService {
   private get authImpl() {
-    return isSupabaseConfigured ? supabaseAuthService : mockAuthService
+    return mockAuthService
   }
 
   async login(email: string, password: string): Promise<User | null> {

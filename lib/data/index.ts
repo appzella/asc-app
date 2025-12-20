@@ -1,11 +1,9 @@
 import { IDataRepository } from './repository'
 import { MockDataRepository } from './mockRepository'
-import { SupabaseDataRepository } from './supabaseRepository'
-import { isSupabaseConfigured } from '../supabase/client'
 
 /**
  * Data Repository Factory
- * Wählt die richtige Implementierung basierend auf Environment-Variablen
+ * Currently hardcoded to use MockDataRepository for the migration to Firebase.
  */
 let repositoryInstance: IDataRepository | null = null
 
@@ -14,12 +12,8 @@ export function getDataRepository(): IDataRepository {
     return repositoryInstance
   }
 
-  // Use Supabase if configured, otherwise fall back to mock data
-  if (isSupabaseConfigured) {
-    repositoryInstance = new SupabaseDataRepository()
-  } else {
-    repositoryInstance = new MockDataRepository()
-  }
+  // Always use Mock Repository for now
+  repositoryInstance = new MockDataRepository()
 
   return repositoryInstance
 }

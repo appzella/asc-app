@@ -38,6 +38,7 @@
   ],
   "exclude": [
     "node_modules",
-    "supabase/functions"
+    "supabase/functions",
+    "app_backup_20251204_2125"
   ]
 }
