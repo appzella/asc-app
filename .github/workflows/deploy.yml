@@ -1,0 +1,43 @@
+name: Deploy to Firebase App Hosting
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          workload_identity_provider: projects/479483332034/locations/global/workloadIdentityPools/github-actions-pool/providers/github-actions-provider
+          service_account: 'firebase-app-hosting-deploy@asc-app-project.iam.gserviceaccount.com'
+
+      - name: 'Install npm dependencies'
+        run: npm ci
+
+      - name: 'Build the Next.js app'
+        run: npm run build
+
+      - name: 'Deploy to Firebase'
+        uses: 'firebase/firebase-tools-action@v0'
+        with:
+          command: |
+            if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+              firebase apphosting:backends:deploy --project asc-app-project --backend-id next-js-app --pr "${{ github.event.number }}"
+            else
+              firebase apphosting:backends:deploy --project asc-app-project --backend-id next-js-app --branch main
+            fi
