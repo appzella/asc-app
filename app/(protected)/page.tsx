@@ -12,7 +12,7 @@ export default function Page() {
           <div className="flex flex-col gap-2 px-4 lg:px-6">
             <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
             <p className="text-muted-foreground">
-              Willkommen zurück! Hier ist deine Übersicht.
+              Staging-Test! Diese Version wurde automatisch von der Staging-Branch deployed.
             </p>
           </div>
           <SectionCards />
