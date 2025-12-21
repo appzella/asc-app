@@ -145,7 +145,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                             </CardHeader>
                             <CardContent className="flex flex-col items-center sm:flex-row gap-8">
                                 <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-                                    <Avatar className="w-32 h-32 border-4 border-background shadow-xl">
+                                    <Avatar className="w-32 h-32 ring-2 ring-border shadow-lg">
                                         <AvatarImage src={form.watch("profilePhoto") || "/avatars/placeholder.png"} />
                                         <AvatarFallback className="text-4xl">
                                             {defaultValues.name?.substring(0, 2).toUpperCase()}

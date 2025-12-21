@@ -12,6 +12,8 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { User } from "@/lib/types"
 
+import { UserActions } from "@/components/users/user-actions"
+
 interface UserListProps {
     users: User[]
 }
@@ -25,8 +27,7 @@ export function UserList({ users }: UserListProps) {
                         <TableHead className="w-[80px]">Avatar</TableHead>
                         <TableHead>Name</TableHead>
                         <TableHead>Email</TableHead>
-                        <TableHead>Rolle</TableHead>
-                        <TableHead>Status</TableHead>
+                        <TableHead>Rolle & Status</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -41,14 +42,7 @@ export function UserList({ users }: UserListProps) {
                             <TableCell className="font-medium">{user.name}</TableCell>
                             <TableCell>{user.email}</TableCell>
                             <TableCell>
-                                <UserRoleBadge role={user.role} />
-                            </TableCell>
-                            <TableCell>
-                                {user.active ? (
-                                    <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50">Aktiv</Badge>
-                                ) : (
-                                    <Badge variant="outline" className="text-gray-500">Inaktiv</Badge>
-                                )}
+                                <UserActions user={user} />
                             </TableCell>
                         </TableRow>
                     ))}

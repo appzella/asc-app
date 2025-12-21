@@ -57,14 +57,10 @@ const navData = {
   ],
   navAdmin: [
     {
-      title: "Einstellungen",
-      url: "/settings",
+      title: "Konfiguration",
+      url: "/admin/tour-types",
       icon: SettingsIcon,
       items: [
-        {
-          title: "Allgemein",
-          url: "/settings",
-        },
         {
           title: "Tourenarten",
           url: "/admin/tour-types",

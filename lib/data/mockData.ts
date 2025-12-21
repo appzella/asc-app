@@ -32,10 +32,10 @@ class DataStore {
     return this.users.find((u) => u.email === email)
   }
 
-  createUser(user: Omit<User, 'id' | 'createdAt'>): User {
+  createUser(user: Omit<User, 'id' | 'createdAt'> & { id?: string }): User {
     const newUser: User = {
       ...user,
-      id: `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: user.id || `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       active: user.active !== undefined ? user.active : true,
       createdAt: new Date(),
     }
@@ -89,10 +89,10 @@ class DataStore {
     }
   }
 
-  createTour(tour: Omit<Tour, 'id' | 'createdAt' | 'updatedAt' | 'participants' | 'status' | 'waitlist'>): Tour {
+  createTour(tour: Omit<Tour, 'id' | 'createdAt' | 'updatedAt' | 'participants' | 'status' | 'waitlist'> & { id?: string }): Tour {
     const newTour: Tour = {
       ...tour,
-      id: `tour_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: tour.id || `tour_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       status: 'draft',
       participants: [],
       waitlist: [],
@@ -453,10 +453,15 @@ class DataStore {
 // Singleton Instance
 export const dataStore = new DataStore()
 
+if (typeof window !== 'undefined') {
+  (window as any).dataStore = dataStore
+}
+
 // Seed Data
 export function seedData() {
   // Admin User
   const admin = dataStore.createUser({
+    id: 'user_admin',
     email: 'admin@asc.ch',
     name: 'Admin User',
     role: 'admin',
@@ -467,6 +472,7 @@ export function seedData() {
 
   // Leader User
   const leader1 = dataStore.createUser({
+    id: 'user_leader1',
     email: 'leader@asc.ch',
     name: 'Max Mustermann',
     role: 'leader',
@@ -476,6 +482,7 @@ export function seedData() {
   })
 
   const leader2 = dataStore.createUser({
+    id: 'user_leader2',
     email: 'leader2@asc.ch',
     name: 'Anna Schmidt',
     role: 'leader',
@@ -486,6 +493,7 @@ export function seedData() {
 
   // Member Users
   const member1 = dataStore.createUser({
+    id: 'user_member1',
     email: 'member@asc.ch',
     name: 'Peter Müller',
     role: 'member',
@@ -495,6 +503,7 @@ export function seedData() {
   })
 
   const member2 = dataStore.createUser({
+    id: 'user_member2',
     email: 'member2@asc.ch',
     name: 'Lisa Weber',
     role: 'member',
@@ -505,6 +514,7 @@ export function seedData() {
 
   // Pascal Staub (User Request)
   const pascal = dataStore.createUser({
+    id: 'user_pascal',
     email: 'pascal@asc.ch',
     name: 'Pascal Staub',
     role: 'admin', // Giving admin role as he is the dev/owner
@@ -515,6 +525,7 @@ export function seedData() {
 
   // Sample Tours
   const tour1 = dataStore.createTour({
+    id: 'tour_saentis',
     title: 'Skitour auf den Säntis',
     description: 'Schöne Skitour auf den Säntis mit herrlicher Aussicht.',
     date: new Date('2024-01-15'),
@@ -531,6 +542,7 @@ export function seedData() {
   })
 
   const tour2 = dataStore.createTour({
+    id: 'tour_toggenburg',
     title: 'Wanderung Toggenburg',
     description: 'Gemütliche Wanderung durch das Toggenburg.',
     date: new Date('2024-02-20'),
@@ -548,6 +560,7 @@ export function seedData() {
 
   // Weitere Skitouren in der Ostschweiz
   const tour3 = dataStore.createTour({
+    id: 'tour_churfirsten',
     title: 'Skitour auf den Churfirsten',
     description: 'Klassische Skitour auf die Churfirsten mit spektakulärer Aussicht auf den Walensee. Route über die Südflanke.',
     date: new Date('2024-01-20'),
@@ -564,6 +577,7 @@ export function seedData() {
   })
 
   const tour4 = dataStore.createTour({
+    id: 'tour_pizol',
     title: 'Pizol Skitour',
     description: 'Beliebte Skitour auf den Pizol. Schöne Aufstiegsroute mit anspruchsvollem Abstieg. Für geübte Skitourengeher.',
     date: new Date('2024-01-25'),
@@ -580,22 +594,42 @@ export function seedData() {
   })
 
   const tour5 = dataStore.createTour({
+    id: 'tour_kronberg',
     title: 'Kronberg Skitour',
     description: 'Genussvolle Skitour auf den Kronberg bei Appenzell. Ideal für Einsteiger und alle, die eine entspannte Tour suchen.',
     date: new Date('2024-01-30'),
-    difficulty: 'WS',
+    difficulty: 'L',
     tourType: 'Skitour',
     tourLength: 'Eintagestour',
     peak: 'Kronberg',
     peakElevation: 1663,
     elevation: 800,
-    duration: 4,
-    leaderId: leader1.id,
+    duration: 3.5,
+    leaderId: leader2.id,
     maxParticipants: 10,
+    createdBy: leader2.id,
+  })
+
+  // Future Tour
+  const tourFuture = dataStore.createTour({
+    id: 'tour_future',
+    title: 'Zukunftstour Piz Bernina',
+    description: 'Hochtour auf den einzigen Viertausender der Ostalpen.',
+    date: new Date('2026-07-15'),
+    difficulty: 'ZS',
+    tourType: 'Skitour',
+    tourLength: 'Mehrtagestour',
+    peak: 'Piz Bernina',
+    peakElevation: 4049,
+    elevation: 1200,
+    duration: 8,
+    leaderId: leader1.id,
+    maxParticipants: 6,
     createdBy: leader1.id,
   })
 
   const tour6 = dataStore.createTour({
+    id: 'tour_mattstock',
     title: 'Mattstock Skitour',
     description: 'Abwechslungsreiche Skitour auf den Mattstock im Toggenburg. Schöne Route durch abwechslungsreiches Gelände.',
     date: new Date('2024-03-15'),
@@ -612,6 +646,7 @@ export function seedData() {
   })
 
   const tour7 = dataStore.createTour({
+    id: 'tour_speer',
     title: 'Speer Skitour',
     description: 'Anspruchsvolle Skitour auf den Speer mit teilweise steilen Passagen. Gute Kondition und Skitechnik erforderlich.',
     date: new Date('2024-03-20'),
@@ -628,6 +663,7 @@ export function seedData() {
   })
 
   const tour8 = dataStore.createTour({
+    id: 'tour_chaeserrugg',
     title: 'Chäserugg Skitour',
     description: 'Klassische Skitour auf den Chäserugg mit herrlicher Aussicht auf die Linthebene und den Zürichsee.',
     date: new Date('2024-03-25'),
@@ -644,6 +680,7 @@ export function seedData() {
   })
 
   const tour9 = dataStore.createTour({
+    id: 'tour_selun',
     title: 'Selun Skitour',
     description: 'Genussvolle Skitour auf den Selun im Flumserberg Gebiet. Perfekt für eine entspannte Skitour mit Freunden.',
     date: new Date('2024-04-01'),
@@ -660,6 +697,7 @@ export function seedData() {
   })
 
   const tour10 = dataStore.createTour({
+    id: 'tour_hochgrat',
     title: 'Hochgrat Skitour',
     description: 'Anspruchsvolle Skitour auf den Hochgrat. Lohnende Aussicht über die gesamte Ostschweiz. Für erfahrene Skitourengeher.',
     date: new Date('2024-04-05'),
@@ -676,6 +714,7 @@ export function seedData() {
   })
 
   const tour11 = dataStore.createTour({
+    id: 'tour_gamsberg',
     title: 'Gamsberg Skitour',
     description: 'Schöne Skitour auf den Gamsberg bei Wildhaus. Abwechslungsreiche Route durch Wald und freies Gelände.',
     date: new Date('2024-04-10'),
@@ -692,6 +731,7 @@ export function seedData() {
   })
 
   const tour12 = dataStore.createTour({
+    id: 'tour_maegisalp',
     title: 'Mägisalp Skitour',
     description: 'Einfache und genussvolle Skitour zur Mägisalp. Ideal für Einsteiger oder eine entspannte Tagestour.',
     date: new Date('2024-04-15'),
@@ -709,6 +749,7 @@ export function seedData() {
 
   // Skitouren Winter 2025/26
   const tour13 = dataStore.createTour({
+    id: 'tour_saentis_2025',
     title: 'Skitour auf den Säntis (Winter 2025)',
     description: 'Klassische Winter-Skitour auf den Säntis. Perfekte Bedingungen für die erste große Tour der Saison.',
     date: new Date('2025-12-20'),
@@ -725,6 +766,7 @@ export function seedData() {
   })
 
   const tour14 = dataStore.createTour({
+    id: 'tour_altmann',
     title: 'Altmann Skitour',
     description: 'Schöne Skitour auf den Altmann bei Alt St. Johann. Abwechslungsreiche Route mit herrlicher Aussicht.',
     date: new Date('2026-01-10'),
@@ -741,6 +783,7 @@ export function seedData() {
   })
 
   const tour15 = dataStore.createTour({
+    id: 'tour_biberlichopf',
     title: 'Biberlichopf Skitour',
     description: 'Genussvolle Skitour auf den Biberlichopf im Toggenburg. Perfekt für eine entspannte Tagestour mit Freunden.',
     date: new Date('2026-01-25'),
@@ -757,6 +800,7 @@ export function seedData() {
   })
 
   const tour16 = dataStore.createTour({
+    id: 'tour_wildhauser',
     title: 'Wildhauser Schafberg Skitour',
     description: 'Beliebte Skitour auf den Wildhauser Schafberg. Schöne Aufstiegsroute mit langem Genussabstieg.',
     date: new Date('2026-02-08'),
@@ -773,6 +817,7 @@ export function seedData() {
   })
 
   const tour17 = dataStore.createTour({
+    id: 'tour_flumserberg',
     title: 'Flumserberg Überschreitung',
     description: 'Anspruchsvolle Überschreitung im Flumserberg Gebiet. Mehrere Gipfel, lohnende Tour für erfahrene Skitourengeher.',
     date: new Date('2026-02-22'),
@@ -789,6 +834,7 @@ export function seedData() {
   })
 
   const tour18 = dataStore.createTour({
+    id: 'tour_hoernli',
     title: 'Hörnli Skitour',
     description: 'Klassische Skitour auf das Hörnli bei Alt St. Johann. Beliebte Route mit guter Schneelage.',
     date: new Date('2026-03-07'),
@@ -805,6 +851,7 @@ export function seedData() {
   })
 
   const tour19 = dataStore.createTour({
+    id: 'tour_schwaegalp',
     title: 'Schwägalp Rundtour',
     description: 'Schöne Rundtour ab Schwägalp. Abwechslungsreiche Route durch verschiedene Geländeformen. Für geübte Skitourengeher.',
     date: new Date('2026-03-21'),

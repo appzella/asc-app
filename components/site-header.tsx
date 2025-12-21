@@ -38,7 +38,7 @@ export function SiteHeader() {
           orientation="vertical"
           className="mx-2 data-[orientation=vertical]:h-4"
         />
-        <h1 className="text-base font-medium">{sectionTitle}</h1>
+
         <Breadcrumb className="hidden md:flex">
           <BreadcrumbList>
             {segments.map((segment, index) => {
@@ -47,10 +47,17 @@ export function SiteHeader() {
               let title = segment.charAt(0).toUpperCase() + segment.slice(1)
 
               // Simple localization for breadcrumbs too
+              // Simple localization for breadcrumbs too
               if (title === "Tours") title = "Touren"
               if (title === "Create") title = "Erstellen"
               if (title === "Users") title = "Mitglieder"
               if (title === "Profile") title = "Profil"
+              if (title === "Settings") title = "Einstellungen"
+              if (title === "Invitations") title = "Einladungen"
+              if (title === "Archive") title = "Archiv"
+              if (title === "Tour-types") title = "Tourenarten"
+              if (title === "Tour-lengths") title = "Tourenlängen"
+              if (title === "Difficulties") title = "Schwierigkeitsgrade"
 
               return (
                 <div key={href} className="flex items-center">
