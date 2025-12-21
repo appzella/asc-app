@@ -95,7 +95,7 @@ export function TourCard({ tour }: TourCardProps) {
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[10px] uppercase text-muted-foreground font-semibold tracking-wider">Aufstieg</span>
-                  <span className="text-sm font-medium">{tour.ascent} hm</span>
+                  <span className="text-sm font-medium">{tour.ascent} Hm</span>
                 </div>
               </div>
 
@@ -105,7 +105,7 @@ export function TourCard({ tour }: TourCardProps) {
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[10px] uppercase text-muted-foreground font-semibold tracking-wider">Abstieg</span>
-                  <span className="text-sm font-medium">{tour.descent} hm</span>
+                  <span className="text-sm font-medium">{tour.descent} Hm</span>
                 </div>
               </div>
 

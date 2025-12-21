@@ -312,7 +312,7 @@ export function TourForm() {
                                                 onValueChange={field.onChange}
                                                 min={0}
                                                 step={50}
-                                                unit="hm"
+                                                unit="Hm"
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -331,7 +331,7 @@ export function TourForm() {
                                                 onValueChange={field.onChange}
                                                 min={0}
                                                 step={50}
-                                                unit="hm"
+                                                unit="Hm"
                                             />
                                         </FormControl>
                                         <FormMessage />
