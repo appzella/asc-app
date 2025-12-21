@@ -539,6 +539,7 @@ export function seedData() {
     leaderId: leader1.id,
     maxParticipants: 8,
     createdBy: leader1.id,
+    gpxFile: '/demo/sample-tour.gpx',
   })
 
   const tour2 = dataStore.createTour({
@@ -763,6 +764,7 @@ export function seedData() {
     leaderId: leader1.id,
     maxParticipants: 8,
     createdBy: leader1.id,
+    gpxFile: '/demo/sample-tour.gpx',
   })
 
   const tour14 = dataStore.createTour({

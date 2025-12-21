@@ -16,7 +16,7 @@ import { formatDifficulty } from '@/lib/difficulty'
 import { formatDuration } from '@/lib/duration'
 import Link from 'next/link'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import { Calendar, Clock, ArrowUpRight, Users, ChartNoAxesColumnIncreasing, Map } from 'lucide-react'
+import { Calendar, Clock, ArrowUpRight, Users, ChartNoAxesColumnIncreasing, Map, Download } from 'lucide-react'
 import dynamic from 'next/dynamic'
 const TourMap = dynamic(() => import('@/components/tours/tour-map'), { ssr: false })
 import { toast } from 'sonner'
@@ -350,6 +350,14 @@ export default function TourDetailPage() {
                         <Card className="hidden sm:block overflow-hidden">
                             <div className="h-[400px] w-full relative z-0">
                                 <TourMap gpxUrl={tour.gpxFile} height="100%" />
+                            </div>
+                            <div className="p-3 border-t flex justify-end">
+                                <Button variant="outline" size="sm" asChild>
+                                    <a href={tour.gpxFile} download className="flex items-center gap-2">
+                                        <Download className="h-4 w-4" />
+                                        GPX herunterladen
+                                    </a>
+                                </Button>
                             </div>
                         </Card>
                     )}

@@ -69,10 +69,6 @@ const navData = {
           title: "Tourenlängen",
           url: "/admin/tour-lengths",
         },
-        {
-          title: "Schwierigkeitsgrade",
-          url: "/admin/difficulties",
-        },
       ],
     },
     {
