@@ -503,6 +503,16 @@ export function seedData() {
     active: true,
   })
 
+  // Pascal Staub (User Request)
+  const pascal = dataStore.createUser({
+    email: 'pascal@asc.ch',
+    name: 'Pascal Staub',
+    role: 'admin', // Giving admin role as he is the dev/owner
+    password: 'password',
+    registered: true,
+    active: true,
+  })
+
   // Sample Tours
   const tour1 = dataStore.createTour({
     title: 'Skitour auf den Säntis',
