@@ -2,7 +2,17 @@
 
 import { useState, useCallback } from 'react'
 import Cropper, { Area } from 'react-easy-crop'
+import { X, ZoomIn, ZoomOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Slider } from '@/components/ui/slider'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 interface ImageCropperProps {
   image: string
@@ -10,6 +20,7 @@ interface ImageCropperProps {
   onCancel: () => void
   aspectRatio?: number
   cropShape?: 'rect' | 'round'
+  open?: boolean
 }
 
 export function ImageCropper({
@@ -18,10 +29,12 @@ export function ImageCropper({
   onCancel,
   aspectRatio = 1,
   cropShape = 'round',
+  open = true,
 }: ImageCropperProps) {
   const [crop, setCrop] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
 
   const onCropChange = useCallback((crop: { x: number; y: number }) => {
     setCrop(crop)
@@ -32,7 +45,7 @@ export function ImageCropper({
   }, [])
 
   const onCropCompleteCallback = useCallback(
-    (croppedArea: Area, croppedAreaPixels: Area) => {
+    (_croppedArea: Area, croppedAreaPixels: Area) => {
       setCroppedAreaPixels(croppedAreaPixels)
     },
     []
@@ -76,7 +89,6 @@ export function ImageCropper({
     )
 
     // Optimize image size: Scale down to max 512x512px for profile photos
-    // This reduces file size significantly without visible quality loss
     const MAX_SIZE = 512
     let finalCanvas = canvas
 
@@ -85,7 +97,6 @@ export function ImageCropper({
       const newWidth = Math.round(pixelCrop.width * scale)
       const newHeight = Math.round(pixelCrop.height * scale)
 
-      // Create optimized canvas
       const optimizedCanvas = document.createElement('canvas')
       optimizedCanvas.width = newWidth
       optimizedCanvas.height = newHeight
@@ -95,7 +106,6 @@ export function ImageCropper({
         throw new Error('No 2d context for optimization')
       }
 
-      // Draw scaled image with high quality
       optimizedCtx.imageSmoothingEnabled = true
       optimizedCtx.imageSmoothingQuality = 'high'
       optimizedCtx.drawImage(canvas, 0, 0, newWidth, newHeight)
@@ -113,7 +123,7 @@ export function ImageCropper({
           resolve(blob)
         },
         'image/jpeg',
-        0.85 // Slightly lower quality (0.85) since we're optimizing size
+        0.85
       )
     })
   }
@@ -121,27 +131,37 @@ export function ImageCropper({
   const handleSave = async () => {
     if (!croppedAreaPixels) return
 
+    setIsSaving(true)
     try {
       const croppedImageBlob = await getCroppedImg(image, croppedAreaPixels)
       onCropComplete(croppedImageBlob)
     } catch (error) {
       console.error('Error cropping image:', error)
+    } finally {
+      setIsSaving(false)
     }
   }
 
+  const handleZoomIn = () => {
+    setZoom((prev) => Math.min(prev + 0.25, 3))
+  }
+
+  const handleZoomOut = () => {
+    setZoom((prev) => Math.max(prev - 0.25, 1))
+  }
+
   return (
-    <div className="fixed inset-0 z-[200] bg-black/80 flex items-center justify-center p-4">
-      <div className="bg-background rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-        <div className="p-6 border-b">
-          <h2 className="text-xl font-semibold text-foreground">
-            Bild zuschneiden
-          </h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Verschiebe und zoome das Bild, um den gewünschten Ausschnitt
-            zu wählen
-          </p>
-        </div>
-        <div className="relative flex-1 min-h-[400px] bg-foreground">
+    <Dialog open={open} onOpenChange={(open) => !open && onCancel()}>
+      <DialogContent className="sm:max-w-2xl" showCloseButton={false}>
+        <DialogHeader>
+          <DialogTitle>Bild zuschneiden</DialogTitle>
+          <DialogDescription>
+            Verschiebe und zoome das Bild, um den gewünschten Ausschnitt zu wählen.
+          </DialogDescription>
+        </DialogHeader>
+
+        {/* Crop Area */}
+        <div className="relative h-[350px] w-full rounded-lg overflow-hidden bg-muted">
           <Cropper
             image={image}
             crop={crop}
@@ -155,36 +175,56 @@ export function ImageCropper({
               containerStyle: {
                 width: '100%',
                 height: '100%',
+                borderRadius: '0.5rem',
               },
             }}
           />
         </div>
-        <div className="p-6 border-t flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex-1 w-full sm:w-auto">
-            <label className="text-sm font-medium text-foreground block mb-2">
-              Zoom: {zoom.toFixed(1)}x
-            </label>
-            <input
-              type="range"
-              value={zoom}
+
+        {/* Zoom Controls */}
+        <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleZoomOut}
+            disabled={zoom <= 1}
+            aria-label="Verkleinern"
+          >
+            <ZoomOut className="h-4 w-4" />
+          </Button>
+          <div className="flex-1">
+            <Slider
+              value={[zoom]}
               min={1}
               max={3}
               step={0.1}
-              onChange={(e) => setZoom(parseFloat(e.target.value))}
-              className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary-600"
+              onValueChange={([value]) => setZoom(value)}
+              aria-label="Zoom"
             />
           </div>
-          <div className="flex gap-3 w-full sm:w-auto">
-            <Button variant="outline" onClick={onCancel} className="flex-1 sm:flex-initial">
-              Abbrechen
-            </Button>
-            <Button onClick={handleSave} className="flex-1 sm:flex-initial">
-              Speichern
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleZoomIn}
+            disabled={zoom >= 3}
+            aria-label="Vergrössern"
+          >
+            <ZoomIn className="h-4 w-4" />
+          </Button>
+          <span className="text-sm text-muted-foreground w-12 text-right">
+            {zoom.toFixed(1)}x
+          </span>
         </div>
-      </div>
-    </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onCancel} disabled={isSaving}>
+            Abbrechen
+          </Button>
+          <Button onClick={handleSave} disabled={isSaving}>
+            {isSaving ? 'Speichere...' : 'Speichern'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
-
