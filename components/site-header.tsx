@@ -58,6 +58,12 @@ export function SiteHeader() {
               if (title === "Tour-types") title = "Tourenarten"
               if (title === "Tour-lengths") title = "Tourenlängen"
               if (title === "Difficulties") title = "Schwierigkeitsgrade"
+              if (title === "Edit") title = "Bearbeiten"
+
+              // Hide tour IDs (they start with 'tour_' or 'Tour_')
+              if (segment.toLowerCase().startsWith("tour_")) {
+                title = "Details"
+              }
 
               return (
                 <div key={href} className="flex items-center">
