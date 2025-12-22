@@ -50,9 +50,10 @@ function UserRow({ user }: { user: User }) {
     }
 
     return (
-        <div className="flex items-center justify-between p-4 border-b last:border-b-0 hover:bg-muted/50 transition-colors">
-            <div className="flex items-center gap-4">
-                <div className="relative">
+        <div className="flex flex-col gap-3 p-4 border-b last:border-b-0 hover:bg-muted/50 transition-colors sm:flex-row sm:items-center sm:justify-between">
+            {/* User info section */}
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="relative shrink-0">
                     <Avatar className="h-10 w-10">
                         <AvatarImage src={user.profilePhoto || ""} alt={user.name} />
                         <AvatarFallback>{user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
@@ -60,13 +61,14 @@ function UserRow({ user }: { user: User }) {
                     {/* Status indicator dot */}
                     <span className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-background ${isActive ? 'bg-green-500' : 'bg-gray-400'}`} />
                 </div>
-                <div className="flex flex-col">
-                    <span className="font-medium">{user.name}</span>
-                    <span className="text-sm text-muted-foreground">{user.email}</span>
+                <div className="flex flex-col min-w-0">
+                    <span className="font-medium truncate">{user.name}</span>
+                    <span className="text-sm text-muted-foreground truncate">{user.email}</span>
                 </div>
             </div>
 
-            <div className="flex items-center gap-4">
+            {/* Controls section */}
+            <div className="flex items-center justify-between gap-3 sm:gap-4 sm:justify-end">
                 {/* Role badge for visual reference */}
                 <Badge variant={currentRole === 'admin' ? 'default' : currentRole === 'leader' ? 'secondary' : 'outline'} className="hidden sm:flex">
                     {currentRole === 'admin' ? 'Admin' : currentRole === 'leader' ? 'Tourenleiter' : 'Mitglied'}
@@ -74,7 +76,7 @@ function UserRow({ user }: { user: User }) {
 
                 {/* Role selector */}
                 <Select value={currentRole} onValueChange={(val) => handleRoleChange(val as UserRole)}>
-                    <SelectTrigger className="w-[130px] h-8">
+                    <SelectTrigger className="w-[130px] h-9">
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
