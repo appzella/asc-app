@@ -345,18 +345,16 @@ export default function TourDetailPage() {
 
             {/* Full-width Map Section */}
             {tour.gpxFile && (
-                <Card className="hidden sm:block overflow-hidden">
+                <Card className="hidden sm:block overflow-hidden relative">
                     <div className="h-[500px] w-full relative z-0">
                         <TourMap gpxUrl={tour.gpxFile} height="100%" />
                     </div>
-                    <div className="p-3 border-t flex justify-end">
-                        <Button variant="outline" size="sm" asChild>
-                            <a href={tour.gpxFile} download className="flex items-center gap-2">
-                                <Download className="h-4 w-4" />
-                                GPX herunterladen
-                            </a>
-                        </Button>
-                    </div>
+                    <Button variant="secondary" size="sm" asChild className="absolute bottom-4 right-4 z-10 shadow-lg">
+                        <a href={tour.gpxFile} download className="flex items-center gap-2">
+                            <Download className="h-4 w-4" />
+                            GPX herunterladen
+                        </a>
+                    </Button>
                 </Card>
             )}
 
