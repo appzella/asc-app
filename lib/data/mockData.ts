@@ -468,6 +468,7 @@ export function seedData() {
     password: 'admin123',
     registered: true,
     active: true,
+    profilePhoto: '/avatars/pascal-staub.png',
   })
 
   // Leader User
