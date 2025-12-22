@@ -82,7 +82,7 @@ function UserRow({
 
                 {/* Role selector - compact */}
                 <Select value={currentRole} onValueChange={(val) => handleRoleChange(val as UserRole)}>
-                    <SelectTrigger className="w-[90px] h-7 text-xs shrink-0">
+                    <SelectTrigger className="w-[90px] sm:w-[130px] h-7 text-xs shrink-0">
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
