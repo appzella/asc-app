@@ -378,8 +378,8 @@ export default function TourMap({ gpxUrl, height = '400px', initialFullscreen = 
           </Button>
         </div>
 
-        {/* Icon Buttons Row */}
-        <div className="flex gap-1">
+        {/* Icon Buttons Column */}
+        <div className="flex flex-col gap-1">
           {/* GPX Download */}
           <TooltipProvider>
             <Tooltip>
