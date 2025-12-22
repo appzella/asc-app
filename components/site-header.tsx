@@ -1,6 +1,8 @@
 "use client"
 
 import { usePathname } from "next/navigation"
+import { useEffect, useState } from "react"
+import { dataRepository } from "@/lib/data"
 
 import { ModeToggle } from "@/components/mode-toggle"
 import { NotificationCenter } from "@/components/notification-center"
@@ -18,6 +20,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 export function SiteHeader() {
   const pathname = usePathname()
   const segments = pathname.split("/").filter((segment) => segment !== "")
+  const [tourTitles, setTourTitles] = useState<Record<string, string>>({})
 
   // Determine Section Title
   let sectionTitle = "Dashboard"
@@ -29,6 +32,37 @@ export function SiteHeader() {
     if (sectionTitle === "Settings") sectionTitle = "Einstellungen"
     if (sectionTitle === "Profile") sectionTitle = "Profil"
   }
+
+  useEffect(() => {
+    const fetchTourTitles = async () => {
+      const newTitles: Record<string, string> = {}
+      let hasUpdates = false
+
+      for (const segment of segments) {
+        if (segment.toLowerCase().startsWith("tour_") && !tourTitles[segment]) {
+          try {
+            const tour = await dataRepository.getTourById(segment)
+            if (tour) {
+              if (tour.peak && tour.peakElevation) {
+                newTitles[segment] = `${tour.peak} ${tour.peakElevation} m`
+              } else {
+                newTitles[segment] = tour.title
+              }
+              hasUpdates = true
+            }
+          } catch (error) {
+            console.error("Failed to fetch tour title for breadcrumb", error)
+          }
+        }
+      }
+
+      if (hasUpdates) {
+        setTourTitles(prev => ({ ...prev, ...newTitles }))
+      }
+    }
+
+    fetchTourTitles()
+  }, [pathname, segments, tourTitles]) // tourTitles dependency to avoid loops? No, check condition ensures no loop.
 
   return (
     <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-background px-4 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
@@ -47,7 +81,6 @@ export function SiteHeader() {
               let title = segment.charAt(0).toUpperCase() + segment.slice(1)
 
               // Simple localization for breadcrumbs too
-              // Simple localization for breadcrumbs too
               if (title === "Tours") title = "Touren"
               if (title === "Create") title = "Erstellen"
               if (title === "Users") title = "Mitglieder"
@@ -60,9 +93,9 @@ export function SiteHeader() {
               if (title === "Difficulties") title = "Schwierigkeitsgrade"
               if (title === "Edit") title = "Bearbeiten"
 
-              // Hide tour IDs (they start with 'tour_' or 'Tour_')
+              // Handle tour IDs
               if (segment.toLowerCase().startsWith("tour_")) {
-                title = "Details"
+                title = tourTitles[segment] || "Details"
               }
 
               return (
