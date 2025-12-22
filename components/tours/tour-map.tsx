@@ -351,7 +351,7 @@ export default function TourMap({ gpxUrl, height = '400px', initialFullscreen = 
         }}
       >
         {/* Karten-Layer Auswahl */}
-        <div className="flex gap-1 bg-background/95 backdrop-blur-sm border rounded-md p-1 shadow-sm">
+        <div className="flex gap-1 bg-background border rounded-md p-1 shadow-sm">
           <Button
             variant={selectedLayer === 'karte-sw' ? 'default' : 'outline'}
             size="sm"
@@ -387,7 +387,7 @@ export default function TourMap({ gpxUrl, height = '400px', initialFullscreen = 
                   <Button
                     variant="outline"
                     size="icon"
-                    className="bg-background/95 backdrop-blur-sm border shadow-sm"
+                    className="bg-background border shadow-sm"
                   >
                     <Layers className="h-4 w-4" />
                   </Button>
@@ -467,7 +467,7 @@ export default function TourMap({ gpxUrl, height = '400px', initialFullscreen = 
                   e.preventDefault()
                   e.stopPropagation()
                 }}
-                className="bg-background/95 backdrop-blur-sm border shadow-sm"
+                className="bg-background border shadow-sm"
               >
                 {isFullscreen ? (
                   <Minimize2 className="h-4 w-4" />
