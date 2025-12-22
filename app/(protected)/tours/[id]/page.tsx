@@ -334,13 +334,16 @@ export default function TourDetailPage() {
                 </div>
             )}
 
-            <div className="flex flex-col gap-2">
-                <h1 className="text-2xl font-bold tracking-tight">{tour.title}</h1>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                    <Link href="/tours" className="hover:underline">Touren</Link>
-                    <span>/</span>
-                    <span className="text-foreground">{tour.title}</span>
-                </div>
+            <div>
+                <h1 className="text-3xl font-bold tracking-tight">
+                    {tour.peak && tour.peakElevation ? (
+                        <>
+                            {tour.peak} <span className="text-muted-foreground">{tour.peakElevation} m</span>
+                        </>
+                    ) : (
+                        tour.title
+                    )}
+                </h1>
             </div>
 
             {/* Full-width Map Section */}
