@@ -380,27 +380,6 @@ export default function TourMap({ gpxUrl, height = '400px', initialFullscreen = 
 
         {/* Icon Buttons - styled like layer switcher */}
         <div className="flex flex-col gap-1 bg-background border rounded-md p-1 shadow-sm">
-          {/* GPX Download */}
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  asChild
-                  className="h-8 w-8"
-                >
-                  <a href={gpxUrl} download>
-                    <Download className="h-4 w-4" />
-                  </a>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="left">
-                <p>GPX herunterladen</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-
           {/* Layer Settings */}
           <TooltipProvider>
             <Popover open={isLayerPanelOpen} onOpenChange={setIsLayerPanelOpen}>
@@ -502,6 +481,27 @@ export default function TourMap({ gpxUrl, height = '400px', initialFullscreen = 
               </TooltipTrigger>
               <TooltipContent side="left">
                 <p>{isFullscreen ? 'Vollbild beenden' : 'Vollbild'}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          {/* GPX Download - at bottom */}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  asChild
+                  className="h-8 w-8"
+                >
+                  <a href={gpxUrl} download>
+                    <Download className="h-4 w-4" />
+                  </a>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="left">
+                <p>GPX herunterladen</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
