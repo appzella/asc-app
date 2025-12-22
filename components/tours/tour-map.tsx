@@ -378,39 +378,39 @@ export default function TourMap({ gpxUrl, height = '400px', initialFullscreen = 
           </Button>
         </div>
 
-        {/* Icon Buttons Column */}
-        <div className="flex flex-col gap-1">
+        {/* Icon Buttons - styled like layer switcher */}
+        <div className="flex flex-col gap-1 bg-background border rounded-md p-1 shadow-sm">
           {/* GPX Download */}
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="icon"
                   asChild
-                  className="bg-background border shadow-sm"
+                  className="h-8 w-8"
                 >
                   <a href={gpxUrl} download>
                     <Download className="h-4 w-4" />
                   </a>
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="bottom">
+              <TooltipContent side="left">
                 <p>GPX herunterladen</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
 
-          {/* Layer-Button mit Popover und Tooltip - quadratisch */}
+          {/* Layer Settings */}
           <TooltipProvider>
             <Popover open={isLayerPanelOpen} onOpenChange={setIsLayerPanelOpen}>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <PopoverTrigger asChild>
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       size="icon"
-                      className="bg-background border shadow-sm"
+                      className="h-8 w-8"
                     >
                       <Layers className="h-4 w-4" />
                     </Button>
@@ -418,7 +418,6 @@ export default function TourMap({ gpxUrl, height = '400px', initialFullscreen = 
                 </TooltipTrigger>
                 <TooltipContent side="left">
                   <p>Kartenebenen</p>
-
                 </TooltipContent>
               </Tooltip>
               <PopoverContent side="left" align="start" className="w-80 z-[10000]">
@@ -474,12 +473,14 @@ export default function TourMap({ gpxUrl, height = '400px', initialFullscreen = 
                 </div>
               </PopoverContent>
             </Popover>
+          </TooltipProvider>
 
-            {/* Vollbild-Button mit Tooltip - quadratisch */}
+          {/* Fullscreen */}
+          <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="icon"
                   onClick={(e) => {
                     e.preventDefault()
@@ -490,7 +491,7 @@ export default function TourMap({ gpxUrl, height = '400px', initialFullscreen = 
                     e.preventDefault()
                     e.stopPropagation()
                   }}
-                  className="bg-background border shadow-sm"
+                  className="h-8 w-8"
                 >
                   {isFullscreen ? (
                     <Minimize2 className="h-4 w-4" />
@@ -501,7 +502,6 @@ export default function TourMap({ gpxUrl, height = '400px', initialFullscreen = 
               </TooltipTrigger>
               <TooltipContent side="left">
                 <p>{isFullscreen ? 'Vollbild beenden' : 'Vollbild'}</p>
-
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
