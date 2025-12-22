@@ -50,44 +50,42 @@ function UserRow({ user }: { user: User }) {
     }
 
     return (
-        <div className="flex flex-col gap-3 p-4 border-b last:border-b-0 hover:bg-muted/50 transition-colors sm:flex-row sm:items-center sm:justify-between">
-            {/* User info section */}
-            <div className="flex items-center gap-3 min-w-0 flex-1">
-                <div className="relative shrink-0">
-                    <Avatar className="h-10 w-10">
-                        <AvatarImage src={user.profilePhoto || ""} alt={user.name} />
-                        <AvatarFallback>{user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    {/* Status indicator dot */}
-                    <span className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-background ${isActive ? 'bg-green-500' : 'bg-gray-400'}`} />
+        <div className="p-4 border-b last:border-b-0 hover:bg-muted/50 transition-colors">
+            {/* Flex wrap layout - automatically wraps on small screens */}
+            <div className="flex flex-wrap items-center gap-3">
+                {/* User info section - takes available space */}
+                <div className="flex items-center gap-3 min-w-0 flex-1 basis-[200px]">
+                    <div className="relative shrink-0">
+                        <Avatar className="h-10 w-10">
+                            <AvatarImage src={user.profilePhoto || ""} alt={user.name} />
+                            <AvatarFallback>{user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                        </Avatar>
+                        {/* Status indicator dot */}
+                        <span className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-background ${isActive ? 'bg-green-500' : 'bg-gray-400'}`} />
+                    </div>
+                    <div className="flex flex-col min-w-0 flex-1">
+                        <span className="font-medium truncate">{user.name}</span>
+                        <span className="text-sm text-muted-foreground truncate">{user.email}</span>
+                    </div>
                 </div>
-                <div className="flex flex-col min-w-0">
-                    <span className="font-medium truncate">{user.name}</span>
-                    <span className="text-sm text-muted-foreground truncate">{user.email}</span>
+
+                {/* Controls section - wraps to next line if no space */}
+                <div className="flex items-center gap-2 shrink-0">
+                    {/* Role selector - compact */}
+                    <Select value={currentRole} onValueChange={(val) => handleRoleChange(val as UserRole)}>
+                        <SelectTrigger className="w-[90px] h-8 text-xs">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="admin">Admin</SelectItem>
+                            <SelectItem value="leader">TL</SelectItem>
+                            <SelectItem value="member">Mitglied</SelectItem>
+                        </SelectContent>
+                    </Select>
+
+                    {/* Active toggle */}
+                    <Switch checked={isActive} onCheckedChange={handleStatusToggle} />
                 </div>
-            </div>
-
-            {/* Controls section */}
-            <div className="flex items-center justify-between gap-3 sm:gap-4 sm:justify-end">
-                {/* Role badge for visual reference */}
-                <Badge variant={currentRole === 'admin' ? 'default' : currentRole === 'leader' ? 'secondary' : 'outline'} className="hidden sm:flex">
-                    {currentRole === 'admin' ? 'Admin' : currentRole === 'leader' ? 'Tourenleiter' : 'Mitglied'}
-                </Badge>
-
-                {/* Role selector */}
-                <Select value={currentRole} onValueChange={(val) => handleRoleChange(val as UserRole)}>
-                    <SelectTrigger className="w-[130px] h-9">
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="admin">Admin</SelectItem>
-                        <SelectItem value="leader">Tourenleiter</SelectItem>
-                        <SelectItem value="member">Mitglied</SelectItem>
-                    </SelectContent>
-                </Select>
-
-                {/* Active toggle */}
-                <Switch checked={isActive} onCheckedChange={handleStatusToggle} />
             </div>
         </div>
     )

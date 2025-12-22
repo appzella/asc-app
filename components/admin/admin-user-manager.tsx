@@ -63,38 +63,38 @@ function UserRow({
     }
 
     return (
-        <div className="flex items-center justify-between p-4 border-b last:border-b-0 hover:bg-muted/50 transition-colors">
-            <div className="flex items-center gap-4">
-                <div className="relative">
-                    <Avatar className="h-10 w-10">
-                        <AvatarImage src={user.profilePhoto || ""} alt={user.name} />
-                        <AvatarFallback>{user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <span className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-background ${isActive ? 'bg-green-500' : 'bg-gray-400'}`} />
+        <div className="p-4 border-b last:border-b-0 hover:bg-muted/50 transition-colors">
+            <div className="flex flex-wrap items-center gap-3">
+                {/* User info - flexible */}
+                <div className="flex items-center gap-3 min-w-0 flex-1 basis-[180px]">
+                    <div className="relative shrink-0">
+                        <Avatar className="h-10 w-10">
+                            <AvatarImage src={user.profilePhoto || ""} alt={user.name} />
+                            <AvatarFallback>{user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                        </Avatar>
+                        <span className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-background ${isActive ? 'bg-green-500' : 'bg-gray-400'}`} />
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                        <span className="font-medium truncate">{user.name}</span>
+                        <span className="text-sm text-muted-foreground truncate">{user.email}</span>
+                    </div>
                 </div>
-                <div className="flex flex-col">
-                    <span className="font-medium">{user.name}</span>
-                    <span className="text-sm text-muted-foreground">{user.email}</span>
+
+                {/* Controls - compact */}
+                <div className="flex items-center gap-2 shrink-0">
+                    <Select value={currentRole} onValueChange={(val) => handleRoleChange(val as UserRole)}>
+                        <SelectTrigger className="w-[85px] h-8 text-xs">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="admin">Admin</SelectItem>
+                            <SelectItem value="leader">TL</SelectItem>
+                            <SelectItem value="member">Mitglied</SelectItem>
+                        </SelectContent>
+                    </Select>
+
+                    <Switch checked={isActive} onCheckedChange={handleStatusToggle} />
                 </div>
-            </div>
-
-            <div className="flex items-center gap-4">
-                <Badge variant={currentRole === 'admin' ? 'default' : currentRole === 'leader' ? 'secondary' : 'outline'} className="hidden sm:flex">
-                    {currentRole === 'admin' ? 'Admin' : currentRole === 'leader' ? 'Tourenleiter' : 'Mitglied'}
-                </Badge>
-
-                <Select value={currentRole} onValueChange={(val) => handleRoleChange(val as UserRole)}>
-                    <SelectTrigger className="w-[130px] h-8">
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="admin">Admin</SelectItem>
-                        <SelectItem value="leader">Tourenleiter</SelectItem>
-                        <SelectItem value="member">Mitglied</SelectItem>
-                    </SelectContent>
-                </Select>
-
-                <Switch checked={isActive} onCheckedChange={handleStatusToggle} />
             </div>
         </div>
     )

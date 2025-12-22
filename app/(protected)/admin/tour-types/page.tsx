@@ -245,22 +245,23 @@ export default function TourTypesPage() {
                                 >
                                     <div className="rounded-lg border bg-card">
                                         <CollapsibleTrigger asChild>
-                                            <div className="flex items-center justify-between p-3 hover:bg-accent/50 transition-colors cursor-pointer rounded-t-lg">
-                                                <div className="flex items-center gap-3">
-                                                    <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab" />
+                                            <div className="flex flex-wrap items-center gap-2 p-3 hover:bg-accent/50 transition-colors cursor-pointer rounded-t-lg">
+                                                <div className="flex items-center gap-2 min-w-0 flex-1">
+                                                    <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab shrink-0" />
                                                     <ChevronDown
-                                                        className={`h-4 w-4 text-muted-foreground transition-transform ${expandedTypes.includes(type) ? 'rotate-180' : ''
+                                                        className={`h-4 w-4 text-muted-foreground transition-transform shrink-0 ${expandedTypes.includes(type) ? 'rotate-180' : ''
                                                             }`}
                                                     />
-                                                    <span className="font-medium">{type}</span>
-                                                    <Badge variant="secondary" className="text-xs">
-                                                        {difficulties[type]?.length || 0} Schwierigkeiten
+                                                    <span className="font-medium truncate">{type}</span>
+                                                    <Badge variant="secondary" className="text-xs shrink-0">
+                                                        {difficulties[type]?.length || 0}
                                                     </Badge>
                                                 </div>
-                                                <div className="flex items-center gap-1">
+                                                <div className="flex items-center gap-1 shrink-0">
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
+                                                        className="h-8 w-8"
                                                         onClick={(e) => {
                                                             e.stopPropagation()
                                                             openEditTypeDialog(type)
@@ -271,6 +272,7 @@ export default function TourTypesPage() {
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
+                                                        className="h-8 w-8"
                                                         onClick={(e) => {
                                                             e.stopPropagation()
                                                             openDeleteTypeDialog(type)
