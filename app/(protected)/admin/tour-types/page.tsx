@@ -4,6 +4,25 @@ import { useState, useEffect } from 'react'
 import { Plus, Pencil, Trash2, GripVertical, Mountain, ChevronDown } from 'lucide-react'
 import { toast } from 'sonner'
 
+// dnd-kit imports
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    DragEndEvent,
+} from '@dnd-kit/core'
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    useSortable,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -36,6 +55,222 @@ import { dataStore } from '@/lib/data/mockData'
 
 type DialogType = 'addType' | 'editType' | 'deleteType' | 'addDifficulty' | 'editDifficulty' | 'deleteDifficulty' | null
 
+// Sortable tour type component
+function SortableTourType({
+    type,
+    difficulties,
+    isExpanded,
+    onToggle,
+    onEdit,
+    onDelete,
+    onAddDifficulty,
+    onEditDifficulty,
+    onDeleteDifficulty,
+    onReorderDifficulties,
+}: {
+    type: string
+    difficulties: string[]
+    isExpanded: boolean
+    onToggle: () => void
+    onEdit: () => void
+    onDelete: () => void
+    onAddDifficulty: () => void
+    onEditDifficulty: (difficulty: string) => void
+    onDeleteDifficulty: (difficulty: string) => void
+    onReorderDifficulties: (newOrder: string[]) => void
+}) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: type })
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+    }
+
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    )
+
+    const handleDifficultyDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event
+        if (over && active.id !== over.id) {
+            const oldIndex = difficulties.indexOf(active.id as string)
+            const newIndex = difficulties.indexOf(over.id as string)
+            const newOrder = arrayMove(difficulties, oldIndex, newIndex)
+            onReorderDifficulties(newOrder)
+        }
+    }
+
+    return (
+        <Collapsible open={isExpanded} onOpenChange={onToggle}>
+            <div ref={setNodeRef} style={style} className="rounded-lg border bg-card">
+                <CollapsibleTrigger asChild>
+                    <div className="flex flex-wrap items-center gap-2 p-3 hover:bg-accent/50 transition-colors cursor-pointer rounded-t-lg">
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                            <button
+                                className="cursor-grab active:cursor-grabbing touch-none"
+                                {...attributes}
+                                {...listeners}
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <GripVertical className="h-4 w-4 text-muted-foreground" />
+                            </button>
+                            <ChevronDown
+                                className={`h-4 w-4 text-muted-foreground transition-transform shrink-0 ${isExpanded ? 'rotate-180' : ''}`}
+                            />
+                            <span className="font-medium truncate">{type}</span>
+                            <Badge variant="secondary" className="text-xs shrink-0">
+                                {difficulties.length}
+                            </Badge>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    onEdit()
+                                }}
+                            >
+                                <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    onDelete()
+                                }}
+                            >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                        </div>
+                    </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                    <div className="border-t p-3 bg-muted/20">
+                        <div className="flex items-center justify-between mb-2">
+                            <Label className="text-xs text-muted-foreground uppercase tracking-wide">
+                                Schwierigkeitsgrade
+                            </Label>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 text-xs"
+                                onClick={onAddDifficulty}
+                            >
+                                <Plus className="h-3 w-3 mr-1" />
+                                Hinzufügen
+                            </Button>
+                        </div>
+                        <DndContext
+                            sensors={sensors}
+                            collisionDetection={closestCenter}
+                            onDragEnd={handleDifficultyDragEnd}
+                        >
+                            <SortableContext
+                                items={difficulties}
+                                strategy={verticalListSortingStrategy}
+                            >
+                                <div className="space-y-1">
+                                    {difficulties.map((difficulty) => (
+                                        <SortableDifficulty
+                                            key={difficulty}
+                                            id={difficulty}
+                                            onEdit={() => onEditDifficulty(difficulty)}
+                                            onDelete={() => onDeleteDifficulty(difficulty)}
+                                        />
+                                    ))}
+                                    {difficulties.length === 0 && (
+                                        <div className="text-center py-4 text-sm text-muted-foreground">
+                                            Keine Schwierigkeitsgrade definiert
+                                        </div>
+                                    )}
+                                </div>
+                            </SortableContext>
+                        </DndContext>
+                    </div>
+                </CollapsibleContent>
+            </div>
+        </Collapsible>
+    )
+}
+
+// Sortable difficulty component
+function SortableDifficulty({
+    id,
+    onEdit,
+    onDelete,
+}: {
+    id: string
+    onEdit: () => void
+    onDelete: () => void
+}) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id })
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+    }
+
+    return (
+        <div
+            ref={setNodeRef}
+            style={style}
+            className="flex items-center justify-between p-2 rounded-md bg-background border hover:bg-accent/30 transition-colors"
+        >
+            <div className="flex items-center gap-3">
+                <button
+                    className="cursor-grab active:cursor-grabbing touch-none"
+                    {...attributes}
+                    {...listeners}
+                >
+                    <GripVertical className="h-3 w-3 text-muted-foreground" />
+                </button>
+                <span className="text-sm">{id}</span>
+            </div>
+            <div className="flex items-center gap-1">
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    onClick={onEdit}
+                >
+                    <Pencil className="h-3 w-3" />
+                </Button>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    onClick={onDelete}
+                >
+                    <Trash2 className="h-3 w-3 text-destructive" />
+                </Button>
+            </div>
+        </div>
+    )
+}
+
 export default function TourTypesPage() {
     const [tourTypes, setTourTypes] = useState<string[]>([])
     const [difficulties, setDifficulties] = useState<Record<string, string[]>>({})
@@ -47,6 +282,14 @@ export default function TourTypesPage() {
     const [selectedTourType, setSelectedTourType] = useState<string | null>(null)
     const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null)
 
+    // DnD sensors
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    )
+
     useEffect(() => {
         loadData()
     }, [])
@@ -55,6 +298,33 @@ export default function TourTypesPage() {
         const settings = dataStore.getSettings()
         setTourTypes(settings.tourTypes)
         setDifficulties(settings.difficulties)
+    }
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event
+
+        if (over && active.id !== over.id) {
+            setTourTypes((items) => {
+                const oldIndex = items.indexOf(active.id as string)
+                const newIndex = items.indexOf(over.id as string)
+                const newOrder = arrayMove(items, oldIndex, newIndex)
+
+                // Persist the new order
+                dataStore.updateTourTypesOrder(newOrder)
+                toast.success('Reihenfolge aktualisiert')
+
+                return newOrder
+            })
+        }
+    }
+
+    const handleReorderDifficulties = (tourType: string, newOrder: string[]) => {
+        setDifficulties(prev => ({
+            ...prev,
+            [tourType]: newOrder
+        }))
+        dataStore.updateDifficultiesOrder(tourType, newOrder)
+        toast.success('Reihenfolge aktualisiert')
     }
 
     const toggleExpanded = (type: string) => {
@@ -236,117 +506,40 @@ export default function TourTypesPage() {
                         </div>
                     </CardHeader>
                     <CardContent>
-                        <div className="space-y-3">
-                            {tourTypes.map((type) => (
-                                <Collapsible
-                                    key={type}
-                                    open={expandedTypes.includes(type)}
-                                    onOpenChange={() => toggleExpanded(type)}
-                                >
-                                    <div className="rounded-lg border bg-card">
-                                        <CollapsibleTrigger asChild>
-                                            <div className="flex flex-wrap items-center gap-2 p-3 hover:bg-accent/50 transition-colors cursor-pointer rounded-t-lg">
-                                                <div className="flex items-center gap-2 min-w-0 flex-1">
-                                                    <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab shrink-0" />
-                                                    <ChevronDown
-                                                        className={`h-4 w-4 text-muted-foreground transition-transform shrink-0 ${expandedTypes.includes(type) ? 'rotate-180' : ''
-                                                            }`}
-                                                    />
-                                                    <span className="font-medium truncate">{type}</span>
-                                                    <Badge variant="secondary" className="text-xs shrink-0">
-                                                        {difficulties[type]?.length || 0}
-                                                    </Badge>
-                                                </div>
-                                                <div className="flex items-center gap-1 shrink-0">
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="h-8 w-8"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation()
-                                                            openEditTypeDialog(type)
-                                                        }}
-                                                    >
-                                                        <Pencil className="h-4 w-4" />
-                                                    </Button>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="h-8 w-8"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation()
-                                                            openDeleteTypeDialog(type)
-                                                        }}
-                                                    >
-                                                        <Trash2 className="h-4 w-4 text-destructive" />
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        </CollapsibleTrigger>
-                                        <CollapsibleContent>
-                                            <div className="border-t p-3 bg-muted/20">
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <Label className="text-xs text-muted-foreground uppercase tracking-wide">
-                                                        Schwierigkeitsgrade
-                                                    </Label>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className="h-7 text-xs"
-                                                        onClick={() => openAddDifficultyDialog(type)}
-                                                    >
-                                                        <Plus className="h-3 w-3 mr-1" />
-                                                        Hinzufügen
-                                                    </Button>
-                                                </div>
-                                                <div className="space-y-1">
-                                                    {difficulties[type]?.map((difficulty) => (
-                                                        <div
-                                                            key={difficulty}
-                                                            className="flex items-center justify-between p-2 rounded-md bg-background border hover:bg-accent/30 transition-colors"
-                                                        >
-                                                            <div className="flex items-center gap-3">
-                                                                <GripVertical className="h-3 w-3 text-muted-foreground cursor-grab" />
-                                                                <span className="text-sm">{difficulty}</span>
-                                                            </div>
-                                                            <div className="flex items-center gap-1">
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="icon"
-                                                                    className="h-6 w-6"
-                                                                    onClick={() => openEditDifficultyDialog(type, difficulty)}
-                                                                >
-                                                                    <Pencil className="h-3 w-3" />
-                                                                </Button>
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="icon"
-                                                                    className="h-6 w-6"
-                                                                    onClick={() => openDeleteDifficultyDialog(type, difficulty)}
-                                                                >
-                                                                    <Trash2 className="h-3 w-3 text-destructive" />
-                                                                </Button>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                    {(!difficulties[type] || difficulties[type].length === 0) && (
-                                                        <div className="text-center py-4 text-sm text-muted-foreground">
-                                                            Keine Schwierigkeitsgrade definiert
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </CollapsibleContent>
-                                    </div>
-                                </Collapsible>
-                            ))}
+                        <DndContext
+                            sensors={sensors}
+                            collisionDetection={closestCenter}
+                            onDragEnd={handleDragEnd}
+                        >
+                            <SortableContext
+                                items={tourTypes}
+                                strategy={verticalListSortingStrategy}
+                            >
+                                <div className="space-y-3">
+                                    {tourTypes.map((type) => (
+                                        <SortableTourType
+                                            key={type}
+                                            type={type}
+                                            difficulties={difficulties[type] || []}
+                                            isExpanded={expandedTypes.includes(type)}
+                                            onToggle={() => toggleExpanded(type)}
+                                            onEdit={() => openEditTypeDialog(type)}
+                                            onDelete={() => openDeleteTypeDialog(type)}
+                                            onAddDifficulty={() => openAddDifficultyDialog(type)}
+                                            onEditDifficulty={(difficulty) => openEditDifficultyDialog(type, difficulty)}
+                                            onDeleteDifficulty={(difficulty) => openDeleteDifficultyDialog(type, difficulty)}
+                                            onReorderDifficulties={(newOrder) => handleReorderDifficulties(type, newOrder)}
+                                        />
+                                    ))}
 
-                            {tourTypes.length === 0 && (
-                                <div className="text-center py-8 text-muted-foreground">
-                                    Keine Tourenarten vorhanden
+                                    {tourTypes.length === 0 && (
+                                        <div className="text-center py-8 text-muted-foreground">
+                                            Keine Tourenarten vorhanden
+                                        </div>
+                                    )}
                                 </div>
-                            )}
-                        </div>
+                            </SortableContext>
+                        </DndContext>
                     </CardContent>
                 </Card>
             </div>
@@ -484,6 +677,6 @@ export default function TourTypesPage() {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
-        </div>
+        </div >
     )
 }

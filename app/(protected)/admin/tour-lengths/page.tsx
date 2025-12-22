@@ -4,6 +4,25 @@ import { useState, useEffect } from 'react'
 import { Plus, Pencil, Trash2, GripVertical, Clock } from 'lucide-react'
 import { toast } from 'sonner'
 
+// dnd-kit imports
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    DragEndEvent,
+} from '@dnd-kit/core'
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    useSortable,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -27,6 +46,67 @@ import {
 } from '@/components/ui/alert-dialog'
 import { dataStore } from '@/lib/data/mockData'
 
+// Sortable item component
+function SortableItem({
+    id,
+    onEdit,
+    onDelete
+}: {
+    id: string
+    onEdit: (id: string) => void
+    onDelete: (id: string) => void
+}) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id })
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+    }
+
+    return (
+        <div
+            ref={setNodeRef}
+            style={style}
+            className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+        >
+            <div className="flex items-center gap-3">
+                <button
+                    className="cursor-grab active:cursor-grabbing touch-none"
+                    {...attributes}
+                    {...listeners}
+                >
+                    <GripVertical className="h-4 w-4 text-muted-foreground" />
+                </button>
+                <span className="font-medium">{id}</span>
+            </div>
+            <div className="flex items-center gap-1">
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onEdit(id)}
+                >
+                    <Pencil className="h-4 w-4" />
+                </Button>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onDelete(id)}
+                >
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+            </div>
+        </div>
+    )
+}
+
 export default function TourLengthsPage() {
     const [tourLengths, setTourLengths] = useState<string[]>([])
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
@@ -36,6 +116,14 @@ export default function TourLengthsPage() {
     const [editingLength, setEditingLength] = useState<string | null>(null)
     const [editedName, setEditedName] = useState('')
 
+    // DnD sensors
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    )
+
     useEffect(() => {
         loadTourLengths()
     }, [])
@@ -43,6 +131,24 @@ export default function TourLengthsPage() {
     const loadTourLengths = () => {
         const settings = dataStore.getSettings()
         setTourLengths(settings.tourLengths)
+    }
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event
+
+        if (over && active.id !== over.id) {
+            setTourLengths((items) => {
+                const oldIndex = items.indexOf(active.id as string)
+                const newIndex = items.indexOf(over.id as string)
+                const newOrder = arrayMove(items, oldIndex, newIndex)
+
+                // Persist the new order
+                dataStore.updateTourLengthsOrder(newOrder)
+                toast.success('Reihenfolge aktualisiert')
+
+                return newOrder
+            })
+        }
     }
 
     const handleAddLength = () => {
@@ -134,41 +240,33 @@ export default function TourLengthsPage() {
                         </div>
                     </CardHeader>
                     <CardContent>
-                        <div className="space-y-2">
-                            {tourLengths.map((length) => (
-                                <div
-                                    key={length}
-                                    className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab" />
-                                        <span className="font-medium">{length}</span>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => openEditDialog(length)}
-                                        >
-                                            <Pencil className="h-4 w-4" />
-                                        </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => openDeleteDialog(length)}
-                                        >
-                                            <Trash2 className="h-4 w-4 text-destructive" />
-                                        </Button>
-                                    </div>
-                                </div>
-                            ))}
+                        <DndContext
+                            sensors={sensors}
+                            collisionDetection={closestCenter}
+                            onDragEnd={handleDragEnd}
+                        >
+                            <SortableContext
+                                items={tourLengths}
+                                strategy={verticalListSortingStrategy}
+                            >
+                                <div className="space-y-2">
+                                    {tourLengths.map((length) => (
+                                        <SortableItem
+                                            key={length}
+                                            id={length}
+                                            onEdit={openEditDialog}
+                                            onDelete={openDeleteDialog}
+                                        />
+                                    ))}
 
-                            {tourLengths.length === 0 && (
-                                <div className="text-center py-8 text-muted-foreground">
-                                    Keine Tourenlängen vorhanden
+                                    {tourLengths.length === 0 && (
+                                        <div className="text-center py-8 text-muted-foreground">
+                                            Keine Tourenlängen vorhanden
+                                        </div>
+                                    )}
                                 </div>
-                            )}
-                        </div>
+                            </SortableContext>
+                        </DndContext>
                     </CardContent>
                 </Card>
             </div>
