@@ -343,25 +343,25 @@ export default function TourDetailPage() {
                 </div>
             </div>
 
+            {/* Full-width Map Section */}
+            {tour.gpxFile && (
+                <Card className="hidden sm:block overflow-hidden">
+                    <div className="h-[500px] w-full relative z-0">
+                        <TourMap gpxUrl={tour.gpxFile} height="100%" />
+                    </div>
+                    <div className="p-3 border-t flex justify-end">
+                        <Button variant="outline" size="sm" asChild>
+                            <a href={tour.gpxFile} download className="flex items-center gap-2">
+                                <Download className="h-4 w-4" />
+                                GPX herunterladen
+                            </a>
+                        </Button>
+                    </div>
+                </Card>
+            )}
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 space-y-6">
-                    {/* Map Section - Always visible on desktop if GPX exists */}
-                    {tour.gpxFile && (
-                        <Card className="hidden sm:block overflow-hidden">
-                            <div className="h-[400px] w-full relative z-0">
-                                <TourMap gpxUrl={tour.gpxFile} height="100%" />
-                            </div>
-                            <div className="p-3 border-t flex justify-end">
-                                <Button variant="outline" size="sm" asChild>
-                                    <a href={tour.gpxFile} download className="flex items-center gap-2">
-                                        <Download className="h-4 w-4" />
-                                        GPX herunterladen
-                                    </a>
-                                </Button>
-                            </div>
-                        </Card>
-                    )}
-
                     <Card>
                         <CardHeader>
                             <CardTitle>Details</CardTitle>
