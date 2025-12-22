@@ -16,7 +16,7 @@ import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import { updateUserRole, toggleUserStatus } from "@/app/actions/users"
-import { Search, Users, ShieldCheck, UserX, Crown } from "lucide-react"
+import { Search, Users, ShieldCheck, UserX, Crown, User as UserIcon } from "lucide-react"
 
 interface AdminUserManagerProps {
     initialUsers: User[]
@@ -80,15 +80,15 @@ function UserRow({
                     </div>
                 </div>
 
-                {/* Controls - compact */}
+                {/* Controls - responsive */}
                 <div className="flex items-center gap-2 shrink-0">
                     <Select value={currentRole} onValueChange={(val) => handleRoleChange(val as UserRole)}>
-                        <SelectTrigger className="w-[85px] h-8 text-xs">
+                        <SelectTrigger className="w-[100px] h-8 text-xs">
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="admin">Admin</SelectItem>
-                            <SelectItem value="leader">TL</SelectItem>
+                            <SelectItem value="leader">Tourenleiter</SelectItem>
                             <SelectItem value="member">Mitglied</SelectItem>
                         </SelectContent>
                     </Select>
