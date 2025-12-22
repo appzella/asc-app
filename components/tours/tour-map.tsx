@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { MapContainer, TileLayer, useMap, WMSTileLayer } from 'react-leaflet'
-import { Maximize2, Minimize2, Layers, Flag, CirclePlay } from 'lucide-react'
+import { Maximize2, Minimize2, Layers, Flag, CirclePlay, Download } from 'lucide-react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { Button } from '@/components/ui/button'
 import {
@@ -378,110 +378,134 @@ export default function TourMap({ gpxUrl, height = '400px', initialFullscreen = 
           </Button>
         </div>
 
-        {/* Layer-Button mit Popover und Tooltip - quadratisch */}
-        <TooltipProvider>
-          <Popover open={isLayerPanelOpen} onOpenChange={setIsLayerPanelOpen}>
+        {/* Icon Buttons Row */}
+        <div className="flex gap-1">
+          {/* GPX Download */}
+          <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="bg-background border shadow-sm"
-                  >
-                    <Layers className="h-4 w-4" />
-                  </Button>
-                </PopoverTrigger>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  asChild
+                  className="bg-background border shadow-sm"
+                >
+                  <a href={gpxUrl} download>
+                    <Download className="h-4 w-4" />
+                  </a>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                <p>GPX herunterladen</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          {/* Layer-Button mit Popover und Tooltip - quadratisch */}
+          <TooltipProvider>
+            <Popover open={isLayerPanelOpen} onOpenChange={setIsLayerPanelOpen}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="bg-background border shadow-sm"
+                    >
+                      <Layers className="h-4 w-4" />
+                    </Button>
+                  </PopoverTrigger>
+                </TooltipTrigger>
+                <TooltipContent side="left">
+                  <p>Kartenebenen</p>
+
+                </TooltipContent>
+              </Tooltip>
+              <PopoverContent side="left" align="start" className="w-80 z-[10000]">
+                <div className="space-y-4">
+                  <h4 className="font-medium text-sm mb-4">Zusätzliche Kartenebenen</h4>
+                  {/* Hangneigung */}
+                  <div className="flex items-center justify-between">
+                    <label htmlFor="hangneigung" className="text-xs font-medium cursor-pointer">
+                      Hangneigung ≥30°
+                    </label>
+                    <Switch
+                      id="hangneigung"
+                      checked={showHangneigung}
+                      onCheckedChange={setShowHangneigung}
+                    />
+                  </div>
+
+                  {/* Wanderwege */}
+                  <div className="flex items-center justify-between">
+                    <label htmlFor="wanderwege" className="text-xs font-medium cursor-pointer">
+                      Wanderwege
+                    </label>
+                    <Switch
+                      id="wanderwege"
+                      checked={showWanderwege}
+                      onCheckedChange={setShowWanderwege}
+                    />
+                  </div>
+
+                  {/* Jagdbanngebiete */}
+                  <div className="flex items-center justify-between">
+                    <label htmlFor="jagdbanngebiete" className="text-xs font-medium cursor-pointer">
+                      Jagdbanngebiete
+                    </label>
+                    <Switch
+                      id="jagdbanngebiete"
+                      checked={showJagdbanngebiete}
+                      onCheckedChange={setShowJagdbanngebiete}
+                    />
+                  </div>
+
+                  {/* Wildruhezonen */}
+                  <div className="flex items-center justify-between">
+                    <label htmlFor="wildruhezonen" className="text-xs font-medium cursor-pointer">
+                      Wildruhezonen
+                    </label>
+                    <Switch
+                      id="wildruhezonen"
+                      checked={showWildruhezonen}
+                      onCheckedChange={setShowWildruhezonen}
+                    />
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+
+            {/* Vollbild-Button mit Tooltip - quadratisch */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    toggleFullscreen()
+                  }}
+                  onMouseDown={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                  }}
+                  className="bg-background border shadow-sm"
+                >
+                  {isFullscreen ? (
+                    <Minimize2 className="h-4 w-4" />
+                  ) : (
+                    <Maximize2 className="h-4 w-4" />
+                  )}
+                </Button>
               </TooltipTrigger>
               <TooltipContent side="left">
-                <p>Kartenebenen</p>
+                <p>{isFullscreen ? 'Vollbild beenden' : 'Vollbild'}</p>
 
               </TooltipContent>
             </Tooltip>
-            <PopoverContent side="left" align="start" className="w-80 z-[10000]">
-              <div className="space-y-4">
-                <h4 className="font-medium text-sm mb-4">Zusätzliche Kartenebenen</h4>
-                {/* Hangneigung */}
-                <div className="flex items-center justify-between">
-                  <label htmlFor="hangneigung" className="text-xs font-medium cursor-pointer">
-                    Hangneigung ≥30°
-                  </label>
-                  <Switch
-                    id="hangneigung"
-                    checked={showHangneigung}
-                    onCheckedChange={setShowHangneigung}
-                  />
-                </div>
-
-                {/* Wanderwege */}
-                <div className="flex items-center justify-between">
-                  <label htmlFor="wanderwege" className="text-xs font-medium cursor-pointer">
-                    Wanderwege
-                  </label>
-                  <Switch
-                    id="wanderwege"
-                    checked={showWanderwege}
-                    onCheckedChange={setShowWanderwege}
-                  />
-                </div>
-
-                {/* Jagdbanngebiete */}
-                <div className="flex items-center justify-between">
-                  <label htmlFor="jagdbanngebiete" className="text-xs font-medium cursor-pointer">
-                    Jagdbanngebiete
-                  </label>
-                  <Switch
-                    id="jagdbanngebiete"
-                    checked={showJagdbanngebiete}
-                    onCheckedChange={setShowJagdbanngebiete}
-                  />
-                </div>
-
-                {/* Wildruhezonen */}
-                <div className="flex items-center justify-between">
-                  <label htmlFor="wildruhezonen" className="text-xs font-medium cursor-pointer">
-                    Wildruhezonen
-                  </label>
-                  <Switch
-                    id="wildruhezonen"
-                    checked={showWildruhezonen}
-                    onCheckedChange={setShowWildruhezonen}
-                  />
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
-
-          {/* Vollbild-Button mit Tooltip - quadratisch */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  toggleFullscreen()
-                }}
-                onMouseDown={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                }}
-                className="bg-background border shadow-sm"
-              >
-                {isFullscreen ? (
-                  <Minimize2 className="h-4 w-4" />
-                ) : (
-                  <Maximize2 className="h-4 w-4" />
-                )}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="left">
-              <p>{isFullscreen ? 'Vollbild beenden' : 'Vollbild'}</p>
-
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+          </TooltipProvider>
+        </div>
       </div>
 
       <MapContainer

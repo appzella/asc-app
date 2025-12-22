@@ -349,12 +349,6 @@ export default function TourDetailPage() {
                     <div className="h-[500px] w-full">
                         <TourMap gpxUrl={tour.gpxFile} height="100%" />
                     </div>
-                    <Button variant="secondary" size="sm" asChild className="absolute bottom-4 right-4 z-10 shadow-lg">
-                        <a href={tour.gpxFile} download className="flex items-center gap-2">
-                            <Download className="h-4 w-4" />
-                            GPX herunterladen
-                        </a>
-                    </Button>
                 </div>
             )}
 
