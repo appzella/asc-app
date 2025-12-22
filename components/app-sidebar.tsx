@@ -100,7 +100,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [user, setUser] = React.useState({
     name: "Laden...",
     email: "",
-    avatar: "/avatars/placeholder.png",
+    avatar: "",
+    initials: "--",
   })
 
 
@@ -112,10 +113,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         leader: "Tourenleiter",
         member: "Mitglied",
       }
+      // Get initials from name (first 2 letters)
+      const initials = u.name ? u.name.substring(0, 2).toUpperCase() : "??"
       return {
         name: u.name || "Benutzer",
         email: roleMap[u.role] || u.role || "",
-        avatar: u.profilePhoto || "/avatars/placeholder.png",
+        avatar: u.profilePhoto || "",
+        initials,
       }
     }
 
