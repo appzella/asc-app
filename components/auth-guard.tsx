@@ -16,13 +16,26 @@ export function AuthGuard({ children }: AuthGuardProps) {
     const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
-        // Subscribe to auth changes
-        const unsubscribe = authService.subscribe((currentUser) => {
+        // Check initial session
+        const checkSession = async () => {
+            const currentUser = await authService.getCurrentUserAsync()
             setUser(currentUser)
             setIsLoading(false)
 
             // Redirect to login if not authenticated
-            if (!currentUser && !pathname.startsWith('/login') && !pathname.startsWith('/register')) {
+            if (!currentUser && !pathname.startsWith('/login') && !pathname.startsWith('/register') && !pathname.startsWith('/forgot-password')) {
+                router.replace('/login')
+            }
+        }
+
+        checkSession()
+
+        // Subscribe to auth changes
+        const unsubscribe = authService.subscribe((currentUser) => {
+            setUser(currentUser)
+
+            // Redirect to login if not authenticated
+            if (!currentUser && !pathname.startsWith('/login') && !pathname.startsWith('/register') && !pathname.startsWith('/forgot-password')) {
                 router.replace('/login')
             }
         })

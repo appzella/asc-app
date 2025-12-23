@@ -1,5 +1,5 @@
 import { User } from './types'
-import { mockAuthService } from './auth/mockAuth'
+import { supabaseAuthService } from './auth/supabaseAuth'
 
 export interface AuthState {
   user: User | null
@@ -8,19 +8,19 @@ export interface AuthState {
 
 /**
  * Unified Auth Service
- * Currently hardcoded to use MockAuthService for the migration to Firebase.
+ * Now using Supabase Auth for production.
  */
 class AuthService {
   private get authImpl() {
-    return mockAuthService
+    return supabaseAuthService
   }
 
   async login(email: string, password: string): Promise<User | null> {
     return this.authImpl.login(email, password)
   }
 
-  logout(): void {
-    this.authImpl.logout()
+  async logout(): Promise<void> {
+    return this.authImpl.logout()
   }
 
   getCurrentUser(): User | null {
@@ -57,4 +57,3 @@ class AuthService {
 }
 
 export const authService = new AuthService()
-
