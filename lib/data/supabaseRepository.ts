@@ -494,10 +494,33 @@ export class SupabaseRepository implements IDataRepository {
     }
 
     async removeTourType(type: string): Promise<boolean> {
+        // First get the tour type ID
+        const tourTypeId = await this.getTourTypeIdByLabel(type)
+        if (!tourTypeId) return false
+
+        // Check if any tours use this type
+        const { count, error: countError } = await this.supabase
+            .from('tours')
+            .select('*', { count: 'exact', head: true })
+            .eq('tour_type_id', tourTypeId)
+
+        if (countError) return false
+        if (count && count > 0) {
+            console.error(`Cannot delete tour type "${type}": ${count} tours are using it`)
+            return false
+        }
+
+        // Delete associated difficulties first
+        await this.supabase
+            .from('tour_difficulties')
+            .delete()
+            .eq('tour_type_id', tourTypeId)
+
+        // Now delete the tour type
         const { error } = await this.supabase
             .from('tour_types')
             .delete()
-            .eq('label', type)
+            .eq('id', tourTypeId)
         return !error
     }
 

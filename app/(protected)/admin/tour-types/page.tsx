@@ -393,7 +393,7 @@ export default function TourTypesPage() {
             await loadData()
             closeDialog()
         } else {
-            toast.error('Fehler beim Löschen')
+            toast.error(`"${selectedTourType}" kann nicht gelöscht werden - es gibt noch Touren dieses Typs`)
         }
     }
 

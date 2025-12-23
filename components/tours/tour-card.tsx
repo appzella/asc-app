@@ -1,5 +1,7 @@
 import Link from "next/link"
-import { ArrowDownRight, ArrowUpRight, CalendarIcon, ClockIcon, MapPinIcon, UsersIcon, UserIcon } from "lucide-react"
+import { ArrowDownRight, ArrowUpRight, CalendarIcon, ClockIcon, MapPinIcon, UsersIcon } from "lucide-react"
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -19,6 +21,7 @@ export interface Tour {
   type: string
   difficulty: string
   guide: string
+  guidePhoto?: string | null
   location: string
   ascent: number
   descent: number
@@ -132,9 +135,12 @@ export function TourCard({ tour }: TourCardProps) {
 
             {/* Guide */}
             <div className="flex items-center gap-2.5 border-t pt-3">
-              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10">
-                <UserIcon className="h-3.5 w-3.5 text-primary" />
-              </div>
+              <Avatar className="h-6 w-6">
+                <AvatarImage src={tour.guidePhoto || undefined} />
+                <AvatarFallback className="text-[10px] bg-primary/10 text-primary">
+                  {tour.guide.substring(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
               <span className="text-xs font-medium text-muted-foreground">
                 <span className="text-foreground">{tour.guide}</span>
               </span>

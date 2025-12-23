@@ -32,6 +32,7 @@ export default async function ToursPage() {
         type: t.type,
         difficulty: t.difficulty,
         guide: t.leader?.name || 'Unbekannt',
+        guidePhoto: t.leader?.profilePhoto,
         location: t.peak || 'Ostschweiz',
         ascent: t.ascent,
         descent: t.descent,
