@@ -12,8 +12,8 @@ export default function ProtectedLayout({
         <AuthGuard>
             <SidebarProvider>
                 <AppSidebar variant="inset" />
-                {/* Mobile: fixed header + scroll content | Desktop: normal scroll */}
-                <SidebarInset className="flex flex-col h-screen overflow-hidden md:h-auto md:overflow-visible">
+                {/* Mobile: fixed header + scroll content | Desktop: normal overflow-hidden */}
+                <SidebarInset className="flex flex-col h-screen overflow-hidden md:h-auto">
                     <SiteHeader />
                     <div className="flex-1 overflow-y-auto md:overflow-visible">
                         {children}
