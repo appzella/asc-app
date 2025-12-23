@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { ArrowDownRight, ArrowUpRight, CalendarIcon, ClockIcon, MapPinIcon, UsersIcon } from "lucide-react"
+import { formatDurationRange } from "@/lib/duration"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
@@ -25,7 +26,8 @@ export interface Tour {
   location: string
   ascent: number
   descent: number
-  duration: string
+  durationMin?: number
+  durationMax?: number
   description: string
   participants: {
     current: number
@@ -118,7 +120,11 @@ export function TourCard({ tour }: TourCardProps) {
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[10px] uppercase text-muted-foreground font-semibold tracking-wider">Dauer</span>
-                  <span className="text-sm font-medium">{tour.duration}</span>
+                  <span className="text-sm font-medium">
+                    {tour.durationMin && tour.durationMax
+                      ? formatDurationRange([tour.durationMin, tour.durationMax])
+                      : '-'}
+                  </span>
                 </div>
               </div>
 

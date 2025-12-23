@@ -36,7 +36,8 @@ export default async function ToursPage() {
         location: t.peak || 'Ostschweiz',
         ascent: t.ascent,
         descent: t.descent,
-        duration: t.duration,
+        durationMin: t.durationMin,
+        durationMax: t.durationMax,
         description: t.description,
         participants: {
             current: t.participants.length,

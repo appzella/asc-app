@@ -1,84 +1,46 @@
-'use client'
-
-import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
-import { authService } from '@/lib/auth'
-import { dataRepository } from '@/lib/data'
-import { User, Tour } from '@/lib/types'
+import { notFound, redirect } from 'next/navigation'
+import { getServerRepository } from '@/lib/data/server'
 import { TourForm } from '@/components/tours/tour-form'
 import { canEditTour } from '@/lib/roles'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
-import { toast } from 'sonner'
+import { createClient } from '@/lib/supabase/server'
 
-export default function EditTourPage() {
-    const params = useParams()
-    const router = useRouter()
-    const tourId = params.id as string
+interface EditTourPageProps {
+    params: Promise<{ id: string }>
+}
 
-    const [user, setUser] = useState<User | null>(null)
-    const [tour, setTour] = useState<Tour | null>(null)
-    const [isLoading, setIsLoading] = useState(true)
+export default async function EditTourPage({ params }: EditTourPageProps) {
+    const { id: tourId } = await params
 
-    useEffect(() => {
-        const loadData = async () => {
-            try {
-                const currentUser = authService.getCurrentUser()
-                if (!currentUser) {
-                    router.push('/login')
-                    return
-                }
-                setUser(currentUser)
+    // Get current user from Supabase auth
+    const supabase = await createClient()
+    const { data: { user: authUser } } = await supabase.auth.getUser()
 
-                const tourData = await dataRepository.getTourById(tourId)
-                if (!tourData) {
-                    toast.error('Tour nicht gefunden')
-                    router.push('/tours')
-                    return
-                }
-
-                // Check permissions
-                if (!canEditTour(currentUser.role, tourData.leaderId, currentUser.id, tourData.status)) {
-                    toast.error('Keine Berechtigung zum Bearbeiten')
-                    router.push(`/tours/${tourId}`)
-                    return
-                }
-
-                setTour(tourData)
-            } catch (error) {
-                console.error('Error loading tour:', error)
-                toast.error('Fehler beim Laden der Tour')
-            } finally {
-                setIsLoading(false)
-            }
-        }
-
-        loadData()
-    }, [tourId, router])
-
-    if (isLoading) {
-        return (
-            <div className="flex flex-1 flex-col gap-4 py-4 md:gap-6 md:py-6">
-                <div className="flex items-center gap-4 px-4 lg:px-6">
-                    <Skeleton className="h-10 w-10" />
-                    <div className="flex flex-col gap-2">
-                        <Skeleton className="h-8 w-64" />
-                        <Skeleton className="h-4 w-48" />
-                    </div>
-                </div>
-                <div className="px-4 lg:px-6 max-w-4xl space-y-6">
-                    <Skeleton className="h-[200px] w-full" />
-                    <Skeleton className="h-[200px] w-full" />
-                    <Skeleton className="h-[150px] w-full" />
-                </div>
-            </div>
-        )
+    if (!authUser) {
+        redirect('/login')
     }
 
-    if (!tour || !user) {
-        return null
+    const repository = await getServerRepository()
+
+    // Load tour and user data
+    const [tour, currentUser] = await Promise.all([
+        repository.getTourById(tourId),
+        repository.getUserById(authUser.id)
+    ])
+
+    if (!tour) {
+        notFound()
+    }
+
+    if (!currentUser) {
+        redirect('/login')
+    }
+
+    // Check permissions
+    if (!canEditTour(currentUser.role, tour.leaderId, currentUser.id, tour.status)) {
+        redirect(`/tours/${tourId}`)
     }
 
     return (

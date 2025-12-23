@@ -54,7 +54,8 @@ export interface Tour {
   peakElevation?: number // Height of the peak in meters
   ascent?: number // Höhenmeter (ascent)
   descent?: number // Höhenmeter (descent)
-  duration?: string // e.g., "4-5 Stunden"
+  durationMin?: number // Minimum duration in hours (e.g., 3.5)
+  durationMax?: number // Maximum duration in hours (e.g., 5.0)
   leaderId: string // User-ID des Tourenleiters
   leader?: User // Referenz zum Leader
   maxParticipants?: number

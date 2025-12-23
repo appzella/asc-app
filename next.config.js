@@ -10,9 +10,11 @@ const nextConfig = {
   reactStrictMode: true,
   // Turbopack configuration
   turbopack: {},
-  // Optional: Enable experimental Turbopack features
+  // Experimental features including server actions config
   experimental: {
-    // turbopackFileSystemCacheForDev: true,
+    serverActions: {
+      bodySizeLimit: '5mb',
+    },
   },
 }
 

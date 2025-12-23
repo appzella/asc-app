@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, useWatch } from "react-hook-form"
 import { format } from "date-fns"
 import { de } from "date-fns/locale"
-import { CalendarIcon, CopyIcon, MapPin, Mountain, Users, FileText } from "lucide-react"
+import { CalendarIcon, MapPin, Mountain, Users, FileText } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { formatDurationRange } from "@/lib/duration"
 
@@ -38,54 +38,41 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 import { Slider } from "@/components/ui/slider"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Skeleton } from "@/components/ui/skeleton"
 
 import { tourFormSchema, type TourFormValues } from "@/lib/validations/tour"
-import type { Tour as TourCardType } from '@/components/tours/tour-card'
-import type { Tour } from '@/lib/types'
+import type { Tour, TourSettings } from '@/lib/types'
 import { dataRepository } from '@/lib/data'
+import { authService } from '@/lib/auth'
 import { toast } from 'sonner'
+import { uploadGpxFile } from '@/app/actions/gpx'
 
 interface TourFormProps {
     mode?: 'create' | 'edit'
     initialData?: Tour
 }
 
-// Mock Data
-const MOCK_EXISTING_TOURS: Partial<TourCardType>[] = [
-    {
-        title: "Piz Palü",
-        description: "Klassische Hochtour über den Normalweg.",
-        ascent: 1200,
-        descent: 1200,
-        duration: "5h",
-        type: "Skitour",
-        difficulty: "ZS",
-        guide: "Max Muster",
-    },
-    {
-        title: "Muttseehütte",
-        description: "Wanderung zur Muttseehütte via Tierfehd.",
-        ascent: 600,
-        descent: 600,
-        duration: "4h",
-        type: "Wanderung",
-        difficulty: "T3",
-        guide: "Anna Alpin",
-    },
-]
-
-const MOCK_GUIDES = [
-    { id: "1", name: "Pascal Staub", role: "Admin" },
-    { id: "2", name: "Max Muster", role: "Tourenleiter" },
-    { id: "3", name: "Anna Alpin", role: "Tourenleiter" },
-    { id: "4", name: "Felix Fels", role: "Tourenleiter" },
-]
-
 export function TourForm({ mode = 'create', initialData }: TourFormProps) {
     const router = useRouter()
-    const [duplicateMatch, setDuplicateMatch] = useState<Partial<TourCardType> | null>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
+    const [settings, setSettings] = useState<TourSettings | null>(null)
+
+    // Load settings on mount
+    useEffect(() => {
+        const loadSettings = async () => {
+            try {
+                const data = await dataRepository.getSettings()
+                setSettings(data)
+            } catch (error) {
+                console.error('Error loading settings:', error)
+                toast.error('Fehler beim Laden der Einstellungen')
+            } finally {
+                setIsLoading(false)
+            }
+        }
+        loadSettings()
+    }, [])
 
     const form = useForm<TourFormValues>({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -94,76 +81,95 @@ export function TourForm({ mode = 'create', initialData }: TourFormProps) {
             title: initialData.title || "",
             description: initialData.description || "",
             date: new Date(initialData.date),
+            type: initialData.type || "",
+            difficulty: initialData.difficulty || "",
+            length: initialData.length || "",
+            peak: initialData.peak || "",
+            peakElevation: initialData.peakElevation || undefined,
             ascent: initialData.ascent || 0,
             descent: initialData.descent || 0,
-            duration: [3, 5], // Default since duration is now string
-            type: initialData.type || "Skitour",
-            difficulty: initialData.difficulty || "WS",
+            duration: [initialData.durationMin || 3, initialData.durationMax || 5],
+            maxParticipants: initialData.maxParticipants || 12,
             whatsappLink: initialData.whatsappLink || "",
-            guide: initialData.leader?.name || "",
         } : {
             title: "",
             description: "",
+            type: "",
+            difficulty: "",
+            length: "",
+            peak: "",
+            peakElevation: undefined,
             ascent: 0,
             descent: 0,
             duration: [3, 5],
-            type: "Skitour",
-            difficulty: "WS",
+            maxParticipants: 12,
             whatsappLink: "",
-            guide: "",
         },
     })
 
-    const watchedTitle = useWatch({
+    // Watch type to update difficulty options
+    const watchedType = useWatch({
         control: form.control,
-        name: "title",
+        name: "type",
     })
 
-    useEffect(() => {
-        if (!watchedTitle || watchedTitle.length < 3) {
-            setDuplicateMatch(null)
-            return
-        }
-        const match = MOCK_EXISTING_TOURS.find(
-            (t) => t.title?.toLowerCase() === watchedTitle.toLowerCase()
-        )
-        setDuplicateMatch(match || null)
-    }, [watchedTitle])
-
-    const applyDuplicate = () => {
-        if (!duplicateMatch) return
-        form.setValue("description", duplicateMatch.description || "")
-        form.setValue("ascent", duplicateMatch.ascent || 0)
-        form.setValue("descent", duplicateMatch.descent || 0)
-        form.setValue("type", duplicateMatch.type || "Skitour")
-        form.setValue("difficulty", duplicateMatch.difficulty || "WS")
-        form.setValue("guide", duplicateMatch.guide || "")
-        setDuplicateMatch(null)
-    }
+    // Get difficulties for selected type
+    const difficultyOptions = settings?.difficulties?.[watchedType] || []
 
     async function onSubmit(data: TourFormValues) {
         setIsSubmitting(true)
         try {
+            const currentUser = authService.getCurrentUser()
+            if (!currentUser) {
+                toast.error('Du musst angemeldet sein')
+                router.push('/login')
+                return
+            }
+
+            const tourData = {
+                title: data.title,
+                description: data.description || '',
+                date: data.date?.toISOString().split('T')[0] || '',
+                type: data.type,
+                difficulty: data.difficulty,
+                length: data.length,
+                peak: data.peak,
+                peakElevation: data.peakElevation,
+                ascent: data.ascent || 0,
+                descent: data.descent || 0,
+                durationMin: data.duration?.[0],
+                durationMax: data.duration?.[1],
+                maxParticipants: data.maxParticipants,
+                whatsappLink: data.whatsappLink || undefined,
+                leaderId: currentUser.id,
+            }
+
+            let tourId: string
+
             if (mode === 'edit' && initialData) {
                 // Update existing tour
-                await dataRepository.updateTour(initialData.id, {
-                    title: data.title,
-                    description: data.description || '',
-                    date: data.date?.toISOString().split('T')[0] || '',
-                    type: data.type,
-                    difficulty: data.difficulty,
-                    ascent: data.ascent || 0,
-                    duration: data.duration ? `${data.duration[0]}-${data.duration[1]} Stunden` : '4 Stunden',
-                    whatsappLink: data.whatsappLink || undefined,
-                })
-                toast.success('Tour erfolgreich aktualisiert')
-                router.push(`/tours/${initialData.id}`)
+                await dataRepository.updateTour(initialData.id, tourData)
+                tourId = initialData.id
             } else {
                 // Create new tour
-                console.log('Creating tour:', data)
-                toast.success('Tour erfolgreich erstellt')
-                router.push('/tours')
+                const newTour = await dataRepository.createTour(tourData)
+                tourId = newTour.id
             }
+
+            // Upload GPX file if provided
+            if (data.gpx && data.gpx instanceof File) {
+                const formData = new FormData()
+                formData.append('file', data.gpx)
+                formData.append('tourId', tourId)
+
+                const result = await uploadGpxFile(formData)
+                if (!result.success) {
+                    toast.warning(`GPX-Upload fehlgeschlagen: ${result.error}`)
+                }
+            }
+
+            toast.success(mode === 'edit' ? 'Tour erfolgreich aktualisiert' : 'Tour erfolgreich erstellt')
+            router.push(`/tours/${tourId}`)
         } catch (error) {
             console.error('Error saving tour:', error)
             toast.error('Fehler beim Speichern der Tour')
@@ -172,25 +178,19 @@ export function TourForm({ mode = 'create', initialData }: TourFormProps) {
         }
     }
 
+    if (isLoading) {
+        return (
+            <div className="space-y-6">
+                <Skeleton className="h-[200px] w-full" />
+                <Skeleton className="h-[300px] w-full" />
+                <Skeleton className="h-[150px] w-full" />
+            </div>
+        )
+    }
+
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-
-                {/* Duplicate Alert */}
-                {duplicateMatch && (
-                    <Alert className="border-primary/50 bg-primary/10">
-                        <CopyIcon className="h-4 w-4 text-primary" />
-                        <AlertTitle>Ähnliche Tour gefunden</AlertTitle>
-                        <AlertDescription className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-2">
-                            <span className="text-muted-foreground">
-                                Eine Tour mit dem Namen <strong className="text-foreground">{duplicateMatch.title}</strong> existiert bereits.
-                            </span>
-                            <Button size="sm" variant="outline" type="button" onClick={applyDuplicate}>
-                                Daten übernehmen
-                            </Button>
-                        </AlertDescription>
-                    </Alert>
-                )}
 
                 {/* Section 1: Allgemein */}
                 <Card>
@@ -201,7 +201,7 @@ export function TourForm({ mode = 'create', initialData }: TourFormProps) {
                             </div>
                             <div>
                                 <CardTitle className="text-base">Allgemeine Informationen</CardTitle>
-                                <CardDescription>Name, Datum und Beschreibung der Tour.</CardDescription>
+                                <CardDescription>Name, Datum, Gipfel und Beschreibung.</CardDescription>
                             </div>
                         </div>
                     </CardHeader>
@@ -214,7 +214,7 @@ export function TourForm({ mode = 'create', initialData }: TourFormProps) {
                                     <FormItem>
                                         <FormLabel>Titel</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="z.B. Piz Palü" {...field} />
+                                            <Input placeholder="z.B. Frühjahrstour Alpstein" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -262,6 +262,43 @@ export function TourForm({ mode = 'create', initialData }: TourFormProps) {
                                 )}
                             />
                         </div>
+
+                        {/* Peak and Elevation */}
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            <FormField
+                                control={form.control}
+                                name="peak"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Gipfel / Ziel</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="z.B. Säntis" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="peakElevation"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Höhe (m ü.M.)</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                type="number"
+                                                placeholder="z.B. 2502"
+                                                {...field}
+                                                value={field.value || ''}
+                                                onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+
                         <FormField
                             control={form.control}
                             name="description"
@@ -291,29 +328,28 @@ export function TourForm({ mode = 'create', initialData }: TourFormProps) {
                             </div>
                             <div>
                                 <CardTitle className="text-base">Technische Details</CardTitle>
-                                <CardDescription>Art, Schwierigkeit und Höhenmeter.</CardDescription>
+                                <CardDescription>Art, Schwierigkeit, Länge und Höhenmeter.</CardDescription>
                             </div>
                         </div>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="grid gap-4 sm:grid-cols-3">
                             <FormField
                                 control={form.control}
                                 name="type"
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Art</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                                        <Select onValueChange={field.onChange} value={field.value}>
                                             <FormControl>
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="Art wählen" />
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                <SelectItem value="Skitour">Skitour</SelectItem>
-                                                <SelectItem value="Hochtour">Hochtour</SelectItem>
-                                                <SelectItem value="Wanderung">Wanderung</SelectItem>
-                                                <SelectItem value="Klettern">Klettern</SelectItem>
+                                                {settings?.tourTypes.map((type) => (
+                                                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                                                ))}
                                             </SelectContent>
                                         </Select>
                                         <FormMessage />
@@ -326,18 +362,42 @@ export function TourForm({ mode = 'create', initialData }: TourFormProps) {
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Schwierigkeit</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                                        <Select
+                                            onValueChange={field.onChange}
+                                            value={field.value}
+                                            disabled={!watchedType || difficultyOptions.length === 0}
+                                        >
                                             <FormControl>
                                                 <SelectTrigger>
-                                                    <SelectValue placeholder="Schwierigkeit" />
+                                                    <SelectValue placeholder={watchedType ? "Schwierigkeit" : "Erst Art wählen"} />
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                <SelectItem value="L">Leicht (L)</SelectItem>
-                                                <SelectItem value="WS">Wenig Schwierig (WS)</SelectItem>
-                                                <SelectItem value="ZS">Ziemlich Schwierig (ZS)</SelectItem>
-                                                <SelectItem value="S">Schwierig (S)</SelectItem>
-                                                <SelectItem value="SS">Sehr Schwierig (SS)</SelectItem>
+                                                {difficultyOptions.map((diff) => (
+                                                    <SelectItem key={diff} value={diff}>{diff}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="length"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Länge</FormLabel>
+                                        <Select onValueChange={field.onChange} value={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Länge wählen" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {settings?.tourLengths.map((len) => (
+                                                    <SelectItem key={len} value={len}>{len}</SelectItem>
+                                                ))}
                                             </SelectContent>
                                         </Select>
                                         <FormMessage />
@@ -426,7 +486,7 @@ export function TourForm({ mode = 'create', initialData }: TourFormProps) {
                             </div>
                             <div>
                                 <CardTitle className="text-base">Organisation</CardTitle>
-                                <CardDescription>Tourenleiter und Kommunikation.</CardDescription>
+                                <CardDescription>Teilnehmer und Kommunikation.</CardDescription>
                             </div>
                         </div>
                     </CardHeader>
@@ -434,24 +494,19 @@ export function TourForm({ mode = 'create', initialData }: TourFormProps) {
                         <div className="grid gap-4 sm:grid-cols-2">
                             <FormField
                                 control={form.control}
-                                name="guide"
+                                name="maxParticipants"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Tourenleiter</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
-                                            <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Leiter wählen" />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                {MOCK_GUIDES.map((guide) => (
-                                                    <SelectItem key={guide.id} value={guide.name}>
-                                                        {guide.name}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
+                                        <FormLabel>Max. Teilnehmer</FormLabel>
+                                        <FormControl>
+                                            <NumberStepper
+                                                value={field.value || 12}
+                                                onValueChange={field.onChange}
+                                                min={1}
+                                                max={50}
+                                                step={1}
+                                            />
+                                        </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}

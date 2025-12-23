@@ -13,7 +13,7 @@ import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
 import { canEditTour, canPublishTour, canSubmitForPublishing } from '@/lib/roles'
 import { formatDifficulty } from '@/lib/difficulty'
-import { formatDuration } from '@/lib/duration'
+import { formatDuration, formatDurationRange } from '@/lib/duration'
 import Link from 'next/link'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Calendar, Clock, ArrowUpRight, Users, ChartNoAxesColumnIncreasing, Map, Download } from 'lucide-react'
@@ -264,10 +264,10 @@ export default function TourDetailPage() {
     )
     const formatDate = (date: Date) => {
         return new Date(date).toLocaleDateString('de-CH', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
+            weekday: 'short',
             day: 'numeric',
+            month: 'short',
+            year: 'numeric',
         })
     }
 
@@ -369,7 +369,11 @@ export default function TourDetailPage() {
                                     <span className="text-xs text-muted-foreground uppercase">Dauer</span>
                                     <div className="flex items-center gap-2">
                                         <Clock className="w-4 h-4 text-primary" />
-                                        <span className="text-sm font-medium">{tour.duration || '-'}</span>
+                                        <span className="text-sm font-medium">
+                                            {tour.durationMin && tour.durationMax
+                                                ? formatDurationRange([tour.durationMin, tour.durationMax])
+                                                : '-'}
+                                        </span>
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-1">

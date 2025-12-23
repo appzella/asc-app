@@ -219,7 +219,8 @@ export class SupabaseRepository implements IDataRepository {
                 peak_elevation: tour.peakElevation,
                 ascent: tour.ascent,
                 descent: tour.descent,
-                duration: tour.duration,
+                duration_min: tour.durationMin,
+                duration_max: tour.durationMax,
                 max_participants: tour.maxParticipants,
                 meeting_point: tour.meetingPoint,
                 meeting_point_link: tour.meetingPointLink,
@@ -276,7 +277,8 @@ export class SupabaseRepository implements IDataRepository {
         if (updates.peakElevation !== undefined) dbUpdates.peak_elevation = updates.peakElevation
         if (updates.ascent !== undefined) dbUpdates.ascent = updates.ascent
         if (updates.descent !== undefined) dbUpdates.descent = updates.descent
-        if (updates.duration !== undefined) dbUpdates.duration = updates.duration
+        if (updates.durationMin !== undefined) dbUpdates.duration_min = updates.durationMin
+        if (updates.durationMax !== undefined) dbUpdates.duration_max = updates.durationMax
         if (updates.maxParticipants !== undefined) dbUpdates.max_participants = updates.maxParticipants
         if (updates.meetingPoint !== undefined) dbUpdates.meeting_point = updates.meetingPoint
         if (updates.meetingPointLink !== undefined) dbUpdates.meeting_point_link = updates.meetingPointLink
@@ -774,8 +776,9 @@ export class SupabaseRepository implements IDataRepository {
             peak: db.peak as string | undefined,
             peakElevation: db.peak_elevation as number | undefined,
             ascent: db.ascent as number | undefined,
-            descent: db.descent as number | undefined,
-            duration: db.duration as string | undefined,
+
+            durationMin: db.duration_min as number | undefined,
+            durationMax: db.duration_max as number | undefined,
             maxParticipants: db.max_participants as number | undefined,
             meetingPoint: db.meeting_point as string | undefined,
             meetingPointLink: db.meeting_point_link as string | undefined,
