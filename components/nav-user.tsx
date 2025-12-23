@@ -6,8 +6,6 @@ import {
   SettingsIcon,
   UserCircleIcon,
 } from "lucide-react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
 import { authService } from "@/lib/auth"
 
 import {
@@ -41,20 +39,12 @@ export function NavUser({
     initials: string
   }
 }) {
-  const { isMobile, setOpenMobile } = useSidebar()
-  const router = useRouter()
+  const { isMobile } = useSidebar()
 
   const handleLogout = async () => {
     await authService.logout()
     // Use window.location for a clean redirect that clears all state
     window.location.href = "/login"
-  }
-
-  // Close sidebar on mobile when navigating
-  const handleNavigation = () => {
-    if (isMobile) {
-      setOpenMobile(false)
-    }
   }
 
   return (
@@ -101,17 +91,17 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem asChild onClick={handleNavigation}>
-                <Link href="/profile">
+              <DropdownMenuItem asChild>
+                <a href="/profile">
                   <UserCircleIcon />
                   Profil
-                </Link>
+                </a>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild onClick={handleNavigation}>
-                <Link href="/settings">
+              <DropdownMenuItem asChild>
+                <a href="/settings">
                   <SettingsIcon />
                   Einstellungen
-                </Link>
+                </a>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
