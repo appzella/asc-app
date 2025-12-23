@@ -1,9 +1,9 @@
 import { IDataRepository } from './repository'
-import { MockDataRepository } from './mockRepository'
+import { supabaseRepository } from './supabaseRepository'
 
 /**
  * Data Repository Factory
- * Currently hardcoded to use MockDataRepository for the migration to Firebase.
+ * Now using Supabase for production data.
  */
 let repositoryInstance: IDataRepository | null = null
 
@@ -12,12 +12,11 @@ export function getDataRepository(): IDataRepository {
     return repositoryInstance
   }
 
-  // Always use Mock Repository for now
-  repositoryInstance = new MockDataRepository()
+  // Use Supabase Repository for production
+  repositoryInstance = supabaseRepository
 
   return repositoryInstance
 }
 
 // Export for convenience
 export const dataRepository = getDataRepository()
-
