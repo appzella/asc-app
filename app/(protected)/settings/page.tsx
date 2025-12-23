@@ -8,15 +8,52 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useState, useEffect } from "react"
 import { Bell, Palette } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
+import { toast } from "sonner"
+
+const SETTINGS_STORAGE_KEY = 'asc-app-settings'
+
+interface NotificationSettings {
+    emailNotifications: boolean
+    pushNotifications: boolean
+}
+
+const defaultSettings: NotificationSettings = {
+    emailNotifications: true,
+    pushNotifications: true,
+}
 
 export default function SettingsPage() {
     const { theme, setTheme } = useTheme()
     const [mounted, setMounted] = useState(false)
+    const [settings, setSettings] = useState<NotificationSettings>(defaultSettings)
 
-    // Avoid hydration mismatch
+    // Load settings from localStorage on mount
     useEffect(() => {
         setMounted(true)
+        try {
+            const stored = localStorage.getItem(SETTINGS_STORAGE_KEY)
+            if (stored) {
+                const parsed = JSON.parse(stored)
+                setSettings(prev => ({ ...prev, ...parsed }))
+            }
+        } catch (error) {
+            console.error('Error loading settings:', error)
+        }
     }, [])
+
+    // Save settings to localStorage
+    const updateSetting = (key: keyof NotificationSettings, value: boolean) => {
+        const newSettings = { ...settings, [key]: value }
+        setSettings(newSettings)
+
+        try {
+            localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(newSettings))
+            toast.success('Einstellung gespeichert')
+        } catch (error) {
+            console.error('Error saving settings:', error)
+            toast.error('Fehler beim Speichern')
+        }
+    }
 
     if (!mounted) {
         return (
@@ -93,14 +130,22 @@ export default function SettingsPage() {
                                 <Label htmlFor="email-notifications">E-Mail Benachrichtigungen</Label>
                                 <p className="text-sm text-muted-foreground">Erhalte E-Mails über neue Touren.</p>
                             </div>
-                            <Switch id="email-notifications" defaultChecked />
+                            <Switch
+                                id="email-notifications"
+                                checked={settings.emailNotifications}
+                                onCheckedChange={(checked) => updateSetting('emailNotifications', checked)}
+                            />
                         </div>
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
                                 <Label htmlFor="push-notifications">Push-Benachrichtigungen</Label>
                                 <p className="text-sm text-muted-foreground">Erhalte Push-Meldungen auf dein Gerät.</p>
                             </div>
-                            <Switch id="push-notifications" defaultChecked />
+                            <Switch
+                                id="push-notifications"
+                                checked={settings.pushNotifications}
+                                onCheckedChange={(checked) => updateSetting('pushNotifications', checked)}
+                            />
                         </div>
                     </CardContent>
                 </Card>

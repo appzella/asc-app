@@ -41,10 +41,18 @@ import { Slider } from "@/components/ui/slider"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 import { tourFormSchema, type TourFormValues } from "@/lib/validations/tour"
-import type { Tour } from '@/components/tours/tour-card'
+import type { Tour as TourCardType } from '@/components/tours/tour-card'
+import type { Tour } from '@/lib/types'
+import { dataRepository } from '@/lib/data'
+import { toast } from 'sonner'
+
+interface TourFormProps {
+    mode?: 'create' | 'edit'
+    initialData?: Tour
+}
 
 // Mock Data
-const MOCK_EXISTING_TOURS: Partial<Tour>[] = [
+const MOCK_EXISTING_TOURS: Partial<TourCardType>[] = [
     {
         title: "Piz Palü",
         description: "Klassische Hochtour über den Normalweg.",
@@ -60,6 +68,7 @@ const MOCK_EXISTING_TOURS: Partial<Tour>[] = [
         description: "Wanderung zur Muttseehütte via Tierfehd.",
         ascent: 600,
         descent: 600,
+        duration: "4h",
         type: "Wanderung",
         difficulty: "T3",
         guide: "Anna Alpin",
@@ -73,14 +82,26 @@ const MOCK_GUIDES = [
     { id: "4", name: "Felix Fels", role: "Tourenleiter" },
 ]
 
-export function TourForm() {
+export function TourForm({ mode = 'create', initialData }: TourFormProps) {
     const router = useRouter()
-    const [duplicateMatch, setDuplicateMatch] = useState<Partial<Tour> | null>(null)
+    const [duplicateMatch, setDuplicateMatch] = useState<Partial<TourCardType> | null>(null)
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
     const form = useForm<TourFormValues>({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         resolver: zodResolver(tourFormSchema) as any,
-        defaultValues: {
+        defaultValues: initialData ? {
+            title: initialData.title || "",
+            description: initialData.description || "",
+            date: new Date(initialData.date),
+            ascent: initialData.elevation || 0,
+            descent: initialData.elevation || 0,
+            duration: [initialData.duration || 3, (initialData.duration || 3) + 2],
+            type: initialData.tourType || "Skitour",
+            difficulty: initialData.difficulty || "WS",
+            whatsappLink: initialData.whatsappGroupLink || "",
+            guide: initialData.leader?.name || "",
+        } : {
             title: "",
             description: "",
             ascent: 0,
@@ -120,9 +141,35 @@ export function TourForm() {
         setDuplicateMatch(null)
     }
 
-    function onSubmit(data: TourFormValues) {
-        // Submit logic would go here
-        console.log(data)
+    async function onSubmit(data: TourFormValues) {
+        setIsSubmitting(true)
+        try {
+            if (mode === 'edit' && initialData) {
+                // Update existing tour
+                await dataRepository.updateTour(initialData.id, {
+                    title: data.title,
+                    description: data.description || '',
+                    date: data.date,
+                    tourType: data.type as any,
+                    difficulty: data.difficulty as any,
+                    elevation: data.ascent || 0,
+                    duration: data.duration ? (data.duration[0] + data.duration[1]) / 2 : 4,
+                    whatsappGroupLink: data.whatsappLink || null,
+                })
+                toast.success('Tour erfolgreich aktualisiert')
+                router.push(`/tours/${initialData.id}`)
+            } else {
+                // Create new tour
+                console.log('Creating tour:', data)
+                toast.success('Tour erfolgreich erstellt')
+                router.push('/tours')
+            }
+        } catch (error) {
+            console.error('Error saving tour:', error)
+            toast.error('Fehler beim Speichern der Tour')
+        } finally {
+            setIsSubmitting(false)
+        }
     }
 
     return (
@@ -471,11 +518,11 @@ export function TourForm() {
 
                 {/* Action Buttons */}
                 <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
-                    <Button variant="outline" type="button" onClick={() => router.back()}>
+                    <Button variant="outline" type="button" onClick={() => router.back()} disabled={isSubmitting}>
                         Abbrechen
                     </Button>
-                    <Button type="submit">
-                        Tour erstellen
+                    <Button type="submit" disabled={isSubmitting}>
+                        {isSubmitting ? 'Wird gespeichert...' : mode === 'edit' ? 'Änderungen speichern' : 'Tour erstellen'}
                     </Button>
                 </div>
             </form>
