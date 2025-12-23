@@ -67,11 +67,12 @@ export default function TourDetailPage() {
                 setUser(currentUser)
 
                 if (currentUser) {
-                    setIsRegistered(tourData.participants.includes(currentUser.id))
-                    setIsOnWaitlist(tourData.waitlist?.includes(currentUser.id) || false)
+                    // participants and waitlist are now User[] not string[]
+                    setIsRegistered(tourData.participants.some(p => p.id === currentUser.id))
+                    setIsOnWaitlist(tourData.waitlist?.some(p => p.id === currentUser.id) || false)
                 }
 
-                const max = tourData.maxParticipants
+                const max = tourData.maxParticipants || 10
                 const current = tourData.participants.length
                 setManuallyAdded(Math.max(0, current - max))
 

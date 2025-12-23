@@ -374,18 +374,9 @@ export class SupabaseRepository implements IDataRepository {
             this.supabase.from('tour_lengths').select('*').order('sort_order'),
         ])
 
-        const tourTypes: TourType[] = (typesRes.data || []).map((t: Record<string, unknown>) => ({
-            name: t.name as string,
-            label: t.label as string,
-            icon: t.icon as string | undefined,
-            difficulties: [], // Would need separate table
-        }))
-
-        const tourLengths: TourLength[] = (lengthsRes.data || []).map((l: Record<string, unknown>) => ({
-            name: l.name as string,
-            label: l.label as string,
-            description: l.description as string | undefined,
-        }))
+        // Return as string arrays for backward compatibility with admin pages
+        const tourTypes: string[] = (typesRes.data || []).map((t: Record<string, unknown>) => t.label as string)
+        const tourLengths: string[] = (lengthsRes.data || []).map((l: Record<string, unknown>) => l.label as string)
 
         return { tourTypes, tourLengths }
     }
@@ -514,6 +505,29 @@ export class SupabaseRepository implements IDataRepository {
         const path = gpxUrl.split('/gpx-files/')[1]
         if (path) {
             await this.supabase.storage.from('gpx-files').remove([path])
+        }
+    }
+
+    async uploadProfilePhoto(userId: string, file: File): Promise<string> {
+        const ext = file.name.split('.').pop() || 'jpg'
+        const fileName = `${userId}/${Date.now()}.${ext}`
+        const { data, error } = await this.supabase.storage
+            .from('profile-photos')
+            .upload(fileName, file, { upsert: true })
+
+        if (error) throw new Error(error.message)
+
+        const { data: urlData } = this.supabase.storage
+            .from('profile-photos')
+            .getPublicUrl(data.path)
+
+        return urlData.publicUrl
+    }
+
+    async deleteProfilePhoto(photoUrl: string): Promise<void> {
+        const path = photoUrl.split('/profile-photos/')[1]
+        if (path) {
+            await this.supabase.storage.from('profile-photos').remove([path])
         }
     }
 

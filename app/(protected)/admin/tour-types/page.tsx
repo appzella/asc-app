@@ -297,7 +297,7 @@ export default function TourTypesPage() {
     const loadData = () => {
         const settings = dataStore.getSettings()
         setTourTypes(settings.tourTypes)
-        setDifficulties(settings.difficulties)
+        setDifficulties(settings.difficulties ?? {})
     }
 
     const handleDragEnd = (event: DragEndEvent) => {

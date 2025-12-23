@@ -1,12 +1,22 @@
 export type UserRole = 'admin' | 'leader' | 'member'
 
-export type TourStatus = 'draft' | 'published' | 'cancelled'
+export type TourStatus = 'draft' | 'published' | 'cancelled' | 'completed'
 
-export type TourType = 'Wanderung' | 'Skitour' | 'Bike'
+// Tour Type as object (from database)
+export interface TourType {
+  name: string
+  label: string
+  icon?: string
+}
 
-export type TourLength = 'Eintagestour' | 'Mehrtagestour'
+// Tour Length as object (from database)
+export interface TourLength {
+  name: string
+  label: string
+  description?: string
+}
 
-// SAC Schwierigkeitsskalen
+// SAC Schwierigkeitsskalen (for type safety)
 export type Difficulty =
   // Wanderungen (T-Skala)
   | 'T1' | 'T2' | 'T3' | 'T4' | 'T5' | 'T6'
@@ -20,45 +30,39 @@ export interface User {
   email: string
   name: string
   role: UserRole
-  password?: string // Nur für Dummy-Daten, später nicht mehr vorhanden
-  createdAt: Date
-  invitedBy?: string // Admin-ID, der die Einladung erstellt hat
-  registrationToken?: string // Token für Registrierung
-  registered: boolean // Ob der User bereits registriert ist
-  active: boolean // Ob der User aktiv ist (deaktivierte User können sich nicht einloggen)
-  profilePhoto?: string | null // Base64 encoded image, URL oder null (entfernt)
-  phone?: string // Festnetz
-  mobile?: string // Mobiltelefon
-  street?: string // Strasse
-  zip?: string // Postleitzahl
-  city?: string // Ort
+  phone?: string
+  emergencyContact?: string
+  profilePhoto?: string
+  isActive?: boolean
+  createdAt?: string
 }
 
 export interface Tour {
   id: string
   title: string
-  description: string
-  date: Date
-  difficulty: Difficulty
-  tourType: TourType
-  tourLength: TourLength
+  description?: string
+  date: string // ISO date string
+  time?: string
+  type: string // e.g., 'ski', 'hike', 'snowshoe'
+  difficulty?: string // e.g., 'L', 'WS', 'T2'
+  length?: string // e.g., 'short', 'medium', 'long'
   peak?: string // Name of the peak/destination
   peakElevation?: number // Height of the peak in meters
-  elevation: number // Höhenmeter (ascent)
-  duration: number // Dauer in Stunden
+  ascent?: number // Höhenmeter (ascent)
+  descent?: number // Höhenmeter (descent)
+  duration?: string // e.g., "4-5 Stunden"
   leaderId: string // User-ID des Tourenleiters
   leader?: User // Referenz zum Leader
-  maxParticipants: number
+  maxParticipants?: number
+  meetingPoint?: string // Treffpunkt
+  meetingPointLink?: string // Google Maps Link
   status: TourStatus
-  participants: string[] // Array von User-IDs
-  waitlist: string[] // Array von User-IDs auf der Warteliste
-  createdAt: Date
-  updatedAt: Date
-  createdBy: string // User-ID
-  submittedForPublishing?: boolean // Ob die Tour zur Veröffentlichung eingereicht wurde
-  pendingChanges?: Partial<Tour> // Ausstehende Änderungen, die auf Freigabe warten
-  gpxFile?: string | null // URL zur GPX-Datei in Supabase Storage
-  whatsappGroupLink?: string | null // Optionaler Link zur WhatsApp-Gruppe
+  participants: User[] // Array of User objects
+  waitlist: User[] // Array of User objects on waitlist
+  createdAt?: string
+  updatedAt?: string
+  gpxFile?: string // URL zur GPX-Datei in Supabase Storage
+  whatsappLink?: string // WhatsApp-Gruppen-Link
 }
 
 export interface Invitation {
@@ -66,18 +70,17 @@ export interface Invitation {
   email: string
   token: string
   createdBy: string // Admin-ID
-  createdAt: Date
+  createdAt: string
   used: boolean
-  usedAt?: Date
 }
 
 export interface TourSettings {
   tourTypes: string[]
   tourLengths: string[]
-  difficulties: {
-    [tourType: string]: string[] // z.B. { 'Wanderung': ['T1', 'T2', ...], 'Skitour': ['L', 'WS', ...] }
+  difficulties?: {
+    [tourType: string]: string[]
   }
-  tourTypeIcons?: { [tourType: string]: string } // z.B. { 'Wanderung': 'Mountain', 'Skitour': 'Ski' }
+  tourTypeIcons?: { [tourType: string]: string }
 }
 
 export type NotificationType = 'NEW_TOUR' | 'PARTICIPANT_SIGNUP' | 'TOUR_UPDATE'
@@ -90,7 +93,7 @@ export interface Notification {
   message: string
   link?: string
   read: boolean
-  createdAt: Date
+  createdAt: string
 }
 
 export interface NotificationPreferences {
@@ -101,6 +104,6 @@ export interface NotificationPreferences {
   pushParticipantSignup: boolean
   emailTourUpdate: boolean
   pushTourUpdate: boolean
-  createdAt: Date
-  updatedAt: Date
+  createdAt: string
+  updatedAt: string
 }
