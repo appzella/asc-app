@@ -1,11 +1,11 @@
-import { getDataRepository } from "@/lib/data"
+import { getServerRepository } from "@/lib/data/server"
 import { InvitationList } from "@/components/admin/invitation-list"
 import { CreateInvitationDialog } from "@/components/admin/create-invitation-dialog"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Mail, MailCheck, Clock } from "lucide-react"
 
 export default async function AdminInvitationsPage() {
-    const repository = getDataRepository()
+    const repository = await getServerRepository()
     const invitations = await repository.getInvitations()
 
     // Calculate stats

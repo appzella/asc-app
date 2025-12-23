@@ -75,6 +75,10 @@ export class SupabaseRepository implements IDataRepository {
         if (updates.name !== undefined) dbUpdates.name = updates.name
         if (updates.role !== undefined) dbUpdates.role = updates.role
         if (updates.phone !== undefined) dbUpdates.phone = updates.phone
+        if (updates.mobile !== undefined) dbUpdates.mobile = updates.mobile
+        if (updates.street !== undefined) dbUpdates.street = updates.street
+        if (updates.zip !== undefined) dbUpdates.zip = updates.zip
+        if (updates.city !== undefined) dbUpdates.city = updates.city
         if (updates.emergencyContact !== undefined) dbUpdates.emergency_contact = updates.emergencyContact
         if (updates.profilePhoto !== undefined) dbUpdates.profile_photo = updates.profilePhoto
         if (updates.isActive !== undefined) dbUpdates.is_active = updates.isActive
@@ -87,7 +91,10 @@ export class SupabaseRepository implements IDataRepository {
             .select()
             .single()
 
-        if (error) return null
+        if (error) {
+            console.error('Error updating user:', JSON.stringify(error, null, 2))
+            return null
+        }
         return this.mapDbUserToUser(data)
     }
 
@@ -98,6 +105,10 @@ export class SupabaseRepository implements IDataRepository {
             name: db.name as string || '',
             role: (db.role as 'admin' | 'leader' | 'member') || 'member',
             phone: db.phone as string | undefined,
+            mobile: db.mobile as string | undefined,
+            street: db.street as string | undefined,
+            zip: db.zip as string | undefined,
+            city: db.city as string | undefined,
             emergencyContact: db.emergency_contact as string | undefined,
             profilePhoto: db.profile_photo as string | undefined,
             isActive: db.is_active as boolean ?? true,
@@ -110,7 +121,14 @@ export class SupabaseRepository implements IDataRepository {
     async getTours(): Promise<Tour[]> {
         const { data: tours, error } = await this.supabase
             .from('tours')
-            .select('*, tour_participants(user_id, is_waitlist), leader:users!leader_id(*)')
+            .select(`
+                *,
+                tour_participants(user_id, is_waitlist),
+                leader:users!leader_id(*),
+                tour_type:tour_types!tour_type_id(id, name, label),
+                tour_length:tour_lengths!tour_length_id(id, name, label),
+                tour_difficulty:tour_difficulties!difficulty_id(id, name)
+            `)
             .order('date', { ascending: true })
 
         if (error) {
@@ -124,7 +142,14 @@ export class SupabaseRepository implements IDataRepository {
     async getTourById(id: string): Promise<Tour | null> {
         const { data, error } = await this.supabase
             .from('tours')
-            .select('*, tour_participants(user_id, is_waitlist), leader:users!leader_id(*)')
+            .select(`
+                *,
+                tour_participants(user_id, is_waitlist),
+                leader:users!leader_id(*),
+                tour_type:tour_types!tour_type_id(id, name, label),
+                tour_length:tour_lengths!tour_length_id(id, name, label),
+                tour_difficulty:tour_difficulties!difficulty_id(id, name)
+            `)
             .eq('id', id)
             .single()
 
@@ -135,7 +160,14 @@ export class SupabaseRepository implements IDataRepository {
     async getPublishedTours(): Promise<Tour[]> {
         const { data, error } = await this.supabase
             .from('tours')
-            .select('*, tour_participants(user_id, is_waitlist), leader:users!leader_id(*)')
+            .select(`
+                *,
+                tour_participants(user_id, is_waitlist),
+                leader:users!leader_id(*),
+                tour_type:tour_types!tour_type_id(id, name, label),
+                tour_length:tour_lengths!tour_length_id(id, name, label),
+                tour_difficulty:tour_difficulties!difficulty_id(id, name)
+            `)
             .eq('status', 'published')
             .order('date', { ascending: true })
 
@@ -146,7 +178,13 @@ export class SupabaseRepository implements IDataRepository {
     async getDraftTours(): Promise<Tour[]> {
         const { data, error } = await this.supabase
             .from('tours')
-            .select('*, tour_participants(user_id, is_waitlist)')
+            .select(`
+                *,
+                tour_participants(user_id, is_waitlist),
+                tour_type:tour_types!tour_type_id(id, name, label),
+                tour_length:tour_lengths!tour_length_id(id, name, label),
+                tour_difficulty:tour_difficulties!difficulty_id(id, name)
+            `)
             .eq('status', 'draft')
             .order('date', { ascending: true })
 
@@ -160,6 +198,13 @@ export class SupabaseRepository implements IDataRepository {
     }
 
     async createTour(tour: Omit<Tour, 'id' | 'createdAt' | 'updatedAt' | 'participants' | 'status' | 'waitlist'>): Promise<Tour> {
+        // Look up IDs from labels
+        const tourTypeId = await this.getTourTypeIdByLabel(tour.type)
+        const tourLengthId = tour.length ? await this.getTourLengthIdByLabel(tour.length) : null
+        const difficultyId = tour.difficulty && tourTypeId
+            ? await this.getDifficultyIdByName(tourTypeId, tour.difficulty)
+            : null
+
         const { data, error } = await this.supabase
             .from('tours')
             .insert({
@@ -167,9 +212,9 @@ export class SupabaseRepository implements IDataRepository {
                 description: tour.description,
                 date: tour.date,
                 time: tour.time,
-                type: tour.type,
-                difficulty: tour.difficulty,
-                length: tour.length,
+                tour_type_id: tourTypeId,
+                difficulty_id: difficultyId,
+                tour_length_id: tourLengthId,
                 peak: tour.peak,
                 peak_elevation: tour.peakElevation,
                 ascent: tour.ascent,
@@ -183,7 +228,12 @@ export class SupabaseRepository implements IDataRepository {
                 leader_id: tour.leaderId,
                 status: 'published',
             })
-            .select()
+            .select(`
+                *,
+                tour_type:tour_types!tour_type_id(id, name, label),
+                tour_length:tour_lengths!tour_length_id(id, name, label),
+                tour_difficulty:tour_difficulties!difficulty_id(id, name)
+            `)
             .single()
 
         if (error) throw new Error(error.message)
@@ -196,9 +246,32 @@ export class SupabaseRepository implements IDataRepository {
         if (updates.description !== undefined) dbUpdates.description = updates.description
         if (updates.date !== undefined) dbUpdates.date = updates.date
         if (updates.time !== undefined) dbUpdates.time = updates.time
-        if (updates.type !== undefined) dbUpdates.type = updates.type
-        if (updates.difficulty !== undefined) dbUpdates.difficulty = updates.difficulty
-        if (updates.length !== undefined) dbUpdates.length = updates.length
+
+        // Handle type update - look up tour_type_id
+        if (updates.type !== undefined) {
+            const tourTypeId = await this.getTourTypeIdByLabel(updates.type)
+            if (tourTypeId) dbUpdates.tour_type_id = tourTypeId
+        }
+
+        // Handle difficulty update - need tourTypeId to look up difficulty_id
+        if (updates.difficulty !== undefined) {
+            // Get current tour to find its type
+            const currentTour = await this.getTourById(id)
+            if (currentTour) {
+                const tourTypeId = await this.getTourTypeIdByLabel(updates.type || currentTour.type)
+                if (tourTypeId) {
+                    const difficultyId = await this.getDifficultyIdByName(tourTypeId, updates.difficulty)
+                    if (difficultyId) dbUpdates.difficulty_id = difficultyId
+                }
+            }
+        }
+
+        // Handle length update - look up tour_length_id
+        if (updates.length !== undefined) {
+            const tourLengthId = await this.getTourLengthIdByLabel(updates.length)
+            if (tourLengthId) dbUpdates.tour_length_id = tourLengthId
+        }
+
         if (updates.peak !== undefined) dbUpdates.peak = updates.peak
         if (updates.peakElevation !== undefined) dbUpdates.peak_elevation = updates.peakElevation
         if (updates.ascent !== undefined) dbUpdates.ascent = updates.ascent
@@ -216,7 +289,12 @@ export class SupabaseRepository implements IDataRepository {
             .from('tours')
             .update(dbUpdates)
             .eq('id', id)
-            .select()
+            .select(`
+                *,
+                tour_type:tour_types!tour_type_id(id, name, label),
+                tour_length:tour_lengths!tour_length_id(id, name, label),
+                tour_difficulty:tour_difficulties!difficulty_id(id, name)
+            `)
             .single()
 
         if (error) return null
@@ -370,16 +448,37 @@ export class SupabaseRepository implements IDataRepository {
     // ====== SETTINGS (Tour Types & Lengths) ======
 
     async getSettings(): Promise<TourSettings> {
-        const [typesRes, lengthsRes] = await Promise.all([
+        const [typesRes, lengthsRes, difficultiesRes] = await Promise.all([
             this.supabase.from('tour_types').select('*').order('sort_order'),
             this.supabase.from('tour_lengths').select('*').order('sort_order'),
+            this.supabase.from('tour_difficulties').select('*, tour_types!inner(label)').order('sort_order'),
         ])
 
         // Return as string arrays for backward compatibility with admin pages
         const tourTypes: string[] = (typesRes.data || []).map((t: Record<string, unknown>) => t.label as string)
         const tourLengths: string[] = (lengthsRes.data || []).map((l: Record<string, unknown>) => l.label as string)
 
-        return { tourTypes, tourLengths }
+        // Build difficulties map by tour type label
+        const difficulties: { [tourType: string]: string[] } = {}
+        for (const diff of (difficultiesRes.data || [])) {
+            const tourTypeLabel = (diff.tour_types as Record<string, unknown>)?.label as string
+            if (tourTypeLabel) {
+                if (!difficulties[tourTypeLabel]) {
+                    difficulties[tourTypeLabel] = []
+                }
+                difficulties[tourTypeLabel].push(diff.name as string)
+            }
+        }
+
+        // Build icon map from tour types
+        const tourTypeIcons: { [tourType: string]: string } = {}
+        for (const t of (typesRes.data || [])) {
+            if (t.icon) {
+                tourTypeIcons[t.label as string] = t.icon as string
+            }
+        }
+
+        return { tourTypes, tourLengths, difficulties, tourTypeIcons }
     }
 
     async updateSettings(_updates: Partial<TourSettings>): Promise<TourSettings> {
@@ -387,9 +486,10 @@ export class SupabaseRepository implements IDataRepository {
     }
 
     async addTourType(type: string): Promise<boolean> {
+        const name = type.toLowerCase().replace(/\s+/g, '-')
         const { error } = await this.supabase
             .from('tour_types')
-            .insert({ name: type, label: type })
+            .insert({ name, label: type })
         return !error
     }
 
@@ -397,15 +497,15 @@ export class SupabaseRepository implements IDataRepository {
         const { error } = await this.supabase
             .from('tour_types')
             .delete()
-            .eq('name', type)
+            .eq('label', type)
         return !error
     }
 
     async renameTourType(oldName: string, newName: string): Promise<boolean> {
         const { error } = await this.supabase
             .from('tour_types')
-            .update({ name: newName, label: newName })
-            .eq('name', oldName)
+            .update({ name: newName.toLowerCase().replace(/\s+/g, '-'), label: newName })
+            .eq('label', oldName)
         return !error
     }
 
@@ -413,14 +513,15 @@ export class SupabaseRepository implements IDataRepository {
         const { error } = await this.supabase
             .from('tour_types')
             .update({ icon: iconName })
-            .eq('name', tourType)
+            .eq('label', tourType)
         return !error
     }
 
     async addTourLength(length: string): Promise<boolean> {
+        const name = length.toLowerCase().replace(/\s+/g, '-')
         const { error } = await this.supabase
             .from('tour_lengths')
-            .insert({ name: length, label: length })
+            .insert({ name, label: length })
         return !error
     }
 
@@ -428,60 +529,134 @@ export class SupabaseRepository implements IDataRepository {
         const { error } = await this.supabase
             .from('tour_lengths')
             .delete()
-            .eq('name', length)
+            .eq('label', length)
         return !error
     }
 
     async renameTourLength(oldName: string, newName: string): Promise<boolean> {
         const { error } = await this.supabase
             .from('tour_lengths')
-            .update({ name: newName, label: newName })
-            .eq('name', oldName)
+            .update({ name: newName.toLowerCase().replace(/\s+/g, '-'), label: newName })
+            .eq('label', oldName)
         return !error
     }
 
     async updateTourTypesOrder(orderedTypes: string[]): Promise<void> {
         await Promise.all(
-            orderedTypes.map((name, index) =>
+            orderedTypes.map((label, index) =>
                 this.supabase
                     .from('tour_types')
                     .update({ sort_order: index })
-                    .eq('name', name)
+                    .eq('label', label)
             )
         )
     }
 
     async updateTourLengthsOrder(orderedLengths: string[]): Promise<void> {
         await Promise.all(
-            orderedLengths.map((name, index) =>
+            orderedLengths.map((label, index) =>
                 this.supabase
                     .from('tour_lengths')
                     .update({ sort_order: index })
+                    .eq('label', label)
+            )
+        )
+    }
+
+    // ====== DIFFICULTIES ======
+
+    private async getTourTypeIdByLabel(label: string): Promise<string | null> {
+        const { data, error } = await this.supabase
+            .from('tour_types')
+            .select('id')
+            .eq('label', label)
+            .single()
+        if (error || !data) return null
+        return data.id as string
+    }
+
+    private async getTourLengthIdByLabel(label: string): Promise<string | null> {
+        const { data, error } = await this.supabase
+            .from('tour_lengths')
+            .select('id')
+            .eq('label', label)
+            .single()
+        if (error || !data) return null
+        return data.id as string
+    }
+
+    private async getDifficultyIdByName(tourTypeId: string, difficultyName: string): Promise<string | null> {
+        const { data, error } = await this.supabase
+            .from('tour_difficulties')
+            .select('id')
+            .eq('tour_type_id', tourTypeId)
+            .eq('name', difficultyName)
+            .single()
+        if (error || !data) return null
+        return data.id as string
+    }
+
+    async addDifficulty(tourType: string, difficulty: string): Promise<boolean> {
+        const tourTypeId = await this.getTourTypeIdByLabel(tourType)
+        if (!tourTypeId) return false
+
+        const { error } = await this.supabase
+            .from('tour_difficulties')
+            .insert({ tour_type_id: tourTypeId, name: difficulty })
+        return !error
+    }
+
+    async removeDifficulty(tourType: string, difficulty: string): Promise<boolean> {
+        const tourTypeId = await this.getTourTypeIdByLabel(tourType)
+        if (!tourTypeId) return false
+
+        const { error } = await this.supabase
+            .from('tour_difficulties')
+            .delete()
+            .eq('tour_type_id', tourTypeId)
+            .eq('name', difficulty)
+        return !error
+    }
+
+    async renameDifficulty(tourType: string, oldName: string, newName: string): Promise<boolean> {
+        const tourTypeId = await this.getTourTypeIdByLabel(tourType)
+        if (!tourTypeId) return false
+
+        const { error } = await this.supabase
+            .from('tour_difficulties')
+            .update({ name: newName })
+            .eq('tour_type_id', tourTypeId)
+            .eq('name', oldName)
+        return !error
+    }
+
+    async updateDifficultiesOrder(tourType: string, orderedDifficulties: string[]): Promise<void> {
+        const tourTypeId = await this.getTourTypeIdByLabel(tourType)
+        if (!tourTypeId) return
+
+        await Promise.all(
+            orderedDifficulties.map((name, index) =>
+                this.supabase
+                    .from('tour_difficulties')
+                    .update({ sort_order: index })
+                    .eq('tour_type_id', tourTypeId)
                     .eq('name', name)
             )
         )
     }
 
-    // Difficulties - simplified for now
-    async addDifficulty(_tourType: string, _difficulty: string): Promise<boolean> {
-        return true // Would need separate table
-    }
+    async getDifficultiesForTourType(tourType: string): Promise<string[]> {
+        const tourTypeId = await this.getTourTypeIdByLabel(tourType)
+        if (!tourTypeId) return []
 
-    async removeDifficulty(_tourType: string, _difficulty: string): Promise<boolean> {
-        return true
-    }
+        const { data, error } = await this.supabase
+            .from('tour_difficulties')
+            .select('name')
+            .eq('tour_type_id', tourTypeId)
+            .order('sort_order')
 
-    async renameDifficulty(_tourType: string, _oldName: string, _newName: string): Promise<boolean> {
-        return true
-    }
-
-    async updateDifficultiesOrder(_tourType: string, _orderedDifficulties: string[]): Promise<void> {
-        // Would need separate table
-    }
-
-    async getDifficultiesForTourType(_tourType: string): Promise<string[]> {
-        // Default difficulties for now
-        return ['L', 'WS', 'ZS', 'S']
+        if (error || !data) return []
+        return data.map((d: Record<string, unknown>) => d.name as string)
     }
 
     // ====== FILE UPLOAD ======
@@ -570,9 +745,9 @@ export class SupabaseRepository implements IDataRepository {
             description: db.description as string | undefined,
             date: db.date as string,
             time: db.time as string | undefined,
-            type: db.type as string,
-            difficulty: db.difficulty as string | undefined,
-            length: db.length as string | undefined,
+            type: (db.tour_type as Record<string, unknown>)?.label as string || '',
+            difficulty: (db.tour_difficulty as Record<string, unknown>)?.name as string | undefined,
+            length: (db.tour_length as Record<string, unknown>)?.label as string | undefined,
             peak: db.peak as string | undefined,
             peakElevation: db.peak_elevation as number | undefined,
             ascent: db.ascent as number | undefined,

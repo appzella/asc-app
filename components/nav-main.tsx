@@ -57,6 +57,21 @@ function NavItem({
 }) {
   const id = useId()
 
+  // If no sub-items, render as a direct link
+  if (!item.items || item.items.length === 0) {
+    return (
+      <SidebarMenuItem>
+        <SidebarMenuButton asChild tooltip={item.title}>
+          <Link href={item.url} onClick={onNavigate}>
+            {item.icon && <item.icon />}
+            <span>{item.title}</span>
+          </Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    )
+  }
+
+  // With sub-items, render as collapsible
   return (
     <Collapsible
       asChild
@@ -68,20 +83,16 @@ function NavItem({
           <SidebarMenuButton tooltip={item.title}>
             {item.icon && <item.icon />}
             <span>{item.title}</span>
-            {item.items && (
-              <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-            )}
+            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
           </SidebarMenuButton>
         </CollapsibleTrigger>
-        {item.items && (
-          <CollapsibleContent>
-            <SidebarMenuSub>
-              {item.items.map((subItem) => (
-                <NavSubItem key={subItem.title} subItem={subItem} onNavigate={onNavigate} />
-              ))}
-            </SidebarMenuSub>
-          </CollapsibleContent>
-        )}
+        <CollapsibleContent>
+          <SidebarMenuSub>
+            {item.items.map((subItem) => (
+              <NavSubItem key={subItem.title} subItem={subItem} onNavigate={onNavigate} />
+            ))}
+          </SidebarMenuSub>
+        </CollapsibleContent>
       </SidebarMenuItem>
     </Collapsible>
   )

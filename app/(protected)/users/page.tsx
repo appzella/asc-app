@@ -1,4 +1,4 @@
-import { getDataRepository } from "@/lib/data"
+import { getServerRepository } from "@/lib/data/server"
 import { MemberList } from "@/components/users/member-list"
 import { Metadata } from "next"
 
@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 }
 
 export default async function UsersPage() {
-    const repository = getDataRepository()
+    const repository = await getServerRepository()
     const users = await repository.getUsers()
 
     // Filter only active users for the public member list

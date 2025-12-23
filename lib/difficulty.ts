@@ -62,4 +62,3 @@ export function formatDifficulty(difficulty: Difficulty, tourType?: TourType): s
   const option = options.find((opt) => opt.value === difficulty)
   return option ? option.label : difficulty
 }
-

@@ -44,7 +44,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { dataStore } from '@/lib/data/mockData'
+import { dataRepository } from '@/lib/data'
 
 // Sortable item component
 function SortableItem({
@@ -128,8 +128,8 @@ export default function TourLengthsPage() {
         loadTourLengths()
     }, [])
 
-    const loadTourLengths = () => {
-        const settings = dataStore.getSettings()
+    const loadTourLengths = async () => {
+        const settings = await dataRepository.getSettings()
         setTourLengths(settings.tourLengths)
     }
 
@@ -143,24 +143,25 @@ export default function TourLengthsPage() {
                 const newOrder = arrayMove(items, oldIndex, newIndex)
 
                 // Persist the new order
-                dataStore.updateTourLengthsOrder(newOrder)
-                toast.success('Reihenfolge aktualisiert')
+                dataRepository.updateTourLengthsOrder(newOrder).then(() => {
+                    toast.success('Reihenfolge aktualisiert')
+                })
 
                 return newOrder
             })
         }
     }
 
-    const handleAddLength = () => {
+    const handleAddLength = async () => {
         if (!newLengthName.trim()) {
             toast.error('Bitte einen Namen eingeben')
             return
         }
 
-        const success = dataStore.addTourLength(newLengthName.trim())
+        const success = await dataRepository.addTourLength(newLengthName.trim())
         if (success) {
             toast.success(`"${newLengthName.trim()}" wurde hinzugefügt`)
-            loadTourLengths()
+            await loadTourLengths()
             setNewLengthName('')
             setIsAddDialogOpen(false)
         } else {
@@ -168,16 +169,16 @@ export default function TourLengthsPage() {
         }
     }
 
-    const handleEditLength = () => {
+    const handleEditLength = async () => {
         if (!editingLength || !editedName.trim()) {
             toast.error('Bitte einen Namen eingeben')
             return
         }
 
-        const success = dataStore.renameTourLength(editingLength, editedName.trim())
+        const success = await dataRepository.renameTourLength(editingLength, editedName.trim())
         if (success) {
             toast.success(`Umbenannt zu "${editedName.trim()}"`)
-            loadTourLengths()
+            await loadTourLengths()
             setIsEditDialogOpen(false)
             setEditingLength(null)
             setEditedName('')
@@ -186,13 +187,13 @@ export default function TourLengthsPage() {
         }
     }
 
-    const handleDeleteLength = () => {
+    const handleDeleteLength = async () => {
         if (!editingLength) return
 
-        const success = dataStore.removeTourLength(editingLength)
+        const success = await dataRepository.removeTourLength(editingLength)
         if (success) {
             toast.success(`"${editingLength}" wurde gelöscht`)
-            loadTourLengths()
+            await loadTourLengths()
             setIsDeleteDialogOpen(false)
             setEditingLength(null)
         } else {

@@ -51,7 +51,7 @@ import {
     CollapsibleContent,
     CollapsibleTrigger,
 } from '@/components/ui/collapsible'
-import { dataStore } from '@/lib/data/mockData'
+import { dataRepository } from '@/lib/data'
 
 type DialogType = 'addType' | 'editType' | 'deleteType' | 'addDifficulty' | 'editDifficulty' | 'deleteDifficulty' | null
 
@@ -294,8 +294,8 @@ export default function TourTypesPage() {
         loadData()
     }, [])
 
-    const loadData = () => {
-        const settings = dataStore.getSettings()
+    const loadData = async () => {
+        const settings = await dataRepository.getSettings()
         setTourTypes(settings.tourTypes)
         setDifficulties(settings.difficulties ?? {})
     }
@@ -310,8 +310,9 @@ export default function TourTypesPage() {
                 const newOrder = arrayMove(items, oldIndex, newIndex)
 
                 // Persist the new order
-                dataStore.updateTourTypesOrder(newOrder)
-                toast.success('Reihenfolge aktualisiert')
+                dataRepository.updateTourTypesOrder(newOrder).then(() => {
+                    toast.success('Reihenfolge aktualisiert')
+                })
 
                 return newOrder
             })
@@ -323,8 +324,9 @@ export default function TourTypesPage() {
             ...prev,
             [tourType]: newOrder
         }))
-        dataStore.updateDifficultiesOrder(tourType, newOrder)
-        toast.success('Reihenfolge aktualisiert')
+        dataRepository.updateDifficultiesOrder(tourType, newOrder).then(() => {
+            toast.success('Reihenfolge aktualisiert')
+        })
     }
 
     const toggleExpanded = (type: string) => {
@@ -343,16 +345,16 @@ export default function TourTypesPage() {
     }
 
     // Tour Type Handlers
-    const handleAddType = () => {
+    const handleAddType = async () => {
         if (!inputValue.trim()) {
             toast.error('Bitte einen Namen eingeben')
             return
         }
 
-        const success = dataStore.addTourType(inputValue.trim())
+        const success = await dataRepository.addTourType(inputValue.trim())
         if (success) {
             toast.success(`"${inputValue.trim()}" wurde hinzugefügt`)
-            loadData()
+            await loadData()
             // Auto-expand the new type
             setExpandedTypes(prev => [...prev, inputValue.trim()])
             closeDialog()
@@ -361,34 +363,34 @@ export default function TourTypesPage() {
         }
     }
 
-    const handleEditType = () => {
+    const handleEditType = async () => {
         if (!selectedTourType || !inputValue.trim()) {
             toast.error('Bitte einen Namen eingeben')
             return
         }
 
-        const success = dataStore.renameTourType(selectedTourType, inputValue.trim())
+        const success = await dataRepository.renameTourType(selectedTourType, inputValue.trim())
         if (success) {
             toast.success(`Umbenannt zu "${inputValue.trim()}"`)
             // Update expanded state
             setExpandedTypes(prev =>
                 prev.map(t => t === selectedTourType ? inputValue.trim() : t)
             )
-            loadData()
+            await loadData()
             closeDialog()
         } else {
             toast.error('Dieser Name existiert bereits')
         }
     }
 
-    const handleDeleteType = () => {
+    const handleDeleteType = async () => {
         if (!selectedTourType) return
 
-        const success = dataStore.removeTourType(selectedTourType)
+        const success = await dataRepository.removeTourType(selectedTourType)
         if (success) {
             toast.success(`"${selectedTourType}" wurde gelöscht`)
             setExpandedTypes(prev => prev.filter(t => t !== selectedTourType))
-            loadData()
+            await loadData()
             closeDialog()
         } else {
             toast.error('Fehler beim Löschen')
@@ -396,45 +398,45 @@ export default function TourTypesPage() {
     }
 
     // Difficulty Handlers
-    const handleAddDifficulty = () => {
+    const handleAddDifficulty = async () => {
         if (!selectedTourType || !inputValue.trim()) {
             toast.error('Bitte einen Namen eingeben')
             return
         }
 
-        const success = dataStore.addDifficulty(selectedTourType, inputValue.trim())
+        const success = await dataRepository.addDifficulty(selectedTourType, inputValue.trim())
         if (success) {
             toast.success(`"${inputValue.trim()}" wurde hinzugefügt`)
-            loadData()
+            await loadData()
             closeDialog()
         } else {
             toast.error('Dieser Schwierigkeitsgrad existiert bereits')
         }
     }
 
-    const handleEditDifficulty = () => {
+    const handleEditDifficulty = async () => {
         if (!selectedTourType || !selectedDifficulty || !inputValue.trim()) {
             toast.error('Bitte einen Namen eingeben')
             return
         }
 
-        const success = dataStore.renameDifficulty(selectedTourType, selectedDifficulty, inputValue.trim())
+        const success = await dataRepository.renameDifficulty(selectedTourType, selectedDifficulty, inputValue.trim())
         if (success) {
             toast.success(`Umbenannt zu "${inputValue.trim()}"`)
-            loadData()
+            await loadData()
             closeDialog()
         } else {
             toast.error('Dieser Name existiert bereits')
         }
     }
 
-    const handleDeleteDifficulty = () => {
+    const handleDeleteDifficulty = async () => {
         if (!selectedTourType || !selectedDifficulty) return
 
-        const success = dataStore.removeDifficulty(selectedTourType, selectedDifficulty)
+        const success = await dataRepository.removeDifficulty(selectedTourType, selectedDifficulty)
         if (success) {
             toast.success(`"${selectedDifficulty}" wurde gelöscht`)
-            loadData()
+            await loadData()
             closeDialog()
         } else {
             toast.error('Fehler beim Löschen')

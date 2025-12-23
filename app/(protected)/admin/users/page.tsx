@@ -1,11 +1,11 @@
-import { getDataRepository } from "@/lib/data"
+import { getServerRepository } from "@/lib/data/server"
 import { AdminUserManager } from "@/components/admin/admin-user-manager"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import Link from "next/link"
 
 export default async function AdminUsersPage() {
-    const repository = getDataRepository()
+    const repository = await getServerRepository()
     const users = await repository.getUsers()
 
     return (

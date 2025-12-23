@@ -1,7 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { dataRepository } from "@/lib/data"
+import { getServerRepository } from "@/lib/data/server"
 import { profileSchema, type ProfileFormValues } from "@/lib/validations/profile"
 import { User } from "@/lib/types"
 
@@ -46,8 +46,9 @@ export async function updateUserProfile(
             updateData.profilePhoto = profilePhoto as string | null
         }
 
-        // Use repository instead of direct Supabase call
-        const updatedUser = await dataRepository.updateUser(userId, updateData)
+        // Use server repository for proper RLS context
+        const repository = await getServerRepository()
+        const updatedUser = await repository.updateUser(userId, updateData)
 
         if (!updatedUser) {
             console.error("Repository update failed")

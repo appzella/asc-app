@@ -49,11 +49,6 @@ const navData = {
         },
       ],
     },
-    {
-      title: "Mitglieder",
-      url: "/users",
-      icon: UsersIcon,
-    },
   ],
   navAdmin: [
     {
