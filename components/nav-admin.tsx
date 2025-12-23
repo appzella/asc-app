@@ -1,6 +1,7 @@
 "use client"
 
 import { useId } from "react"
+import Link from "next/link"
 import { ChevronRight, type LucideIcon } from "lucide-react"
 
 import {
@@ -18,10 +19,30 @@ import {
     SidebarMenuSub,
     SidebarMenuSubButton,
     SidebarMenuSubItem,
+    useSidebar,
 } from "@/components/ui/sidebar"
+
+function NavAdminSubItem({
+    subItem,
+    onNavigate,
+}: {
+    subItem: { title: string; url: string }
+    onNavigate: () => void
+}) {
+    return (
+        <SidebarMenuSubItem>
+            <SidebarMenuSubButton asChild>
+                <Link href={subItem.url} onClick={onNavigate}>
+                    <span>{subItem.title}</span>
+                </Link>
+            </SidebarMenuSubButton>
+        </SidebarMenuSubItem>
+    )
+}
 
 function NavAdminItem({
     item,
+    onNavigate,
 }: {
     item: {
         title: string
@@ -33,6 +54,7 @@ function NavAdminItem({
             url: string
         }[]
     }
+    onNavigate: () => void
 }) {
     const id = useId()
 
@@ -56,13 +78,7 @@ function NavAdminItem({
                     <CollapsibleContent>
                         <SidebarMenuSub>
                             {item.items.map((subItem) => (
-                                <SidebarMenuSubItem key={subItem.title}>
-                                    <SidebarMenuSubButton asChild>
-                                        <a href={subItem.url}>
-                                            <span>{subItem.title}</span>
-                                        </a>
-                                    </SidebarMenuSubButton>
-                                </SidebarMenuSubItem>
+                                <NavAdminSubItem key={subItem.title} subItem={subItem} onNavigate={onNavigate} />
                             ))}
                         </SidebarMenuSub>
                     </CollapsibleContent>
@@ -86,13 +102,21 @@ export function NavAdmin({
         }[]
     }[]
 }) {
+    const { isMobile, setOpenMobile } = useSidebar()
+
+    const handleNavigation = () => {
+        if (isMobile) {
+            setOpenMobile(false)
+        }
+    }
+
     return (
         <SidebarGroup className="group-data-[collapsible=icon]:hidden">
             <SidebarGroupLabel>Verwaltung</SidebarGroupLabel>
             <SidebarGroupContent>
                 <SidebarMenu>
                     {items.map((item) => (
-                        <NavAdminItem key={item.title} item={item} />
+                        <NavAdminItem key={item.title} item={item} onNavigate={handleNavigation} />
                     ))}
                 </SidebarMenu>
             </SidebarGroupContent>

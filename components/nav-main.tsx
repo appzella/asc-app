@@ -1,6 +1,7 @@
 "use client"
 
 import { useId } from "react"
+import Link from "next/link"
 import { ChevronRight, PlusCircleIcon, type LucideIcon } from "lucide-react"
 
 import {
@@ -17,11 +18,30 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  useSidebar,
 } from "@/components/ui/sidebar"
+
+function NavSubItem({
+  subItem,
+  onNavigate,
+}: {
+  subItem: { title: string; url: string }
+  onNavigate: () => void
+}) {
+  return (
+    <SidebarMenuSubItem>
+      <SidebarMenuSubButton asChild>
+        <Link href={subItem.url} onClick={onNavigate}>
+          <span>{subItem.title}</span>
+        </Link>
+      </SidebarMenuSubButton>
+    </SidebarMenuSubItem>
+  )
+}
 
 function NavItem({
   item,
-  index,
+  onNavigate,
 }: {
   item: {
     title: string
@@ -33,7 +53,7 @@ function NavItem({
       url: string
     }[]
   }
-  index: number
+  onNavigate: () => void
 }) {
   const id = useId()
 
@@ -57,13 +77,7 @@ function NavItem({
           <CollapsibleContent>
             <SidebarMenuSub>
               {item.items.map((subItem) => (
-                <SidebarMenuSubItem key={subItem.title}>
-                  <SidebarMenuSubButton asChild>
-                    <a href={subItem.url}>
-                      <span>{subItem.title}</span>
-                    </a>
-                  </SidebarMenuSubButton>
-                </SidebarMenuSubItem>
+                <NavSubItem key={subItem.title} subItem={subItem} onNavigate={onNavigate} />
               ))}
             </SidebarMenuSub>
           </CollapsibleContent>
@@ -87,6 +101,14 @@ export function NavMain({
     }[]
   }[]
 }) {
+  const { isMobile, setOpenMobile } = useSidebar()
+
+  const handleNavigation = () => {
+    if (isMobile) {
+      setOpenMobile(false)
+    }
+  }
+
   return (
     <SidebarGroup>
       <SidebarGroupContent className="flex flex-col gap-2">
@@ -97,16 +119,16 @@ export function NavMain({
               tooltip="Neue Tour"
               className="min-w-8 bg-primary text-primary-foreground duration-200 ease-linear hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground"
             >
-              <a href="/tours/create">
+              <Link href="/tours/create" onClick={handleNavigation}>
                 <PlusCircleIcon />
                 <span>Neue Tour</span>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
         <SidebarMenu>
           {items.map((item, index) => (
-            <NavItem key={item.title} item={item} index={index} />
+            <NavItem key={item.title} item={item} onNavigate={handleNavigation} />
           ))}
         </SidebarMenu>
       </SidebarGroupContent>

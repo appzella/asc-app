@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import {
   LogOutIcon,
   MoreVerticalIcon,
@@ -39,12 +40,18 @@ export function NavUser({
     initials: string
   }
 }) {
-  const { isMobile } = useSidebar()
+  const { isMobile, setOpenMobile } = useSidebar()
 
   const handleLogout = async () => {
     await authService.logout()
     // Use window.location for a clean redirect that clears all state
     window.location.href = "/login"
+  }
+
+  const handleNavigation = () => {
+    if (isMobile) {
+      setOpenMobile(false)
+    }
   }
 
   return (
@@ -91,17 +98,17 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem asChild>
-                <a href="/profile">
+              <DropdownMenuItem asChild onClick={handleNavigation}>
+                <Link href="/profile">
                   <UserCircleIcon />
                   Profil
-                </a>
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <a href="/settings">
+              <DropdownMenuItem asChild onClick={handleNavigation}>
+                <Link href="/settings">
                   <SettingsIcon />
                   Einstellungen
-                </a>
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
