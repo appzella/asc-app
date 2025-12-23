@@ -2,6 +2,7 @@ import "./globals.css"
 import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
+import { AppProgressBar as ProgressBar } from 'next-nprogress-bar'
 import type { Metadata, Viewport } from "next"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -27,6 +28,7 @@ export const viewport: Viewport = {
     initialScale: 1,
     maximumScale: 1,
     userScalable: false,
+    viewportFit: "cover", // iOS Safe Areas
 }
 
 export default function RootLayout({
@@ -45,6 +47,12 @@ export default function RootLayout({
                 >
                     {children}
                     <Toaster />
+                    <ProgressBar
+                        height="3px"
+                        color="oklch(0.7 0.25 145)"
+                        options={{ showSpinner: false }}
+                        shallowRouting
+                    />
                 </ThemeProvider>
             </body>
         </html>
