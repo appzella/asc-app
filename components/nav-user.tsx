@@ -46,8 +46,8 @@ export function NavUser({
 
   const handleLogout = async () => {
     await authService.logout()
-    router.push("/login")
-    router.refresh()
+    // Use window.location for a clean redirect that clears all state
+    window.location.href = "/login"
   }
 
   return (
