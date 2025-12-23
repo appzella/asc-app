@@ -27,7 +27,6 @@ export const viewport: Viewport = {
     initialScale: 1,
     maximumScale: 1,
     userScalable: false,
-    viewportFit: "cover", // iOS Safe Areas
 }
 
 export default function RootLayout({
