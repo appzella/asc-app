@@ -92,6 +92,7 @@ export function SiteHeader() {
               if (title === "Tour-lengths") title = "Tourenlängen"
               if (title === "Difficulties") title = "Schwierigkeitsgrade"
               if (title === "Edit") title = "Bearbeiten"
+              if (title === "Admin") title = "Verwaltung"
 
               // Handle tour IDs
               if (segment.toLowerCase().startsWith("tour_")) {
