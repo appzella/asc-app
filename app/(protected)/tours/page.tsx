@@ -1,4 +1,4 @@
-import { getDataRepository } from "@/lib/data"
+import { getServerRepository } from "@/lib/data/server"
 import { TourGrid } from "@/components/tours/tour-grid"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -9,7 +9,7 @@ import { formatDuration } from "@/lib/duration"
 export const dynamic = 'force-dynamic'
 
 export default async function ToursPage() {
-    const repository = getDataRepository()
+    const repository = await getServerRepository()
     const rawTours = await repository.getTours()
 
     // Filter for upcoming tours (today or later)
@@ -29,13 +29,13 @@ export default async function ToursPage() {
         id: t.id,
         title: t.title,
         date: new Date(t.date).toLocaleDateString('de-CH'),
-        type: t.tourType,
+        type: t.type,
         difficulty: t.difficulty,
         guide: t.leader?.name || 'Unbekannt',
         location: t.peak || 'Ostschweiz',
-        ascent: t.elevation,
-        descent: t.elevation,
-        duration: formatDuration(t.duration),
+        ascent: t.ascent,
+        descent: t.descent,
+        duration: t.duration,
         description: t.description,
         participants: {
             current: t.participants.length,

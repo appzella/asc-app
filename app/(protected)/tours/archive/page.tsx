@@ -1,13 +1,16 @@
-import { getDataRepository } from "@/lib/data"
+import { getServerRepository } from "@/lib/data/server"
 import { TourGrid } from "@/components/tours/tour-grid"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Calendar, Users, Mountain } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 import { formatDuration } from "@/lib/duration"
+import { Calendar, Users, Mountain, MapPin, ArrowLeft } from "lucide-react"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
 
 export const dynamic = 'force-dynamic'
 
 export default async function ToursArchivePage() {
-    const repository = getDataRepository()
+    const repository = await getServerRepository()
     const rawTours = await repository.getTours()
 
     // Filter for past tours and sort descending
@@ -27,13 +30,13 @@ export default async function ToursArchivePage() {
         id: t.id,
         title: t.title,
         date: new Date(t.date).toLocaleDateString('de-CH'),
-        type: t.tourType,
+        type: t.type,
         difficulty: t.difficulty,
         guide: t.leader?.name || 'Unbekannt',
         location: t.peak || 'Ostschweiz',
-        ascent: t.elevation,
-        descent: t.elevation,
-        duration: formatDuration(t.duration),
+        ascent: t.ascent,
+        descent: t.descent,
+        duration: t.duration,
         description: t.description,
         participants: {
             current: t.participants.length,

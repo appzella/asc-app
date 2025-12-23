@@ -1,12 +1,17 @@
 import { createClient } from '../supabase/client'
 import { User, Tour, Invitation, TourSettings, TourType, TourLength } from '../types'
 import { IDataRepository } from './repository'
+import { SupabaseClient } from '@supabase/supabase-js'
 
 /**
  * Supabase Data Repository Implementation
  */
 export class SupabaseRepository implements IDataRepository {
-    private supabase = createClient()
+    private supabase: SupabaseClient
+
+    constructor(client?: SupabaseClient) {
+        this.supabase = client || createClient()
+    }
 
     // ====== USER MANAGEMENT ======
 
@@ -105,11 +110,11 @@ export class SupabaseRepository implements IDataRepository {
     async getTours(): Promise<Tour[]> {
         const { data: tours, error } = await this.supabase
             .from('tours')
-            .select('*, tour_participants(user_id, is_waitlist)')
+            .select('*, tour_participants(user_id, is_waitlist), leader:users!leader_id(*)')
             .order('date', { ascending: true })
 
         if (error) {
-            console.error('Error fetching tours:', error)
+            console.error('Error fetching tours:', JSON.stringify(error, null, 2))
             return []
         }
 
@@ -119,7 +124,7 @@ export class SupabaseRepository implements IDataRepository {
     async getTourById(id: string): Promise<Tour | null> {
         const { data, error } = await this.supabase
             .from('tours')
-            .select('*, tour_participants(user_id, is_waitlist)')
+            .select('*, tour_participants(user_id, is_waitlist), leader:users!leader_id(*)')
             .eq('id', id)
             .single()
 
@@ -130,7 +135,7 @@ export class SupabaseRepository implements IDataRepository {
     async getPublishedTours(): Promise<Tour[]> {
         const { data, error } = await this.supabase
             .from('tours')
-            .select('*, tour_participants(user_id, is_waitlist)')
+            .select('*, tour_participants(user_id, is_waitlist), leader:users!leader_id(*)')
             .eq('status', 'published')
             .order('date', { ascending: true })
 
@@ -185,7 +190,7 @@ export class SupabaseRepository implements IDataRepository {
         return this.mapDbTourToTour(data)
     }
 
-    async updateTour(id: string, updates: Partial<Tour>, _submitForApproval?: boolean): Promise<Tour | null> {
+    async updateTour(id: string, updates: Partial<Tour>): Promise<Tour | null> {
         const dbUpdates: Record<string, unknown> = {}
         if (updates.title !== undefined) dbUpdates.title = updates.title
         if (updates.description !== undefined) dbUpdates.description = updates.description
@@ -228,10 +233,6 @@ export class SupabaseRepository implements IDataRepository {
 
     async cancelTour(id: string): Promise<Tour | null> {
         return this.updateTour(id, { status: 'cancelled' })
-    }
-
-    async submitTourForPublishing(id: string): Promise<Tour | null> {
-        return this.publishTour(id) // Direct publish for now
     }
 
     async deleteTour(id: string): Promise<boolean> {
@@ -558,6 +559,11 @@ export class SupabaseRepository implements IDataRepository {
             waitlistUsers = (data || []).map(u => this.mapDbUserToUser(u))
         }
 
+        let leader: User | undefined = undefined
+        if (db.leader) {
+            leader = this.mapDbUserToUser(db.leader as Record<string, unknown>)
+        }
+
         return {
             id: db.id as string,
             title: db.title as string,
@@ -579,6 +585,7 @@ export class SupabaseRepository implements IDataRepository {
             whatsappLink: db.whatsapp_link as string | undefined,
             status: db.status as 'draft' | 'published' | 'cancelled' | 'completed',
             leaderId: db.leader_id as string,
+            leader: leader,
             participants: participantUsers,
             waitlist: waitlistUsers,
             createdAt: db.created_at as string,

@@ -104,9 +104,9 @@ export default function TourDetailPage() {
                 const updatedTour = await dataRepository.getTourById(tourId)
                 if (updatedTour) {
                     setTour(updatedTour)
-                    setIsRegistered(updatedTour.participants.includes(user.id))
-                    setIsOnWaitlist(updatedTour.waitlist?.includes(user.id) || false)
-                    if (updatedTour.whatsappGroupLink) {
+                    setIsRegistered(updatedTour.participants.some(p => p.id === user.id))
+                    setIsOnWaitlist(updatedTour.waitlist?.some(p => p.id === user.id) || false)
+                    if (updatedTour.whatsappLink) {
                         setShowWhatsAppDialog(true)
                     }
                     toast.success('Erfolgreich angemeldet')
@@ -237,20 +237,7 @@ export default function TourDetailPage() {
         }
     }
 
-    const handleSubmitForPublishing = async () => {
-        if (!user || !tour) return
 
-        try {
-            const updatedTour = await dataRepository.submitTourForPublishing(tourId)
-            if (updatedTour) {
-                setTour(updatedTour)
-                router.refresh()
-                toast.success('Tour eingereicht')
-            }
-        } catch (error) {
-            console.error('Error submitting tour for publishing:', error)
-        }
-    }
 
     if (isLoading) {
         return (
@@ -287,7 +274,7 @@ export default function TourDetailPage() {
     const canEdit = canEditTour(user.role, tour.leaderId, user.id, tour.status)
     const canPublish = canPublishTour(user.role)
     const canSubmit = canSubmitForPublishing(user.role, tour.leaderId, user.id, tour.status)
-    const isFull = tour.participants.length >= tour.maxParticipants
+    const isFull = tour.participants.length >= (tour.maxParticipants || 10)
     const isLeader = tour.leaderId === user.id
 
     const today = new Date()
@@ -375,28 +362,28 @@ export default function TourDetailPage() {
                                     <span className="text-xs text-muted-foreground uppercase">Datum</span>
                                     <div className="flex items-center gap-2">
                                         <Calendar className="w-4 h-4 text-primary" />
-                                        <span className="text-sm font-medium">{formatDate(tour.date)}</span>
+                                        <span className="text-sm font-medium">{formatDate(new Date(tour.date))}</span>
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-1">
                                     <span className="text-xs text-muted-foreground uppercase">Dauer</span>
                                     <div className="flex items-center gap-2">
                                         <Clock className="w-4 h-4 text-primary" />
-                                        <span className="text-sm font-medium">{formatDuration(tour.duration)}</span>
+                                        <span className="text-sm font-medium">{tour.duration || '-'}</span>
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-1">
                                     <span className="text-xs text-muted-foreground uppercase">Aufstieg</span>
                                     <div className="flex items-center gap-2">
                                         <ArrowUpRight className="w-4 h-4 text-primary" />
-                                        <span className="text-sm font-medium">{tour.elevation} Hm</span>
+                                        <span className="text-sm font-medium">{tour.ascent || 0} Hm</span>
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-1">
                                     <span className="text-xs text-muted-foreground uppercase">Schwierigkeit</span>
                                     <div className="flex items-center gap-2">
                                         <ChartNoAxesColumnIncreasing className="w-4 h-4 text-primary" />
-                                        <span className="text-sm font-medium">{formatDifficulty(tour.difficulty, tour.tourType)}</span>
+                                        <span className="text-sm font-medium">{tour.difficulty || '-'}</span>
                                     </div>
                                 </div>
                             </div>
@@ -404,8 +391,8 @@ export default function TourDetailPage() {
                             <Separator />
 
                             <div className="flex flex-wrap gap-2">
-                                <Badge variant="outline">{tour.tourType}</Badge>
-                                <Badge variant="outline">{tour.tourLength}</Badge>
+                                <Badge variant="outline">{tour.type}</Badge>
+                                <Badge variant="outline">{tour.length}</Badge>
                                 {tour.peak && <Badge variant="secondary">{tour.peak} ({tour.peakElevation} m)</Badge>}
                             </div>
 
@@ -432,7 +419,7 @@ export default function TourDetailPage() {
                     {/* Action Cards based on role/status */}
 
                     {/* Leader Draft Actions */}
-                    {canSubmit && tour.status === 'draft' && !tour.submittedForPublishing && (
+                    {canSubmit && tour.status === 'draft' && (
                         <Card className="bg-blue-50/50 border-blue-200">
                             <CardHeader>
                                 <CardTitle className="text-blue-700">Tour einreichen</CardTitle>
@@ -440,7 +427,7 @@ export default function TourDetailPage() {
                             </CardHeader>
                             <CardContent className="space-y-2">
                                 {canEdit && <Button variant="outline" className="w-full" asChild><Link href={`/tours/${tourId}/edit`}>Bearbeiten</Link></Button>}
-                                <Button className="w-full" onClick={handleSubmitForPublishing}>Einreichen</Button>
+                                <Button className="w-full" onClick={handleApprove}>Einreichen</Button>
                             </CardContent>
                         </Card>
                     )}
@@ -454,7 +441,7 @@ export default function TourDetailPage() {
                             <CardContent className="space-y-2">
                                 {canEdit && <Button variant="outline" className="w-full" asChild><Link href={`/tours/${tourId}/edit`}>Bearbeiten</Link></Button>}
 
-                                {tour.status === 'draft' && tour.submittedForPublishing && (
+                                {tour.status === 'draft' && (
                                     <Button className="w-full bg-green-600 hover:bg-green-700" onClick={handleApprove}>Veröffentlichen</Button>
                                 )}
 
@@ -480,9 +467,9 @@ export default function TourDetailPage() {
                                 <div className="space-y-1">
                                     <div className="flex justify-between text-sm">
                                         <span>Belegung</span>
-                                        <span className="font-medium">{tour.participants.length} / {tour.maxParticipants}</span>
+                                        <span className="font-medium">{tour.participants.length} / {tour.maxParticipants || 10}</span>
                                     </div>
-                                    <Progress value={(Math.min(tour.participants.length, tour.maxParticipants) / tour.maxParticipants) * 100} />
+                                    <Progress value={(Math.min(tour.participants.length, tour.maxParticipants || 10) / (tour.maxParticipants || 10)) * 100} />
                                     {manuallyAdded > 0 && <p className="text-xs text-muted-foreground">+ {manuallyAdded} manuell hinzugefügt</p>}
                                 </div>
 
@@ -521,13 +508,13 @@ export default function TourDetailPage() {
                         </DialogDescription>
                     </DialogHeader>
                     <div className="flex flex-col items-center justify-center p-4 space-y-4">
-                        {tour.whatsappGroupLink && (
+                        {tour.whatsappLink && (
                             <>
                                 <div className="w-[200px] h-[200px]">
-                                    <QRCode data={tour.whatsappGroupLink} className="w-full h-full" />
+                                    <QRCode data={tour.whatsappLink} className="w-full h-full" />
                                 </div>
                                 <Button asChild className="w-full">
-                                    <a href={tour.whatsappGroupLink} target="_blank" rel="noopener noreferrer">
+                                    <a href={tour.whatsappLink} target="_blank" rel="noopener noreferrer">
                                         Link öffnen
                                     </a>
                                 </Button>

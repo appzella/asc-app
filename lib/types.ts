@@ -31,8 +31,12 @@ export interface User {
   name: string
   role: UserRole
   phone?: string
+  mobile?: string
+  street?: string
+  zip?: string
+  city?: string
   emergencyContact?: string
-  profilePhoto?: string
+  profilePhoto?: string | null
   isActive?: boolean
   createdAt?: string
 }
@@ -61,8 +65,8 @@ export interface Tour {
   waitlist: User[] // Array of User objects on waitlist
   createdAt?: string
   updatedAt?: string
-  gpxFile?: string // URL zur GPX-Datei in Supabase Storage
-  whatsappLink?: string // WhatsApp-Gruppen-Link
+  gpxFile?: string | null // URL zur GPX-Datei in Supabase Storage
+  whatsappLink?: string | null // WhatsApp-Gruppen-Link
 }
 
 export interface Invitation {

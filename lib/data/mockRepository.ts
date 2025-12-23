@@ -46,23 +46,18 @@ export class MockDataRepository implements IDataRepository {
     return dataStore.getTours().filter(t => t.status === 'draft')
   }
 
-  async getToursSubmittedForPublishing(): Promise<Tour[]> {
-    return dataStore.getTours().filter(t => t.status === 'draft' && t.submittedForPublishing === true)
-  }
-
   async createTour(tour: Omit<Tour, 'id' | 'createdAt' | 'updatedAt' | 'participants' | 'status' | 'waitlist'>): Promise<Tour> {
     return dataStore.createTour(tour)
   }
 
-  async updateTour(id: string, updates: Partial<Tour>, submitForApproval = false): Promise<Tour | null> {
-    return dataStore.updateTour(id, updates, submitForApproval)
+  async updateTour(id: string, updates: Partial<Tour>): Promise<Tour | null> {
+    return dataStore.updateTour(id, updates)
   }
 
   async publishTour(id: string): Promise<Tour | null> {
     const tour = dataStore.getTourById(id)
     if (!tour) return null
     tour.status = 'published'
-    tour.submittedForPublishing = false
     return tour
   }
 
@@ -70,7 +65,6 @@ export class MockDataRepository implements IDataRepository {
     const tour = dataStore.getTourById(id)
     if (!tour) return null
     tour.status = 'draft'
-    tour.submittedForPublishing = false
     return tour
   }
 
@@ -78,14 +72,6 @@ export class MockDataRepository implements IDataRepository {
     const tour = dataStore.getTourById(id)
     if (!tour) return null
     tour.status = 'cancelled'
-    tour.submittedForPublishing = false
-    return tour
-  }
-
-  async submitTourForPublishing(id: string): Promise<Tour | null> {
-    const tour = dataStore.getTourById(id)
-    if (!tour) return null
-    tour.submittedForPublishing = true
     return tour
   }
 
@@ -102,7 +88,7 @@ export class MockDataRepository implements IDataRepository {
     if (!tour || tour.status !== 'published') {
       return false
     }
-    
+
     // Prüfe ob Tour archiviert ist (Datum in der Vergangenheit)
     const today = new Date()
     today.setHours(0, 0, 0, 0)
@@ -111,7 +97,7 @@ export class MockDataRepository implements IDataRepository {
     if (tourDate < today) {
       return false
     }
-    
+
     return dataStore.registerForTour(tourId, userId)
   }
 
@@ -232,6 +218,14 @@ export class MockDataRepository implements IDataRepository {
 
   async deleteGpxFile(gpxUrl: string): Promise<void> {
     // Mock implementation - no-op
+    return
+  }
+
+  async uploadProfilePhoto(userId: string, file: File): Promise<string> {
+    return `https://example.com/avatars/${userId}/${file.name}`
+  }
+
+  async deleteProfilePhoto(photoUrl: string): Promise<void> {
     return
   }
 }

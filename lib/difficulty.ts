@@ -14,14 +14,16 @@ export interface DifficultyOption {
  * @param tourType - Die Tourenart
  * @param settings - Optional: TourSettings (um async Aufrufe zu vermeiden)
  */
-export function getDifficultyOptions(tourType: TourType | '', settings?: TourSettings): DifficultyOption[] {
+export function getDifficultyOptions(tourType: string | TourType | '', settings?: TourSettings): DifficultyOption[] {
   if (!tourType) {
     return []
   }
 
+  const typeName = typeof tourType === 'string' ? tourType : tourType.name
+
   // Falls Settings nicht übergeben wurden, verwende leeren Array als Fallback
   // Die Komponenten sollten die Settings bereits geladen haben
-  const difficulties = settings?.difficulties[tourType] || []
+  const difficulties = settings?.difficulties?.[typeName] || []
 
   // Fallback-Beschreibungen für bekannte Schwierigkeitsgrade
   const descriptions: Record<string, string> = {
@@ -45,7 +47,7 @@ export function getDifficultyOptions(tourType: TourType | '', settings?: TourSet
     'B5': 'Extrem steil und technisch, für Experten',
   }
 
-  return difficulties.map((diff) => ({
+  return difficulties.map((diff: string) => ({
     value: diff as Difficulty,
     label: diff,
     description: descriptions[diff],

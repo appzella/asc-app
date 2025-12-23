@@ -18,8 +18,8 @@ const defaultPreferences: NotificationPreferences = {
     pushParticipantSignup: true,
     emailTourUpdate: true,
     pushTourUpdate: true,
-    createdAt: new Date(),
-    updatedAt: new Date()
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
 }
 
 export function NotificationSettings() {

@@ -94,12 +94,12 @@ export function TourForm({ mode = 'create', initialData }: TourFormProps) {
             title: initialData.title || "",
             description: initialData.description || "",
             date: new Date(initialData.date),
-            ascent: initialData.elevation || 0,
-            descent: initialData.elevation || 0,
-            duration: [initialData.duration || 3, (initialData.duration || 3) + 2],
-            type: initialData.tourType || "Skitour",
+            ascent: initialData.ascent || 0,
+            descent: initialData.descent || 0,
+            duration: [3, 5], // Default since duration is now string
+            type: initialData.type || "Skitour",
             difficulty: initialData.difficulty || "WS",
-            whatsappLink: initialData.whatsappGroupLink || "",
+            whatsappLink: initialData.whatsappLink || "",
             guide: initialData.leader?.name || "",
         } : {
             title: "",
@@ -149,12 +149,12 @@ export function TourForm({ mode = 'create', initialData }: TourFormProps) {
                 await dataRepository.updateTour(initialData.id, {
                     title: data.title,
                     description: data.description || '',
-                    date: data.date,
-                    tourType: data.type as any,
-                    difficulty: data.difficulty as any,
-                    elevation: data.ascent || 0,
-                    duration: data.duration ? (data.duration[0] + data.duration[1]) / 2 : 4,
-                    whatsappGroupLink: data.whatsappLink || null,
+                    date: data.date?.toISOString().split('T')[0] || '',
+                    type: data.type,
+                    difficulty: data.difficulty,
+                    ascent: data.ascent || 0,
+                    duration: data.duration ? `${data.duration[0]}-${data.duration[1]} Stunden` : '4 Stunden',
+                    whatsappLink: data.whatsappLink || undefined,
                 })
                 toast.success('Tour erfolgreich aktualisiert')
                 router.push(`/tours/${initialData.id}`)

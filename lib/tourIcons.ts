@@ -17,8 +17,9 @@ export function getIconByName(iconName: string): React.ComponentType<any> {
 /**
  * Default Icons für Tourentypen (Fallback falls kein Icon in DB)
  */
-function getDefaultIcon(tourType: TourType): string {
-  switch (tourType) {
+function getDefaultIcon(tourType: string | TourType): string {
+  const typeName = typeof tourType === 'string' ? tourType : tourType.name
+  switch (typeName) {
     case 'Wanderung':
       return 'Mountain'
     case 'Skitour':
@@ -37,18 +38,20 @@ function getDefaultIcon(tourType: TourType): string {
  * @returns React Component für das Icon
  */
 export function getTourIcon(
-  tourType: TourType,
+  tourType: string | TourType,
   tourTypeIcons?: { [key: string]: string }
 ): React.ComponentType<any> {
-  const iconName = tourTypeIcons?.[tourType] || getDefaultIcon(tourType)
+  const typeName = typeof tourType === 'string' ? tourType : tourType.name
+  const iconName = tourTypeIcons?.[typeName] || getDefaultIcon(typeName)
   return getIconByName(iconName)
 }
 
 /**
  * Gibt die Icon-Farbe für einen Tourentyp zurück
  */
-export function getTourIconColor(tourType: TourType): string {
-  switch (tourType) {
+export function getTourIconColor(tourType: string | TourType): string {
+  const typeName = typeof tourType === 'string' ? tourType : tourType.name
+  switch (typeName) {
     case 'Wanderung':
       return 'text-blue-600'
     case 'Skitour':
@@ -59,4 +62,3 @@ export function getTourIconColor(tourType: TourType): string {
       return 'text-muted-foreground'
   }
 }
-

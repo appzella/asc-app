@@ -1,8 +1,11 @@
 import { User, Tour, Invitation, TourSettings, TourType, TourLength, Difficulty } from '../types'
 
+// Mock User extending User to include password for simulation
+type MockUser = User & { password?: string; registered?: boolean }
+
 // In-Memory Datenspeicher
 class DataStore {
-  private users: User[] = []
+  private users: MockUser[] = []
   private tours: Tour[] = []
   private invitations: Invitation[] = []
   private currentUser: User | null = null
@@ -18,7 +21,10 @@ class DataStore {
 
   // User Management
   getUsers(): User[] {
-    return this.users.map(({ password, ...user }) => user) // Passwort entfernen
+    return this.users.map((user) => {
+      const { password, ...cleanUser } = user
+      return cleanUser
+    })
   }
 
   getUserById(id: string): User | undefined {
@@ -29,21 +35,25 @@ class DataStore {
   }
 
   getUserByEmail(email: string): User | undefined {
-    return this.users.find((u) => u.email === email)
+    const user = this.users.find((u) => u.email === email)
+    if (!user) return undefined
+    const { password, ...cleanUser } = user
+    return cleanUser
   }
 
-  createUser(user: Omit<User, 'id' | 'createdAt'> & { id?: string }): User {
-    const newUser: User = {
+  createUser(user: Omit<MockUser, 'id' | 'createdAt'> & { id?: string }): User {
+    const newUser: MockUser = {
       ...user,
       id: user.id || `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      active: user.active !== undefined ? user.active : true,
-      createdAt: new Date(),
+      isActive: user.isActive !== undefined ? user.isActive : true,
+      createdAt: new Date().toISOString(),
     }
     this.users.push(newUser)
-    return newUser
+    const { password, ...cleanUser } = newUser
+    return cleanUser
   }
 
-  updateUser(id: string, updates: Partial<User>): User | null {
+  updateUser(id: string, updates: Partial<MockUser>): User | null {
     const index = this.users.findIndex((u) => u.id === id)
     if (index === -1) return null
     this.users[index] = { ...this.users[index], ...updates }
@@ -54,7 +64,7 @@ class DataStore {
   // Auth
   login(email: string, password: string): User | null {
     const user = this.users.find((u) => u.email === email && u.password === password)
-    if (user && user.registered && user.active) {
+    if (user && user.registered && user.isActive) {
       this.currentUser = user
       const { password, ...userWithoutPassword } = user
       return userWithoutPassword
@@ -68,7 +78,8 @@ class DataStore {
 
   getCurrentUser(): User | null {
     if (!this.currentUser) return null
-    const { password, ...userWithoutPassword } = this.currentUser
+    // Make sure we strip password if it somehow persisted
+    const { password, ...userWithoutPassword } = this.currentUser as MockUser
     return userWithoutPassword
   }
 
@@ -96,9 +107,8 @@ class DataStore {
       status: 'draft',
       participants: [],
       waitlist: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      submittedForPublishing: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     }
     this.tours.push(newTour)
     return this.getTourById(newTour.id)!
@@ -114,8 +124,7 @@ class DataStore {
     this.tours[index] = {
       ...tour,
       ...updates,
-      pendingChanges: undefined,
-      updatedAt: new Date(),
+      updatedAt: new Date().toISOString(),
     }
 
     return this.getTourById(id)!
@@ -129,8 +138,7 @@ class DataStore {
     this.tours[index] = {
       ...tour,
       status: 'published',
-      submittedForPublishing: false,
-      updatedAt: new Date(),
+      updatedAt: new Date().toISOString(),
     }
 
     return this.getTourById(id)!
@@ -144,8 +152,7 @@ class DataStore {
     this.tours[index] = {
       ...tour,
       status: 'draft',
-      submittedForPublishing: false,
-      updatedAt: new Date(),
+      updatedAt: new Date().toISOString(),
     }
 
     return this.getTourById(id)!
@@ -159,8 +166,7 @@ class DataStore {
     this.tours[index] = {
       ...tour,
       status: 'cancelled',
-      submittedForPublishing: false,
-      updatedAt: new Date(),
+      updatedAt: new Date().toISOString(),
     }
 
     return this.getTourById(id)!
@@ -170,15 +176,21 @@ class DataStore {
     const tour = this.tours.find((t) => t.id === tourId)
     // Only allow registration for published tours (not draft, cancelled, etc.)
     if (!tour || tour.status !== 'published') return false
-    if (tour.participants.includes(userId) || tour.waitlist.includes(userId)) return false
+
+    // Check if user is already participating or on waitlist by ID
+    if (tour.participants.some(p => p.id === userId) || tour.waitlist.some(p => p.id === userId)) return false
+
+    const user = this.getUserById(userId)
+    if (!user) return false
 
     // Wenn Tour voll ist, zur Warteliste hinzufügen
-    if (tour.participants.length >= tour.maxParticipants) {
-      tour.waitlist.push(userId)
+    const maxParticipants = tour.maxParticipants || 10
+    if (tour.participants.length >= maxParticipants) {
+      tour.waitlist.push(user)
       return true
     }
 
-    tour.participants.push(userId)
+    tour.participants.push(user)
     return true
   }
 
@@ -186,15 +198,16 @@ class DataStore {
     const tour = this.tours.find((t) => t.id === tourId)
     if (!tour) return false
 
-    const index = tour.participants.indexOf(userId)
+    const index = tour.participants.findIndex(p => p.id === userId)
     if (index === -1) return false
 
     tour.participants.splice(index, 1)
 
     // Automatisches Nachrücken: Wenn noch Platz unter maxParticipants und Warteliste vorhanden
-    if (tour.participants.length < tour.maxParticipants && tour.waitlist.length > 0) {
-      const firstWaitlistUserId = tour.waitlist.shift()!
-      tour.participants.push(firstWaitlistUserId)
+    const maxParticipants = tour.maxParticipants || 10
+    if (tour.participants.length < maxParticipants && tour.waitlist.length > 0) {
+      const firstWaitlistUser = tour.waitlist.shift()!
+      tour.participants.push(firstWaitlistUser)
     }
 
     return true
@@ -203,9 +216,12 @@ class DataStore {
   addToWaitlist(tourId: string, userId: string): boolean {
     const tour = this.tours.find((t) => t.id === tourId)
     if (!tour) return false
-    if (tour.waitlist.includes(userId) || tour.participants.includes(userId)) return false
+    if (tour.waitlist.some(p => p.id === userId) || tour.participants.some(p => p.id === userId)) return false
 
-    tour.waitlist.push(userId)
+    const user = this.getUserById(userId)
+    if (!user) return false
+
+    tour.waitlist.push(user)
     return true
   }
 
@@ -213,7 +229,7 @@ class DataStore {
     const tour = this.tours.find((t) => t.id === tourId)
     if (!tour) return false
 
-    const index = tour.waitlist.indexOf(userId)
+    const index = tour.waitlist.findIndex(p => p.id === userId)
     if (index === -1) return false
 
     tour.waitlist.splice(index, 1)
@@ -223,24 +239,23 @@ class DataStore {
   getWaitlistByTourId(tourId: string): User[] {
     const tour = this.tours.find((t) => t.id === tourId)
     if (!tour) return []
-
     return tour.waitlist
-      .map((userId) => this.getUserById(userId))
-      .filter((user): user is User => user !== undefined)
   }
 
   promoteFromWaitlist(tourId: string, userId: string): boolean {
     const tour = this.tours.find((t) => t.id === tourId)
     if (!tour) return false
 
-    const waitlistIndex = tour.waitlist.indexOf(userId)
+    const waitlistIndex = tour.waitlist.findIndex(p => p.id === userId)
     if (waitlistIndex === -1) return false
+
+    const user = tour.waitlist[waitlistIndex]
 
     // Entferne von Warteliste
     tour.waitlist.splice(waitlistIndex, 1)
 
     // Füge als Teilnehmer hinzu (auch wenn Tour bereits voll ist)
-    tour.participants.push(userId)
+    tour.participants.push(user)
     return true
   }
 
@@ -249,16 +264,19 @@ class DataStore {
     if (!tour || tour.status !== 'published') return false
 
     // Prüfe ob bereits Teilnehmer
-    if (tour.participants.includes(userId)) return false
+    if (tour.participants.some(p => p.id === userId)) return false
+
+    const user = this.getUserById(userId)
+    if (!user) return false
 
     // Prüfe ob auf Warteliste - wenn ja, entferne von dort
-    const waitlistIndex = tour.waitlist.indexOf(userId)
+    const waitlistIndex = tour.waitlist.findIndex(p => p.id === userId)
     if (waitlistIndex !== -1) {
       tour.waitlist.splice(waitlistIndex, 1)
     }
 
     // Füge als Teilnehmer hinzu (auch wenn Tour bereits voll ist)
-    tour.participants.push(userId)
+    tour.participants.push(user)
     return true
   }
 
@@ -270,7 +288,7 @@ class DataStore {
       email,
       token,
       createdBy,
-      createdAt: new Date(),
+      createdAt: new Date().toISOString(),
       used: false,
     }
     this.invitations.push(invitation)
@@ -281,8 +299,8 @@ class DataStore {
       name: '', // Wird bei Registrierung ausgefüllt
       role: 'member',
       registered: false,
-      active: true,
-      registrationToken: token,
+      isActive: true, // Renamed from active
+      // registrationToken: token, // This might not be in User interface anymore, assuming removed
     })
 
     return invitation
@@ -300,14 +318,14 @@ class DataStore {
     if (!user) return null
 
     invitation.used = true
-    invitation.usedAt = new Date()
+    // invitation.usedAt = new Date() // Field removed from type
 
     const updatedUser = this.updateUser(user.id, {
       name,
       password,
       registered: true,
-      registrationToken: undefined,
-    })
+      // registrationToken: undefined,
+    } as any) // Casting as any to allow mock properties like password/registered
 
     return updatedUser
   }
@@ -349,8 +367,8 @@ class DataStore {
 
     // Update all tours that use this tour type
     this.tours.forEach(tour => {
-      if (tour.tourType === oldName) {
-        tour.tourType = newName.trim() as TourType
+      if (tour.type === oldName) {
+        tour.type = newName.trim()
       }
     })
 
@@ -386,8 +404,8 @@ class DataStore {
 
     // Update all tours that use this tour length
     this.tours.forEach(tour => {
-      if (tour.tourLength === oldName) {
-        tour.tourLength = newName.trim() as TourLength
+      if (tour.length === oldName) {
+        tour.length = newName.trim()
       }
     })
 
@@ -403,6 +421,7 @@ class DataStore {
   }
 
   updateDifficultiesOrder(tourType: string, orderedDifficulties: string[]): void {
+    if (!this.settings.difficulties) this.settings.difficulties = {}
     if (!this.settings.difficulties[tourType]) {
       this.settings.difficulties[tourType] = []
     }
@@ -410,6 +429,7 @@ class DataStore {
   }
 
   addDifficulty(tourType: string, difficulty: string): boolean {
+    if (!this.settings.difficulties) this.settings.difficulties = {}
     if (!this.settings.difficulties[tourType]) {
       this.settings.difficulties[tourType] = []
     }
@@ -419,7 +439,7 @@ class DataStore {
   }
 
   removeDifficulty(tourType: string, difficulty: string): boolean {
-    if (!this.settings.difficulties[tourType]) return false
+    if (!this.settings.difficulties || !this.settings.difficulties[tourType]) return false
     const index = this.settings.difficulties[tourType].indexOf(difficulty)
     if (index === -1) return false
     this.settings.difficulties[tourType].splice(index, 1)
@@ -428,7 +448,7 @@ class DataStore {
 
   renameDifficulty(tourType: string, oldName: string, newName: string): boolean {
     if (!newName.trim() || oldName === newName) return false
-    if (!this.settings.difficulties[tourType]) return false
+    if (!this.settings.difficulties || !this.settings.difficulties[tourType]) return false
     const index = this.settings.difficulties[tourType].indexOf(oldName)
     if (index === -1) return false
     if (this.settings.difficulties[tourType].includes(newName.trim())) return false // Already exists
@@ -437,8 +457,8 @@ class DataStore {
 
     // Update all tours that use this difficulty for this tour type
     this.tours.forEach(tour => {
-      if (tour.tourType === tourType && tour.difficulty === oldName) {
-        tour.difficulty = newName.trim() as Difficulty
+      if (tour.type === tourType && tour.difficulty === oldName) {
+        tour.difficulty = newName.trim()
       }
     })
 
@@ -446,6 +466,7 @@ class DataStore {
   }
 
   getDifficultiesForTourType(tourType: string): string[] {
+    if (!this.settings.difficulties) return []
     return this.settings.difficulties[tourType] || []
   }
 }
@@ -467,7 +488,7 @@ export function seedData() {
     role: 'admin',
     password: 'admin123',
     registered: true,
-    active: true,
+    isActive: true,
     profilePhoto: '/avatars/pascal-staub.png',
   })
 
@@ -479,7 +500,7 @@ export function seedData() {
     role: 'leader',
     password: 'leader123',
     registered: true,
-    active: true,
+    isActive: true,
   })
 
   const leader2 = dataStore.createUser({
@@ -489,7 +510,7 @@ export function seedData() {
     role: 'leader',
     password: 'leader123',
     registered: true,
-    active: true,
+    isActive: true,
   })
 
   // Member Users
@@ -500,7 +521,7 @@ export function seedData() {
     role: 'member',
     password: 'member123',
     registered: true,
-    active: true,
+    isActive: true,
   })
 
   const member2 = dataStore.createUser({
@@ -510,7 +531,7 @@ export function seedData() {
     role: 'member',
     password: 'member123',
     registered: true,
-    active: true,
+    isActive: true,
   })
 
   // Pascal Staub (User Request)
@@ -521,7 +542,7 @@ export function seedData() {
     role: 'admin', // Giving admin role as he is the dev/owner
     password: 'password',
     registered: true,
-    active: true,
+    isActive: true,
   })
 
   // Sample Tours
@@ -529,17 +550,16 @@ export function seedData() {
     id: 'tour_saentis',
     title: 'Skitour auf den Säntis',
     description: 'Schöne Skitour auf den Säntis mit herrlicher Aussicht.',
-    date: new Date('2024-01-15'),
+    date: '2024-01-15',
     difficulty: 'ZS',
-    tourType: 'Skitour',
-    tourLength: 'Eintagestour',
+    type: 'Skitour',
+    length: 'Eintagestour',
     peak: 'Säntis',
     peakElevation: 2502,
-    elevation: 1800,
-    duration: 6,
+    ascent: 1800,
+    duration: '6 h',
     leaderId: leader1.id,
     maxParticipants: 8,
-    createdBy: leader1.id,
     gpxFile: '/demo/sample-tour.gpx',
   })
 
@@ -547,17 +567,16 @@ export function seedData() {
     id: 'tour_toggenburg',
     title: 'Wanderung Toggenburg',
     description: 'Gemütliche Wanderung durch das Toggenburg.',
-    date: new Date('2024-02-20'),
+    date: '2024-02-20',
     difficulty: 'T2',
-    tourType: 'Wanderung',
-    tourLength: 'Eintagestour',
+    type: 'Wanderung',
+    length: 'Eintagestour',
     peak: 'Chäserrugg',
     peakElevation: 2262,
-    elevation: 500,
-    duration: 4,
+    ascent: 500,
+    duration: '4 h',
     leaderId: leader2.id,
     maxParticipants: 12,
-    createdBy: leader2.id,
   })
 
   // Weitere Skitouren in der Ostschweiz
@@ -565,51 +584,48 @@ export function seedData() {
     id: 'tour_churfirsten',
     title: 'Skitour auf den Churfirsten',
     description: 'Klassische Skitour auf die Churfirsten mit spektakulärer Aussicht auf den Walensee. Route über die Südflanke.',
-    date: new Date('2024-01-20'),
+    date: '2024-01-20',
     difficulty: 'ZS',
-    tourType: 'Skitour',
-    tourLength: 'Eintagestour',
+    type: 'Skitour',
+    length: 'Eintagestour',
     peak: 'Hinterrugg',
     peakElevation: 2306,
-    elevation: 1200,
-    duration: 5,
+    ascent: 1200,
+    duration: '5 h',
     leaderId: leader1.id,
     maxParticipants: 6,
-    createdBy: leader1.id,
   })
 
   const tour4 = dataStore.createTour({
     id: 'tour_pizol',
     title: 'Pizol Skitour',
     description: 'Beliebte Skitour auf den Pizol. Schöne Aufstiegsroute mit anspruchsvollem Abstieg. Für geübte Skitourengeher.',
-    date: new Date('2024-01-25'),
+    date: '2024-01-25',
     difficulty: 'S',
-    tourType: 'Skitour',
-    tourLength: 'Eintagestour',
+    type: 'Skitour',
+    length: 'Eintagestour',
     peak: 'Pizol',
     peakElevation: 2844,
-    elevation: 1100,
-    duration: 5.5,
+    ascent: 1100,
+    duration: '5.5 h',
     leaderId: leader2.id,
     maxParticipants: 8,
-    createdBy: leader2.id,
   })
 
   const tour5 = dataStore.createTour({
     id: 'tour_kronberg',
     title: 'Kronberg Skitour',
     description: 'Genussvolle Skitour auf den Kronberg bei Appenzell. Ideal für Einsteiger und alle, die eine entspannte Tour suchen.',
-    date: new Date('2024-01-30'),
+    date: '2024-01-30',
     difficulty: 'L',
-    tourType: 'Skitour',
-    tourLength: 'Eintagestour',
+    type: 'Skitour',
+    length: 'Eintagestour',
     peak: 'Kronberg',
     peakElevation: 1663,
-    elevation: 800,
-    duration: 3.5,
+    ascent: 800,
+    duration: '3.5 h',
     leaderId: leader2.id,
     maxParticipants: 10,
-    createdBy: leader2.id,
   })
 
   // Future Tour
@@ -617,136 +633,128 @@ export function seedData() {
     id: 'tour_future',
     title: 'Zukunftstour Piz Bernina',
     description: 'Hochtour auf den einzigen Viertausender der Ostalpen.',
-    date: new Date('2026-07-15'),
+    date: '2026-07-15',
     difficulty: 'ZS',
-    tourType: 'Skitour',
-    tourLength: 'Mehrtagestour',
+    type: 'Skitour',
+    length: 'Mehrtagestour',
     peak: 'Piz Bernina',
     peakElevation: 4049,
-    elevation: 1200,
-    duration: 8,
+    ascent: 1200,
+    duration: '8 h',
     leaderId: leader1.id,
     maxParticipants: 6,
-    createdBy: leader1.id,
   })
 
   const tour6 = dataStore.createTour({
     id: 'tour_mattstock',
     title: 'Mattstock Skitour',
     description: 'Abwechslungsreiche Skitour auf den Mattstock im Toggenburg. Schöne Route durch abwechslungsreiches Gelände.',
-    date: new Date('2024-03-15'),
+    date: '2024-03-15',
     difficulty: 'ZS',
-    tourType: 'Skitour',
-    tourLength: 'Eintagestour',
+    type: 'Skitour',
+    length: 'Eintagestour',
     peak: 'Mattstock',
     peakElevation: 1936,
-    elevation: 950,
-    duration: 4.5,
+    ascent: 950,
+    duration: '4.5 h',
     leaderId: leader2.id,
     maxParticipants: 8,
-    createdBy: leader2.id,
   })
 
   const tour7 = dataStore.createTour({
     id: 'tour_speer',
     title: 'Speer Skitour',
     description: 'Anspruchsvolle Skitour auf den Speer mit teilweise steilen Passagen. Gute Kondition und Skitechnik erforderlich.',
-    date: new Date('2024-03-20'),
+    date: '2024-03-20',
     difficulty: 'S',
-    tourType: 'Skitour',
-    tourLength: 'Eintagestour',
+    type: 'Skitour',
+    length: 'Eintagestour',
     peak: 'Speer',
     peakElevation: 1950,
-    elevation: 1300,
-    duration: 6,
+    ascent: 1300,
+    duration: '6 h',
     leaderId: leader1.id,
     maxParticipants: 6,
-    createdBy: leader1.id,
   })
 
   const tour8 = dataStore.createTour({
     id: 'tour_chaeserrugg',
     title: 'Chäserugg Skitour',
     description: 'Klassische Skitour auf den Chäserugg mit herrlicher Aussicht auf die Linthebene und den Zürichsee.',
-    date: new Date('2024-03-25'),
+    date: '2024-03-25',
     difficulty: 'ZS',
-    tourType: 'Skitour',
-    tourLength: 'Eintagestour',
+    type: 'Skitour',
+    length: 'Eintagestour',
     peak: 'Chäserrugg',
     peakElevation: 2262,
-    elevation: 1050,
-    duration: 5,
+    ascent: 1050,
+    duration: '5 h',
     leaderId: leader2.id,
     maxParticipants: 8,
-    createdBy: leader2.id,
   })
 
   const tour9 = dataStore.createTour({
     id: 'tour_selun',
     title: 'Selun Skitour',
     description: 'Genussvolle Skitour auf den Selun im Flumserberg Gebiet. Perfekt für eine entspannte Skitour mit Freunden.',
-    date: new Date('2024-04-01'),
+    date: '2024-04-01',
     difficulty: 'WS',
-    tourType: 'Skitour',
-    tourLength: 'Eintagestour',
+    type: 'Skitour',
+    length: 'Eintagestour',
     peak: 'Selun',
     peakElevation: 2205,
-    elevation: 700,
-    duration: 3.5,
+    ascent: 700,
+    duration: '3.5 h',
     leaderId: leader1.id,
     maxParticipants: 12,
-    createdBy: leader1.id,
   })
 
   const tour10 = dataStore.createTour({
     id: 'tour_hochgrat',
     title: 'Hochgrat Skitour',
     description: 'Anspruchsvolle Skitour auf den Hochgrat. Lohnende Aussicht über die gesamte Ostschweiz. Für erfahrene Skitourengeher.',
-    date: new Date('2024-04-05'),
+    date: '2024-04-05',
     difficulty: 'SS',
-    tourType: 'Skitour',
-    tourLength: 'Eintagestour',
+    type: 'Skitour',
+    length: 'Eintagestour',
     peak: 'Hochgrat',
     peakElevation: 1834,
-    elevation: 1400,
-    duration: 6.5,
+    ascent: 1400,
+    duration: '6.5 h',
     leaderId: leader2.id,
     maxParticipants: 5,
-    createdBy: leader2.id,
   })
 
   const tour11 = dataStore.createTour({
     id: 'tour_gamsberg',
     title: 'Gamsberg Skitour',
     description: 'Schöne Skitour auf den Gamsberg bei Wildhaus. Abwechslungsreiche Route durch Wald und freies Gelände.',
-    date: new Date('2024-04-10'),
+    date: '2024-04-10',
     difficulty: 'ZS',
-    tourType: 'Skitour',
-    tourLength: 'Eintagestour',
+    type: 'Skitour',
+    length: 'Eintagestour',
     peak: 'Gamsberg',
     peakElevation: 2385,
-    elevation: 880,
-    duration: 4.5,
+    ascent: 880,
+    duration: '4.5 h',
     leaderId: leader1.id,
     maxParticipants: 8,
-    createdBy: leader1.id,
   })
 
   const tour12 = dataStore.createTour({
     id: 'tour_maegisalp',
     title: 'Mägisalp Skitour',
     description: 'Einfache und genussvolle Skitour zur Mägisalp. Ideal für Einsteiger oder eine entspannte Tagestour.',
-    date: new Date('2024-04-15'),
+    date: '2024-04-15',
     difficulty: 'L',
-    tourType: 'Skitour',
-    tourLength: 'Eintagestour',
+    type: 'Skitour',
+    length: 'Eintagestour',
     peak: 'Mägisalp',
     peakElevation: 1705,
-    elevation: 550,
-    duration: 3,
+    ascent: 550,
+    duration: '3 h',
     leaderId: leader2.id,
     maxParticipants: 15,
-    createdBy: leader2.id,
   })
 
   // Skitouren Winter 2025/26
@@ -754,17 +762,16 @@ export function seedData() {
     id: 'tour_saentis_2025',
     title: 'Skitour auf den Säntis (Winter 2025)',
     description: 'Klassische Winter-Skitour auf den Säntis. Perfekte Bedingungen für die erste große Tour der Saison.',
-    date: new Date('2025-12-20'),
+    date: '2025-12-20',
     difficulty: 'ZS',
-    tourType: 'Skitour',
-    tourLength: 'Eintagestour',
+    type: 'Skitour',
+    length: 'Eintagestour',
     peak: 'Säntis',
     peakElevation: 2502,
-    elevation: 1800,
-    duration: 6,
+    ascent: 1800,
+    duration: '6 h',
     leaderId: leader1.id,
     maxParticipants: 8,
-    createdBy: leader1.id,
     gpxFile: '/demo/sample-tour.gpx',
   })
 
@@ -772,102 +779,96 @@ export function seedData() {
     id: 'tour_altmann',
     title: 'Altmann Skitour',
     description: 'Schöne Skitour auf den Altmann bei Alt St. Johann. Abwechslungsreiche Route mit herrlicher Aussicht.',
-    date: new Date('2026-01-10'),
+    date: '2026-01-10',
     difficulty: 'WS',
-    tourType: 'Skitour',
-    tourLength: 'Eintagestour',
+    type: 'Skitour',
+    length: 'Eintagestour',
     peak: 'Altmann',
     peakElevation: 2435,
-    elevation: 750,
-    duration: 4,
+    ascent: 750,
+    duration: '4 h',
     leaderId: leader2.id,
     maxParticipants: 10,
-    createdBy: leader2.id,
   })
 
   const tour15 = dataStore.createTour({
     id: 'tour_biberlichopf',
     title: 'Biberlichopf Skitour',
     description: 'Genussvolle Skitour auf den Biberlichopf im Toggenburg. Perfekt für eine entspannte Tagestour mit Freunden.',
-    date: new Date('2026-01-25'),
+    date: '2026-01-25',
     difficulty: 'L',
-    tourType: 'Skitour',
-    tourLength: 'Eintagestour',
+    type: 'Skitour',
+    length: 'Eintagestour',
     peak: 'Biberlichopf',
     peakElevation: 1400,
-    elevation: 600,
-    duration: 3.5,
+    ascent: 600,
+    duration: '3.5 h',
     leaderId: leader1.id,
     maxParticipants: 12,
-    createdBy: leader1.id,
   })
 
   const tour16 = dataStore.createTour({
     id: 'tour_wildhauser',
     title: 'Wildhauser Schafberg Skitour',
     description: 'Beliebte Skitour auf den Wildhauser Schafberg. Schöne Aufstiegsroute mit langem Genussabstieg.',
-    date: new Date('2026-02-08'),
+    date: '2026-02-08',
     difficulty: 'ZS',
-    tourType: 'Skitour',
-    tourLength: 'Eintagestour',
+    type: 'Skitour',
+    length: 'Eintagestour',
     peak: 'Wildhauser Schafberg',
     peakElevation: 2373,
-    elevation: 900,
-    duration: 4.5,
+    ascent: 900,
+    duration: '4.5 h',
     leaderId: leader2.id,
     maxParticipants: 8,
-    createdBy: leader2.id,
   })
 
   const tour17 = dataStore.createTour({
     id: 'tour_flumserberg',
     title: 'Flumserberg Überschreitung',
     description: 'Anspruchsvolle Überschreitung im Flumserberg Gebiet. Mehrere Gipfel, lohnende Tour für erfahrene Skitourengeher.',
-    date: new Date('2026-02-22'),
+    date: '2026-02-22',
     difficulty: 'S',
-    tourType: 'Skitour',
-    tourLength: 'Eintagestour',
+    type: 'Skitour',
+    length: 'Eintagestour',
     peak: 'Leistchamm',
     peakElevation: 2101,
-    elevation: 1350,
-    duration: 6.5,
+    ascent: 1350,
+    duration: '6.5 h',
     leaderId: leader1.id,
     maxParticipants: 6,
-    createdBy: leader1.id,
   })
 
   const tour18 = dataStore.createTour({
     id: 'tour_hoernli',
     title: 'Hörnli Skitour',
     description: 'Klassische Skitour auf das Hörnli bei Alt St. Johann. Beliebte Route mit guter Schneelage.',
-    date: new Date('2026-03-07'),
+    date: '2026-03-07',
     difficulty: 'WS',
-    tourType: 'Skitour',
-    tourLength: 'Eintagestour',
+    type: 'Skitour',
+    length: 'Eintagestour',
     peak: 'Hörnli',
     peakElevation: 1133,
-    elevation: 850,
-    duration: 4.5,
+    ascent: 850,
+    duration: '4.5 h',
     leaderId: leader2.id,
     maxParticipants: 10,
-    createdBy: leader2.id,
   })
 
   const tour19 = dataStore.createTour({
     id: 'tour_schwaegalp',
     title: 'Schwägalp Rundtour',
     description: 'Schöne Rundtour ab Schwägalp. Abwechslungsreiche Route durch verschiedene Geländeformen. Für geübte Skitourengeher.',
-    date: new Date('2026-03-21'),
+    date: '2026-03-21',
     difficulty: 'ZS',
-    tourType: 'Skitour',
-    tourLength: 'Eintagestour',
+    type: 'Skitour',
+    length: 'Eintagestour',
     peak: 'Lütispitz',
     peakElevation: 1987,
-    elevation: 1000,
-    duration: 5,
+    ascent: 1000,
+    duration: '5 h',
     leaderId: leader1.id,
     maxParticipants: 8,
-    createdBy: leader1.id,
   })
 
   // Touren veröffentlichen
@@ -932,4 +933,3 @@ if (!seeded) {
   seedData()
   seeded = true
 }
-

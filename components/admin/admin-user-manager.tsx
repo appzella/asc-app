@@ -32,7 +32,7 @@ function UserRow({
     onStatusChange: (userId: string, newStatus: boolean) => void
 }) {
     const [currentRole, setCurrentRole] = useState<UserRole>(user.role)
-    const [isActive, setIsActive] = useState(user.active)
+    const [isActive, setIsActive] = useState(user.isActive || false)
 
     const handleRoleChange = async (newRole: UserRole) => {
         const previousRole = currentRole
@@ -106,8 +106,8 @@ export function AdminUserManager({ initialUsers }: AdminUserManagerProps) {
     // Live stats calculation
     const stats = useMemo(() => ({
         total: users.length,
-        active: users.filter(u => u.active).length,
-        inactive: users.filter(u => !u.active).length,
+        active: users.filter(u => u.isActive).length,
+        inactive: users.filter(u => !u.isActive).length,
         admins: users.filter(u => u.role === 'admin').length,
         leaders: users.filter(u => u.role === 'leader').length,
     }), [users])
@@ -122,7 +122,7 @@ export function AdminUserManager({ initialUsers }: AdminUserManagerProps) {
     }
 
     const handleStatusChange = (userId: string, newStatus: boolean) => {
-        setUsers(prev => prev.map(u => u.id === userId ? { ...u, active: newStatus } : u))
+        setUsers(prev => prev.map(u => u.id === userId ? { ...u, isActive: newStatus } : u))
     }
 
     return (

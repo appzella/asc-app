@@ -12,7 +12,7 @@ export default async function UsersPage() {
     const users = await repository.getUsers()
 
     // Filter only active users for the public member list
-    const activeUsers = users.filter(u => u.active)
+    const activeUsers = users.filter(u => u.isActive)
 
     return (
         <div className="flex flex-1 flex-col gap-4 py-4 md:gap-6 md:py-6">

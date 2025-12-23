@@ -18,13 +18,11 @@ export interface IDataRepository {
   getTourById(id: string): Promise<Tour | null>
   getPublishedTours(): Promise<Tour[]>
   getDraftTours(): Promise<Tour[]>
-  getToursSubmittedForPublishing(): Promise<Tour[]>
   createTour(tour: Omit<Tour, 'id' | 'createdAt' | 'updatedAt' | 'participants' | 'status' | 'waitlist'>): Promise<Tour>
-  updateTour(id: string, updates: Partial<Tour>, submitForApproval?: boolean): Promise<Tour | null>
+  updateTour(id: string, updates: Partial<Tour>): Promise<Tour | null>
   publishTour(id: string): Promise<Tour | null>
   unpublishTour(id: string): Promise<Tour | null>
   cancelTour(id: string): Promise<Tour | null>
-  submitTourForPublishing(id: string): Promise<Tour | null>
   registerForTour(tourId: string, userId: string): Promise<boolean>
   unregisterFromTour(tourId: string, userId: string): Promise<boolean>
   addParticipantManually(tourId: string, userId: string): Promise<boolean> // Manuelles Hinzufügen durch Leader/Admin
@@ -63,5 +61,7 @@ export interface IDataRepository {
   // File Upload
   uploadGpxFile(tourId: string, file: File): Promise<string>
   deleteGpxFile(gpxUrl: string): Promise<void>
+  uploadProfilePhoto(userId: string, file: File): Promise<string>
+  deleteProfilePhoto(photoUrl: string): Promise<void>
 }
 

@@ -22,7 +22,7 @@ export function UserActions({ user }: UserActionsProps) {
     const [loadingRole, setLoadingRole] = useState(false)
     const [loadingStatus, setLoadingStatus] = useState(false)
     const [currentRole, setCurrentRole] = useState<UserRole>(user.role)
-    const [isActive, setIsActive] = useState(user.active)
+    const [isActive, setIsActive] = useState(user.isActive || false)
 
     const handleRoleChange = async (newRole: UserRole) => {
         const previousRole = currentRole

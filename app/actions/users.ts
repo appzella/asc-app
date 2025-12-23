@@ -11,7 +11,7 @@ export async function updateUserRole(userId: string, newRole: UserRole) {
 
 export async function toggleUserStatus(userId: string, newStatus: boolean) {
     const repository = getDataRepository()
-    await repository.updateUser(userId, { active: newStatus })
+    await repository.updateUser(userId, { isActive: newStatus })
     return { success: true }
 }
 
