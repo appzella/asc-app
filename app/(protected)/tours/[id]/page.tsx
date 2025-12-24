@@ -16,7 +16,7 @@ import { formatDifficulty } from '@/lib/difficulty'
 import { formatDuration, formatDurationRange } from '@/lib/duration'
 import Link from 'next/link'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import { Calendar, Clock, ArrowUpRight, Users, ChartNoAxesColumnIncreasing, Map, Download } from 'lucide-react'
+import { Calendar, Clock, ArrowUpRight, ArrowDownRight, Users, ChartNoAxesColumnIncreasing, Map, Download } from 'lucide-react'
 import dynamic from 'next/dynamic'
 const TourMap = dynamic(() => import('@/components/tours/tour-map'), { ssr: false })
 import { toast } from 'sonner'
@@ -357,18 +357,45 @@ export default function TourDetailPage() {
 
                             <Separator />
 
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                                <div className="flex flex-col gap-1">
-                                    <span className="text-xs text-muted-foreground uppercase">Datum</span>
-                                    <div className="flex items-center gap-2">
-                                        <Calendar className="w-4 h-4 text-primary" />
-                                        <span className="text-sm font-medium">{formatDate(new Date(tour.date))}</span>
+                            {/* Date - Prominent display */}
+                            <div className="flex items-center gap-3 p-4 rounded-xl bg-primary/5 border border-primary/10">
+                                <div className="rounded-full bg-primary/10 p-2">
+                                    <Calendar className="w-5 h-5 text-primary" />
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] uppercase text-muted-foreground font-semibold tracking-wider">Datum</span>
+                                    <span className="text-base font-semibold">{formatDate(new Date(tour.date))}</span>
+                                </div>
+                            </div>
+
+                            {/* Stats Grid - Tour Card Style */}
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 rounded-xl bg-muted/40 p-4">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="rounded-full bg-background p-1.5 shadow-sm">
+                                        <ArrowUpRight className="h-4 w-4 text-primary" />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] uppercase text-muted-foreground font-semibold tracking-wider">Aufstieg</span>
+                                        <span className="text-sm font-medium">{tour.ascent || 0} Hm</span>
                                     </div>
                                 </div>
-                                <div className="flex flex-col gap-1">
-                                    <span className="text-xs text-muted-foreground uppercase">Dauer</span>
-                                    <div className="flex items-center gap-2">
-                                        <Clock className="w-4 h-4 text-primary" />
+
+                                <div className="flex items-center gap-2.5">
+                                    <div className="rounded-full bg-background p-1.5 shadow-sm">
+                                        <ArrowDownRight className="h-4 w-4 text-primary" />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] uppercase text-muted-foreground font-semibold tracking-wider">Abstieg</span>
+                                        <span className="text-sm font-medium">{tour.descent || 0} Hm</span>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-2.5">
+                                    <div className="rounded-full bg-background p-1.5 shadow-sm">
+                                        <Clock className="h-4 w-4 text-primary" />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] uppercase text-muted-foreground font-semibold tracking-wider">Dauer</span>
                                         <span className="text-sm font-medium">
                                             {tour.durationMin && tour.durationMax
                                                 ? formatDurationRange([tour.durationMin, tour.durationMax])
@@ -376,17 +403,13 @@ export default function TourDetailPage() {
                                         </span>
                                     </div>
                                 </div>
-                                <div className="flex flex-col gap-1">
-                                    <span className="text-xs text-muted-foreground uppercase">Aufstieg</span>
-                                    <div className="flex items-center gap-2">
-                                        <ArrowUpRight className="w-4 h-4 text-primary" />
-                                        <span className="text-sm font-medium">{tour.ascent || 0} Hm</span>
+
+                                <div className="flex items-center gap-2.5">
+                                    <div className="rounded-full bg-background p-1.5 shadow-sm">
+                                        <ChartNoAxesColumnIncreasing className="h-4 w-4 text-primary" />
                                     </div>
-                                </div>
-                                <div className="flex flex-col gap-1">
-                                    <span className="text-xs text-muted-foreground uppercase">Schwierigkeit</span>
-                                    <div className="flex items-center gap-2">
-                                        <ChartNoAxesColumnIncreasing className="w-4 h-4 text-primary" />
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] uppercase text-muted-foreground font-semibold tracking-wider">Schwierigkeit</span>
                                         <span className="text-sm font-medium">{tour.difficulty || '-'}</span>
                                     </div>
                                 </div>

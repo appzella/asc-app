@@ -98,6 +98,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     avatar: "",
     initials: "--",
   })
+  const [isAdmin, setIsAdmin] = React.useState(false)
 
 
   React.useEffect(() => {
@@ -122,12 +123,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const currentUser = authService.getCurrentUser()
     if (currentUser) {
       setUser(formatUser(currentUser))
+      setIsAdmin(currentUser.role === 'admin')
     }
 
     // Subscribe to changes
     const unsubscribe = authService.subscribe((u) => {
       if (u) {
         setUser(formatUser(u))
+        setIsAdmin(u.role === 'admin')
+      } else {
+        setIsAdmin(false)
       }
     })
 
@@ -154,7 +159,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={navData.navMain} />
-        <NavAdmin items={navData.navAdmin} />
+        {isAdmin && <NavAdmin items={navData.navAdmin} />}
         <NavSecondary items={navData.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>

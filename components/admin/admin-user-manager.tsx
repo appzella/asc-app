@@ -39,8 +39,14 @@ function UserRow({
         setCurrentRole(newRole)
         onRoleChange(user.id, newRole)
         try {
-            await updateUserRole(user.id, newRole)
-            toast.success(`Rolle geändert`)
+            const result = await updateUserRole(user.id, newRole)
+            if (result.success) {
+                toast.success(`Rolle geändert`)
+            } else {
+                setCurrentRole(previousRole)
+                onRoleChange(user.id, previousRole)
+                toast.error(result.error || "Fehler beim Ändern der Rolle")
+            }
         } catch {
             setCurrentRole(previousRole)
             onRoleChange(user.id, previousRole)
@@ -53,8 +59,14 @@ function UserRow({
         setIsActive(checked)
         onStatusChange(user.id, checked)
         try {
-            await toggleUserStatus(user.id, checked)
-            toast.success(checked ? "Aktiviert" : "Deaktiviert")
+            const result = await toggleUserStatus(user.id, checked)
+            if (result.success) {
+                toast.success(checked ? "Aktiviert" : "Deaktiviert")
+            } else {
+                setIsActive(previousStatus)
+                onStatusChange(user.id, previousStatus)
+                toast.error(result.error || "Fehler beim Ändern des Status")
+            }
         } catch {
             setIsActive(previousStatus)
             onStatusChange(user.id, previousStatus)

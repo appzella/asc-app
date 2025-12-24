@@ -106,7 +106,7 @@ export function TourCard({ tour }: TourCardProps) {
 
               <div className="flex items-center gap-2.5">
                 <div className="rounded-full bg-background p-1.5 shadow-sm">
-                  <ArrowDownRight className="h-3.5 w-3.5 text-muted-foreground" />
+                  <ArrowDownRight className="h-3.5 w-3.5 text-primary" />
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[10px] uppercase text-muted-foreground font-semibold tracking-wider">Abstieg</span>
@@ -116,7 +116,7 @@ export function TourCard({ tour }: TourCardProps) {
 
               <div className="flex items-center gap-2.5">
                 <div className="rounded-full bg-background p-1.5 shadow-sm">
-                  <ClockIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                  <ClockIcon className="h-3.5 w-3.5 text-primary" />
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[10px] uppercase text-muted-foreground font-semibold tracking-wider">Dauer</span>
@@ -130,7 +130,7 @@ export function TourCard({ tour }: TourCardProps) {
 
               <div className="flex items-center gap-2.5">
                 <div className="rounded-full bg-background p-1.5 shadow-sm">
-                  <UsersIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                  <UsersIcon className="h-3.5 w-3.5 text-primary" />
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[10px] uppercase text-muted-foreground font-semibold tracking-wider">Teilnehmer</span>
