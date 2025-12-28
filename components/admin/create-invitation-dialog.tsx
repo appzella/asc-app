@@ -26,10 +26,14 @@ export function CreateInvitationDialog() {
         e.preventDefault()
         setLoading(true)
         try {
-            await createInvitation(email)
-            toast.success("Einladung erstellt")
-            setOpen(false)
-            setEmail("")
+            const result = await createInvitation(email)
+            if (result.success) {
+                toast.success("Einladung erstellt")
+                setOpen(false)
+                setEmail("")
+            } else {
+                toast.error(result.error || "Fehler beim Erstellen der Einladung")
+            }
         } catch (error) {
             toast.error("Fehler beim Erstellen der Einladung")
         } finally {
