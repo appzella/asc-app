@@ -25,6 +25,7 @@ export default function SettingsPage() {
     const { theme, setTheme } = useTheme()
     const [mounted, setMounted] = useState(false)
     const [settings, setSettings] = useState<NotificationSettings>(defaultSettings)
+    const [settingsLoaded, setSettingsLoaded] = useState(false)
     const [isSaving, setIsSaving] = useState(false)
 
     // Load settings from database on mount
@@ -45,6 +46,8 @@ export default function SettingsPage() {
                 }
             } catch (error) {
                 console.error('Error loading settings:', error)
+            } finally {
+                setSettingsLoaded(true)
             }
         }
         loadSettings()
@@ -171,9 +174,9 @@ export default function SettingsPage() {
                             </div>
                             <Switch
                                 id="email-notifications"
-                                checked={settings.emailNotifications}
+                                checked={settingsLoaded ? settings.emailNotifications : false}
                                 onCheckedChange={(checked) => updateSetting('emailNotifications', checked)}
-                                disabled={isSaving}
+                                disabled={isSaving || !settingsLoaded}
                             />
                         </div>
                         <div className="flex items-center justify-between">
@@ -183,9 +186,9 @@ export default function SettingsPage() {
                             </div>
                             <Switch
                                 id="push-notifications"
-                                checked={settings.pushNotifications}
+                                checked={settingsLoaded ? settings.pushNotifications : false}
                                 onCheckedChange={(checked) => updateSetting('pushNotifications', checked)}
-                                disabled={isSaving}
+                                disabled={isSaving || !settingsLoaded}
                             />
                         </div>
                     </CardContent>
