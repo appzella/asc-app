@@ -118,23 +118,32 @@ class SupabaseAuthService {
     async register(email: string, password: string, name: string, token?: string): Promise<User | null> {
         // Verify invitation token if provided
         if (token) {
+            // First check if invitation exists at all
             const { data: invitation, error: invError } = await this.supabase
                 .from('invitations')
                 .select('*')
                 .eq('token', token)
-                .eq('used', false)
                 .single()
 
             if (invError || !invitation) {
-                console.error('Invalid invitation token')
-                return null
+                console.error('Invitation not found for token:', token)
+                throw new Error('Einladung nicht gefunden')
+            }
+
+            if (invitation.used) {
+                console.error('Invitation already used')
+                throw new Error('Diese Einladung wurde bereits verwendet')
             }
 
             // Mark invitation as used
-            await this.supabase
+            const { error: updateError } = await this.supabase
                 .from('invitations')
                 .update({ used: true })
                 .eq('id', invitation.id)
+
+            if (updateError) {
+                console.error('Failed to mark invitation as used:', updateError)
+            }
         }
 
         const { data, error } = await this.supabase.auth.signUp({

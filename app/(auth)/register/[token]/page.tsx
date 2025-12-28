@@ -98,11 +98,9 @@ export default function RegisterPage() {
                 // Email confirmation required flow
                 setIsSuccess(true)
             }
-        } catch (err) {
-            if (process.env.NODE_ENV === 'development') {
-                console.error("Registration failed", err)
-            }
-            setError("Ein Fehler ist aufgetreten.")
+        } catch (err: any) {
+            console.error("Registration failed", err)
+            setError(err?.message || "Ein Fehler ist aufgetreten.")
         } finally {
             setIsLoading(false)
         }
