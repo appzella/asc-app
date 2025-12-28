@@ -16,7 +16,7 @@ function InvitationRow({ invitation }: { invitation: Invitation }) {
     const [copied, setCopied] = useState(false)
 
     const copyLink = () => {
-        const link = `${window.location.origin}/register?token=${invitation.token}`
+        const link = `${window.location.origin}/register/${invitation.token}`
         navigator.clipboard.writeText(link)
         setCopied(true)
         toast.success("Link kopiert!")
