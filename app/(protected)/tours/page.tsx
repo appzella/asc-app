@@ -1,16 +1,24 @@
 import { getServerRepository } from "@/lib/data/server"
+import { createClient } from "@/lib/supabase/server"
 import { TourGrid } from "@/components/tours/tour-grid"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Calendar, MapPin, Plus } from "lucide-react"
 import Link from "next/link"
-import { formatDuration } from "@/lib/duration"
+import { canCreateTour } from "@/lib/roles"
 
 export const dynamic = 'force-dynamic'
 
 export default async function ToursPage() {
     const repository = await getServerRepository()
     const rawTours = await repository.getTours()
+
+    // Get current user's role
+    const supabase = await createClient()
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+    const users = await repository.getUsers()
+    const currentUser = authUser ? users.find(u => u.id === authUser.id) : null
+    const showCreateButton = currentUser ? canCreateTour(currentUser.role) : false
 
     // Filter for upcoming tours (today or later)
     const now = new Date()
@@ -55,12 +63,14 @@ export default async function ToursPage() {
                     <h1 className="text-2xl font-bold tracking-tight">Aktuelle Touren</h1>
                     <p className="text-muted-foreground">Entdecke unsere nächsten Abenteuer.</p>
                 </div>
-                <Button asChild>
-                    <Link href="/tours/create">
-                        <Plus className="mr-2 h-4 w-4" />
-                        Tour erstellen
-                    </Link>
-                </Button>
+                {showCreateButton && (
+                    <Button asChild>
+                        <Link href="/tours/create">
+                            <Plus className="mr-2 h-4 w-4" />
+                            Tour erstellen
+                        </Link>
+                    </Button>
+                )}
             </div>
 
             {/* Stats Cards */}

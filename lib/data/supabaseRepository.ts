@@ -82,6 +82,10 @@ export class SupabaseRepository implements IDataRepository {
         if (updates.emergencyContact !== undefined) dbUpdates.emergency_contact = updates.emergencyContact
         if (updates.profilePhoto !== undefined) dbUpdates.profile_photo = updates.profilePhoto
         if (updates.isActive !== undefined) dbUpdates.is_active = updates.isActive
+        // User settings
+        if (updates.theme !== undefined) dbUpdates.theme = updates.theme
+        if (updates.emailNotifications !== undefined) dbUpdates.email_notifications = updates.emailNotifications
+        if (updates.pushNotifications !== undefined) dbUpdates.push_notifications = updates.pushNotifications
         dbUpdates.updated_at = new Date().toISOString()
 
         const { data, error } = await this.supabase
@@ -113,6 +117,10 @@ export class SupabaseRepository implements IDataRepository {
             profilePhoto: db.profile_photo as string | undefined,
             isActive: db.is_active as boolean ?? true,
             createdAt: db.created_at as string,
+            // User settings
+            theme: db.theme as 'light' | 'dark' | 'system' | undefined,
+            emailNotifications: db.email_notifications as boolean ?? true,
+            pushNotifications: db.push_notifications as boolean ?? true,
         }
     }
 

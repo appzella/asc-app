@@ -2,8 +2,28 @@ import { TourForm } from "@/components/tours/tour-form"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { redirect } from "next/navigation"
+import { getServerRepository } from "@/lib/data/server"
+import { createClient } from "@/lib/supabase/server"
+import { canCreateTour } from "@/lib/roles"
 
-export default function CreateTourPage() {
+export default async function CreateTourPage() {
+    // Verify user has permission to create tours
+    const supabase = await createClient()
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+
+    if (!authUser) {
+        redirect("/login")
+    }
+
+    const repository = await getServerRepository()
+    const users = await repository.getUsers()
+    const currentUser = users.find(u => u.id === authUser.id)
+
+    if (!currentUser || !canCreateTour(currentUser.role)) {
+        redirect("/tours")
+    }
+
     return (
         <div className="flex flex-1 flex-col gap-4 py-4 md:gap-6 md:py-6">
             <div className="flex items-center gap-4 px-4 lg:px-6">

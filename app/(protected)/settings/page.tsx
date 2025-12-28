@@ -9,8 +9,7 @@ import { useState, useEffect } from "react"
 import { Bell, Palette } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
-
-const SETTINGS_STORAGE_KEY = 'asc-app-settings'
+import { updateUserSettings, getUserSettings } from "@/app/actions/settings"
 
 interface NotificationSettings {
     emailNotifications: boolean
@@ -26,32 +25,72 @@ export default function SettingsPage() {
     const { theme, setTheme } = useTheme()
     const [mounted, setMounted] = useState(false)
     const [settings, setSettings] = useState<NotificationSettings>(defaultSettings)
+    const [isSaving, setIsSaving] = useState(false)
 
-    // Load settings from localStorage on mount
+    // Load settings from database on mount
     useEffect(() => {
         setMounted(true)
-        try {
-            const stored = localStorage.getItem(SETTINGS_STORAGE_KEY)
-            if (stored) {
-                const parsed = JSON.parse(stored)
-                setSettings(prev => ({ ...prev, ...parsed }))
+        const loadSettings = async () => {
+            try {
+                const dbSettings = await getUserSettings()
+                if (dbSettings) {
+                    setSettings({
+                        emailNotifications: dbSettings.emailNotifications ?? true,
+                        pushNotifications: dbSettings.pushNotifications ?? true,
+                    })
+                    // Sync theme from database if different
+                    if (dbSettings.theme && dbSettings.theme !== theme) {
+                        setTheme(dbSettings.theme)
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading settings:', error)
             }
-        } catch (error) {
-            console.error('Error loading settings:', error)
         }
+        loadSettings()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    // Save settings to localStorage
-    const updateSetting = (key: keyof NotificationSettings, value: boolean) => {
+    // Save theme to database
+    const handleThemeChange = async (newTheme: string) => {
+        setTheme(newTheme)
+        setIsSaving(true)
+        try {
+            const result = await updateUserSettings({ theme: newTheme as 'light' | 'dark' | 'system' })
+            if (result.success) {
+                toast.success('Thema gespeichert')
+            } else {
+                toast.error(result.error || 'Fehler beim Speichern')
+            }
+        } catch (error) {
+            console.error('Error saving theme:', error)
+            toast.error('Fehler beim Speichern')
+        } finally {
+            setIsSaving(false)
+        }
+    }
+
+    // Save notification setting to database
+    const updateSetting = async (key: keyof NotificationSettings, value: boolean) => {
         const newSettings = { ...settings, [key]: value }
         setSettings(newSettings)
+        setIsSaving(true)
 
         try {
-            localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(newSettings))
-            toast.success('Einstellung gespeichert')
+            const result = await updateUserSettings({ [key]: value })
+            if (result.success) {
+                toast.success('Einstellung gespeichert')
+            } else {
+                // Revert on error
+                setSettings(settings)
+                toast.error(result.error || 'Fehler beim Speichern')
+            }
         } catch (error) {
             console.error('Error saving settings:', error)
+            setSettings(settings)
             toast.error('Fehler beim Speichern')
+        } finally {
+            setIsSaving(false)
         }
     }
 
@@ -97,7 +136,7 @@ export default function SettingsPage() {
                                 <Label htmlFor="theme">Thema</Label>
                                 <p className="text-sm text-muted-foreground">Wähle zwischen hellem und dunklem Modus.</p>
                             </div>
-                            <Select value={theme} onValueChange={setTheme}>
+                            <Select value={theme} onValueChange={handleThemeChange} disabled={isSaving}>
                                 <SelectTrigger className="w-[140px]">
                                     <SelectValue placeholder="Wähle ein Thema" />
                                 </SelectTrigger>
@@ -134,6 +173,7 @@ export default function SettingsPage() {
                                 id="email-notifications"
                                 checked={settings.emailNotifications}
                                 onCheckedChange={(checked) => updateSetting('emailNotifications', checked)}
+                                disabled={isSaving}
                             />
                         </div>
                         <div className="flex items-center justify-between">
@@ -145,6 +185,7 @@ export default function SettingsPage() {
                                 id="push-notifications"
                                 checked={settings.pushNotifications}
                                 onCheckedChange={(checked) => updateSetting('pushNotifications', checked)}
+                                disabled={isSaving}
                             />
                         </div>
                     </CardContent>

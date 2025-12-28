@@ -33,8 +33,8 @@ export function canManageUsers(role: UserRole): boolean {
 
 export function canEditTour(role: UserRole, tourLeaderId: string, userId: string, tourStatus: string): boolean {
     if (role === ROLES.ADMIN) return true
-    // Leaders können nur Entwürfe bearbeiten
-    if (role === ROLES.LEADER && tourLeaderId === userId && tourStatus === 'draft') return true
+    // Leaders können ihre eigenen Touren bearbeiten (alle Status ausser abgesagt)
+    if (role === ROLES.LEADER && tourLeaderId === userId && tourStatus !== 'cancelled') return true
     return false
 }
 

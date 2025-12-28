@@ -39,6 +39,10 @@ export interface User {
   profilePhoto?: string | null
   isActive?: boolean
   createdAt?: string
+  // User settings
+  theme?: 'light' | 'dark' | 'system'
+  emailNotifications?: boolean
+  pushNotifications?: boolean
 }
 
 export interface Tour {
