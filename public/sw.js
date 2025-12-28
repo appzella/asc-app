@@ -44,9 +44,14 @@ self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (event.request.method !== 'GET') return;
 
-  // Skip API calls and Supabase requests (should always be fresh)
   const url = new URL(event.request.url);
+
+  // Only handle http/https requests (skip chrome-extension, etc.)
+  if (!url.protocol.startsWith('http')) return;
+
+  // Skip API calls, Supabase, and development resources
   if (url.pathname.startsWith('/api') ||
+    url.pathname.startsWith('/_next/webpack-hmr') ||
     url.hostname.includes('supabase') ||
     url.hostname.includes('googleapis')) {
     return;
