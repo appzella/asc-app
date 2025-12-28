@@ -288,7 +288,7 @@ export default function TourDetailPage() {
     const isArchived = tourDate < today
 
     const canRegister = tour.status === 'published' && !isRegistered && !isFull && !isLeader && !isArchived && !isOnWaitlist
-    const canAddToWaitlist = tour.status === 'published' && !isRegistered && !isLeader && !isArchived && !isOnWaitlist
+    const canAddToWaitlist = tour.status === 'published' && !isRegistered && isFull && !isLeader && !isArchived && !isOnWaitlist
 
     return (
         <div className="flex flex-1 flex-col gap-4 py-4 md:gap-6 md:py-6 px-4 lg:px-6">
@@ -524,6 +524,65 @@ export default function TourDetailPage() {
                                 )}
 
                                 {isArchived && <p className="text-center text-sm text-muted-foreground">Diese Tour hat bereits stattgefunden.</p>}
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {/* Participants List - visible to everyone */}
+                    {tour.participants.length > 0 && (
+                        <Card>
+                            <CardHeader className="pb-3">
+                                <CardTitle className="text-base flex items-center gap-2">
+                                    <Users className="h-4 w-4" />
+                                    Teilnehmer ({tour.participants.length}{tour.maxParticipants ? `/${tour.maxParticipants}` : ''})
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-2">
+                                    {tour.participants.map((participant) => (
+                                        <div key={participant.id} className="flex items-center gap-3">
+                                            <Avatar className="h-8 w-8">
+                                                {participant.profilePhoto && (
+                                                    <AvatarImage src={participant.profilePhoto} alt={participant.name} />
+                                                )}
+                                                <AvatarFallback className="text-xs">
+                                                    {participant.name.substring(0, 2).toUpperCase()}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <span className="text-sm">{participant.name}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {/* Waitlist - only show if there are people on waitlist */}
+                    {tour.waitlist && tour.waitlist.length > 0 && (
+                        <Card>
+                            <CardHeader className="pb-3">
+                                <CardTitle className="text-base flex items-center gap-2">
+                                    <Clock className="h-4 w-4" />
+                                    Warteliste ({tour.waitlist.length})
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-2">
+                                    {tour.waitlist.map((person, index) => (
+                                        <div key={person.id} className="flex items-center gap-3">
+                                            <span className="text-xs text-muted-foreground w-4">{index + 1}.</span>
+                                            <Avatar className="h-8 w-8">
+                                                {person.profilePhoto && (
+                                                    <AvatarImage src={person.profilePhoto} alt={person.name} />
+                                                )}
+                                                <AvatarFallback className="text-xs">
+                                                    {person.name.substring(0, 2).toUpperCase()}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <span className="text-sm">{person.name}</span>
+                                        </div>
+                                    ))}
+                                </div>
                             </CardContent>
                         </Card>
                     )}
