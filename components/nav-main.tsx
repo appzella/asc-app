@@ -100,6 +100,7 @@ function NavItem({
 
 export function NavMain({
   items,
+  showCreateButton = false,
 }: {
   items: {
     title: string
@@ -111,6 +112,7 @@ export function NavMain({
       url: string
     }[]
   }[]
+  showCreateButton?: boolean
 }) {
   const { isMobile, setOpenMobile } = useSidebar()
 
@@ -123,20 +125,22 @@ export function NavMain({
   return (
     <SidebarGroup>
       <SidebarGroupContent className="flex flex-col gap-2">
-        <SidebarMenu>
-          <SidebarMenuItem className="flex items-center gap-2">
-            <SidebarMenuButton
-              asChild
-              tooltip="Neue Tour"
-              className="min-w-8 bg-primary text-primary-foreground duration-200 ease-linear hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground"
-            >
-              <Link href="/tours/create" onClick={handleNavigation}>
-                <PlusCircleIcon />
-                <span>Neue Tour</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        {showCreateButton && (
+          <SidebarMenu>
+            <SidebarMenuItem className="flex items-center gap-2">
+              <SidebarMenuButton
+                asChild
+                tooltip="Neue Tour"
+                className="min-w-8 bg-primary text-primary-foreground duration-200 ease-linear hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground"
+              >
+                <Link href="/tours/create" onClick={handleNavigation}>
+                  <PlusCircleIcon />
+                  <span>Neue Tour</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        )}
         <SidebarMenu>
           {items.map((item, index) => (
             <NavItem key={item.title} item={item} onNavigate={handleNavigation} />

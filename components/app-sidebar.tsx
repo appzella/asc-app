@@ -99,6 +99,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     initials: "--",
   })
   const [isAdmin, setIsAdmin] = React.useState(false)
+  const [canCreate, setCanCreate] = React.useState(false)
 
 
   React.useEffect(() => {
@@ -124,6 +125,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     if (currentUser) {
       setUser(formatUser(currentUser))
       setIsAdmin(currentUser.role === 'admin')
+      setCanCreate(currentUser.role === 'admin' || currentUser.role === 'leader')
     }
 
     // Subscribe to changes
@@ -131,8 +133,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       if (u) {
         setUser(formatUser(u))
         setIsAdmin(u.role === 'admin')
+        setCanCreate(u.role === 'admin' || u.role === 'leader')
       } else {
         setIsAdmin(false)
+        setCanCreate(false)
       }
     })
 
@@ -158,7 +162,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={navData.navMain} />
+        <NavMain items={navData.navMain} showCreateButton={canCreate} />
         {isAdmin && <NavAdmin items={navData.navAdmin} />}
         <NavSecondary items={navData.navSecondary} className="mt-auto" />
       </SidebarContent>
