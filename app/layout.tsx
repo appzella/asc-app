@@ -2,6 +2,7 @@ import "./globals.css"
 import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
+import { ServiceWorkerRegistration } from "@/components/service-worker-registration"
 import type { Metadata, Viewport } from "next"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -45,6 +46,7 @@ export default function RootLayout({
                 >
                     {children}
                     <Toaster />
+                    <ServiceWorkerRegistration />
                 </ThemeProvider>
             </body>
         </html>
