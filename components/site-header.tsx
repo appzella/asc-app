@@ -73,6 +73,9 @@ export function SiteHeader() {
           className="mx-2 data-[orientation=vertical]:h-4"
         />
 
+        {/* Mobile: Show current section title */}
+        <span className="font-medium text-sm md:hidden">{sectionTitle}</span>
+
         <Breadcrumb className="hidden md:flex">
           <BreadcrumbList>
             {segments.map((segment, index) => {
