@@ -1,4 +1,4 @@
-import { User, Tour, Invitation, TourSettings } from '../types'
+import { User, Tour, Invitation, TourSettings, Notification } from '../types'
 
 /**
  * Repository Interface
@@ -40,6 +40,14 @@ export interface IDataRepository {
   useInvitation(token: string, name: string, password: string): Promise<User | null>
   getInvitations(): Promise<Invitation[]>
 
+  // Notifications
+  getNotifications(userId: string): Promise<Notification[]>
+  getUnreadNotificationCount(userId: string): Promise<number>
+  createNotification(notification: { userId: string; type: string; title: string; message: string; link?: string }): Promise<Notification | null>
+  createNotificationForAllUsers(notification: { type: string; title: string; message: string; link?: string }, excludeUserId?: string): Promise<void>
+  markNotificationAsRead(notificationId: string): Promise<void>
+  markAllNotificationsAsRead(userId: string): Promise<void>
+
   // Settings
   getSettings(): Promise<TourSettings>
   updateSettings(updates: Partial<TourSettings>): Promise<TourSettings>
@@ -64,4 +72,3 @@ export interface IDataRepository {
   uploadProfilePhoto(userId: string, file: File): Promise<string>
   deleteProfilePhoto(photoUrl: string): Promise<void>
 }
-

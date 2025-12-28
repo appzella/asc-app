@@ -1,5 +1,5 @@
 import { createClient } from '../supabase/client'
-import { User, Tour, Invitation, TourSettings, TourType, TourLength } from '../types'
+import { User, Tour, Invitation, TourSettings, TourType, TourLength, Notification, NotificationType } from '../types'
 import { IDataRepository } from './repository'
 import { SupabaseClient } from '@supabase/supabase-js'
 
@@ -801,6 +801,125 @@ export class SupabaseRepository implements IDataRepository {
             updatedAt: db.updated_at as string,
         }
     }
+
+    // ===== NOTIFICATIONS =====
+
+    async getNotifications(userId: string): Promise<Notification[]> {
+        const { data, error } = await this.supabase
+            .from('notifications')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false })
+            .limit(50)
+
+        if (error) {
+            console.error('Error fetching notifications:', error)
+            return []
+        }
+        return data.map(n => this.mapDbNotificationToNotification(n))
+    }
+
+    async getUnreadNotificationCount(userId: string): Promise<number> {
+        const { count, error } = await this.supabase
+            .from('notifications')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', userId)
+            .eq('read', false)
+
+        if (error) return 0
+        return count || 0
+    }
+
+    async createNotification(notification: {
+        userId: string
+        type: string
+        title: string
+        message: string
+        link?: string
+    }): Promise<Notification | null> {
+        const { data, error } = await this.supabase
+            .from('notifications')
+            .insert({
+                user_id: notification.userId,
+                type: notification.type,
+                title: notification.title,
+                message: notification.message,
+                link: notification.link,
+            })
+            .select()
+            .single()
+
+        if (error) {
+            console.error('Error creating notification:', error)
+            return null
+        }
+        return this.mapDbNotificationToNotification(data)
+    }
+
+    async createNotificationForAllUsers(notification: {
+        type: string
+        title: string
+        message: string
+        link?: string
+    }, excludeUserId?: string): Promise<void> {
+        const users = await this.getUsers()
+        const notifications = users
+            .filter(u => u.id !== excludeUserId)
+            .map(u => ({
+                user_id: u.id,
+                type: notification.type,
+                title: notification.title,
+                message: notification.message,
+                link: notification.link,
+            }))
+
+        if (notifications.length > 0) {
+            const { error } = await this.supabase
+                .from('notifications')
+                .insert(notifications)
+
+            if (error) {
+                console.error('Error creating notifications for all users:', error)
+            }
+        }
+    }
+
+    async markNotificationAsRead(notificationId: string): Promise<void> {
+        const { error } = await this.supabase
+            .from('notifications')
+            .update({ read: true })
+            .eq('id', notificationId)
+
+        if (error) {
+            console.error('Error marking notification as read:', error)
+        }
+    }
+
+    async markAllNotificationsAsRead(userId: string): Promise<void> {
+        const { error } = await this.supabase
+            .from('notifications')
+            .update({ read: true })
+            .eq('user_id', userId)
+            .eq('read', false)
+
+        if (error) {
+            console.error('Error marking all notifications as read:', error)
+        }
+    }
+
+    private mapDbNotificationToNotification(db: Record<string, unknown>): Notification {
+        return {
+            id: db.id as string,
+            userId: db.user_id as string,
+            type: (db.type as string || 'TOUR_UPDATE') as NotificationType,
+            title: db.title as string,
+            message: db.message as string || '',
+            link: db.link as string | undefined,
+            read: db.read as boolean,
+            createdAt: db.created_at as string,
+        }
+    }
 }
 
 export const supabaseRepository = new SupabaseRepository()
+

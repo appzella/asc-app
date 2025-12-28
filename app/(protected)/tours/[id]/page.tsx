@@ -32,6 +32,7 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { QRCode } from '@/components/ui/shadcn-io/qr-code'
+import { notifyParticipantSignup, notifyParticipantLeft } from '@/app/actions/notifications'
 
 export default function TourDetailPage() {
     const params = useParams()
@@ -110,6 +111,9 @@ export default function TourDetailPage() {
                         setShowWhatsAppDialog(true)
                     }
                     toast.success('Erfolgreich angemeldet')
+
+                    // Notify tour leader
+                    notifyParticipantSignup(tourId, user.id)
                 }
             } else {
                 toast.error('Anmeldung fehlgeschlagen')
