@@ -5,8 +5,12 @@ import Link from "next/link"
 
 export default async function Page() {
   const repository = await getServerRepository()
-  const tours = await repository.getPublishedTours()
-  const users = await repository.getUsers()
+
+  // Parallel data fetching for better performance
+  const [tours, users] = await Promise.all([
+    repository.getPublishedTours(),
+    repository.getUsers()
+  ])
 
   const upcomingTours = tours.filter(t => new Date(t.date) >= new Date())
   const pastTours = tours.filter(t => new Date(t.date) < new Date())

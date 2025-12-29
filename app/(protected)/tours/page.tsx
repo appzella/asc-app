@@ -10,13 +10,18 @@ import { canCreateTour } from "@/lib/roles"
 export const dynamic = 'force-dynamic'
 
 export default async function ToursPage() {
-    const repository = await getServerRepository()
-    const rawTours = await repository.getTours()
+    // Parallel data fetching for better performance
+    const [repository, supabase] = await Promise.all([
+        getServerRepository(),
+        createClient()
+    ])
 
-    // Get current user's role
-    const supabase = await createClient()
-    const { data: { user: authUser } } = await supabase.auth.getUser()
-    const users = await repository.getUsers()
+    const [rawTours, users, { data: { user: authUser } }] = await Promise.all([
+        repository.getTours(),
+        repository.getUsers(),
+        supabase.auth.getUser()
+    ])
+
     const currentUser = authUser ? users.find(u => u.id === authUser.id) : null
     const showCreateButton = currentUser ? canCreateTour(currentUser.role) : false
 
