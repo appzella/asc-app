@@ -25,6 +25,7 @@ import { profileSchema, type ProfileFormValues } from "@/lib/validations/profile
 import { updateUserProfile, uploadProfilePhoto } from "@/app/actions/profile"
 import { User } from "@/lib/types"
 import { ImageCropper } from "@/components/ui/image-cropper"
+import { authService } from "@/lib/auth"
 
 interface ProfileFormProps {
     user: User
@@ -123,6 +124,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
             if (result.status === "success") {
                 toast.success(result.message)
+                // Refresh auth service to update sidebar immediately
+                await authService.refreshCurrentUser()
                 router.refresh()
             } else if (result.status === "error") {
                 toast.error(result.message)
