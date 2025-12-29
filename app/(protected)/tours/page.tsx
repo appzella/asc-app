@@ -16,12 +16,14 @@ export default async function ToursPage() {
         createClient()
     ])
 
-    const [rawTours, users, { data: { user: authUser } }] = await Promise.all([
+    const [rawTours, users, settings, { data: { user: authUser } }] = await Promise.all([
         repository.getTours(),
         repository.getUsers(),
+        repository.getSettings(),
         supabase.auth.getUser()
     ])
 
+    const tourTypes = settings.tourTypes || []
     const currentUser = authUser ? users.find(u => u.id === authUser.id) : null
     const showCreateButton = currentUser ? canCreateTour(currentUser.role) : false
 
@@ -104,7 +106,7 @@ export default async function ToursPage() {
             </div>
 
             <div className="px-4 lg:px-6 flex flex-col gap-4">
-                <TourGrid initialTours={tours} />
+                <TourGrid initialTours={tours} tourTypes={tourTypes} />
             </div>
         </div>
     )

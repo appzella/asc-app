@@ -6,9 +6,10 @@ import { FilterState, TourFilterBar } from "./tour-filter-bar"
 
 interface TourGridProps {
     initialTours: Tour[]
+    tourTypes?: string[]
 }
 
-export function TourGrid({ initialTours }: TourGridProps) {
+export function TourGrid({ initialTours, tourTypes = [] }: TourGridProps) {
     const [filters, setFilters] = useState<FilterState>({
         type: "",
         difficulty: "",
@@ -54,7 +55,7 @@ export function TourGrid({ initialTours }: TourGridProps) {
 
     return (
         <>
-            <TourFilterBar onFilterChange={setFilters} />
+            <TourFilterBar onFilterChange={setFilters} tourTypes={tourTypes} />
 
             {filteredTours.length === 0 ? (
                 <div className="flex h-[200px] items-center justify-center rounded-lg border border-dashed">

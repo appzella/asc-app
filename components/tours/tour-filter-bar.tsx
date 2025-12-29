@@ -23,10 +23,10 @@ export interface FilterState {
 
 interface TourFilterBarProps {
     onFilterChange: (filters: FilterState) => void
+    tourTypes?: string[]
 }
 
-const TOUR_TYPES = ["Skitour", "Hochtour", "Wanderung", "Klettern", "Bike"]
-
+// Fallback difficulties per type (used when no specific difficulties are configured)
 const DIFFICULTIES: Record<string, string[]> = {
     Skitour: ["L", "WS", "ZS", "S", "SS", "AS", "EX"],
     Hochtour: ["L", "WS", "ZS", "S", "SS", "AS", "EX"],
@@ -35,7 +35,7 @@ const DIFFICULTIES: Record<string, string[]> = {
     Bike: ["S0", "S1", "S2", "S3", "S4", "S5"],
 }
 
-export function TourFilterBar({ onFilterChange }: TourFilterBarProps) {
+export function TourFilterBar({ onFilterChange, tourTypes = [] }: TourFilterBarProps) {
     const [type, setType] = useState<string>("all")
     const [difficulty, setDifficulty] = useState<string>("all")
     const [search, setSearch] = useState("")
@@ -43,11 +43,7 @@ export function TourFilterBar({ onFilterChange }: TourFilterBarProps) {
 
     // Reset difficulty when type changes
     useEffect(() => {
-        if (type === "all") {
-            setDifficulty("all")
-        } else {
-            setDifficulty("all")
-        }
+        setDifficulty("all")
     }, [type])
 
     // Notify parent of changes
@@ -60,6 +56,7 @@ export function TourFilterBar({ onFilterChange }: TourFilterBarProps) {
         })
     }, [type, difficulty, search, myTours, onFilterChange])
 
+    // Get available difficulties for selected type
     const availableDifficulties =
         type !== "all" && DIFFICULTIES[type] ? DIFFICULTIES[type] : []
 
@@ -73,7 +70,7 @@ export function TourFilterBar({ onFilterChange }: TourFilterBarProps) {
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all">Alle Arten</SelectItem>
-                            {TOUR_TYPES.map((t) => (
+                            {tourTypes.map((t) => (
                                 <SelectItem key={t} value={t}>
                                     {t}
                                 </SelectItem>

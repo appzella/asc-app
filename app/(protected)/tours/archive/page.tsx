@@ -11,7 +11,13 @@ export const dynamic = 'force-dynamic'
 
 export default async function ToursArchivePage() {
     const repository = await getServerRepository()
-    const rawTours = await repository.getTours()
+
+    const [rawTours, settings] = await Promise.all([
+        repository.getTours(),
+        repository.getSettings()
+    ])
+
+    const tourTypes = settings.tourTypes || []
 
     // Filter for past tours and sort descending
     const now = new Date()
@@ -95,7 +101,7 @@ export default async function ToursArchivePage() {
             </div>
 
             <div className="px-4 lg:px-6 flex flex-col gap-4">
-                <TourGrid initialTours={tours} />
+                <TourGrid initialTours={tours} tourTypes={tourTypes} />
             </div>
         </div>
     )
