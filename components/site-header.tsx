@@ -31,6 +31,7 @@ export function SiteHeader() {
     if (sectionTitle === "Users") sectionTitle = "Mitglieder"
     if (sectionTitle === "Settings") sectionTitle = "Einstellungen"
     if (sectionTitle === "Profile") sectionTitle = "Profil"
+    if (sectionTitle === "Admin") sectionTitle = "Verwaltung"
   }
 
   useEffect(() => {
