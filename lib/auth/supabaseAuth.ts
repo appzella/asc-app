@@ -116,6 +116,8 @@ class SupabaseAuthService {
     }
 
     async register(email: string, password: string, name: string, token?: string): Promise<User | null> {
+        let invitationId: string | null = null
+
         // Verify invitation token if provided
         if (token) {
             // First check if invitation exists at all
@@ -135,15 +137,8 @@ class SupabaseAuthService {
                 throw new Error('Diese Einladung wurde bereits verwendet')
             }
 
-            // Mark invitation as used
-            const { error: updateError } = await this.supabase
-                .from('invitations')
-                .update({ used: true })
-                .eq('id', invitation.id)
-
-            if (updateError) {
-                console.error('Failed to mark invitation as used:', updateError)
-            }
+            // Store invitation ID to mark as used after successful registration
+            invitationId = invitation.id
         }
 
         const { data, error } = await this.supabase.auth.signUp({
@@ -165,6 +160,19 @@ class SupabaseAuthService {
             // Wait for the trigger to create the user profile
             await new Promise(resolve => setTimeout(resolve, 500))
             await this.fetchUserProfile(data.user.id)
+
+            // Mark invitation as used AFTER successful registration (user is now authenticated)
+            if (invitationId) {
+                const { error: updateError } = await this.supabase
+                    .from('invitations')
+                    .update({ used: true })
+                    .eq('id', invitationId)
+
+                if (updateError) {
+                    console.error('Failed to mark invitation as used:', updateError)
+                }
+            }
+
             this.notifyListeners()
             return this.currentUser
         }
