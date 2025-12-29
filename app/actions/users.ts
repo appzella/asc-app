@@ -4,6 +4,12 @@ import { getServerRepository } from "@/lib/data/server"
 import { createClient } from "@/lib/supabase/server"
 import { UserRole } from "@/lib/types"
 
+async function getCurrentUserId(): Promise<string | null> {
+    const supabase = await createClient()
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+    return authUser?.id || null
+}
+
 async function isAdmin(): Promise<boolean> {
     const supabase = await createClient()
     const { data: { user: authUser } } = await supabase.auth.getUser()
@@ -42,6 +48,26 @@ export async function toggleUserStatus(userId: string, newStatus: boolean): Prom
         return { success: false, error: 'Keine Berechtigung' }
     }
 
+    // Prevent self-deactivation
+    const currentUserId = await getCurrentUserId()
+    if (currentUserId === userId && newStatus === false) {
+        return { success: false, error: 'Du kannst dich nicht selbst deaktivieren.' }
+    }
+
+    // Check if this is the only active admin being deactivated
+    if (newStatus === false) {
+        const repository = await getServerRepository()
+        const users = await repository.getUsers()
+        const targetUser = users.find(u => u.id === userId)
+
+        if (targetUser?.role === 'admin') {
+            const activeAdmins = users.filter(u => u.role === 'admin' && u.isActive !== false)
+            if (activeAdmins.length <= 1) {
+                return { success: false, error: 'Der letzte aktive Administrator kann nicht deaktiviert werden.' }
+            }
+        }
+    }
+
     const repository = await getServerRepository()
     const result = await repository.updateUser(userId, { isActive: newStatus })
     if (!result) {
@@ -49,4 +75,3 @@ export async function toggleUserStatus(userId: string, newStatus: boolean): Prom
     }
     return { success: true }
 }
-

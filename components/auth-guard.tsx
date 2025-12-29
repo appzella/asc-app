@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { authService } from '@/lib/auth'
 import { User } from '@/lib/types'
+import { toast } from 'sonner'
 
 interface AuthGuardProps {
     children: React.ReactNode
@@ -25,18 +26,36 @@ export function AuthGuard({ children }: AuthGuardProps) {
             // Redirect to login if not authenticated
             if (!currentUser && !pathname.startsWith('/login') && !pathname.startsWith('/register') && !pathname.startsWith('/forgot-password')) {
                 router.replace('/login')
+                return
+            }
+
+            // Check if user is deactivated
+            if (currentUser && currentUser.isActive === false) {
+                await authService.logout()
+                toast.error('Dein Konto wurde deaktiviert. Bitte kontaktiere einen Administrator.')
+                router.replace('/login')
+                return
             }
         }
 
         checkSession()
 
         // Subscribe to auth changes
-        const unsubscribe = authService.subscribe((currentUser) => {
+        const unsubscribe = authService.subscribe(async (currentUser) => {
             setUser(currentUser)
 
             // Redirect to login if not authenticated
             if (!currentUser && !pathname.startsWith('/login') && !pathname.startsWith('/register') && !pathname.startsWith('/forgot-password')) {
                 router.replace('/login')
+                return
+            }
+
+            // Check if user is deactivated
+            if (currentUser && currentUser.isActive === false) {
+                await authService.logout()
+                toast.error('Dein Konto wurde deaktiviert. Bitte kontaktiere einen Administrator.')
+                router.replace('/login')
+                return
             }
         })
 
@@ -54,6 +73,11 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
     // If not authenticated, show nothing (redirect is happening)
     if (!user) {
+        return null
+    }
+
+    // If user is deactivated, show nothing (redirect is happening)
+    if (user.isActive === false) {
         return null
     }
 
