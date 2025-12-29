@@ -73,3 +73,26 @@ export async function updateUserProfile(
         }
     }
 }
+
+export async function uploadProfilePhoto(
+    userId: string,
+    formData: FormData
+): Promise<{ status: "success" | "error"; url?: string; message: string }> {
+    try {
+        const file = formData.get("file") as File
+        if (!file) {
+            return { status: "error", message: "Keine Datei ausgewählt" }
+        }
+
+        const repository = await getServerRepository()
+        const url = await repository.uploadProfilePhoto(userId, file)
+
+        revalidatePath("/profile")
+        revalidatePath("/")
+
+        return { status: "success", url, message: "Bild hochgeladen" }
+    } catch (error) {
+        console.error("Failed to upload profile photo", error)
+        return { status: "error", message: "Fehler beim Hochladen" }
+    }
+}

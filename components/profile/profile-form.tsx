@@ -22,7 +22,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 import { profileSchema, type ProfileFormValues } from "@/lib/validations/profile"
-import { updateUserProfile } from "@/app/actions/profile"
+import { updateUserProfile, uploadProfilePhoto } from "@/app/actions/profile"
 import { User } from "@/lib/types"
 import { ImageCropper } from "@/components/ui/image-cropper"
 
@@ -32,6 +32,7 @@ interface ProfileFormProps {
 
 export function ProfileForm({ user }: ProfileFormProps) {
     const [isLoading, setIsLoading] = useState(false)
+    const [isUploading, setIsUploading] = useState(false)
 
     // Image Cropper State
     const [showCropper, setShowCropper] = useState(false)
@@ -86,14 +87,30 @@ export function ProfileForm({ user }: ProfileFormProps) {
     }
 
     const handleCropComplete = async (croppedBlob: Blob) => {
-        // Convert Blob to Base64
-        const reader = new FileReader()
-        reader.readAsDataURL(croppedBlob)
-        reader.onloadend = () => {
-            const base64data = reader.result as string
-            form.setValue("profilePhoto", base64data, { shouldDirty: true })
-            setShowCropper(false)
-            setSelectedImage(null)
+        setShowCropper(false)
+        setSelectedImage(null)
+        setIsUploading(true)
+
+        try {
+            // Create File from Blob for upload
+            const file = new File([croppedBlob], `profile-${Date.now()}.jpg`, { type: 'image/jpeg' })
+            const formData = new FormData()
+            formData.append('file', file)
+
+            // Upload to Supabase Storage via server action
+            const result = await uploadProfilePhoto(user.id, formData)
+
+            if (result.status === 'success' && result.url) {
+                form.setValue('profilePhoto', result.url, { shouldDirty: true })
+                toast.success('Bild hochgeladen')
+            } else {
+                toast.error(result.message || 'Fehler beim Hochladen')
+            }
+        } catch (error) {
+            toast.error('Fehler beim Hochladen')
+            console.error('Upload error:', error)
+        } finally {
+            setIsUploading(false)
         }
     }
 
