@@ -1,3 +1,4 @@
+import React from "react"
 import Link from "next/link"
 import { ArrowDownRight, ArrowUpRight, CalendarIcon, ClockIcon, MapPinIcon, UsersIcon } from "lucide-react"
 import { formatDurationRange } from "@/lib/duration"
@@ -159,3 +160,5 @@ export function TourCard({ tour }: TourCardProps) {
     </Link>
   )
 }
+
+export const MemoizedTourCard = React.memo(TourCard)
