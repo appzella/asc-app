@@ -8,7 +8,7 @@ import {
     Collapsible,
     CollapsibleContent,
     CollapsibleTrigger,
-} from "@/components/ui/collapsible"
+} from "@/components/animate-ui/primitives/radix/collapsible"
 import {
     SidebarGroup,
     SidebarGroupContent,

@@ -50,7 +50,7 @@ import {
     Collapsible,
     CollapsibleContent,
     CollapsibleTrigger,
-} from '@/components/ui/collapsible'
+} from '@/components/animate-ui/primitives/radix/collapsible'
 import { dataRepository } from '@/lib/data'
 
 type DialogType = 'addType' | 'editType' | 'deleteType' | 'addDifficulty' | 'editDifficulty' | 'deleteDifficulty' | null
