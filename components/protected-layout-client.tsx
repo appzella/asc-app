@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { authService } from '@/lib/auth'
 import { User } from '@/lib/types'
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
+import { SidebarInset, SidebarProvider } from "@/components/animate-ui/components/radix/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 
 export function ProtectedLayoutClient({ children }: { children: React.ReactNode }) {
