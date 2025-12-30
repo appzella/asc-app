@@ -6,7 +6,6 @@ import {
   MoreVerticalIcon,
   SettingsIcon,
   UserCircleIcon,
-  ChevronsUpDown,
 } from "lucide-react"
 import { authService } from "@/lib/auth"
 
@@ -73,7 +72,7 @@ export function NavUser({
                 <span className="truncate font-semibold">{user.name}</span>
                 <span className="truncate text-xs">{user.email}</span>
               </div>
-              <ChevronsUpDown className="ml-auto size-4" />
+              <MoreVerticalIcon className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
