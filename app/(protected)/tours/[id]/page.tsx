@@ -30,7 +30,7 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-} from '@/components/animate-ui/components/radix/alert-dialog'
+} from '@/components/ui/alert-dialog'
 import { QRCode } from '@/components/ui/shadcn-io/qr-code'
 import { notifyParticipantSignup, notifyParticipantLeft } from '@/app/actions/notifications'
 
