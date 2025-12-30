@@ -1,12 +1,12 @@
 "use client"
 
-import Link from "next/link"
-
+import { useRouter } from "next/navigation"
 import {
   LogOutIcon,
   MoreVerticalIcon,
   SettingsIcon,
   UserCircleIcon,
+  ChevronsUpDown,
 } from "lucide-react"
 import { authService } from "@/lib/auth"
 
@@ -23,7 +23,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/animate-ui/components/radix/dropdown-menu"
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -41,18 +41,19 @@ export function NavUser({
     initials: string
   }
 }) {
+  const router = useRouter()
   const { isMobile, setOpenMobile } = useSidebar()
 
   const handleLogout = async () => {
     await authService.logout()
-    // Use window.location for a clean redirect that clears all state
     window.location.href = "/login"
   }
 
-  const handleNavigation = () => {
+  const handleNavigation = (path: string) => {
     if (isMobile) {
       setOpenMobile(false)
     }
+    router.push(path)
   }
 
   return (
@@ -64,17 +65,15 @@ export function NavUser({
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="h-8 w-8 rounded-full">
+              <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-full">{user.initials}</AvatarFallback>
+                <AvatarFallback className="rounded-lg">{user.initials}</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
-                <span className="truncate text-xs text-muted-foreground">
-                  {user.email}
-                </span>
+                <span className="truncate font-semibold">{user.name}</span>
+                <span className="truncate text-xs">{user.email}</span>
               </div>
-              <MoreVerticalIcon className="ml-auto size-4" />
+              <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -85,31 +84,25 @@ export function NavUser({
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8 rounded-full">
+                <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-full">{user.initials}</AvatarFallback>
+                  <AvatarFallback className="rounded-lg">{user.initials}</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
-                  <span className="truncate text-xs text-muted-foreground">
-                    {user.email}
-                  </span>
+                  <span className="truncate font-semibold">{user.name}</span>
+                  <span className="truncate text-xs">{user.email}</span>
                 </div>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem asChild onClick={handleNavigation}>
-                <Link href="/profile">
-                  <UserCircleIcon />
-                  Profil
-                </Link>
+              <DropdownMenuItem onClick={() => handleNavigation("/profile")}>
+                <UserCircleIcon />
+                Profil
               </DropdownMenuItem>
-              <DropdownMenuItem asChild onClick={handleNavigation}>
-                <Link href="/settings">
-                  <SettingsIcon />
-                  Einstellungen
-                </Link>
+              <DropdownMenuItem onClick={() => handleNavigation("/settings")}>
+                <SettingsIcon />
+                Einstellungen
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
