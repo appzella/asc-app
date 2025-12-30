@@ -1,5 +1,7 @@
 "use client"
 
+import Link from "next/link"
+
 import {
   LogOutIcon,
   MoreVerticalIcon,
@@ -21,7 +23,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/animate-ui/components/radix/dropdown-menu"
+} from "@/components/ui/dropdown-menu"
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -97,13 +99,17 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => { handleNavigation(); window.location.href = '/profile' }}>
-                <UserCircleIcon />
-                Profil
+              <DropdownMenuItem asChild onClick={handleNavigation}>
+                <Link href="/profile">
+                  <UserCircleIcon />
+                  Profil
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => { handleNavigation(); window.location.href = '/settings' }}>
-                <SettingsIcon />
-                Einstellungen
+              <DropdownMenuItem asChild onClick={handleNavigation}>
+                <Link href="/settings">
+                  <SettingsIcon />
+                  Einstellungen
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
