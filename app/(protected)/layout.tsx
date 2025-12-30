@@ -1,6 +1,6 @@
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
+import { SidebarInset, SidebarProvider } from "@/components/animate-ui/components/radix/sidebar"
 import { AuthGuard } from "@/components/auth-guard"
 
 export default function ProtectedLayout({
