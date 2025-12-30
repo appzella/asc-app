@@ -20,7 +20,7 @@ import { Calendar, Clock, ArrowUpRight, ArrowDownRight, Users, ChartNoAxesColumn
 import dynamic from 'next/dynamic'
 const TourMap = dynamic(() => import('@/components/tours/tour-map'), { ssr: false })
 import { toast } from 'sonner'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/animate-ui/components/radix/dialog'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -30,7 +30,7 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+} from '@/components/animate-ui/components/radix/alert-dialog'
 import { QRCode } from '@/components/ui/shadcn-io/qr-code'
 import { notifyParticipantSignup, notifyParticipantLeft } from '@/app/actions/notifications'
 

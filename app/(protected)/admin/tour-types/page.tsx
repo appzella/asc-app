@@ -34,7 +34,7 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from '@/components/ui/dialog'
+} from '@/components/animate-ui/components/radix/dialog'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -44,7 +44,7 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+} from '@/components/animate-ui/components/radix/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import {
     Collapsible,
