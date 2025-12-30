@@ -8,7 +8,8 @@ const Collapsible = CollapsiblePrimitive.Root
 
 const CollapsibleTrigger = CollapsiblePrimitive.CollapsibleTrigger
 
-// Animated CollapsibleContent using tailwindcss-animate accordion animations
+// Animated CollapsibleContent using CSS grid-based height animation
+// This approach works reliably with Radix's data-state attribute
 const CollapsibleContent = React.forwardRef<
     React.ElementRef<typeof CollapsiblePrimitive.CollapsibleContent>,
     React.ComponentPropsWithoutRef<typeof CollapsiblePrimitive.CollapsibleContent>
@@ -16,13 +17,16 @@ const CollapsibleContent = React.forwardRef<
     <CollapsiblePrimitive.CollapsibleContent
         ref={ref}
         className={cn(
-            "overflow-hidden",
-            "data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up",
+            // Grid-based height animation trick for smooth transitions
+            "grid transition-all duration-300 ease-out",
+            "data-[state=closed]:grid-rows-[0fr] data-[state=open]:grid-rows-[1fr]",
             className
         )}
         {...props}
     >
-        {children}
+        <div className="overflow-hidden">
+            {children}
+        </div>
     </CollapsiblePrimitive.CollapsibleContent>
 ))
 CollapsibleContent.displayName = "CollapsibleContent"
