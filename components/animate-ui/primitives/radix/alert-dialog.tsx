@@ -79,7 +79,6 @@ function AlertDialogOverlay({
   return (
     <AlertDialogPrimitive.Overlay
       data-slot="alert-dialog-overlay"
-      asChild
       forceMount
     >
       <motion.div
@@ -119,7 +118,6 @@ function AlertDialogContent({
 
   return (
     <AlertDialogPrimitive.Content
-      asChild
       forceMount
       onOpenAutoFocus={onOpenAutoFocus}
       onCloseAutoFocus={onCloseAutoFocus}
