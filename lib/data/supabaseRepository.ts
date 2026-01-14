@@ -784,7 +784,7 @@ export class SupabaseRepository implements IDataRepository {
             peak: db.peak as string | undefined,
             peakElevation: db.peak_elevation as number | undefined,
             ascent: db.ascent as number | undefined,
-
+            descent: db.descent as number | undefined,
             durationMin: db.duration_min as number | undefined,
             durationMax: db.duration_max as number | undefined,
             maxParticipants: db.max_participants as number | undefined,
